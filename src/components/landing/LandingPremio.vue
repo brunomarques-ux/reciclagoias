@@ -105,7 +105,8 @@ const highlights = [
 <style scoped>
 .rg-premio {
   position: relative;
-  padding: var(--rg-space-20) var(--rg-space-6);
+  /* Padding vertical 96px — 16px a mais pra respiro entre seções. */
+  padding: var(--rg-space-24) var(--rg-space-6);
   background-color: var(--rg-color-surface-base);
 }
 

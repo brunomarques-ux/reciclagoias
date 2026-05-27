@@ -73,7 +73,8 @@ import { howItWorksSteps } from '@/data/mocks/landing';
   --rg-how-bg-tint: #F1F7F3;
 
   position: relative;
-  padding: var(--rg-space-20) var(--rg-space-6);
+  /* Padding vertical 96px — 16px a mais pra respiro entre seções. */
+  padding: var(--rg-space-24) var(--rg-space-6);
   background-color: var(--rg-how-bg-tint);
 }
 

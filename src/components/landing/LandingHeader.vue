@@ -19,6 +19,23 @@ function onScroll() {
   scrolled.value = window.scrollY > 16;
 }
 
+/**
+ * Intercepta cliques nos links da navegação pra fazer scroll suave em vez do
+ * "teleporte" instantâneo do anchor link nativo. O offset do header fixo é
+ * tratado via `scroll-margin-top` definido em globals.css.
+ */
+function onNavClick(ev: MouseEvent, hash: string) {
+  // Permite Ctrl/Cmd+click ou middle-click pra abrir em nova aba (comportamento default).
+  if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.button !== 0) return;
+  const target = document.getElementById(hash);
+  if (!target) return; // link quebrado → deixa o browser tratar
+  ev.preventDefault();
+  target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // Atualiza a URL sem refresh nem reposicionamento do scroll.
+  if (history.pushState) history.pushState(null, '', `#${hash}`);
+  drawerOpen.value = false;
+}
+
 onMounted(async () => {
   onScroll();
   window.addEventListener('scroll', onScroll, { passive: true });
@@ -84,6 +101,7 @@ onUnmounted(() => {
           :key="section.id"
           :href="`#${section.id}`"
           class="rg-app-header__link"
+          @click="onNavClick($event, section.id)"
         >{{ section.label }}</a>
       </nav>
 
@@ -118,7 +136,7 @@ onUnmounted(() => {
             :key="section.id"
             :href="`#${section.id}`"
             class="rg-app-header__drawer-link"
-            @click="drawerOpen = false"
+            @click="onNavClick($event, section.id)"
           >
             {{ section.label }}
             <v-icon icon="mdi-chevron-right" size="18" />

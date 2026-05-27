@@ -84,6 +84,26 @@ a {
   text-decoration: none;
 }
 
+/* Scroll suave global pra qualquer anchor link. O handler do header já chama
+   `scrollIntoView({ behavior: 'smooth' })` programaticamente, mas isso garante
+   que links externos / footer / hashes na URL também sejam suaves. */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Offset pra compensar o header fixo (~62px) quando o usuário pula entre
+   seções via nav. Sem isso, o título da seção fica escondido atrás do header.
+   Aplicado em qualquer elemento que sirva de target de hash. */
+section[id],
+[id^="sobre"],
+[id^="como-funciona"],
+[id^="premio"],
+[id^="comite"],
+[id^="sistema"],
+[id^="duvidas"] {
+  scroll-margin-top: 88px;
+}
+
 :focus-visible {
   outline: 2px solid var(--rg-color-action-primary);
   outline-offset: 2px;

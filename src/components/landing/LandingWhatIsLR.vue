@@ -103,7 +103,9 @@ onBeforeUnmount(() => observer?.disconnect());
 <style scoped>
 .rg-whatis {
   position: relative;
-  padding: var(--rg-space-20) var(--rg-space-6);
+  /* Padding vertical 96px (= --rg-space-24) — 16px a mais que o default,
+     pra dar respiro entre seções e evitar visual apertado. */
+  padding: var(--rg-space-24) var(--rg-space-6);
   background-color: var(--rg-color-surface-base);
 }
 
