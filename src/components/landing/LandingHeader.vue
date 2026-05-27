@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 import RgButton from '@/components/RgButton.vue';
 
 interface NavSection {
@@ -10,24 +10,50 @@ interface NavSection {
 defineProps<{ sections: NavSection[] }>();
 
 const scrolled = ref(false);
+const overHero = ref(false);
 const drawerOpen = ref(false);
+
+let heroObserver: IntersectionObserver | null = null;
 
 function onScroll() {
   scrolled.value = window.scrollY > 16;
 }
 
-onMounted(() => {
+onMounted(async () => {
   onScroll();
   window.addEventListener('scroll', onScroll, { passive: true });
+
+  // Esperar o próximo tick + um RAF para garantir que o hero já está montado no DOM.
+  await nextTick();
+  requestAnimationFrame(() => {
+    const heroEl = document.querySelector('[data-rg-hero]');
+    if (!heroEl) return;
+
+    overHero.value = true;
+    heroObserver = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        if (entry) overHero.value = entry.intersectionRatio > 0.3;
+      },
+      { threshold: [0, 0.3, 0.6, 1] },
+    );
+    heroObserver.observe(heroEl);
+  });
 });
 
 onUnmounted(() => {
   window.removeEventListener('scroll', onScroll);
+  heroObserver?.disconnect();
 });
 </script>
 
 <template>
-  <header :class="['rg-app-header', { 'rg-app-header--scrolled': scrolled }]">
+  <header
+    :class="[
+      'rg-app-header',
+      { 'rg-app-header--scrolled': scrolled, 'rg-app-header--over-hero': overHero && !scrolled },
+    ]"
+  >
     <div class="rg-app-header__inner">
       <a href="#top" class="rg-app-header__brand" aria-label="Recicla Goiás — início">
         <span class="rg-app-header__brand-mark" aria-hidden="true">
@@ -120,8 +146,10 @@ onUnmounted(() => {
 
 <style scoped>
 .rg-app-header {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 30;
   background-color: rgba(255, 255, 255, 0.85);
   backdrop-filter: saturate(140%) blur(10px);
@@ -256,5 +284,43 @@ onUnmounted(() => {
   .rg-app-header__menu-toggle {
     display: inline-flex;
   }
+}
+
+/* ---------- Modo "over hero" (background escuro/vídeo) ---------- */
+.rg-app-header--over-hero {
+  background-color: transparent;
+  backdrop-filter: none;
+  border-bottom-color: transparent;
+  box-shadow: none;
+}
+
+.rg-app-header--over-hero .rg-app-header__brand-text strong {
+  color: white;
+}
+.rg-app-header--over-hero .rg-app-header__brand-text em {
+  color: var(--rg-primitive-brand-200);
+}
+
+.rg-app-header--over-hero .rg-app-header__link {
+  color: rgba(255, 255, 255, 0.82);
+}
+.rg-app-header--over-hero .rg-app-header__link:hover {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.rg-app-header--over-hero .rg-app-header__menu-toggle {
+  color: white;
+  border-color: rgba(255, 255, 255, 0.25);
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+/* Ghost button "Cadastrar-se" muda para branco sobre fundo escuro */
+.rg-app-header--over-hero :deep(.rg-button--ghost) {
+  color: rgba(255, 255, 255, 0.88) !important;
+}
+.rg-app-header--over-hero :deep(.rg-button--ghost:hover) {
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  color: white !important;
 }
 </style>

@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 
 import RgAppHeader from '@/components/landing/LandingHeader.vue';
-import LandingHero from '@/components/landing/LandingHero.vue';
+import LandingHeroScrollExpand from '@/components/landing/LandingHeroScrollExpand.vue';
 import LandingAbout from '@/components/landing/LandingAbout.vue';
 import LandingHowItWorks from '@/components/landing/LandingHowItWorks.vue';
 import LandingBenefits from '@/components/landing/LandingBenefits.vue';
@@ -24,7 +24,20 @@ const sections = ref([
   <RgAppHeader :sections="sections" />
 
   <main>
-    <LandingHero />
+    <LandingHeroScrollExpand
+      media-type="video"
+      media-src="/hero/hero-video.mp4"
+      bg-image-src="/hero/hero-bg.jpg"
+      bg-image-src-webp="/hero/hero-bg.webp"
+      title="Recicla Goiás"
+      eyebrow="Logística Reversa · Goiás 2026"
+      scroll-hint="Role para descobrir"
+      primary-cta-label="Acessar sistema"
+      primary-cta-href="#acessar"
+      secondary-cta-label="Conhecer o processo"
+      secondary-cta-href="#sobre"
+      text-blend
+    />
     <LandingAbout id="sobre" />
     <LandingHowItWorks id="como-funciona" />
     <LandingBenefits />
