@@ -17,14 +17,27 @@ body,
 }
 
 /* Enquanto o hero está em modo de lock (antes de expandir), esconde
-   completamente a scrollbar do body — assim o usuário não vê uma
-   scrollbar "flutuando" no canto enquanto o scroll do documento não funciona. */
+   completamente a scrollbar — inclui html, body e #app (este último
+   recebe `overflow-y: auto` automaticamente do Vuetify, e era ele
+   quem desenhava a barra "flutuando" no canto). */
 html.rg-hero-locked,
-html.rg-hero-locked body {
-  overflow-y: hidden;
+html.rg-hero-locked body,
+html.rg-hero-locked #app,
+html.rg-hero-locked .v-application,
+html.rg-hero-locked .v-application__wrap {
+  overflow-y: hidden !important;
+  overflow-x: hidden !important;
+  scrollbar-width: none; /* Firefox */
 }
 html.rg-hero-locked::-webkit-scrollbar,
-html.rg-hero-locked body::-webkit-scrollbar { display: none; }
+html.rg-hero-locked body::-webkit-scrollbar,
+html.rg-hero-locked #app::-webkit-scrollbar,
+html.rg-hero-locked .v-application::-webkit-scrollbar,
+html.rg-hero-locked .v-application__wrap::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
 
 html {
   font-family: var(--rg-font-family-sans);
