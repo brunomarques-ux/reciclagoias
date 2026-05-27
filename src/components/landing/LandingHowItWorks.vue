@@ -69,7 +69,8 @@ import { howItWorksSteps } from '@/data/mocks/landing';
 .rg-how {
   position: relative;
   padding: var(--rg-space-20) var(--rg-space-6);
-  background-color: var(--rg-color-surface-muted);
+  /* Verde muito claro do Figma (in-between branco e brand-50) */
+  background-color: #F1F7F3;
 }
 
 .rg-how__inner {
@@ -172,7 +173,7 @@ import { howItWorksSteps } from '@/data/mocks/landing';
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--rg-color-surface-muted);
+  background-color: #F1F7F3;
   border: 2px solid var(--rg-color-action-primary);
   border-radius: var(--rg-radius-pill);
   color: var(--rg-color-action-primary);
@@ -204,7 +205,7 @@ import { howItWorksSteps } from '@/data/mocks/landing';
   align-items: center;
   justify-content: center;
   border-radius: var(--rg-radius-pill);
-  background-color: var(--rg-color-surface-muted);
+  background-color: #F1F7F3;
 }
 
 .rg-how__bullet-inner {

@@ -54,7 +54,9 @@ const highlights = [
 
         <ul class="rg-premio__highlights" role="list">
           <li v-for="h in highlights" :key="h.title" class="rg-premio__highlight">
-            <img :src="h.icon" alt="" aria-hidden="true" class="rg-premio__highlight-icon" />
+            <span class="rg-premio__highlight-icon-wrap" aria-hidden="true">
+              <img :src="h.icon" alt="" class="rg-premio__highlight-icon" />
+            </span>
             <div class="rg-premio__highlight-body">
               <strong class="rg-premio__highlight-title">{{ h.title }}</strong>
               <span class="rg-premio__highlight-sub">{{ h.sub }}</span>
@@ -201,9 +203,23 @@ const highlights = [
     0 6px 18px rgba(15, 23, 42, 0.06);
 }
 
+/* Wrapper retangular do ícone (igual ao Figma):
+   verde clarinho com stroke verde e cantos arredondados. */
+.rg-premio__highlight-icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--rg-radius-lg);
+  background-color: var(--rg-primitive-brand-50);
+  border: 1px solid var(--rg-primitive-brand-200);
+  flex: none;
+}
+
 .rg-premio__highlight-icon {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   object-fit: contain;
   display: block;
 }
@@ -230,6 +246,7 @@ const highlights = [
 .rg-premio__cert-wrap {
   display: flex;
   justify-content: center;
+  isolation: isolate; /* contém o mix-blend-mode da img */
 }
 
 .rg-premio__cert {
@@ -238,11 +255,15 @@ const highlights = [
   padding: 0;
   margin: 0;
   border: none;
-  background: transparent;
+  background: transparent !important;
+  background-color: transparent !important;
   cursor: zoom-in;
   border-radius: 0;
   overflow: visible;
   transition: transform var(--rg-motion-duration-base) var(--rg-motion-ease-standard);
+  /* Garante que nenhum estilo herdado de <button> aplique fundo. */
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .rg-premio__cert:hover { transform: translateY(-3px); }
@@ -254,16 +275,20 @@ const highlights = [
   border-radius: var(--rg-radius-md);
 }
 
-/* PNG transparente — sem wrapper com borda/sombra/cropping. */
+/* PNG vem do Figma com cantos brancos (não transparentes, RGB 253-255).
+   `mix-blend-mode: multiply` sobre o fundo branco da seção funde esses
+   cantos quase-brancos com o background, fazendo "sumir" a box retangular
+   sem alterar visualmente a moldura verde nem o texto. */
 .rg-premio__cert-img {
   display: block;
   height: 500px;
   width: auto;
   max-width: 100%;
   object-fit: contain;
-  /* Sombra direta no PNG (não num box ao redor) — mantém o efeito de
-     elevação seguindo o contorno do certificado, não um retângulo. */
-  filter: drop-shadow(0 12px 32px rgba(15, 23, 42, 0.18));
+  background-color: transparent;
+  mix-blend-mode: multiply;
+  /* Drop-shadow não funciona junto com mix-blend-mode (afeta o blending),
+     então a sombra fica aplicada num wrapper externo via box-shadow. */
 }
 
 .rg-premio__ribbon {
