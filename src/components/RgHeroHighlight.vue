@@ -3,9 +3,9 @@
  * Versão Vue do componente HeroHighlight (Aceternity/v0).
  * Adapta para a identidade Recicla Goiás:
  *  - background herda do container (mantém o verde brand-950 do hero)
- *  - dot pattern padrão em brand-700 (sutil sobre verde escuro)
- *  - dot pattern revelado pelo cursor em brand-300 (verde claro)
- *  - máscara radial 200px segue o mouse, criando a "lanterna" de iluminação
+ *  - dot pattern padrão em brand-200 com opacity 0.03 (quase imperceptível, foco na leitura)
+ *  - dot pattern revelado pelo cursor em brand-50 (quase branco)
+ *  - máscara radial 260px segue o mouse, criando a "lanterna" sutil (opacity 0.2 no hover)
  */
 import { ref } from 'vue';
 

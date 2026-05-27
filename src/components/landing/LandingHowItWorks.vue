@@ -67,10 +67,14 @@ import { howItWorksSteps } from '@/data/mocks/landing';
 
 <style scoped>
 .rg-how {
+  /* Verde muito claro do Figma (in-between branco e brand-50). Local porque é
+     exclusivo desta section + dos chips de check; se aparecer em uma 3ª seção
+     vira candidato a `--rg-color-surface-soft-tint` no DS. */
+  --rg-how-bg-tint: #F1F7F3;
+
   position: relative;
   padding: var(--rg-space-20) var(--rg-space-6);
-  /* Verde muito claro do Figma (in-between branco e brand-50) */
-  background-color: #F1F7F3;
+  background-color: var(--rg-how-bg-tint);
 }
 
 .rg-how__inner {
@@ -173,7 +177,7 @@ import { howItWorksSteps } from '@/data/mocks/landing';
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: #F1F7F3;
+  background-color: var(--rg-how-bg-tint);
   border: 2px solid var(--rg-color-action-primary);
   border-radius: var(--rg-radius-pill);
   color: var(--rg-color-action-primary);
@@ -205,7 +209,7 @@ import { howItWorksSteps } from '@/data/mocks/landing';
   align-items: center;
   justify-content: center;
   border-radius: var(--rg-radius-pill);
-  background-color: #F1F7F3;
+  background-color: var(--rg-how-bg-tint);
 }
 
 .rg-how__bullet-inner {

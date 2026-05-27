@@ -23,6 +23,7 @@ interface Props {
   mediaSrc: string;
   posterSrc?: string;
   bgImageSrc: string;
+  /** Source alternativo em WebP. Opcional — renderiza um <source> antes do <img>. */
   bgImageSrcWebp?: string;
   title?: string;
   eyebrow?: string;
@@ -734,14 +735,13 @@ onBeforeUnmount(() => {
   max-width: 920px;
 }
 
-.rg-scroll-hero__content-title-line {
-  display: inline-block;
-}
+/* Nota: `.rg-scroll-hero__content-title-line` não precisa de estilo próprio
+   — o pai já é flex-column. A classe existe só como hook semântico/futuro. */
 
 .rg-scroll-hero__content-lede {
   margin: 0;
-  /* 16px fixo (lede secundário, menor que o título pra dar hierarquia clara). */
-  font-size: 16px;
+  /* Lede secundário em 16px (= --rg-font-size-md), menor que o título pra dar hierarquia clara. */
+  font-size: var(--rg-font-size-md);
   line-height: var(--rg-line-height-relaxed);
   color: rgba(255, 255, 255, 0.82);
 }

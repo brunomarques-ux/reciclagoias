@@ -260,13 +260,13 @@ const highlights = [
   padding: 0;
   margin: 0;
   border: none;
-  background: transparent !important;
-  background-color: transparent !important;
+  /* `appearance: none` + `border: none` neutralizam o estilo nativo do <button>;
+     `background-color: transparent` zera o fundo padrão sem precisar de !important. */
+  background-color: transparent;
   cursor: zoom-in;
   border-radius: 0;
   overflow: visible;
   transition: transform var(--rg-motion-duration-base) var(--rg-motion-ease-standard);
-  /* Garante que nenhum estilo herdado de <button> aplique fundo. */
   -webkit-appearance: none;
   appearance: none;
 }
@@ -292,8 +292,9 @@ const highlights = [
   object-fit: contain;
   background-color: transparent;
   mix-blend-mode: multiply;
-  /* Drop-shadow não funciona junto com mix-blend-mode (afeta o blending),
-     então a sombra fica aplicada num wrapper externo via box-shadow. */
+  /* Sem drop-shadow direto: o `mix-blend-mode: multiply` interfere no blending
+     do filter. Se for preciso adicionar sombra no futuro, aplicar via box-shadow
+     no `.rg-premio__cert-wrap` (que tem `isolation: isolate`). */
 }
 
 .rg-premio__ribbon {

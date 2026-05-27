@@ -162,9 +162,10 @@ onBeforeUnmount(() => observer?.disconnect());
   font-weight: var(--rg-font-weight-bold);
 }
 
-/* Sem chip wrapper: o PNG já vem do Figma com seu "frame" completo
-   (pin verde com folha, fábrica com setas de reciclagem) — qualquer
-   fundo adicional duplicaria o efeito visual. */
+/* Wrapper só pra dimensionar o ícone alinhado ao texto — sem background nem
+   padding, porque o PNG já vem do Figma com seu "frame" completo (pin verde
+   com folha, fábrica com setas de reciclagem). Adicionar fundo aqui duplicaria
+   o efeito visual. */
 .rg-whatis__icon-chip {
   display: inline-flex;
   align-items: center;

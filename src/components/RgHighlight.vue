@@ -65,7 +65,7 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .rg-highlight {
-  display: inline;
+  /* <span> já é inline por default — não declaramos `display: inline`. */
   background-image: linear-gradient(
     90deg,
     var(--rg-primitive-brand-400) 0%,
