@@ -13,7 +13,7 @@
  *   e o conteúdo subsequente da página aparece;
  * - respeita prefers-reduced-motion (Motion já cuida disso) e mobile.
  */
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { Motion } from 'motion-v';
 
 interface Props {
@@ -128,6 +128,30 @@ function expandImmediately() {
   setProgress(1);
 }
 
+/**
+ * Quando a seta "Conhecer o processo" é clicada: expande o hero (libera o
+ * scroll lock) e rola suavemente até a próxima seção, em vez de teleportar.
+ */
+async function goToSection(ev: MouseEvent, hash: string | undefined) {
+  if (!hash || !hash.startsWith('#')) return;
+  ev.preventDefault();
+  if (!mediaFullyExpanded.value) {
+    setProgress(1);
+    await new Promise((r) => setTimeout(r, 250));
+  }
+  const target = document.querySelector(hash);
+  if (target instanceof HTMLElement) {
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+/** Trava a rolagem do body enquanto o hero está em modo de lock,
+ *  evitando a scrollbar visível "voando" no canto direito. */
+watch(mediaFullyExpanded, (expanded) => {
+  if (typeof document === 'undefined') return;
+  document.documentElement.classList.toggle('rg-hero-locked', !expanded);
+});
+
 onMounted(() => {
   checkIsMobile();
   window.addEventListener('resize', checkIsMobile);
@@ -136,6 +160,8 @@ onMounted(() => {
   window.addEventListener('touchstart', onTouchStart, { passive: false });
   window.addEventListener('touchmove', onTouchMove, { passive: false });
   window.addEventListener('touchend', onTouchEnd);
+  // Inicia já em modo locked (oculta scrollbar do body)
+  document.documentElement.classList.add('rg-hero-locked');
 });
 
 onBeforeUnmount(() => {
@@ -145,6 +171,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('touchstart', onTouchStart);
   window.removeEventListener('touchmove', onTouchMove);
   window.removeEventListener('touchend', onTouchEnd);
+  document.documentElement.classList.remove('rg-hero-locked');
 });
 </script>
 
@@ -332,7 +359,7 @@ onBeforeUnmount(() => {
                 </h2>
                 <p class="rg-scroll-hero__content-lede">
                   Aqui empresas, entidades gestoras, verificadores e o comitê acompanham
-                  declarações, certificados e regularidade em um só lugar — com rastreabilidade
+                  declarações, certificados e regularidade em um só lugar, com rastreabilidade
                   ponta a ponta.
                 </p>
 
@@ -358,6 +385,7 @@ onBeforeUnmount(() => {
                     v-if="secondaryCtaLabel"
                     :href="secondaryCtaHref ?? '#sobre'"
                     class="rg-scroll-hero__cta rg-scroll-hero__cta--outline"
+                    @click="goToSection($event, secondaryCtaHref ?? '#sobre')"
                   >
                     {{ secondaryCtaLabel }}
                     <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">

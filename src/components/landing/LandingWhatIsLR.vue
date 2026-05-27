@@ -100,7 +100,8 @@ import { whatIsCards } from '@/data/mocks/landing';
 
 .rg-whatis__title {
   margin: 0;
-  font-size: clamp(40px, 5vw, 64px);
+  /* Tamanho exato do Figma: 56px bold, sem clamp em desktop. */
+  font-size: 56px;
   line-height: 1.05;
   font-weight: var(--rg-font-weight-bold);
   color: var(--rg-color-text-primary);
@@ -174,17 +175,19 @@ import { whatIsCards } from '@/data/mocks/landing';
 }
 
 .rg-whatis__decree-cta {
-  display: inline-flex;
+  /* Full container: ocupa toda a largura do card de decreto. */
+  display: flex;
   align-items: center;
+  justify-content: center;
   gap: var(--rg-space-2);
-  padding: var(--rg-space-2) var(--rg-space-3);
+  width: 100%;
+  padding: var(--rg-space-3) var(--rg-space-4);
   background-color: var(--rg-color-surface-base);
   border: 1px solid var(--rg-color-border-base);
   border-radius: var(--rg-radius-md);
   font-size: var(--rg-font-size-sm);
   font-weight: var(--rg-font-weight-semibold);
   color: var(--rg-color-text-primary);
-  align-self: flex-start;
 }
 
 .rg-whatis__decree:focus-visible {
@@ -207,6 +210,25 @@ import { whatIsCards } from '@/data/mocks/landing';
   display: flex;
   flex-direction: column;
   gap: var(--rg-space-4);
+  padding: var(--rg-space-4);
+  padding-top: var(--rg-space-4);
+  background-color: var(--rg-color-surface-base);
+  border: 1px solid var(--rg-color-border-subtle);
+  border-radius: var(--rg-radius-2xl);
+  /* Sombra 3D: combinação de duas camadas para profundidade tipo "card flutuante" */
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 12px 32px rgba(15, 23, 42, 0.08);
+  transition:
+    transform var(--rg-motion-duration-base) var(--rg-motion-ease-standard),
+    box-shadow var(--rg-motion-duration-base) var(--rg-motion-ease-standard);
+}
+
+.rg-whatis__card:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 2px 4px rgba(15, 23, 42, 0.06),
+    0 20px 48px rgba(15, 23, 42, 0.12);
 }
 
 .rg-whatis__card-media {
@@ -214,7 +236,7 @@ import { whatIsCards } from '@/data/mocks/landing';
   /* Aspect-ratio 4/3 (foto menos quadrada, mais paisagem) — imagem fica menor verticalmente. */
   aspect-ratio: 4 / 3;
   overflow: hidden;
-  border-radius: var(--rg-radius-xl);
+  border-radius: var(--rg-radius-lg);
   background-color: var(--rg-color-surface-muted);
 }
 
@@ -233,14 +255,16 @@ import { whatIsCards } from '@/data/mocks/landing';
   display: flex;
   flex-direction: column;
   gap: var(--rg-space-2);
-  padding-inline: var(--rg-space-1);
+  padding-inline: var(--rg-space-2);
+  padding-bottom: var(--rg-space-2);
 }
 
 .rg-whatis__card-title {
   margin: 0;
   font-size: var(--rg-font-size-lg);
   font-weight: var(--rg-font-weight-bold);
-  color: var(--rg-color-text-primary);
+  /* Verde escuro brand-900 para os títulos dos cards (não preto). */
+  color: var(--rg-primitive-brand-900);
   letter-spacing: var(--rg-letter-spacing-tight);
   line-height: var(--rg-line-height-snug);
 }

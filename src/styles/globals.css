@@ -16,6 +16,16 @@ body,
   max-width: 100vw;
 }
 
+/* Enquanto o hero está em modo de lock (antes de expandir), esconde
+   completamente a scrollbar do body — assim o usuário não vê uma
+   scrollbar "flutuando" no canto enquanto o scroll do documento não funciona. */
+html.rg-hero-locked,
+html.rg-hero-locked body {
+  overflow-y: hidden;
+}
+html.rg-hero-locked::-webkit-scrollbar,
+html.rg-hero-locked body::-webkit-scrollbar { display: none; }
+
 html {
   font-family: var(--rg-font-family-sans);
   font-size: 16px;

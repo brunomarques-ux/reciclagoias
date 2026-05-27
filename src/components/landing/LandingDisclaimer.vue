@@ -102,7 +102,8 @@ import { autoDeclaration } from '@/data/mocks/landing';
   display: inline-flex;
   align-items: center;
   gap: var(--rg-space-2);
-  padding: var(--rg-space-2) var(--rg-space-4);
+  /* Botão menos comprimido: padding vertical maior. */
+  padding: var(--rg-space-4) var(--rg-space-5);
   background-color: white;
   color: var(--rg-primitive-brand-800);
   border-radius: var(--rg-radius-lg);
