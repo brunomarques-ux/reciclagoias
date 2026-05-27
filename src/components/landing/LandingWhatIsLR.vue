@@ -1,5 +1,39 @@
 <script setup lang="ts">
+import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { whatIsCards } from '@/data/mocks/landing';
+
+/**
+ * Fade-in stagger dos cards ao entrarem no viewport.
+ * IntersectionObserver puro + CSS transition (sem framework pra esse case).
+ * Cada card recebe `--rg-stagger-delay` proporcional ao índice.
+ */
+const cardRefs = ref<(HTMLElement | null)[]>([]);
+let observer: IntersectionObserver | null = null;
+
+onMounted(() => {
+  // Respeita `prefers-reduced-motion`: torna o efeito instantâneo
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (prefersReduced) {
+    cardRefs.value.forEach((el) => el?.classList.add('is-visible'));
+    return;
+  }
+
+  observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          observer?.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.18, rootMargin: '0px 0px -10% 0px' },
+  );
+
+  cardRefs.value.forEach((el) => el && observer?.observe(el));
+});
+
+onBeforeUnmount(() => observer?.disconnect());
 </script>
 
 <template>
@@ -45,7 +79,13 @@ import { whatIsCards } from '@/data/mocks/landing';
 
       <!-- 3 cards horizontais com foto + descrição -->
       <ul class="rg-whatis__cards" role="list">
-        <li v-for="card in whatIsCards" :key="card.title" class="rg-whatis__card">
+        <li
+          v-for="(card, idx) in whatIsCards"
+          :key="card.title"
+          :ref="(el) => { cardRefs[idx] = el as HTMLElement | null }"
+          :style="{ '--rg-stagger-delay': `${idx * 120}ms` }"
+          class="rg-whatis__card"
+        >
           <picture class="rg-whatis__card-media">
             <source :srcset="card.imageWebp" type="image/webp" />
             <img :src="card.imageJpg" :alt="card.alt" loading="lazy" />
@@ -63,7 +103,9 @@ import { whatIsCards } from '@/data/mocks/landing';
 <style scoped>
 .rg-whatis {
   position: relative;
-  padding: var(--rg-space-20) var(--rg-space-6);
+  /* Padding vertical 96px (= --rg-space-24) — 16px a mais que o default,
+     pra dar respiro entre seções e evitar visual apertado. */
+  padding: var(--rg-space-24) var(--rg-space-6);
   background-color: var(--rg-color-surface-base);
 }
 
@@ -122,16 +164,16 @@ import { whatIsCards } from '@/data/mocks/landing';
   font-weight: var(--rg-font-weight-bold);
 }
 
+/* Wrapper só pra dimensionar o ícone alinhado ao texto — sem background nem
+   padding, porque o PNG já vem do Figma com seu "frame" completo (pin verde
+   com folha, fábrica com setas de reciclagem). Adicionar fundo aqui duplicaria
+   o efeito visual. */
 .rg-whatis__icon-chip {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.15em;
-  height: 1.15em;
-  padding: 0.1em;
-  border-radius: 9999px;
-  background-color: var(--rg-primitive-brand-50);
-  overflow: hidden;
+  width: 1.05em;
+  height: 1.05em;
   vertical-align: middle;
 }
 
@@ -139,6 +181,7 @@ import { whatIsCards } from '@/data/mocks/landing';
   width: 100%;
   height: 100%;
   object-fit: contain;
+  display: block;
 }
 
 /* ===== Decreto box ===== */
@@ -211,24 +254,35 @@ import { whatIsCards } from '@/data/mocks/landing';
   flex-direction: column;
   gap: var(--rg-space-4);
   padding: var(--rg-space-4);
-  padding-top: var(--rg-space-4);
   background-color: var(--rg-color-surface-base);
-  border: 1px solid var(--rg-color-border-subtle);
+  /* Sem stroke: só sombra. Profundidade vem da combinação de duas camadas. */
   border-radius: var(--rg-radius-2xl);
-  /* Sombra 3D: combinação de duas camadas para profundidade tipo "card flutuante" */
   box-shadow:
     0 1px 2px rgba(15, 23, 42, 0.04),
     0 12px 32px rgba(15, 23, 42, 0.08);
+  /* Estado inicial do fade-stagger: invisível e levemente abaixado. */
+  opacity: 0;
+  transform: translateY(24px);
   transition:
-    transform var(--rg-motion-duration-base) var(--rg-motion-ease-standard),
+    opacity 0.7s cubic-bezier(0.2, 0, 0, 1) var(--rg-stagger-delay, 0ms),
+    transform 0.7s cubic-bezier(0.2, 0, 0, 1) var(--rg-stagger-delay, 0ms),
     box-shadow var(--rg-motion-duration-base) var(--rg-motion-ease-standard);
 }
 
+.rg-whatis__card.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .rg-whatis__card:hover {
-  transform: translateY(-4px);
   box-shadow:
     0 2px 4px rgba(15, 23, 42, 0.06),
     0 20px 48px rgba(15, 23, 42, 0.12);
+}
+
+/* Hover translateY só aplica quando já visível pra não conflitar com o fade. */
+.rg-whatis__card.is-visible:hover {
+  transform: translateY(-4px);
 }
 
 .rg-whatis__card-media {

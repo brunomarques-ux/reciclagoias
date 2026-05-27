@@ -15,12 +15,15 @@
  */
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { Motion } from 'motion-v';
+import RgHeroHighlight from '@/components/RgHeroHighlight.vue';
+import RgHighlight from '@/components/RgHighlight.vue';
 
 interface Props {
   mediaType?: 'video' | 'image';
   mediaSrc: string;
   posterSrc?: string;
   bgImageSrc: string;
+  /** Source alternativo em WebP. Opcional — renderiza um <source> antes do <img>. */
   bgImageSrcWebp?: string;
   title?: string;
   eyebrow?: string;
@@ -349,58 +352,55 @@ onBeforeUnmount(() => {
             :transition="{ duration: 0.7, ease: [0.2, 0, 0, 1] }"
           >
             <slot>
-              <!-- Conteúdo default: copy do Recicla Goiás abaixo do hero -->
-              <div class="rg-scroll-hero__content-inner">
-                <span class="rg-scroll-hero__content-eyebrow">
-                  Governo de Goiás · Secretaria de Indústria e Comércio
-                </span>
-                <h2 class="rg-scroll-hero__content-title">
-                  A plataforma oficial da logística reversa de Goiás.
-                </h2>
-                <p class="rg-scroll-hero__content-lede">
-                  Aqui empresas, entidades gestoras, verificadores e o comitê acompanham
-                  declarações, certificados e regularidade em um só lugar, com rastreabilidade
-                  ponta a ponta.
-                </p>
+              <!-- Conteúdo default · envolto em RgHeroHighlight (dot pattern + lanterna do mouse) -->
+              <RgHeroHighlight>
+                <div class="rg-scroll-hero__content-inner">
+                  <span class="rg-scroll-hero__content-eyebrow">
+                    Governo de Goiás · Secretaria de Indústria e Comércio
+                  </span>
+                  <h2 class="rg-scroll-hero__content-title">
+                    <span class="rg-scroll-hero__content-title-line">
+                      A plataforma oficial da
+                    </span>
+                    <span class="rg-scroll-hero__content-title-line">
+                      <RgHighlight>Logística Reversa de Goiás</RgHighlight>
+                    </span>
+                  </h2>
+                  <p class="rg-scroll-hero__content-lede">
+                    Aqui empresas, entidades gestoras, verificadores e o comitê acompanham
+                    declarações, certificados e regularidade em um só lugar, com rastreabilidade
+                    ponta a ponta.
+                  </p>
 
-                <div class="rg-scroll-hero__content-ctas">
-                  <a
-                    v-if="primaryCtaLabel"
-                    :href="primaryCtaHref ?? '#acessar'"
-                    class="rg-scroll-hero__cta rg-scroll-hero__cta--primary"
-                  >
-                    {{ primaryCtaLabel }}
-                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-                      <path
-                        d="M5 12h14m0 0-5-5m5 5-5 5"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                    </svg>
-                  </a>
-                  <a
-                    v-if="secondaryCtaLabel"
-                    :href="secondaryCtaHref ?? '#sobre'"
-                    class="rg-scroll-hero__cta rg-scroll-hero__cta--outline"
-                    @click="goToSection($event, secondaryCtaHref ?? '#sobre')"
-                  >
-                    {{ secondaryCtaLabel }}
-                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-                      <path
-                        d="M12 5v14m0 0-5-5m5 5 5-5"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                    </svg>
-                  </a>
+                  <div class="rg-scroll-hero__content-ctas">
+                    <a
+                      v-if="primaryCtaLabel"
+                      :href="primaryCtaHref ?? '#acessar'"
+                      class="rg-scroll-hero__cta rg-scroll-hero__cta--primary"
+                    >
+                      {{ primaryCtaLabel }}
+                      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                        <path d="M5 12h14m0 0-5-5m5 5-5 5"
+                          fill="none" stroke="currentColor" stroke-width="2"
+                          stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                    </a>
+                    <a
+                      v-if="secondaryCtaLabel"
+                      :href="secondaryCtaHref ?? '#sobre'"
+                      class="rg-scroll-hero__cta rg-scroll-hero__cta--outline"
+                      @click="goToSection($event, secondaryCtaHref ?? '#sobre')"
+                    >
+                      {{ secondaryCtaLabel }}
+                      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                        <path d="M12 5v14m0 0-5-5m5 5 5-5"
+                          fill="none" stroke="currentColor" stroke-width="2"
+                          stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                    </a>
+                  </div>
                 </div>
-              </div>
+              </RgHeroHighlight>
             </slot>
           </Motion>
         </div>
@@ -457,8 +457,10 @@ onBeforeUnmount(() => {
 .rg-scroll-hero__bg-overlay {
   position: absolute;
   inset: 0;
-  /* Overlay escurecido para garantir leitura do título sobre a foto. */
-  background-color: rgba(7, 38, 20, 0.62);
+  /* Overlay escurecido para garantir leitura do título sobre a foto.
+     0.57 = 5% mais claro que o anterior (0.62), pra mostrar mais da nova bg-hero-v2
+     (refeita sem o texto quebrado por IA da v1). */
+  background-color: rgba(7, 38, 20, 0.57);
 }
 
 .rg-scroll-hero__bg-gradient {
@@ -676,9 +678,21 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   width: 100%;
-  padding: var(--rg-space-12) var(--rg-space-6) var(--rg-space-16);
+  /* Sem padding aqui: o RgHeroHighlight ocupa 100% da área e controla seu
+     próprio padding interno, garantindo que o dot pattern + lanterna cubram
+     toda a faixa verde visível (não só a caixinha do conteúdo). */
+  padding: 0;
   position: relative;
   z-index: 10;
+}
+
+/* Override local: o RgHeroHighlight mantém o tamanho natural do conteúdo
+   (sem min-height grande), apenas com padding pra respiro. O dot pattern
+   fica sutil (opacity baixíssima) e a lanterna leve no hover — o foco é
+   leitura do background, não o efeito do pattern. */
+.rg-scroll-hero__content :deep(.rg-hero-highlight) {
+  width: 100%;
+  padding: var(--rg-space-12) var(--rg-space-6) var(--rg-space-16);
 }
 
 .rg-scroll-hero__content-inner {
@@ -709,16 +723,25 @@ onBeforeUnmount(() => {
 
 .rg-scroll-hero__content-title {
   margin: 0;
-  font-size: clamp(28px, 4vw, 44px);
-  line-height: var(--rg-line-height-tight);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--rg-space-2);
+  font-size: clamp(32px, 4.5vw, 52px);
+  line-height: 1.1;
   letter-spacing: var(--rg-letter-spacing-tight);
   font-weight: var(--rg-font-weight-bold);
   color: white;
+  max-width: 920px;
 }
+
+/* Nota: `.rg-scroll-hero__content-title-line` não precisa de estilo próprio
+   — o pai já é flex-column. A classe existe só como hook semântico/futuro. */
 
 .rg-scroll-hero__content-lede {
   margin: 0;
-  font-size: var(--rg-font-size-lg);
+  /* Lede secundário em 16px (= --rg-font-size-md), menor que o título pra dar hierarquia clara. */
+  font-size: var(--rg-font-size-md);
   line-height: var(--rg-line-height-relaxed);
   color: rgba(255, 255, 255, 0.82);
 }
@@ -782,7 +805,7 @@ onBeforeUnmount(() => {
   .rg-scroll-hero__title {
     font-size: clamp(48px, 14vw, 84px);
   }
-  .rg-scroll-hero__content {
+  .rg-scroll-hero__content :deep(.rg-hero-highlight) {
     padding: var(--rg-space-10) var(--rg-space-4) var(--rg-space-12);
   }
 }
