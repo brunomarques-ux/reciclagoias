@@ -413,7 +413,8 @@ onBeforeUnmount(() => {
 .rg-scroll-hero {
   transition:
     background-color var(--rg-motion-duration-slower) var(--rg-motion-ease-emphasized);
-  overflow-x: hidden;
+  /* `clip` em vez de `hidden` (ver explicação no globals.css). */
+  overflow-x: clip;
   /* Verde quase preto persistente: aparece quando a imagem de fundo desvanece. */
   background-color: var(--rg-primitive-brand-950);
 }
@@ -484,7 +485,7 @@ onBeforeUnmount(() => {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  overflow-x: hidden; /* translateX dos títulos não pode estourar */
+  overflow-x: clip; /* translateX dos títulos não pode estourar */
 }
 
 .rg-scroll-hero__viewport {
