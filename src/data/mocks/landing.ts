@@ -68,161 +68,185 @@ export const dashboardStats: DashboardStat[] = [
   },
 ];
 
-export interface ProcessStep {
+// ============================================================================
+// Logística Reversa — diagrama circular (S2)
+// ============================================================================
+
+export interface CycleStage {
+  key: string;
+  label: string;
+  icon: string;
+}
+
+export const reverseLogisticsCycle: CycleStage[] = [
+  { key: 'recycle',    label: 'Reciclagem',         icon: 'mdi-recycle' },
+  { key: 'industry',   label: 'Indústria',          icon: 'mdi-factory' },
+  { key: 'distrib',    label: 'Distribuição',       icon: 'mdi-truck-fast-outline' },
+  { key: 'retail',     label: 'Varejo',             icon: 'mdi-storefront-outline' },
+  { key: 'consumer',   label: 'Consumidor',         icon: 'mdi-account-group-outline' },
+  { key: 'collection', label: 'Coleta e seleção',   icon: 'mdi-trash-can-outline' },
+];
+
+// ============================================================================
+// Como Funciona — 3 passos do site atual (Cadastre-se / Painel / Planos)
+// ============================================================================
+
+export interface HowItWorksStep {
   number: string;
   title: string;
   description: string;
   icon: string;
 }
 
-export const processSteps: ProcessStep[] = [
+export const howItWorksSteps: HowItWorksStep[] = [
   {
-    number: '01',
-    title: 'Ano-base definido',
+    number: '1',
+    title: 'Cadastre-se',
     description:
-      'O comitê estabelece o ano-base e o prazo da campanha de logística reversa em Goiás.',
-    icon: 'mdi-calendar-check-outline',
+      'Crie sua conta informando os dados da sua empresa ou organização. O processo é simples e rápido.',
+    icon: 'mdi-account-plus-outline',
   },
   {
-    number: '02',
-    title: 'Declaração da empresa',
+    number: '2',
+    title: 'Acesse o painel',
     description:
-      'Operadores e entidades cadastram notas fiscais e declaram os volumes recicláveis no período.',
-    icon: 'mdi-file-document-edit-outline',
+      'Visualize metas, relatórios e obrigações do seu plano em um painel centralizado.',
+    icon: 'mdi-monitor-dashboard',
   },
   {
-    number: '03',
-    title: 'Comprovação documental',
+    number: '3',
+    title: 'Gerencie seus planos',
     description:
-      'Certificados de destinação final são anexados às notas fiscais para evidenciar a operação.',
-    icon: 'mdi-clipboard-check-outline',
-  },
-  {
-    number: '04',
-    title: 'Análise pelo verificador',
-    description:
-      'Verificadores de resultado conferem consistência, aprovam ou devolvem para ajuste.',
-    icon: 'mdi-magnify-scan',
-  },
-  {
-    number: '05',
-    title: 'Status acompanhado',
-    description:
-      'Empresas acompanham em tempo real o andamento de cada certificado e o saldo de massa.',
-    icon: 'mdi-progress-clock',
-  },
-  {
-    number: '06',
-    title: 'Regularidade emitida',
-    description:
-      'Ao final do ciclo, a regularidade fica disponível com rastreabilidade auditável ponta a ponta.',
-    icon: 'mdi-shield-check-outline',
+      'Acompanhe, registre e comprove as ações de logística reversa da sua cadeia produtiva.',
+    icon: 'mdi-clipboard-list-outline',
   },
 ];
 
-export interface Benefit {
+// ============================================================================
+// Prêmio PMI Goiás 2025
+// ============================================================================
+
+export const award = {
+  organization: 'PMI Goiás · Project Management Institute',
+  eventName: '18º Seminário Em Gestão, Projetos e Liderança',
+  date: 'Dezembro de 2025',
+  city: 'Goiânia · GO',
+  category: 'Melhor Projeto de 2025',
+  recipients: [
+    'Gerência de Tecnologia · GETI/SIC',
+    'Comitê da Logística Reversa · CLR/SIC',
+  ],
+  quote: '"Feliz aquele que transfere o que sabe e aprende o que ensina."',
+  quoteAuthor: 'Cora Coralina',
+  summary:
+    'O Projeto Recicla Goiás foi reconhecido como Melhor Projeto de 2025 pelo PMI Goiás, durante o 18º Seminário Em Gestão, Projetos e Liderança realizado em Goiânia.',
+};
+
+// ============================================================================
+// Comitê — 8 secretarias / órgãos parceiros
+// ============================================================================
+
+export interface CommitteeMember {
+  short: string;
+  full: string;
+  icon: string;
+}
+
+export const committeeMembers: CommitteeMember[] = [
+  { short: 'SEMAD',          full: 'Secretaria de Estado de Meio Ambiente e Desenvolvimento Sustentável', icon: 'mdi-leaf' },
+  { short: 'SIC',            full: 'Secretaria de Estado de Indústria, Comércio e Serviços',              icon: 'mdi-factory' },
+  { short: 'RETOMADA',       full: 'Secretaria de Estado da Retomada',                                    icon: 'mdi-trending-up' },
+  { short: 'ECONOMIA',       full: 'Secretaria de Estado da Economia',                                    icon: 'mdi-bank-outline' },
+  { short: 'SGG / IMB',      full: 'Secretaria-Geral da Governadoria (Instituto Mauro Borges)',           icon: 'mdi-office-building-outline' },
+  { short: 'GOIÁS PARCERIAS',full: 'Companhia de Investimentos e Parcerias do Estado de Goiás',           icon: 'mdi-handshake-outline' },
+  { short: 'AGR',            full: 'Agência de Regulação, Controle e Fiscalização de Serviços Públicos', icon: 'mdi-shield-check-outline' },
+  { short: 'MPGO',           full: 'Ministério Público do Estado de Goiás',                               icon: 'mdi-gavel' },
+];
+
+// ============================================================================
+// Diagrama de fluxo da Logística Reversa (S4)
+// ============================================================================
+
+export interface FlowNode {
+  id: string;
+  label: string;
+  variant: 'soft' | 'strong' | 'brand-dark';
+}
+
+export const flowNodes: FlowNode[] = [
+  { id: 'brandOwners',     label: 'Brand Owners',                 variant: 'soft' },
+  { id: 'caixaPreta',      label: 'Caixa Preta',                  variant: 'brand-dark' },
+  { id: 'entidades',       label: 'Entidades gestoras',           variant: 'soft' },
+  { id: 'comite',          label: 'Entidades comitê de LR',       variant: 'soft' },
+  { id: 'semad',           label: 'SEMAD',                        variant: 'soft' },
+  { id: 'consumidor',      label: 'Consumidor',                   variant: 'soft' },
+  { id: 'operadores',      label: 'Operadores da reciclagem',     variant: 'soft' },
+  { id: 'industria',       label: 'Indústria recicladora',        variant: 'soft' },
+  { id: 'verificador',     label: 'Verificador de resultados',    variant: 'strong' },
+];
+
+// ============================================================================
+// Sistema Recicla Goiás (S5) — 4 funcionalidades + texto descritivo
+// ============================================================================
+
+export interface SystemFeature {
   title: string;
   description: string;
   icon: string;
 }
 
-export const benefits: Benefit[] = [
+export const systemFeatures: SystemFeature[] = [
   {
-    title: 'Informação centralizada',
+    title: 'Cadastro de participantes',
     description:
-      'Todas as declarações, notas e certificados em um único lugar — sem planilhas paralelas.',
-    icon: 'mdi-database-outline',
+      'Registro de cooperativas, fabricantes, importadores, distribuidores e comerciantes.',
+    icon: 'mdi-account-multiple-outline',
   },
   {
-    title: 'Processo rastreável',
+    title: 'Metas e relatórios',
     description:
-      'Histórico de cada movimentação preservado, do cadastro à aprovação final.',
-    icon: 'mdi-timeline-text-outline',
+      'Acompanhamento de metas e relatórios dos planos de logística reversa.',
+    icon: 'mdi-chart-bar',
   },
   {
-    title: 'Menos trabalho manual',
+    title: 'Validação de dados',
     description:
-      'Validações automáticas reduzem retrabalho e liberam tempo para análise estratégica.',
-    icon: 'mdi-flash-outline',
+      'Armazenamento e validação de dados cadastrais e comprovações.',
+    icon: 'mdi-database-check-outline',
   },
   {
-    title: 'Mais transparência',
+    title: 'Fiscalização',
     description:
-      'Empresas, verificadores e administração compartilham a mesma visão do estado da obrigação.',
-    icon: 'mdi-eye-outline',
-  },
-  {
-    title: 'Apoio à auditoria',
-    description:
-      'Trilhas completas facilitam fiscalização e prestação de contas a órgãos de controle.',
-    icon: 'mdi-shield-search',
-  },
-  {
-    title: 'Decisão orientada a dados',
-    description:
-      'Indicadores agregados sobre volumes, materiais e cumprimento por entidade gestora.',
-    icon: 'mdi-chart-line',
+      'Criação, acompanhamento e fiscalização dos Planos de Logística Reversa.',
+    icon: 'mdi-magnify-scan',
   },
 ];
 
-export interface UserProfile {
-  slug: string;
-  title: string;
-  summary: string;
-  bullets: string[];
-  icon: string;
-}
-
-export const userProfiles: UserProfile[] = [
-  {
-    slug: 'operador',
-    title: 'Operador Logístico',
-    summary:
-      'Empresas que recebem resíduos, reciclam e geram massa reciclável certificável.',
-    bullets: [
-      'Cadastrar notas fiscais',
-      'Emitir certificados de massa',
-      'Consultar saldo e extratos',
-    ],
-    icon: 'mdi-truck-outline',
-  },
-  {
-    slug: 'entidade',
-    title: 'Entidade Gestora',
-    summary:
-      'Organizações responsáveis pela gestão e validação da logística reversa.',
-    bullets: [
-      'Criar planos e relatórios',
-      'Receber e validar certificados',
-      'Acompanhar operadores com massa disponível',
-    ],
-    icon: 'mdi-domain',
-  },
-  {
-    slug: 'verificador',
-    title: 'Verificador de Resultados',
-    summary:
-      'Profissionais que validam operações e analisam inconsistências.',
-    bullets: [
-      'Consultar registros',
-      'Aprovar ou devolver certificados',
-      'Acompanhar históricos auditáveis',
-    ],
-    icon: 'mdi-check-decagram-outline',
-  },
-  {
-    slug: 'admin',
-    title: 'Admin · Comitê',
-    summary:
-      'Administração do sistema e visão agregada para o comitê gestor.',
-    bullets: [
-      'Gerenciar usuários e empresas',
-      'Acompanhar métricas gerais',
-      'Bloquear ou liberar empresas',
-    ],
-    icon: 'mdi-shield-account-outline',
-  },
+export const systemDescription = [
+  'O Sistema Recicla Goiás foi desenvolvido pela Secretaria de Estado de Indústria, Comércio e Serviços (SIC) com o objetivo de incentivar, facilitar e fortalecer a atuação dos entes envolvidos no estado de Goiás na promoção de boas práticas voltadas ao tratamento de resíduos.',
+  'A solução apoia a criação, o acompanhamento e a fiscalização dos Planos de Logística Reversa, contribuindo para a conformidade ambiental e a gestão sustentável.',
+  'A plataforma possibilita o cadastro de cooperativas/catadores, fabricantes, importadores, distribuidores, comerciantes e demais participantes da cadeia, promovendo a integração entre os atores envolvidos.',
 ];
+
+export const systemStatusNote =
+  'Atualmente em produção, o sistema passa por evolução contínua, com melhorias e ampliação de funcionalidades.';
+
+// ============================================================================
+// Disclaimer sazonal — Autodeclaração de Não Enquadramento
+// ============================================================================
+
+export const autoDeclaration = {
+  title: 'Formulário de Autodeclaração de Não Enquadramento',
+  description:
+    'Empresas convocadas pela Notificação Nº 1/2026 podem apresentar justificativa de não enquadramento.',
+  ctaLabel: 'Acessar formulário',
+  ctaHref: '#autodeclaracao',
+  badge: 'Aviso sazonal · prazo aberto',
+};
+
+// ============================================================================
+// FAQ
+// ============================================================================
 
 export interface FaqItem {
   question: string;
@@ -262,19 +286,52 @@ export const faqItems: FaqItem[] = [
   },
 ];
 
+// ============================================================================
+// Parceiros institucionais (footer)
+// ============================================================================
+
 export interface Partner {
   short: string;
   full: string;
 }
 
 export const institutionalPartners: Partner[] = [
-  { short: 'SIC', full: 'Secretaria de Indústria e Comércio' },
-  { short: 'SEMAD', full: 'Secretaria de Meio Ambiente e Desenvolvimento Sustentável' },
+  { short: 'SIC',      full: 'Secretaria de Indústria e Comércio' },
+  { short: 'SEMAD',    full: 'Secretaria de Meio Ambiente e Desenvolvimento Sustentável' },
   { short: 'RETOMADA', full: 'Secretaria da Retomada' },
   { short: 'ECONOMIA', full: 'Secretaria da Economia' },
-  { short: 'SGG', full: 'Secretaria Geral do Governo' },
-  { short: 'AGR', full: 'Agência Goiana de Regulação, Controle e Fiscalização' },
+  { short: 'SGG',      full: 'Secretaria Geral do Governo' },
+  { short: 'AGR',      full: 'Agência Goiana de Regulação, Controle e Fiscalização' },
 ];
+
+// ============================================================================
+// Mantidos para compatibilidade (até remoção dos componentes antigos)
+// ============================================================================
+
+export interface ProcessStep {
+  number: string;
+  title: string;
+  description: string;
+  icon: string;
+}
+
+export const processSteps: ProcessStep[] = howItWorksSteps;
+
+export interface Benefit {
+  title: string;
+  description: string;
+  icon: string;
+}
+export const benefits: Benefit[] = [];
+
+export interface UserProfile {
+  slug: string;
+  title: string;
+  summary: string;
+  bullets: string[];
+  icon: string;
+}
+export const userProfiles: UserProfile[] = [];
 
 export interface StatusExample {
   identifier: string;
@@ -283,37 +340,7 @@ export interface StatusExample {
   massT: number;
   status: 'aprovado' | 'enviado' | 'ajuste';
 }
-
-export const recentDeclarations: StatusExample[] = [
-  {
-    identifier: 'CM-2024-000.000.000-1',
-    operator: 'EcoDescarte Demonstrativo',
-    material: 'paper',
-    massT: 1350,
-    status: 'aprovado',
-  },
-  {
-    identifier: 'CM-2024-000.000.000-2',
-    operator: 'EcoDescarte Demonstrativo',
-    material: 'plastic',
-    massT: 2500,
-    status: 'enviado',
-  },
-  {
-    identifier: 'CM-2024-000.000.000-3',
-    operator: 'Verde Limpo Exemplo S.A.',
-    material: 'paper',
-    massT: 780,
-    status: 'ajuste',
-  },
-  {
-    identifier: 'CM-2024-000.000.000-4',
-    operator: 'Sustenta Brasil Exemplo',
-    material: 'metal',
-    massT: 7000,
-    status: 'aprovado',
-  },
-];
+export const recentDeclarations: StatusExample[] = [];
 
 export const materialLabels: Record<MaterialKey, string> = {
   paper: 'Papel',

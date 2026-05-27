@@ -151,19 +151,26 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   z-index: 30;
-  background-color: rgba(255, 255, 255, 0.85);
-  backdrop-filter: saturate(140%) blur(10px);
+  /* Efeito glass / frosted (frosted glass + subtle saturation boost). */
+  background-color: rgba(255, 255, 255, 0.62);
+  backdrop-filter: saturate(180%) blur(22px);
+  -webkit-backdrop-filter: saturate(180%) blur(22px);
   border-bottom: 1px solid transparent;
   transition:
-    background-color var(--rg-motion-duration-base) var(--rg-motion-ease-standard),
+    background-color var(--rg-motion-duration-slow) var(--rg-motion-ease-emphasized),
+    backdrop-filter var(--rg-motion-duration-slow) var(--rg-motion-ease-emphasized),
     border-color var(--rg-motion-duration-base) var(--rg-motion-ease-standard),
     box-shadow var(--rg-motion-duration-base) var(--rg-motion-ease-standard);
 }
 
 .rg-app-header--scrolled {
-  background-color: rgba(255, 255, 255, 0.96);
-  border-bottom-color: var(--rg-color-border-subtle);
-  box-shadow: var(--rg-elevation-1);
+  background-color: rgba(255, 255, 255, 0.72);
+  backdrop-filter: saturate(180%) blur(28px);
+  -webkit-backdrop-filter: saturate(180%) blur(28px);
+  border-bottom-color: rgba(15, 23, 42, 0.06);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 6px 24px rgba(15, 23, 42, 0.06);
 }
 
 .rg-app-header__inner {

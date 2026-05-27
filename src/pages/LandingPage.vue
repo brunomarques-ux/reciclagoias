@@ -3,20 +3,22 @@ import { ref } from 'vue';
 
 import RgAppHeader from '@/components/landing/LandingHeader.vue';
 import LandingHeroScrollExpand from '@/components/landing/LandingHeroScrollExpand.vue';
-import LandingAbout from '@/components/landing/LandingAbout.vue';
+import LandingDisclaimer from '@/components/landing/LandingDisclaimer.vue';
+import LandingWhatIsLR from '@/components/landing/LandingWhatIsLR.vue';
 import LandingHowItWorks from '@/components/landing/LandingHowItWorks.vue';
-import LandingBenefits from '@/components/landing/LandingBenefits.vue';
-import LandingDataPreview from '@/components/landing/LandingDataPreview.vue';
-import LandingUserProfiles from '@/components/landing/LandingUserProfiles.vue';
+import LandingPremio from '@/components/landing/LandingPremio.vue';
+import LandingComite from '@/components/landing/LandingComite.vue';
+import LandingFlowDiagram from '@/components/landing/LandingFlowDiagram.vue';
+import LandingSistema from '@/components/landing/LandingSistema.vue';
 import LandingFaq from '@/components/landing/LandingFaq.vue';
-import LandingCtaFinal from '@/components/landing/LandingCtaFinal.vue';
 import LandingFooter from '@/components/landing/LandingFooter.vue';
 
 const sections = ref([
-  { id: 'sobre', label: 'O que é' },
+  { id: 'sobre',         label: 'O que é' },
   { id: 'como-funciona', label: 'Como funciona' },
-  { id: 'para-quem', label: 'Para quem' },
-  { id: 'duvidas', label: 'Perguntas frequentes' },
+  { id: 'comite',        label: 'Comitê' },
+  { id: 'sistema',       label: 'Sistema' },
+  { id: 'duvidas',       label: 'Dúvidas' },
 ]);
 </script>
 
@@ -38,13 +40,15 @@ const sections = ref([
       secondary-cta-href="#sobre"
       text-blend
     />
-    <LandingAbout id="sobre" />
-    <LandingHowItWorks id="como-funciona" />
-    <LandingBenefits />
-    <LandingDataPreview />
-    <LandingUserProfiles id="para-quem" />
+
+    <LandingDisclaimer />
+    <LandingWhatIsLR />
+    <LandingHowItWorks />
+    <LandingPremio />
+    <LandingComite />
+    <LandingFlowDiagram />
+    <LandingSistema />
     <LandingFaq id="duvidas" />
-    <LandingCtaFinal />
   </main>
 
   <LandingFooter />
