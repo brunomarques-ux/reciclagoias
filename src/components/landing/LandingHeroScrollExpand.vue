@@ -419,7 +419,8 @@ onBeforeUnmount(() => {
 .rg-scroll-hero__bg-overlay {
   position: absolute;
   inset: 0;
-  background-color: rgba(7, 38, 20, 0.4);
+  /* Overlay escurecido para garantir leitura do título sobre a foto. */
+  background-color: rgba(7, 38, 20, 0.62);
 }
 
 .rg-scroll-hero__bg-gradient {
@@ -427,9 +428,9 @@ onBeforeUnmount(() => {
   inset: 0;
   background: linear-gradient(
     180deg,
-    rgba(7, 38, 20, 0.0) 0%,
-    rgba(7, 38, 20, 0.0) 55%,
-    rgba(7, 38, 20, 0.55) 90%,
+    rgba(7, 38, 20, 0.25) 0%,
+    rgba(7, 38, 20, 0.10) 30%,
+    rgba(7, 38, 20, 0.45) 80%,
     var(--rg-primitive-brand-950) 100%
   );
 }
@@ -566,8 +567,11 @@ onBeforeUnmount(() => {
 }
 
 .rg-scroll-hero__title-wrap--blend {
-  mix-blend-mode: difference;
-  color: white;
+  /* `lighten` faz o texto sempre aparecer claro sobre fundos escuros
+     e ainda mais claro sobre o vídeo verde, mantendo identidade da marca
+     sem o efeito "roxo" do `difference`. */
+  mix-blend-mode: lighten;
+  color: var(--rg-primitive-brand-100);
 }
 
 .rg-scroll-hero__title {
@@ -576,8 +580,10 @@ onBeforeUnmount(() => {
   line-height: 0.9;
   letter-spacing: -0.04em;
   font-weight: var(--rg-font-weight-bold);
-  color: white;
-  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+  color: var(--rg-primitive-brand-100);
+  text-shadow:
+    0 2px 12px rgba(0, 0, 0, 0.45),
+    0 8px 32px rgba(0, 0, 0, 0.35);
 }
 
 .rg-scroll-hero__title--rest {
