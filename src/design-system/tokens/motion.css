@@ -1,0 +1,16 @@
+/* ============================================================
+ * Recicla Goiás — Design Tokens · Motion
+ * ============================================================ */
+
+:root {
+  --rg-motion-duration-instant: 80ms;
+  --rg-motion-duration-fast:    120ms;
+  --rg-motion-duration-base:    180ms;
+  --rg-motion-duration-slow:    280ms;
+  --rg-motion-duration-slower:  420ms;
+
+  --rg-motion-ease-standard:    cubic-bezier(0.2, 0, 0, 1);
+  --rg-motion-ease-emphasized:  cubic-bezier(0.3, 0, 0, 1);
+  --rg-motion-ease-decelerate:  cubic-bezier(0, 0, 0.2, 1);
+  --rg-motion-ease-accelerate:  cubic-bezier(0.3, 0, 1, 1);
+}

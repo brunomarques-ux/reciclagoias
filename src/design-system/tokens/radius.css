@@ -1,0 +1,15 @@
+/* ============================================================
+ * Recicla Goiás — Design Tokens · Border radius
+ * ============================================================ */
+
+:root {
+  --rg-radius-none: 0;
+  --rg-radius-xs:   4px;
+  --rg-radius-sm:   6px;
+  --rg-radius-md:   8px;
+  --rg-radius-lg:   12px;
+  --rg-radius-xl:   16px;
+  --rg-radius-2xl:  24px;
+  --rg-radius-3xl:  32px;
+  --rg-radius-pill: 9999px;
+}

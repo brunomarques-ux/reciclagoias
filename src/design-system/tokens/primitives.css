@@ -1,0 +1,79 @@
+/* ============================================================
+ * Recicla Goiás — Design Tokens · Primitivas
+ *
+ * Cores cruas, escalas e valores numéricos puros.
+ * Nunca usadas direto em componentes — apenas referenciadas
+ * por src/design-system/tokens/semantic.css.
+ * ============================================================ */
+
+:root {
+  /* ----- Brand (verde institucional Recicla Goiás, refinado) ----- */
+  --rg-primitive-brand-50:  #E9F6EE;
+  --rg-primitive-brand-100: #C8E8D4;
+  --rg-primitive-brand-200: #9FD5B0;
+  --rg-primitive-brand-300: #71BF8A;
+  --rg-primitive-brand-400: #46AB68;
+  --rg-primitive-brand-500: #279C50;
+  --rg-primitive-brand-600: #1F8344;   /* CTA / brand principal */
+  --rg-primitive-brand-700: #176935;
+  --rg-primitive-brand-800: #12522A;
+  --rg-primitive-brand-900: #0D3E20;
+  --rg-primitive-brand-950: #072614;
+
+  /* ----- Neutros (slate calibrado para gov-tech sério) ----- */
+  --rg-primitive-neutral-0:   #FFFFFF;
+  --rg-primitive-neutral-50:  #F8FAFC;
+  --rg-primitive-neutral-100: #F1F5F9;
+  --rg-primitive-neutral-200: #E2E8F0;
+  --rg-primitive-neutral-300: #CBD5E1;
+  --rg-primitive-neutral-400: #94A3B8;
+  --rg-primitive-neutral-500: #64748B;
+  --rg-primitive-neutral-600: #475569;
+  --rg-primitive-neutral-700: #334155;
+  --rg-primitive-neutral-800: #1E293B;
+  --rg-primitive-neutral-900: #0F172A;
+  --rg-primitive-neutral-950: #060B17;
+
+  /* ----- Funcionais (feedback) ----- */
+  --rg-primitive-blue-50:   #EFF6FF;
+  --rg-primitive-blue-100:  #DBEAFE;
+  --rg-primitive-blue-500:  #3B82F6;
+  --rg-primitive-blue-600:  #2563EB;
+  --rg-primitive-blue-700:  #1D4ED8;
+
+  --rg-primitive-amber-50:  #FFFBEB;
+  --rg-primitive-amber-100: #FEF3C7;
+  --rg-primitive-amber-500: #F59E0B;
+  --rg-primitive-amber-600: #D97706;
+  --rg-primitive-amber-700: #B45309;
+
+  --rg-primitive-red-50:    #FEF2F2;
+  --rg-primitive-red-100:   #FEE2E2;
+  --rg-primitive-red-500:   #EF4444;
+  --rg-primitive-red-600:   #DC2626;
+  --rg-primitive-red-700:   #B91C1C;
+
+  --rg-primitive-emerald-50:  #ECFDF5;
+  --rg-primitive-emerald-100: #D1FAE5;
+  --rg-primitive-emerald-500: #10B981;
+  --rg-primitive-emerald-600: #059669;
+  --rg-primitive-emerald-700: #047857;
+
+  /* ----- Material colors (Papel · Plástico · Metal · Vidro) -----
+     Tons base; calibração WCAG final acontece ao implementar tabelas. */
+  --rg-primitive-material-paper-soft:    #DBEAFE;
+  --rg-primitive-material-paper-base:    #2563EB;
+  --rg-primitive-material-paper-strong:  #1D4ED8;
+
+  --rg-primitive-material-plastic-soft:   #FCE7F3;
+  --rg-primitive-material-plastic-base:   #DB2777;
+  --rg-primitive-material-plastic-strong: #BE185D;
+
+  --rg-primitive-material-metal-soft:    #FEF3C7;
+  --rg-primitive-material-metal-base:    #D97706;
+  --rg-primitive-material-metal-strong:  #B45309;
+
+  --rg-primitive-material-glass-soft:    #D1FAE5;
+  --rg-primitive-material-glass-base:    #059669;
+  --rg-primitive-material-glass-strong:  #047857;
+}

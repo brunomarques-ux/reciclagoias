@@ -1,0 +1,58 @@
+/* Reset leve + base. Toda decisão visual vem dos tokens. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+html {
+  font-family: var(--rg-font-family-sans);
+  font-size: 16px;
+  line-height: var(--rg-line-height-base);
+  color: var(--rg-color-text-primary);
+  background-color: var(--rg-color-surface-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-feature-settings: 'cv11', 'ss01', 'ss03';
+}
+
+img,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+:focus-visible {
+  outline: 2px solid var(--rg-color-action-primary);
+  outline-offset: 2px;
+  border-radius: var(--rg-radius-xs);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

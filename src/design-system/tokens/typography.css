@@ -1,0 +1,52 @@
+/* ============================================================
+ * Recicla Goiás — Design Tokens · Tipografia
+ * ============================================================ */
+
+:root {
+  --rg-font-family-sans:
+    'Inter Variable',
+    'Roboto Flex Variable',
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    sans-serif;
+
+  --rg-font-family-mono:
+    ui-monospace,
+    'SF Mono',
+    'Menlo',
+    'Consolas',
+    'Liberation Mono',
+    monospace;
+
+  /* Escala (px) */
+  --rg-font-size-2xs: 11px;
+  --rg-font-size-xs:  12px;
+  --rg-font-size-sm:  14px;
+  --rg-font-size-md:  16px;
+  --rg-font-size-lg:  18px;
+  --rg-font-size-xl:  20px;
+  --rg-font-size-2xl: 24px;
+  --rg-font-size-3xl: 30px;
+  --rg-font-size-4xl: 36px;
+  --rg-font-size-5xl: 48px;
+  --rg-font-size-6xl: 60px;
+
+  /* Line-height */
+  --rg-line-height-tight:   1.15;
+  --rg-line-height-snug:    1.3;
+  --rg-line-height-base:    1.5;
+  --rg-line-height-relaxed: 1.65;
+
+  /* Weight */
+  --rg-font-weight-regular:  400;
+  --rg-font-weight-medium:   500;
+  --rg-font-weight-semibold: 600;
+  --rg-font-weight-bold:     700;
+
+  /* Letter spacing */
+  --rg-letter-spacing-tight:  -0.02em;
+  --rg-letter-spacing-base:   0;
+  --rg-letter-spacing-wide:   0.04em;
+  --rg-letter-spacing-eyebrow: 0.08em;
+}

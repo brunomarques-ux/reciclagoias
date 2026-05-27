@@ -1,0 +1,69 @@
+/* ============================================================
+ * Recicla Goiás — Design Tokens · Semânticos
+ *
+ * Apenas referenciam primitivas. É essa camada que componentes
+ * e páginas devem consumir.
+ * ============================================================ */
+
+:root {
+  /* ----- Surface (planos de fundo) ----- */
+  --rg-color-surface-base:    var(--rg-primitive-neutral-0);     /* fundo padrão da página */
+  --rg-color-surface-muted:   var(--rg-primitive-neutral-50);    /* seções alternadas */
+  --rg-color-surface-subtle:  var(--rg-primitive-neutral-100);   /* cartões discretos */
+  --rg-color-surface-raised:  var(--rg-primitive-neutral-0);     /* cards principais */
+  --rg-color-surface-inverse: var(--rg-primitive-brand-800);     /* blocos institucionais escuros */
+  --rg-color-surface-brand:   var(--rg-primitive-brand-50);      /* destaques de marca */
+
+  /* ----- Text ----- */
+  --rg-color-text-primary:   var(--rg-primitive-neutral-900);
+  --rg-color-text-secondary: var(--rg-primitive-neutral-600);
+  --rg-color-text-muted:     var(--rg-primitive-neutral-500);
+  --rg-color-text-disabled:  var(--rg-primitive-neutral-400);
+  --rg-color-text-on-brand:  var(--rg-primitive-neutral-0);
+  --rg-color-text-on-inverse: var(--rg-primitive-neutral-0);
+  --rg-color-text-brand:     var(--rg-primitive-brand-700);
+
+  /* ----- Borders ----- */
+  --rg-color-border-subtle: var(--rg-primitive-neutral-200);
+  --rg-color-border-base:   var(--rg-primitive-neutral-300);
+  --rg-color-border-strong: var(--rg-primitive-neutral-400);
+  --rg-color-border-brand:  var(--rg-primitive-brand-600);
+  --rg-color-border-inverse: rgba(255, 255, 255, 0.12);
+
+  /* ----- Action (botões / links / interações) ----- */
+  --rg-color-action-primary:         var(--rg-primitive-brand-600);
+  --rg-color-action-primary-hover:   var(--rg-primitive-brand-700);
+  --rg-color-action-primary-pressed: var(--rg-primitive-brand-800);
+  --rg-color-action-primary-soft:    var(--rg-primitive-brand-50);
+
+  --rg-color-action-neutral:         var(--rg-primitive-neutral-900);
+  --rg-color-action-neutral-hover:   var(--rg-primitive-neutral-800);
+  --rg-color-action-neutral-pressed: var(--rg-primitive-neutral-700);
+
+  /* ----- Feedback ----- */
+  --rg-color-feedback-success:      var(--rg-primitive-brand-600);
+  --rg-color-feedback-success-soft: var(--rg-primitive-brand-50);
+  --rg-color-feedback-warning:      var(--rg-primitive-amber-600);
+  --rg-color-feedback-warning-soft: var(--rg-primitive-amber-50);
+  --rg-color-feedback-danger:       var(--rg-primitive-red-600);
+  --rg-color-feedback-danger-soft:  var(--rg-primitive-red-50);
+  --rg-color-feedback-info:         var(--rg-primitive-blue-600);
+  --rg-color-feedback-info-soft:    var(--rg-primitive-blue-50);
+
+  /* ----- Data · Material (Papel, Plástico, Metal, Vidro) ----- */
+  --rg-data-material-paper-soft:    var(--rg-primitive-material-paper-soft);
+  --rg-data-material-paper:         var(--rg-primitive-material-paper-base);
+  --rg-data-material-paper-strong:  var(--rg-primitive-material-paper-strong);
+
+  --rg-data-material-plastic-soft:   var(--rg-primitive-material-plastic-soft);
+  --rg-data-material-plastic:        var(--rg-primitive-material-plastic-base);
+  --rg-data-material-plastic-strong: var(--rg-primitive-material-plastic-strong);
+
+  --rg-data-material-metal-soft:    var(--rg-primitive-material-metal-soft);
+  --rg-data-material-metal:         var(--rg-primitive-material-metal-base);
+  --rg-data-material-metal-strong:  var(--rg-primitive-material-metal-strong);
+
+  --rg-data-material-glass-soft:    var(--rg-primitive-material-glass-soft);
+  --rg-data-material-glass:         var(--rg-primitive-material-glass-base);
+  --rg-data-material-glass-strong:  var(--rg-primitive-material-glass-strong);
+}

@@ -1,0 +1,32 @@
+/* ============================================================
+ * Recicla Goiás — Design Tokens · Espaçamento (base 4px)
+ * ============================================================ */
+
+:root {
+  --rg-space-0:   0;
+  --rg-space-1:   4px;
+  --rg-space-2:   8px;
+  --rg-space-3:   12px;
+  --rg-space-4:   16px;
+  --rg-space-5:   20px;
+  --rg-space-6:   24px;
+  --rg-space-7:   28px;
+  --rg-space-8:   32px;
+  --rg-space-10:  40px;
+  --rg-space-12:  48px;
+  --rg-space-14:  56px;
+  --rg-space-16:  64px;
+  --rg-space-20:  80px;
+  --rg-space-24:  96px;
+  --rg-space-28:  112px;
+  --rg-space-32:  128px;
+  --rg-space-40:  160px;
+
+  /* Container widths */
+  --rg-container-sm: 640px;
+  --rg-container-md: 768px;
+  --rg-container-lg: 1024px;
+  --rg-container-xl: 1280px;
+  --rg-container-2xl: 1440px;
+  --rg-container-page: 1200px;   /* largura editorial padrão da landing */
+}

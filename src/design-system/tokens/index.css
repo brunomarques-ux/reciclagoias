@@ -1,0 +1,14 @@
+/* ============================================================
+ * Recicla Goiás — Design Tokens · Orquestrador
+ *
+ * Ordem importa: primitivas primeiro, depois camadas semânticas.
+ * Este é o único arquivo de tokens que main.ts importa.
+ * ============================================================ */
+
+@import './primitives.css';
+@import './typography.css';
+@import './spacing.css';
+@import './radius.css';
+@import './shadows.css';
+@import './motion.css';
+@import './semantic.css';
