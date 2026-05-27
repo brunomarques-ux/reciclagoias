@@ -10,7 +10,8 @@ import { howItWorksSteps } from '@/data/mocks/landing';
         <div class="rg-how__heading">
           <span class="rg-how__eyebrow">COMO FUNCIONA</span>
           <h2 id="rg-how-title" class="rg-how__title">
-            Três passos simples para começar.
+            <span class="rg-how__title-line">Três passos simples</span>
+            <span class="rg-how__title-line">para começar.</span>
           </h2>
         </div>
         <p class="rg-how__intro">
@@ -110,12 +111,19 @@ import { howItWorksSteps } from '@/data/mocks/landing';
 
 .rg-how__title {
   margin: 0;
+  display: flex;
+  flex-direction: column;
   font-size: 56px;
   line-height: 1.05;
   font-weight: var(--rg-font-weight-bold);
   color: var(--rg-color-text-primary);
   letter-spacing: var(--rg-letter-spacing-tight);
   max-width: 18ch;
+}
+
+/* Cada linha do título em bloco — quebra "Três passos simples" / "para começar." */
+.rg-how__title-line {
+  display: block;
 }
 
 .rg-how__intro {
