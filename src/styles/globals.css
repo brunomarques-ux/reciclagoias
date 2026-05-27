@@ -5,15 +5,19 @@
   box-sizing: border-box;
 }
 
+/* Override forte do reset — alguns ambientes / extensões (e o próprio
+   Vuetify em certos casos) acabam mantendo o margin: 8px default do
+   user-agent no <body>, criando uma faixa branca nas laterais visível
+   contra o hero escuro. !important garante zerar. */
 html,
 body,
 #app {
-  margin: 0;
-  padding: 0;
+  margin: 0 !important;
+  padding: 0 !important;
   min-height: 100vh;
+  width: 100%;
   /* Evita scroll horizontal global causado por animações com translateX(vw). */
   overflow-x: hidden;
-  max-width: 100vw;
 }
 
 /* Enquanto o hero está em modo de lock (antes de expandir), esconde
