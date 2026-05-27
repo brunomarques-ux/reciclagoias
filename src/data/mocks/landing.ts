@@ -241,7 +241,7 @@ export const autoDeclaration = {
     'Empresas convocadas pela Notificação Nº 1/2026 podem apresentar justificativa de não enquadramento.',
   ctaLabel: 'Acessar formulário',
   ctaHref: '#autodeclaracao',
-  badge: 'Aviso sazonal · prazo aberto',
+  badge: 'Prazo aberto',
 };
 
 // ============================================================================

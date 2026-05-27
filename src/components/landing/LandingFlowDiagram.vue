@@ -160,12 +160,23 @@ import RgSectionHeader from '@/components/RgSectionHeader.vue';
 <style scoped>
 .rg-flow {
   position: relative;
-  padding: var(--rg-space-20) var(--rg-space-6);
+  /* Padding-top BEM GRANDE: o título estava sendo coberto pelo gradient escuro. */
+  padding:
+    clamp(220px, 24vw, 320px)
+    var(--rg-space-6)
+    var(--rg-space-20);
+  /* Transição super difusa: 9 paradas escuro → claro. */
   background:
     linear-gradient(180deg,
       var(--rg-primitive-brand-900) 0%,
-      var(--rg-primitive-brand-800) 10%,
-      var(--rg-color-surface-base) 22%,
+      var(--rg-primitive-brand-800) 3%,
+      var(--rg-primitive-brand-700) 6%,
+      var(--rg-primitive-brand-500) 9%,
+      var(--rg-primitive-brand-300) 12%,
+      var(--rg-primitive-brand-200) 15%,
+      var(--rg-primitive-brand-100) 18%,
+      var(--rg-primitive-brand-50) 21%,
+      var(--rg-color-surface-base) 25%,
       var(--rg-color-surface-base) 100%);
 }
 

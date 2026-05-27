@@ -127,10 +127,24 @@ const cards = computed(() =>
 <style scoped>
 .rg-whatis {
   position: relative;
-  padding: var(--rg-space-20) var(--rg-space-6);
-  /* Transição: vem de verde escuro (disclaimer) para branco. */
+  /* Padding-top GRANDE: garante que o título começa só depois do fade terminar. */
+  padding:
+    clamp(180px, 22vw, 280px)
+    var(--rg-space-6)
+    var(--rg-space-20);
+  /* Transição super difusa: 8 paradas de cor distribuídas em ~22% da seção. */
   background:
-    linear-gradient(180deg, var(--rg-primitive-brand-700) 0%, var(--rg-color-surface-base) 14%, var(--rg-color-surface-base) 100%);
+    linear-gradient(180deg,
+      var(--rg-primitive-brand-700) 0%,
+      var(--rg-primitive-brand-600) 3%,
+      var(--rg-primitive-brand-500) 6%,
+      var(--rg-primitive-brand-400) 9%,
+      var(--rg-primitive-brand-300) 12%,
+      var(--rg-primitive-brand-200) 15%,
+      var(--rg-primitive-brand-100) 18%,
+      var(--rg-primitive-brand-50) 21%,
+      var(--rg-color-surface-base) 25%,
+      var(--rg-color-surface-base) 100%);
 }
 
 .rg-whatis__inner {

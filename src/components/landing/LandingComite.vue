@@ -34,13 +34,24 @@ import { committeeMembers } from '@/data/mocks/landing';
 .rg-comite {
   position: relative;
   isolation: isolate;
-  padding: var(--rg-space-20) var(--rg-space-6);
+  /* Padding-top GRANDE: o título "Construído com oito instituições" precisa começar depois do fade. */
+  padding:
+    clamp(200px, 22vw, 300px)
+    var(--rg-space-6)
+    var(--rg-space-20);
   color: white;
-  /* Transição: do final do prêmio (claro) para o verde escuro. */
+  /* Transição super difusa: 8 paradas claro → escuro. */
   background:
     linear-gradient(180deg,
       var(--rg-color-surface-base) 0%,
-      var(--rg-primitive-brand-800) 18%,
+      var(--rg-primitive-brand-50) 3%,
+      var(--rg-primitive-brand-100) 6%,
+      var(--rg-primitive-brand-200) 9%,
+      var(--rg-primitive-brand-300) 12%,
+      var(--rg-primitive-brand-500) 16%,
+      var(--rg-primitive-brand-700) 22%,
+      var(--rg-primitive-brand-800) 30%,
+      var(--rg-primitive-brand-900) 60%,
       var(--rg-primitive-brand-900) 100%);
 }
 
