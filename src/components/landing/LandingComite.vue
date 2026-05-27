@@ -94,8 +94,10 @@ import { committeeMembers } from '@/data/mocks/landing';
   margin: 0;
   display: flex;
   flex-direction: column;
-  /* Sem gap entre as linhas — o line-height já cuida disso. */
-  font-size: clamp(40px, 5vw, 60px);
+  /* Sem gap entre as linhas — o line-height já cuida disso.
+     56px exato conforme Figma node 17-608 (sem clamp em desktop;
+     a versão mobile no @media reduz pra clamp). */
+  font-size: 56px;
   line-height: 1.05;
   font-weight: var(--rg-font-weight-bold);
   letter-spacing: var(--rg-letter-spacing-tight);
