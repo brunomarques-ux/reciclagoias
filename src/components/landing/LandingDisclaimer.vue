@@ -28,13 +28,7 @@ import { autoDeclaration } from '@/data/mocks/landing';
 <style scoped>
 .rg-disclaimer {
   position: relative;
-  /* Transição suave entre o hero escuro e a próxima seção branca. */
-  background: linear-gradient(
-    180deg,
-    var(--rg-primitive-brand-950) 0%,
-    var(--rg-primitive-brand-800) 50%,
-    var(--rg-primitive-brand-700) 100%
-  );
+  background-color: var(--rg-primitive-brand-900);
   padding-block: var(--rg-space-8);
   padding-inline: var(--rg-space-6);
   color: white;

@@ -121,10 +121,7 @@ import { award } from '@/data/mocks/landing';
 .rg-premio {
   position: relative;
   padding: var(--rg-space-20) var(--rg-space-6);
-  background:
-    radial-gradient(800px 600px at 80% 10%, rgba(252, 211, 77, 0.08), transparent 60%),
-    radial-gradient(600px 400px at 10% 80%, rgba(31, 131, 68, 0.06), transparent 60%),
-    linear-gradient(180deg, var(--rg-color-surface-muted) 0%, var(--rg-color-surface-base) 100%);
+  background-color: var(--rg-color-surface-base);
 }
 
 .rg-premio__inner {

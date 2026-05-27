@@ -45,11 +45,7 @@ const expanded = ref<number[]>([0]);
 <style scoped>
 .rg-faq {
   padding: var(--rg-space-20) var(--rg-space-6);
-  /* Transição: vem do Sistema (muted) e prepara entrada para o footer escuro. */
-  background:
-    linear-gradient(180deg,
-      var(--rg-color-surface-muted) 0%,
-      var(--rg-color-surface-base) 100%);
+  background-color: var(--rg-color-surface-base);
 }
 .rg-faq__inner {
   max-width: 920px;

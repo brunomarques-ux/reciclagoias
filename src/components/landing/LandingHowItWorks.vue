@@ -38,8 +38,7 @@ import { howItWorksSteps } from '@/data/mocks/landing';
 .rg-how {
   position: relative;
   padding: var(--rg-space-20) var(--rg-space-6);
-  background:
-    linear-gradient(180deg, var(--rg-color-surface-base) 0%, var(--rg-color-surface-muted) 100%);
+  background-color: var(--rg-color-surface-muted);
 }
 
 .rg-how__inner {

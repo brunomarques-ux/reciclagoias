@@ -47,10 +47,7 @@ import {
 .rg-sistema {
   position: relative;
   padding: var(--rg-space-20) var(--rg-space-6);
-  background:
-    linear-gradient(180deg,
-      var(--rg-color-surface-base) 0%,
-      var(--rg-color-surface-muted) 100%);
+  background-color: var(--rg-color-surface-muted);
 }
 
 .rg-sistema__inner {
