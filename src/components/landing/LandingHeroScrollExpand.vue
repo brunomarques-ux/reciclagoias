@@ -685,13 +685,12 @@ onBeforeUnmount(() => {
   z-index: 10;
 }
 
-/* Override local: o RgHeroHighlight aqui precisa preencher uma área grande
-   (não só o conteúdo apertado) pra que o dot pattern e a lanterna do mouse
-   apareçam em toda a faixa verde escura visível abaixo do vídeo. */
+/* Override local: o RgHeroHighlight mantém o tamanho natural do conteúdo
+   (sem min-height grande), apenas com padding pra respiro. O dot pattern
+   fica sutil (opacity baixíssima) e a lanterna leve no hover — o foco é
+   leitura do background, não o efeito do pattern. */
 .rg-scroll-hero__content :deep(.rg-hero-highlight) {
   width: 100%;
-  min-height: 80vh;
-  justify-content: center;
   padding: var(--rg-space-12) var(--rg-space-6) var(--rg-space-16);
 }
 
@@ -808,7 +807,6 @@ onBeforeUnmount(() => {
   }
   .rg-scroll-hero__content :deep(.rg-hero-highlight) {
     padding: var(--rg-space-10) var(--rg-space-4) var(--rg-space-12);
-    min-height: 70vh;
   }
 }
 

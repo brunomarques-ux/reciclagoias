@@ -75,9 +75,10 @@ function onMouseMove(ev: MouseEvent) {
 }
 
 .rg-hero-highlight__dots {
-  /* opacity 0.55 garante presença visível sobre o brand-950 sem competir
-     com o conteúdo central (título, lede, CTA). */
-  opacity: 0.55;
+  /* Opacidade BAIXÍSSIMA (0.03): o pattern é praticamente imperceptível
+     sem hover. O foco é a leitura do background — a lanterna do mouse é que
+     dá o destaque pontual. */
+  opacity: 0.03;
 }
 
 .rg-hero-highlight__dots-hover {
@@ -102,9 +103,11 @@ function onMouseMove(ev: MouseEvent) {
   );
 }
 
-/* Ao passar o mouse sobre o container, ativa a "lanterna". */
+/* Ao passar o mouse sobre o container, ativa a "lanterna".
+   Opacity 0.2 = leve destaque pontual sem competir com o conteúdo
+   nem com a leitura do background verde. */
 .rg-hero-highlight:hover .rg-hero-highlight__dots-hover {
-  opacity: 1;
+  opacity: 0.2;
 }
 
 .rg-hero-highlight__content {
