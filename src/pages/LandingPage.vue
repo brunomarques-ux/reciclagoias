@@ -29,8 +29,7 @@ const sections = ref([
     <LandingHeroScrollExpand
       media-type="video"
       media-src="/hero/hero-video.mp4"
-      bg-image-src="/hero/hero-bg.jpg"
-      bg-image-src-webp="/hero/hero-bg.webp"
+      bg-image-src="/hero/bg-hero-v2.jpg"
       title="Recicla Goiás"
       eyebrow="Logística Reversa · Goiás 2026"
       scroll-hint="Role para descobrir"

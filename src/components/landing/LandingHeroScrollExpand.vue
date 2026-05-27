@@ -456,8 +456,10 @@ onBeforeUnmount(() => {
 .rg-scroll-hero__bg-overlay {
   position: absolute;
   inset: 0;
-  /* Overlay escurecido para garantir leitura do título sobre a foto. */
-  background-color: rgba(7, 38, 20, 0.62);
+  /* Overlay escurecido para garantir leitura do título sobre a foto.
+     0.57 = 5% mais claro que o anterior (0.62), pra mostrar mais da nova bg-hero-v2
+     (refeita sem o texto quebrado por IA da v1). */
+  background-color: rgba(7, 38, 20, 0.57);
 }
 
 .rg-scroll-hero__bg-gradient {
@@ -675,9 +677,22 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   width: 100%;
-  padding: var(--rg-space-12) var(--rg-space-6) var(--rg-space-16);
+  /* Sem padding aqui: o RgHeroHighlight ocupa 100% da área e controla seu
+     próprio padding interno, garantindo que o dot pattern + lanterna cubram
+     toda a faixa verde visível (não só a caixinha do conteúdo). */
+  padding: 0;
   position: relative;
   z-index: 10;
+}
+
+/* Override local: o RgHeroHighlight aqui precisa preencher uma área grande
+   (não só o conteúdo apertado) pra que o dot pattern e a lanterna do mouse
+   apareçam em toda a faixa verde escura visível abaixo do vídeo. */
+.rg-scroll-hero__content :deep(.rg-hero-highlight) {
+  width: 100%;
+  min-height: 80vh;
+  justify-content: center;
+  padding: var(--rg-space-12) var(--rg-space-6) var(--rg-space-16);
 }
 
 .rg-scroll-hero__content-inner {
@@ -726,7 +741,8 @@ onBeforeUnmount(() => {
 
 .rg-scroll-hero__content-lede {
   margin: 0;
-  font-size: var(--rg-font-size-lg);
+  /* 16px fixo (lede secundário, menor que o título pra dar hierarquia clara). */
+  font-size: 16px;
   line-height: var(--rg-line-height-relaxed);
   color: rgba(255, 255, 255, 0.82);
 }
@@ -790,8 +806,9 @@ onBeforeUnmount(() => {
   .rg-scroll-hero__title {
     font-size: clamp(48px, 14vw, 84px);
   }
-  .rg-scroll-hero__content {
+  .rg-scroll-hero__content :deep(.rg-hero-highlight) {
     padding: var(--rg-space-10) var(--rg-space-4) var(--rg-space-12);
+    min-height: 70vh;
   }
 }
 
