@@ -121,13 +121,18 @@ const highlights = [
 .rg-premio__header {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(360px, 1fr);
-  align-items: start;
+  /* Stretch garante que ambas as colunas ocupem a mesma altura,
+     igualando o bloco de texto à pilha de highlights da direita. */
+  align-items: stretch;
   gap: var(--rg-space-16);
 }
 
 .rg-premio__copy {
   display: flex;
   flex-direction: column;
+  /* space-between distribui eyebrow, título e descrição verticalmente,
+     preenchendo toda a altura (igual ao Figma). */
+  justify-content: space-between;
   gap: var(--rg-space-4);
 }
 

@@ -162,16 +162,15 @@ onBeforeUnmount(() => observer?.disconnect());
   font-weight: var(--rg-font-weight-bold);
 }
 
+/* Sem chip wrapper: o PNG já vem do Figma com seu "frame" completo
+   (pin verde com folha, fábrica com setas de reciclagem) — qualquer
+   fundo adicional duplicaria o efeito visual. */
 .rg-whatis__icon-chip {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 1.15em;
-  height: 1.15em;
-  padding: 0.1em;
-  border-radius: 9999px;
-  background-color: var(--rg-primitive-brand-50);
-  overflow: hidden;
+  width: 1.05em;
+  height: 1.05em;
   vertical-align: middle;
 }
 
@@ -179,6 +178,7 @@ onBeforeUnmount(() => observer?.disconnect());
   width: 100%;
   height: 100%;
   object-fit: contain;
+  display: block;
 }
 
 /* ===== Decreto box ===== */

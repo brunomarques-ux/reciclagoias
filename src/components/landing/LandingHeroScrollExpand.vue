@@ -15,6 +15,8 @@
  */
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { Motion } from 'motion-v';
+import RgHeroHighlight from '@/components/RgHeroHighlight.vue';
+import RgHighlight from '@/components/RgHighlight.vue';
 
 interface Props {
   mediaType?: 'video' | 'image';
@@ -349,58 +351,55 @@ onBeforeUnmount(() => {
             :transition="{ duration: 0.7, ease: [0.2, 0, 0, 1] }"
           >
             <slot>
-              <!-- Conteúdo default: copy do Recicla Goiás abaixo do hero -->
-              <div class="rg-scroll-hero__content-inner">
-                <span class="rg-scroll-hero__content-eyebrow">
-                  Governo de Goiás · Secretaria de Indústria e Comércio
-                </span>
-                <h2 class="rg-scroll-hero__content-title">
-                  A plataforma oficial da logística reversa de Goiás.
-                </h2>
-                <p class="rg-scroll-hero__content-lede">
-                  Aqui empresas, entidades gestoras, verificadores e o comitê acompanham
-                  declarações, certificados e regularidade em um só lugar, com rastreabilidade
-                  ponta a ponta.
-                </p>
+              <!-- Conteúdo default · envolto em RgHeroHighlight (dot pattern + lanterna do mouse) -->
+              <RgHeroHighlight>
+                <div class="rg-scroll-hero__content-inner">
+                  <span class="rg-scroll-hero__content-eyebrow">
+                    Governo de Goiás · Secretaria de Indústria e Comércio
+                  </span>
+                  <h2 class="rg-scroll-hero__content-title">
+                    <span class="rg-scroll-hero__content-title-line">
+                      A plataforma oficial da
+                    </span>
+                    <span class="rg-scroll-hero__content-title-line">
+                      <RgHighlight>Logística Reversa de Goiás</RgHighlight>
+                    </span>
+                  </h2>
+                  <p class="rg-scroll-hero__content-lede">
+                    Aqui empresas, entidades gestoras, verificadores e o comitê acompanham
+                    declarações, certificados e regularidade em um só lugar, com rastreabilidade
+                    ponta a ponta.
+                  </p>
 
-                <div class="rg-scroll-hero__content-ctas">
-                  <a
-                    v-if="primaryCtaLabel"
-                    :href="primaryCtaHref ?? '#acessar'"
-                    class="rg-scroll-hero__cta rg-scroll-hero__cta--primary"
-                  >
-                    {{ primaryCtaLabel }}
-                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-                      <path
-                        d="M5 12h14m0 0-5-5m5 5-5 5"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                    </svg>
-                  </a>
-                  <a
-                    v-if="secondaryCtaLabel"
-                    :href="secondaryCtaHref ?? '#sobre'"
-                    class="rg-scroll-hero__cta rg-scroll-hero__cta--outline"
-                    @click="goToSection($event, secondaryCtaHref ?? '#sobre')"
-                  >
-                    {{ secondaryCtaLabel }}
-                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-                      <path
-                        d="M12 5v14m0 0-5-5m5 5 5-5"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                      />
-                    </svg>
-                  </a>
+                  <div class="rg-scroll-hero__content-ctas">
+                    <a
+                      v-if="primaryCtaLabel"
+                      :href="primaryCtaHref ?? '#acessar'"
+                      class="rg-scroll-hero__cta rg-scroll-hero__cta--primary"
+                    >
+                      {{ primaryCtaLabel }}
+                      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                        <path d="M5 12h14m0 0-5-5m5 5-5 5"
+                          fill="none" stroke="currentColor" stroke-width="2"
+                          stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                    </a>
+                    <a
+                      v-if="secondaryCtaLabel"
+                      :href="secondaryCtaHref ?? '#sobre'"
+                      class="rg-scroll-hero__cta rg-scroll-hero__cta--outline"
+                      @click="goToSection($event, secondaryCtaHref ?? '#sobre')"
+                    >
+                      {{ secondaryCtaLabel }}
+                      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                        <path d="M12 5v14m0 0-5-5m5 5 5-5"
+                          fill="none" stroke="currentColor" stroke-width="2"
+                          stroke-linecap="round" stroke-linejoin="round" />
+                      </svg>
+                    </a>
+                  </div>
                 </div>
-              </div>
+              </RgHeroHighlight>
             </slot>
           </Motion>
         </div>
@@ -709,11 +708,20 @@ onBeforeUnmount(() => {
 
 .rg-scroll-hero__content-title {
   margin: 0;
-  font-size: clamp(28px, 4vw, 44px);
-  line-height: var(--rg-line-height-tight);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--rg-space-2);
+  font-size: clamp(32px, 4.5vw, 52px);
+  line-height: 1.1;
   letter-spacing: var(--rg-letter-spacing-tight);
   font-weight: var(--rg-font-weight-bold);
   color: white;
+  max-width: 920px;
+}
+
+.rg-scroll-hero__content-title-line {
+  display: inline-block;
 }
 
 .rg-scroll-hero__content-lede {
