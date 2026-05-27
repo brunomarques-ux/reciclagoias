@@ -79,14 +79,15 @@ import { whatIsCards } from '@/data/mocks/landing';
 .rg-whatis__header {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  align-items: start;
+  /* Alinhamento inferior: o eyebrow + decreto compartilham a mesma baseline visual. */
+  align-items: end;
   gap: var(--rg-space-12);
 }
 
 .rg-whatis__copy {
   display: flex;
   flex-direction: column;
-  gap: var(--rg-space-3);
+  gap: var(--rg-space-4);
 }
 
 .rg-whatis__eyebrow {
@@ -143,23 +144,23 @@ import { whatIsCards } from '@/data/mocks/landing';
 .rg-whatis__decree {
   display: flex;
   flex-direction: column;
-  gap: var(--rg-space-2);
+  gap: var(--rg-space-3);
   padding: var(--rg-space-4) var(--rg-space-5);
-  background-color: var(--rg-color-surface-raised);
+  /* Fundo cinza claro #F6F6F6 (cobre o card todo, como no Figma). */
+  background-color: #F6F6F6;
   border: 1px solid var(--rg-color-border-subtle);
   border-radius: var(--rg-radius-xl);
   text-decoration: none;
   max-width: 320px;
-  box-shadow: var(--rg-elevation-1);
   transition:
     transform var(--rg-motion-duration-base) var(--rg-motion-ease-standard),
-    box-shadow var(--rg-motion-duration-base) var(--rg-motion-ease-standard),
+    background-color var(--rg-motion-duration-base) var(--rg-motion-ease-standard),
     border-color var(--rg-motion-duration-base) var(--rg-motion-ease-standard);
 }
 
 .rg-whatis__decree:hover {
   transform: translateY(-2px);
-  box-shadow: var(--rg-elevation-2);
+  background-color: #EFEFEF;
   border-color: var(--rg-color-border-base);
 }
 
@@ -168,7 +169,7 @@ import { whatIsCards } from '@/data/mocks/landing';
   font-weight: var(--rg-font-weight-semibold);
   letter-spacing: var(--rg-letter-spacing-wide);
   text-transform: uppercase;
-  color: var(--rg-color-text-muted);
+  color: #647488; /* cinza-azulado conforme inspeção do Figma */
   line-height: var(--rg-line-height-snug);
 }
 
@@ -183,6 +184,7 @@ import { whatIsCards } from '@/data/mocks/landing';
   font-size: var(--rg-font-size-sm);
   font-weight: var(--rg-font-weight-semibold);
   color: var(--rg-color-text-primary);
+  align-self: flex-start;
 }
 
 .rg-whatis__decree:focus-visible {
@@ -197,7 +199,8 @@ import { whatIsCards } from '@/data/mocks/landing';
   padding: 0;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--rg-space-6);
+  /* Gap maior entre cards pra dar mais respiro. */
+  gap: var(--rg-space-10);
 }
 
 .rg-whatis__card {
@@ -208,7 +211,8 @@ import { whatIsCards } from '@/data/mocks/landing';
 
 .rg-whatis__card-media {
   display: block;
-  aspect-ratio: 1 / 1;
+  /* Aspect-ratio 4/3 (foto menos quadrada, mais paisagem) — imagem fica menor verticalmente. */
+  aspect-ratio: 4 / 3;
   overflow: hidden;
   border-radius: var(--rg-radius-xl);
   background-color: var(--rg-color-surface-muted);

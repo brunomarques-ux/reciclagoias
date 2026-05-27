@@ -28,7 +28,12 @@ import { autoDeclaration } from '@/data/mocks/landing';
 <style scoped>
 .rg-disclaimer {
   position: relative;
-  background-color: var(--rg-primitive-brand-900);
+  isolation: isolate;
+  /* Gradient diagonal sutil brand-900 → brand-800 com glow brand-700 no canto. */
+  background:
+    radial-gradient(900px 360px at 85% 50%, rgba(31, 131, 68, 0.25), transparent 60%),
+    radial-gradient(700px 280px at 10% 50%, rgba(23, 105, 53, 0.18), transparent 70%),
+    linear-gradient(135deg, var(--rg-primitive-brand-900) 0%, var(--rg-primitive-brand-800) 55%, var(--rg-primitive-brand-900) 100%);
   padding-block: var(--rg-space-8);
   padding-inline: var(--rg-space-6);
   color: white;

@@ -328,13 +328,12 @@ onBeforeUnmount(() => {
                   Governo de Goiás · Secretaria de Indústria e Comércio
                 </span>
                 <h2 class="rg-scroll-hero__content-title">
-                  Logística reversa com rastreabilidade ponta a ponta.
+                  A plataforma oficial da logística reversa de Goiás.
                 </h2>
                 <p class="rg-scroll-hero__content-lede">
-                  O Recicla Goiás centraliza declarações, certificados e saldo de massa
-                  reciclável em uma plataforma única — para que empresas, entidades
-                  gestoras e o comitê acompanhem, validem e comprovem suas obrigações
-                  com clareza.
+                  Aqui empresas, entidades gestoras, verificadores e o comitê acompanham
+                  declarações, certificados e regularidade em um só lugar — com rastreabilidade
+                  ponta a ponta.
                 </p>
 
                 <div class="rg-scroll-hero__content-ctas">
@@ -361,6 +360,16 @@ onBeforeUnmount(() => {
                     class="rg-scroll-hero__cta rg-scroll-hero__cta--outline"
                   >
                     {{ secondaryCtaLabel }}
+                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                      <path
+                        d="M12 5v14m0 0-5-5m5 5 5-5"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
                   </a>
                 </div>
               </div>
@@ -447,16 +456,19 @@ onBeforeUnmount(() => {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
+  overflow-x: hidden; /* translateX dos títulos não pode estourar */
 }
 
 .rg-scroll-hero__viewport {
   position: relative;
   width: 100%;
+  max-width: 100%;
   height: 100dvh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  overflow: hidden; /* contém a animação do title */
 }
 
 /* ---------- Media (vídeo / imagem) ---------- */

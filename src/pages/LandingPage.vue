@@ -34,8 +34,6 @@ const sections = ref([
       title="Recicla Goiás"
       eyebrow="Logística Reversa · Goiás 2026"
       scroll-hint="Role para descobrir"
-      primary-cta-label="Acessar sistema"
-      primary-cta-href="#acessar"
       secondary-cta-label="Conhecer o processo"
       secondary-cta-href="#sobre"
       text-blend
