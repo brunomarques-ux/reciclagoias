@@ -14,7 +14,12 @@ import { howItWorksSteps } from '@/data/mocks/landing';
           </h2>
         </div>
         <p class="rg-how__intro">
-          <span>DA CRIAÇÃO DA CONTA AO ACOMPANHAMENTO DAS OBRIGAÇÕES.</span>
+          <span class="rg-how__intro-text">
+            Da criação<br />
+            da conta ao<br />
+            acompanhamento<br />
+            das obrigações.
+          </span>
           <span class="rg-how__intro-rule" aria-hidden="true" />
         </p>
       </header>
@@ -113,19 +118,24 @@ import { howItWorksSteps } from '@/data/mocks/landing';
   flex-direction: column;
   align-items: flex-end;
   gap: var(--rg-space-3);
-  max-width: 280px;
-  font-size: var(--rg-font-size-xs);
+  /* Caixa estreita força quebras verticais — mais altura, menos largura, igual ao Figma. */
+  max-width: 220px;
+  font-size: var(--rg-font-size-sm);
   font-weight: var(--rg-font-weight-semibold);
   letter-spacing: var(--rg-letter-spacing-wide);
   text-transform: uppercase;
   color: var(--rg-color-text-muted);
   text-align: right;
-  line-height: var(--rg-line-height-snug);
+  line-height: 1.4;
+}
+
+.rg-how__intro-text {
+  display: block;
 }
 
 .rg-how__intro-rule {
   display: block;
-  width: 32px;
+  width: 40px;
   height: 2px;
   background-color: var(--rg-color-action-primary);
   border-radius: 2px;
@@ -188,8 +198,8 @@ import { howItWorksSteps } from '@/data/mocks/landing';
 .rg-how__bullet {
   position: relative;
   z-index: 1;
-  width: 64px;
-  height: 64px;
+  width: 56px;
+  height: 56px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -198,8 +208,8 @@ import { howItWorksSteps } from '@/data/mocks/landing';
 }
 
 .rg-how__bullet-inner {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -211,10 +221,10 @@ import { howItWorksSteps } from '@/data/mocks/landing';
     var(--rg-primitive-brand-800) 100%
   );
   color: white;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: var(--rg-font-weight-bold);
   box-shadow:
-    0 6px 14px rgba(31, 131, 68, 0.32),
+    0 5px 12px rgba(31, 131, 68, 0.32),
     0 0 0 0.5px rgba(255, 255, 255, 0.1) inset;
 }
 
@@ -268,7 +278,8 @@ import { howItWorksSteps } from '@/data/mocks/landing';
   margin: 0;
   font-size: var(--rg-font-size-xl);
   font-weight: var(--rg-font-weight-bold);
-  color: var(--rg-color-text-primary);
+  /* Verde escuro brand-900, igual ao título dos cards do "O que é" */
+  color: var(--rg-primitive-brand-900);
   letter-spacing: var(--rg-letter-spacing-tight);
 }
 
