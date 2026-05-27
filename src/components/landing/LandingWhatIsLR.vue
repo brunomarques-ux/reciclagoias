@@ -1,123 +1,59 @@
 <script setup lang="ts">
-import { computed } from 'vue';
-import RgSectionHeader from '@/components/RgSectionHeader.vue';
-import { reverseLogisticsCycle } from '@/data/mocks/landing';
-
-/**
- * Diagrama circular nativo (SVG + posicionamento via trigonometria).
- *
- * Substitui a imagem rasterizada de "Logística Reversa" do Figma S2 por uma
- * versão vetorial responsiva. Em mobile, vira lista vertical (display: none
- * no anel e display: flex na lista).
- */
-
-// Calcula a posição (cos/sin) de cada cartão no anel, em vw/% relativo ao
-// container quadrado. ANGLE_OFFSET inicia no topo (12h) e gira sentido horário.
-const ANGLE_OFFSET = -90; // grau onde o primeiro item aparece
-const cards = computed(() =>
-  reverseLogisticsCycle.map((stage, i) => {
-    const angle = ANGLE_OFFSET + (360 / reverseLogisticsCycle.length) * i;
-    const rad = (angle * Math.PI) / 180;
-    // raio % do container (50% = encostando na borda). 38% deixa margem.
-    const r = 38;
-    return {
-      ...stage,
-      angleDeg: angle,
-      x: 50 + Math.cos(rad) * r,
-      y: 50 + Math.sin(rad) * r,
-    };
-  }),
-);
+import { whatIsCards } from '@/data/mocks/landing';
 </script>
 
 <template>
   <section id="sobre" class="rg-whatis" aria-labelledby="rg-whatis-title">
     <div class="rg-whatis__inner">
-      <div class="rg-whatis__copy">
-        <RgSectionHeader
-          eyebrow="O que é"
-          title="Logística reversa, do ponto de consumo ao recomeço produtivo."
-          description="A logística reversa é o processo que devolve produtos, materiais e resíduos ao ciclo produtivo após o uso. O Recicla Goiás organiza esse fluxo — do consumidor à indústria — para garantir reciclagem, reutilização e descarte adequado."
-        />
-        <ul class="rg-whatis__bullets">
-          <li>
-            <strong>Promover sustentabilidade</strong> em toda a cadeia produtiva.
-          </li>
-          <li>
-            <strong>Reduzir desperdícios</strong> e o impacto ambiental dos resíduos.
-          </li>
-          <li>
-            <strong>Contribuir para a economia circular</strong> de Goiás.
-          </li>
-        </ul>
-        <a class="rg-whatis__cta" href="#decreto">
-          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-            <path d="M14 3h7v7M21 3 10 14m-4-9H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1"
-              fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-          Acessar Decreto 10.255/2023
-        </a>
-      </div>
-
-      <!-- Anel (desktop / tablet) -->
-      <div class="rg-whatis__ring" role="img" aria-label="Ciclo de logística reversa em seis estágios">
-        <!-- SVG de fundo: anel + raios -->
-        <svg class="rg-whatis__ring-svg" viewBox="0 0 100 100" aria-hidden="true">
-          <defs>
-            <linearGradient id="rgRingGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="var(--rg-primitive-brand-600)" />
-              <stop offset="100%" stop-color="var(--rg-primitive-brand-800)" />
-            </linearGradient>
-          </defs>
-          <!-- Anel base -->
-          <circle cx="50" cy="50" r="42" fill="none"
-            stroke="var(--rg-color-border-subtle)" stroke-width="0.2"
-            stroke-dasharray="0.5 0.7" />
-          <!-- Anel interno -->
-          <circle cx="50" cy="50" r="20" fill="url(#rgRingGrad)" />
-          <circle cx="50" cy="50" r="20" fill="none"
-            stroke="var(--rg-primitive-brand-500)" stroke-width="0.4"
-            opacity="0.6" />
-          <!-- Raios saindo do centro -->
-          <g stroke="var(--rg-color-border-subtle)" stroke-width="0.18" opacity="0.6">
-            <line v-for="(c, i) in cards" :key="i"
-              x1="50" y1="50" :x2="c.x" :y2="c.y" />
-          </g>
-        </svg>
-
-        <!-- Centro: identidade Recicla Goiás -->
-        <div class="rg-whatis__center">
-          <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true">
-            <path d="M16 4 L26 9.5 V20.5 L16 26 L6 20.5 V9.5 Z" fill="white" opacity="0.16" />
-            <path d="M11 19 L15 12 L19 17 L23 11" fill="none"
-              stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-          <span class="rg-whatis__center-eyebrow">Logística</span>
-          <strong class="rg-whatis__center-title">Reversa</strong>
+      <!-- Header: título à esquerda, box do decreto à direita -->
+      <header class="rg-whatis__header">
+        <div class="rg-whatis__copy">
+          <span class="rg-whatis__eyebrow">O QUE É</span>
+          <h2 id="rg-whatis-title" class="rg-whatis__title">
+            <span class="rg-whatis__title-line">Logística Reversa</span>
+            <span class="rg-whatis__title-line rg-whatis__title-second">
+              <span class="rg-whatis__connector">do</span>
+              <span class="rg-whatis__icon-chip" aria-hidden="true">
+                <picture>
+                  <source srcset="/whatis/pin.png" type="image/png" />
+                  <img src="/whatis/pin.png" alt="" />
+                </picture>
+              </span>
+              <span class="rg-whatis__connector">ao</span>
+              <span class="rg-whatis__icon-chip" aria-hidden="true">
+                <picture>
+                  <source srcset="/whatis/factory.png" type="image/png" />
+                  <img src="/whatis/factory.png" alt="" />
+                </picture>
+              </span>
+            </span>
+          </h2>
         </div>
 
-        <!-- Cards orbitais -->
-        <article
-          v-for="card in cards"
-          :key="card.key"
-          class="rg-whatis__card"
-          :style="{ left: card.x + '%', top: card.y + '%' }"
-        >
-          <span class="rg-whatis__card-icon" aria-hidden="true">
-            <v-icon :icon="card.icon" size="20" />
+        <a class="rg-whatis__decree" href="#decreto" target="_blank" rel="noopener noreferrer">
+          <span class="rg-whatis__decree-label">CLIQUE PARA ACESSAR O TEXTO DO DECRETO</span>
+          <span class="rg-whatis__decree-cta">
+            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+              <path d="M14 3h7v7M21 3 10 14m-4-9H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-1"
+                fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            Acessar Decreto 10.255/2023
           </span>
-          <span class="rg-whatis__card-label">{{ card.label }}</span>
-        </article>
-      </div>
+        </a>
+      </header>
 
-      <!-- Versão mobile: lista vertical -->
-      <ul class="rg-whatis__stack" aria-hidden="true">
-        <li v-for="card in cards" :key="card.key">
-          <span class="rg-whatis__stack-icon">
-            <v-icon :icon="card.icon" size="18" />
-          </span>
-          <span>{{ card.label }}</span>
+      <!-- 3 cards horizontais com foto + descrição -->
+      <ul class="rg-whatis__cards" role="list">
+        <li v-for="card in whatIsCards" :key="card.title" class="rg-whatis__card">
+          <picture class="rg-whatis__card-media">
+            <source :srcset="card.imageWebp" type="image/webp" />
+            <img :src="card.imageJpg" :alt="card.alt" loading="lazy" />
+          </picture>
+          <div class="rg-whatis__card-body">
+            <h3 class="rg-whatis__card-title">{{ card.title }}</h3>
+            <p class="rg-whatis__card-desc">{{ card.description }}</p>
+          </div>
         </li>
       </ul>
     </div>
@@ -132,215 +68,205 @@ const cards = computed(() =>
 }
 
 .rg-whatis__inner {
-  max-width: var(--rg-container-page);
+  max-width: var(--rg-container-page); /* 1200px fixo, centralizado */
   margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--rg-space-12);
+}
+
+/* ===== Header ===== */
+.rg-whatis__header {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 520px);
-  gap: var(--rg-space-16);
-  align-items: center;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--rg-space-12);
 }
 
 .rg-whatis__copy {
   display: flex;
   flex-direction: column;
-  gap: var(--rg-space-5);
+  gap: var(--rg-space-3);
 }
 
-.rg-whatis__bullets {
-  list-style: none;
+.rg-whatis__eyebrow {
+  font-size: var(--rg-font-size-xs);
+  font-weight: var(--rg-font-weight-bold);
+  letter-spacing: var(--rg-letter-spacing-eyebrow);
+  text-transform: uppercase;
+  color: var(--rg-color-text-brand);
+}
+
+.rg-whatis__title {
   margin: 0;
-  padding: 0;
+  font-size: clamp(40px, 5vw, 64px);
+  line-height: 1.05;
+  font-weight: var(--rg-font-weight-bold);
+  color: var(--rg-color-text-primary);
+  letter-spacing: var(--rg-letter-spacing-tight);
   display: flex;
   flex-direction: column;
   gap: var(--rg-space-2);
 }
 
-.rg-whatis__bullets li {
-  position: relative;
-  padding-left: var(--rg-space-5);
-  font-size: var(--rg-font-size-md);
-  color: var(--rg-color-text-secondary);
-  line-height: var(--rg-line-height-relaxed);
-}
-
-.rg-whatis__bullets li::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0.55em;
-  width: 8px;
-  height: 8px;
-  border-radius: var(--rg-radius-pill);
-  background-color: var(--rg-color-action-primary);
-}
-
-.rg-whatis__bullets strong {
-  color: var(--rg-color-text-primary);
-  font-weight: var(--rg-font-weight-semibold);
-}
-
-.rg-whatis__cta {
+.rg-whatis__title-line {
   display: inline-flex;
   align-items: center;
-  gap: var(--rg-space-2);
-  padding: var(--rg-space-2) var(--rg-space-4);
-  align-self: flex-start;
-  border: 1px solid var(--rg-color-border-base);
-  border-radius: var(--rg-radius-lg);
-  font-size: var(--rg-font-size-sm);
-  font-weight: var(--rg-font-weight-semibold);
-  color: var(--rg-color-text-primary);
-  background-color: var(--rg-color-surface-raised);
-  text-decoration: none;
-  transition: all var(--rg-motion-duration-fast) var(--rg-motion-ease-standard);
+  flex-wrap: wrap;
+  gap: var(--rg-space-3);
 }
 
-.rg-whatis__cta:hover {
-  border-color: var(--rg-color-border-strong);
-  background-color: var(--rg-color-surface-muted);
-  transform: translateY(-1px);
+.rg-whatis__connector {
+  font-weight: var(--rg-font-weight-bold);
 }
 
-/* ---------- Anel ---------- */
-.rg-whatis__ring {
-  position: relative;
-  aspect-ratio: 1 / 1;
-  width: 100%;
-  max-width: 520px;
-  margin-inline: auto;
-}
-
-.rg-whatis__ring-svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.rg-whatis__center {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 40%;
-  aspect-ratio: 1 / 1;
-  border-radius: var(--rg-radius-pill);
-  display: flex;
-  flex-direction: column;
+.rg-whatis__icon-chip {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 2px;
-  color: white;
-  text-align: center;
-  padding-inline: var(--rg-space-3);
+  width: 1.15em;
+  height: 1.15em;
+  padding: 0.1em;
+  border-radius: 9999px;
+  background-color: var(--rg-primitive-brand-50);
+  overflow: hidden;
+  vertical-align: middle;
 }
 
-.rg-whatis__center-eyebrow {
-  font-size: var(--rg-font-size-xs);
-  font-weight: var(--rg-font-weight-medium);
-  letter-spacing: var(--rg-letter-spacing-wide);
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.78);
-  margin-top: var(--rg-space-1);
+.rg-whatis__icon-chip img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
-.rg-whatis__center-title {
-  font-size: var(--rg-font-size-xl);
-  font-weight: var(--rg-font-weight-bold);
-  letter-spacing: var(--rg-letter-spacing-tight);
-  line-height: 1;
-}
-
-.rg-whatis__card {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  display: inline-flex;
-  align-items: center;
+/* ===== Decreto box ===== */
+.rg-whatis__decree {
+  display: flex;
+  flex-direction: column;
   gap: var(--rg-space-2);
-  padding: var(--rg-space-2) var(--rg-space-3);
+  padding: var(--rg-space-4) var(--rg-space-5);
   background-color: var(--rg-color-surface-raised);
   border: 1px solid var(--rg-color-border-subtle);
-  border-radius: var(--rg-radius-pill);
+  border-radius: var(--rg-radius-xl);
+  text-decoration: none;
+  max-width: 320px;
   box-shadow: var(--rg-elevation-1);
-  white-space: nowrap;
   transition:
     transform var(--rg-motion-duration-base) var(--rg-motion-ease-standard),
     box-shadow var(--rg-motion-duration-base) var(--rg-motion-ease-standard),
     border-color var(--rg-motion-duration-base) var(--rg-motion-ease-standard);
 }
 
-.rg-whatis__card:hover {
-  transform: translate(-50%, -50%) translateY(-2px);
-  box-shadow: var(--rg-elevation-3);
-  border-color: var(--rg-color-border-brand);
+.rg-whatis__decree:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--rg-elevation-2);
+  border-color: var(--rg-color-border-base);
 }
 
-.rg-whatis__card-icon {
+.rg-whatis__decree-label {
+  font-size: 11px;
+  font-weight: var(--rg-font-weight-semibold);
+  letter-spacing: var(--rg-letter-spacing-wide);
+  text-transform: uppercase;
+  color: var(--rg-color-text-muted);
+  line-height: var(--rg-line-height-snug);
+}
+
+.rg-whatis__decree-cta {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: var(--rg-radius-pill);
-  background-color: var(--rg-color-surface-brand);
-  color: var(--rg-color-text-brand);
-}
-
-.rg-whatis__card-label {
+  gap: var(--rg-space-2);
+  padding: var(--rg-space-2) var(--rg-space-3);
+  background-color: var(--rg-color-surface-base);
+  border: 1px solid var(--rg-color-border-base);
+  border-radius: var(--rg-radius-md);
   font-size: var(--rg-font-size-sm);
   font-weight: var(--rg-font-weight-semibold);
   color: var(--rg-color-text-primary);
 }
 
-.rg-whatis__stack {
-  display: none;
+.rg-whatis__decree:focus-visible {
+  outline: 2px solid var(--rg-color-action-primary);
+  outline-offset: 2px;
 }
 
-/* ---------- Responsivo ---------- */
+/* ===== Cards ===== */
+.rg-whatis__cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--rg-space-6);
+}
+
+.rg-whatis__card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rg-space-4);
+}
+
+.rg-whatis__card-media {
+  display: block;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: var(--rg-radius-xl);
+  background-color: var(--rg-color-surface-muted);
+}
+
+.rg-whatis__card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--rg-motion-duration-slow) var(--rg-motion-ease-standard);
+}
+
+.rg-whatis__card:hover .rg-whatis__card-media img {
+  transform: scale(1.04);
+}
+
+.rg-whatis__card-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rg-space-2);
+  padding-inline: var(--rg-space-1);
+}
+
+.rg-whatis__card-title {
+  margin: 0;
+  font-size: var(--rg-font-size-lg);
+  font-weight: var(--rg-font-weight-bold);
+  color: var(--rg-color-text-primary);
+  letter-spacing: var(--rg-letter-spacing-tight);
+  line-height: var(--rg-line-height-snug);
+}
+
+.rg-whatis__card-desc {
+  margin: 0;
+  font-size: var(--rg-font-size-sm);
+  line-height: var(--rg-line-height-relaxed);
+  color: var(--rg-color-text-secondary);
+}
+
+/* ===== Responsivo ===== */
 @media (max-width: 960px) {
-  .rg-whatis__inner {
+  .rg-whatis__header {
     grid-template-columns: 1fr;
-    gap: var(--rg-space-12);
+  }
+  .rg-whatis__decree {
+    max-width: none;
+  }
+  .rg-whatis__cards {
+    grid-template-columns: 1fr 1fr;
   }
 }
 
-@media (max-width: 600px) {
-  /* Em telas pequenas, esconde anel e mostra lista vertical. */
-  .rg-whatis__ring {
-    display: none;
+@media (max-width: 640px) {
+  .rg-whatis {
+    padding: var(--rg-space-14) var(--rg-space-4);
   }
-
-  .rg-whatis__stack {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--rg-space-2);
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  .rg-whatis__stack li {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--rg-space-2);
-    padding: var(--rg-space-3);
-    background-color: var(--rg-color-surface-raised);
-    border: 1px solid var(--rg-color-border-subtle);
-    border-radius: var(--rg-radius-lg);
-    font-size: var(--rg-font-size-sm);
-    font-weight: var(--rg-font-weight-medium);
-    color: var(--rg-color-text-primary);
-  }
-
-  .rg-whatis__stack-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: var(--rg-radius-pill);
-    background-color: var(--rg-color-surface-brand);
-    color: var(--rg-color-text-brand);
+  .rg-whatis__cards {
+    grid-template-columns: 1fr;
   }
 }
 </style>

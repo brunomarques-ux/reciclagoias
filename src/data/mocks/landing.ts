@@ -88,6 +88,45 @@ export const reverseLogisticsCycle: CycleStage[] = [
 ];
 
 // ============================================================================
+// O que é Logística Reversa — 3 cards com foto + descrição
+// ============================================================================
+
+export interface WhatIsCard {
+  imageJpg: string;
+  imageWebp: string;
+  alt: string;
+  title: string;
+  description: string;
+}
+
+export const whatIsCards: WhatIsCard[] = [
+  {
+    imageJpg: '/whatis/card1.jpg',
+    imageWebp: '/whatis/card1.webp',
+    alt: 'Operador separando materiais em galpão de reciclagem',
+    title: 'Sustentabilidade em toda a cadeia',
+    description:
+      'Do consumo ao reaproveitamento, a logística reversa conecta etapas, agentes e processos mais responsáveis.',
+  },
+  {
+    imageJpg: '/whatis/card2.jpg',
+    imageWebp: '/whatis/card2.webp',
+    alt: 'Equipe selecionando materiais recicláveis em cooperativa',
+    title: 'Menos desperdício, mais controle',
+    description:
+      'A separação correta e a destinação adequada reduzem perdas e diminuem o impacto ambiental dos resíduos.',
+  },
+  {
+    imageJpg: '/whatis/card3.jpg',
+    imageWebp: '/whatis/card3.webp',
+    alt: 'Verificador analisando fardos prensados em centro de reciclagem',
+    title: 'Valor que retorna ao ciclo',
+    description:
+      'Materiais reaproveitados voltam a gerar valor, fortalecendo a reciclagem e a economia circular em Goiás.',
+  },
+];
+
+// ============================================================================
 // Como Funciona — 3 passos do site atual (Cadastre-se / Painel / Planos)
 // ============================================================================
 
