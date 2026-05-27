@@ -16,8 +16,11 @@ body,
   padding: 0 !important;
   min-height: 100vh;
   width: 100%;
-  /* Evita scroll horizontal global causado por animações com translateX(vw). */
-  overflow-x: hidden;
+  /* `clip` em vez de `hidden`: `overflow-x: hidden` força o browser a
+     trocar `overflow-y: visible` para `auto`, criando uma scrollbar
+     vertical "fantasma" que reserva espaço — causa o gap à direita
+     em viewports > 1200px. `clip` corta horizontal sem mexer no Y. */
+  overflow-x: clip;
 }
 
 /* Enquanto o hero está em modo de lock (antes de expandir), esconde
