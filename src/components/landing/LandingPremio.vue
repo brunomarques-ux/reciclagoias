@@ -6,17 +6,17 @@ const lightboxOpen = ref(false);
 
 const highlights = [
   {
-    icon: 'mdi-trophy-outline',
+    icon: '/premio/medal-icon.png',
     title: 'Melhor Projeto do ano',
     sub: 'Reconhecimento PMI Goiás 2025',
   },
   {
-    icon: 'mdi-account-group-outline',
+    icon: '/premio/people-icon.png',
     title: 'Time multidisciplinar',
     sub: 'GETI/SIC + CLR/SIC',
   },
   {
-    icon: 'mdi-calendar-month-outline',
+    icon: '/premio/calendar-icon.png',
     title: '18º Seminário',
     sub: 'Em Gestão, Projetos e Liderança',
   },
@@ -33,9 +33,12 @@ const highlights = [
           <h2 id="rg-premio-title" class="rg-premio__title">
             <span class="rg-premio__title-line">
               Melhor Projeto
-              <span class="rg-premio__trophy" aria-hidden="true">
-                <v-icon icon="mdi-trophy" size="40" />
-              </span>
+              <img
+                src="/premio/trophy-icon.png"
+                alt=""
+                aria-hidden="true"
+                class="rg-premio__trophy"
+              />
               de 2025
             </span>
             <span class="rg-premio__title-line rg-premio__title-brand">
@@ -51,9 +54,7 @@ const highlights = [
 
         <ul class="rg-premio__highlights" role="list">
           <li v-for="h in highlights" :key="h.title" class="rg-premio__highlight">
-            <span class="rg-premio__highlight-icon" aria-hidden="true">
-              <v-icon :icon="h.icon" size="22" />
-            </span>
+            <img :src="h.icon" alt="" aria-hidden="true" class="rg-premio__highlight-icon" />
             <div class="rg-premio__highlight-body">
               <strong class="rg-premio__highlight-title">{{ h.title }}</strong>
               <span class="rg-premio__highlight-sub">{{ h.sub }}</span>
@@ -62,41 +63,37 @@ const highlights = [
         </ul>
       </header>
 
-      <!-- Certificado clicável -->
-      <button
-        type="button"
-        class="rg-premio__cert"
-        :aria-label="`Abrir certificado em tamanho ampliado · Melhor Projeto PMI Goiás 2025`"
-        @click="lightboxOpen = true"
-      >
-        <picture class="rg-premio__cert-media">
-          <source srcset="/premio/certificado@2x.webp" type="image/webp" media="(min-width: 1200px)" />
-          <source srcset="/premio/certificado.webp" type="image/webp" />
+      <!-- Certificado clicável: imagem PNG transparente, centralizada, altura fixa 500px -->
+      <div class="rg-premio__cert-wrap">
+        <button
+          type="button"
+          class="rg-premio__cert"
+          aria-label="Abrir certificado em tamanho ampliado · Melhor Projeto PMI Goiás 2025"
+          @click="lightboxOpen = true"
+        >
           <img
-            src="/premio/certificado.jpg"
+            src="/premio/certificado.png"
             alt="Certificado Melhor Projeto 2025 do PMI Goiás concedido ao Projeto Recicla Goiás"
+            class="rg-premio__cert-img"
             loading="lazy"
           />
-        </picture>
-
-        <span class="rg-premio__ribbon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="16" height="16">
-            <path d="M12 2 15 8l6.5.9-4.7 4.6 1.1 6.6L12 17l-5.9 3.1L7.2 13.5 2.5 8.9 9 8z" fill="#78350F" />
-          </svg>
-          MELHOR PROJETO 2025
-        </span>
-
-        <span class="rg-premio__cert-hint" aria-hidden="true">
-          <v-icon icon="mdi-magnify-plus-outline" size="16" />
-          Clique para ampliar
-        </span>
-      </button>
+          <span class="rg-premio__ribbon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="14" height="14">
+              <path d="M12 2 15 8l6.5.9-4.7 4.6 1.1 6.6L12 17l-5.9 3.1L7.2 13.5 2.5 8.9 9 8z" fill="#78350F" />
+            </svg>
+            MELHOR PROJETO 2025
+          </span>
+          <span class="rg-premio__cert-hint" aria-hidden="true">
+            <v-icon icon="mdi-magnify-plus-outline" size="16" />
+            Clique para ampliar
+          </span>
+        </button>
+      </div>
     </div>
 
     <RgLightbox
       v-model="lightboxOpen"
-      image-src="/premio/certificado.jpg"
-      image-src-webp="/premio/certificado@2x.webp"
+      image-src="/premio/certificado.png"
       alt="Certificado Melhor Projeto 2025 · PMI Goiás · Projeto Recicla Goiás"
       :zoomable="true"
     />
@@ -145,7 +142,6 @@ const highlights = [
   display: flex;
   flex-direction: column;
   gap: var(--rg-space-1);
-  /* Tamanho um pouco menor para caber a primeira linha inteira em desktop. */
   font-size: 48px;
   line-height: 1.05;
   font-weight: var(--rg-font-weight-bold);
@@ -166,18 +162,12 @@ const highlights = [
 }
 
 .rg-premio__trophy {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  border-radius: var(--rg-radius-pill);
-  background-color: var(--rg-primitive-brand-50);
-  color: var(--rg-primitive-brand-700);
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
   flex: none;
-}
-.rg-premio__trophy :deep(.v-icon) {
-  font-size: 28px !important;
+  display: inline-block;
+  vertical-align: middle;
 }
 
 .rg-premio__desc {
@@ -212,14 +202,10 @@ const highlights = [
 }
 
 .rg-premio__highlight-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   width: 40px;
   height: 40px;
-  border-radius: var(--rg-radius-lg);
-  background-color: var(--rg-primitive-brand-50);
-  color: var(--rg-primitive-brand-700);
+  object-fit: contain;
+  display: block;
 }
 
 .rg-premio__highlight-body {
@@ -241,61 +227,57 @@ const highlights = [
 }
 
 /* ============ Certificado ============ */
+.rg-premio__cert-wrap {
+  display: flex;
+  justify-content: center;
+}
+
 .rg-premio__cert {
   position: relative;
-  display: block;
-  width: 100%;
+  display: inline-flex;
   padding: 0;
+  margin: 0;
   border: none;
   background: transparent;
   cursor: zoom-in;
-  border-radius: var(--rg-radius-2xl);
+  border-radius: 0;
   overflow: visible;
   transition: transform var(--rg-motion-duration-base) var(--rg-motion-ease-standard);
 }
 
-.rg-premio__cert:hover {
-  transform: translateY(-2px);
-}
-
-.rg-premio__cert:hover .rg-premio__cert-hint {
-  opacity: 1;
-  transform: translateY(0);
-}
+.rg-premio__cert:hover { transform: translateY(-3px); }
+.rg-premio__cert:hover .rg-premio__cert-hint { opacity: 1; transform: translate(-50%, 0); }
 
 .rg-premio__cert:focus-visible {
   outline: 3px solid var(--rg-color-action-primary);
-  outline-offset: 4px;
+  outline-offset: 6px;
+  border-radius: var(--rg-radius-md);
 }
 
-.rg-premio__cert-media {
+/* PNG transparente — sem wrapper com borda/sombra/cropping. */
+.rg-premio__cert-img {
   display: block;
-  width: 100%;
-  border-radius: var(--rg-radius-2xl);
-  overflow: hidden;
-  box-shadow:
-    0 4px 12px rgba(15, 23, 42, 0.08),
-    0 24px 60px rgba(15, 23, 42, 0.12);
-}
-
-.rg-premio__cert-media img {
-  display: block;
-  width: 100%;
-  height: auto;
+  height: 500px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  /* Sombra direta no PNG (não num box ao redor) — mantém o efeito de
+     elevação seguindo o contorno do certificado, não um retângulo. */
+  filter: drop-shadow(0 12px 32px rgba(15, 23, 42, 0.18));
 }
 
 .rg-premio__ribbon {
   position: absolute;
-  top: var(--rg-space-5);
-  right: var(--rg-space-5);
+  top: var(--rg-space-4);
+  right: var(--rg-space-4);
   display: inline-flex;
   align-items: center;
   gap: var(--rg-space-2);
-  padding: var(--rg-space-2) var(--rg-space-4);
+  padding: var(--rg-space-2) var(--rg-space-3);
   background: linear-gradient(135deg, #FCD34D, #F59E0B);
   color: #78350F;
   border-radius: var(--rg-radius-pill);
-  font-size: var(--rg-font-size-xs);
+  font-size: 11px;
   font-weight: var(--rg-font-weight-bold);
   letter-spacing: var(--rg-letter-spacing-wide);
   text-transform: uppercase;
@@ -306,8 +288,8 @@ const highlights = [
 .rg-premio__cert-hint {
   position: absolute;
   left: 50%;
-  bottom: var(--rg-space-4);
-  transform: translateX(-50%) translateY(4px);
+  bottom: var(--rg-space-5);
+  transform: translate(-50%, 6px);
   display: inline-flex;
   align-items: center;
   gap: var(--rg-space-1);
@@ -337,17 +319,15 @@ const highlights = [
     flex-wrap: wrap;
     white-space: normal;
   }
-  .rg-premio__trophy { width: 40px; height: 40px; }
-  .rg-premio__trophy :deep(.v-icon) { font-size: 24px !important; }
+  .rg-premio__trophy {
+    width: 40px;
+    height: 40px;
+  }
+  .rg-premio__cert-img { height: 360px; }
 }
 
 @media (max-width: 640px) {
   .rg-premio { padding: var(--rg-space-14) var(--rg-space-4); }
-  .rg-premio__ribbon {
-    top: var(--rg-space-3);
-    right: var(--rg-space-3);
-    padding: 4px var(--rg-space-2);
-    font-size: 10px;
-  }
+  .rg-premio__cert-img { height: auto; max-height: 60vh; }
 }
 </style>
