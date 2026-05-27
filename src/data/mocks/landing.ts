@@ -103,8 +103,8 @@ export const howItWorksSteps: HowItWorksStep[] = [
     number: '1',
     title: 'Cadastre-se',
     description:
-      'Crie sua conta informando os dados da sua empresa ou organização. O processo é simples e rápido.',
-    icon: 'mdi-account-plus-outline',
+      'Crie sua conta e informe os dados da sua empresa ou organização.',
+    icon: 'mdi-account-plus',
   },
   {
     number: '2',
@@ -117,8 +117,8 @@ export const howItWorksSteps: HowItWorksStep[] = [
     number: '3',
     title: 'Gerencie seus planos',
     description:
-      'Acompanhe, registre e comprove as ações de logística reversa da sua cadeia produtiva.',
-    icon: 'mdi-clipboard-list-outline',
+      'Acompanhe comprovações, pendências e ações de logística reversa.',
+    icon: 'mdi-clipboard-check-outline',
   },
 ];
 
@@ -150,17 +150,18 @@ export interface CommitteeMember {
   short: string;
   full: string;
   icon: string;
+  url?: string;
 }
 
 export const committeeMembers: CommitteeMember[] = [
-  { short: 'SEMAD',          full: 'Secretaria de Estado de Meio Ambiente e Desenvolvimento Sustentável', icon: 'mdi-leaf' },
-  { short: 'SIC',            full: 'Secretaria de Estado de Indústria, Comércio e Serviços',              icon: 'mdi-factory' },
-  { short: 'RETOMADA',       full: 'Secretaria de Estado da Retomada',                                    icon: 'mdi-trending-up' },
-  { short: 'ECONOMIA',       full: 'Secretaria de Estado da Economia',                                    icon: 'mdi-bank-outline' },
-  { short: 'SGG / IMB',      full: 'Secretaria-Geral da Governadoria (Instituto Mauro Borges)',           icon: 'mdi-office-building-outline' },
-  { short: 'GOIÁS PARCERIAS',full: 'Companhia de Investimentos e Parcerias do Estado de Goiás',           icon: 'mdi-handshake-outline' },
-  { short: 'AGR',            full: 'Agência de Regulação, Controle e Fiscalização de Serviços Públicos', icon: 'mdi-shield-check-outline' },
-  { short: 'MPGO',           full: 'Ministério Público do Estado de Goiás',                               icon: 'mdi-gavel' },
+  { short: 'SEMAD',          full: 'Secretaria de Estado de Meio Ambiente e Desenvolvimento Sustentável', icon: 'mdi-leaf',                    url: 'https://www.meioambiente.go.gov.br/' },
+  { short: 'SIC',            full: 'Secretaria de Estado de Indústria, Comércio e Serviços',              icon: 'mdi-factory',                 url: 'https://www.sic.go.gov.br/' },
+  { short: 'RETOMADA',       full: 'Secretaria de Estado da Retomada',                                    icon: 'mdi-trending-up',             url: 'https://www.retomada.go.gov.br/' },
+  { short: 'ECONOMIA',       full: 'Secretaria de Estado da Economia',                                    icon: 'mdi-bank-outline',            url: 'https://www.economia.go.gov.br/' },
+  { short: 'SGG / IMB',      full: 'Secretaria-Geral da Governadoria · Instituto Mauro Borges',           icon: 'mdi-office-building-outline', url: 'https://www.imb.go.gov.br/' },
+  { short: 'GOIÁS PARCERIAS',full: 'Companhia de Investimentos e Parcerias do Estado de Goiás',           icon: 'mdi-handshake-outline',       url: 'https://www.goiasparcerias.go.gov.br/' },
+  { short: 'AGR',            full: 'Agência de Regulação, Controle e Fiscalização de Serviços Públicos', icon: 'mdi-shield-check-outline',    url: 'https://www.agr.go.gov.br/' },
+  { short: 'MPGO',           full: 'Ministério Público do Estado de Goiás',                               icon: 'mdi-gavel',                   url: 'https://www.mpgo.mp.br/' },
 ];
 
 // ============================================================================
