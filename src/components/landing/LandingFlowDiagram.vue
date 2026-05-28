@@ -21,29 +21,40 @@ import RgLightbox from '@/components/RgLightbox.vue';
 
 const lightboxOpen = ref(false);
 
-// ============ Microinteração 1: tilt 3D no mouse ============
+// ============ Microinteração 1: tilt 3D acompanhando o mouse na página inteira ============
+// Listener global no window: o logo "olha" pro cursor independente do mouse estar
+// em cima dele ou não. Assim que o logo aparece (reveal-on-scroll), ele já está
+// reagindo à posição do mouse. O cálculo normaliza dx/dy pelo viewport e clampa em
+// [-1, 1] pra mapear suavemente em ±14° de tilt máximo.
 const logoRef = ref<HTMLElement | null>(null);
 const tiltX = ref(0);
 const tiltY = ref(0);
+let lastMouseEvent: MouseEvent | null = null;
+let tiltRafId: number | null = null;
 
-function onLogoMouseMove(ev: MouseEvent) {
+const MAX_TILT_DEG = 14;
+
+function updateTiltFromMouse() {
+  tiltRafId = null;
   const el = logoRef.value;
-  if (!el) return;
+  const ev = lastMouseEvent;
+  if (!el || !ev) return;
   const rect = el.getBoundingClientRect();
-  // Posição do mouse relativa ao centro do logo, normalizado pra -1..1
   const cx = rect.left + rect.width / 2;
   const cy = rect.top + rect.height / 2;
-  const dx = (ev.clientX - cx) / (rect.width / 2);
-  const dy = (ev.clientY - cy) / (rect.height / 2);
-  // Inclinação máxima de ±14° pra não exagerar
-  tiltY.value = dx * 14;
-  tiltX.value = -dy * 14;
+  // Normaliza pela metade do viewport — mouse na borda do viewport = tilt máximo.
+  const dx = (ev.clientX - cx) / (window.innerWidth / 2);
+  const dy = (ev.clientY - cy) / (window.innerHeight / 2);
+  const cdx = Math.max(-1, Math.min(1, dx));
+  const cdy = Math.max(-1, Math.min(1, dy));
+  tiltY.value = cdx * MAX_TILT_DEG;
+  tiltX.value = -cdy * MAX_TILT_DEG;
 }
 
-function onLogoMouseLeave() {
-  // Retorna suavemente à posição neutra
-  tiltX.value = 0;
-  tiltY.value = 0;
+function onWindowMouseMove(ev: MouseEvent) {
+  lastMouseEvent = ev;
+  if (tiltRafId !== null) return; // throttle via rAF
+  tiltRafId = requestAnimationFrame(updateTiltFromMouse);
 }
 
 // ============ Microinteração 2: reveal-on-scroll ============
@@ -80,12 +91,17 @@ onMounted(() => {
   updateScrollProgress();
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('resize', updateScrollProgress, { passive: true });
+  // Tilt 3D: listener global no window. O logo reage ao mouse mesmo
+  // quando o cursor não está em cima dele (efeito de "seguir o cursor").
+  window.addEventListener('mousemove', onWindowMouseMove, { passive: true });
 });
 
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', onScroll);
   window.removeEventListener('resize', updateScrollProgress);
+  window.removeEventListener('mousemove', onWindowMouseMove);
   if (rafId) cancelAnimationFrame(rafId);
+  if (tiltRafId) cancelAnimationFrame(tiltRafId);
 });
 </script>
 
@@ -111,11 +127,11 @@ onBeforeUnmount(() => {
           </p>
         </div>
 
-        <!-- Símbolo 3D da logo: tilt no mouse + reveal-on-scroll -->
+        <!-- Símbolo 3D da logo: tilt seguindo o mouse globalmente + reveal-on-scroll -->
         <div
           class="rg-flow__logo-3d-wrap"
           :style="{
-            '--rg-flow-scroll': scrollProgress,
+            '--rg-flow-scroll': String(scrollProgress),
           } as Record<string, string>"
           aria-hidden="true"
         >
@@ -126,8 +142,6 @@ onBeforeUnmount(() => {
               '--rg-flow-tilt-x': tiltX + 'deg',
               '--rg-flow-tilt-y': tiltY + 'deg',
             } as Record<string, string>"
-            @mousemove="onLogoMouseMove"
-            @mouseleave="onLogoMouseLeave"
           >
             <img
               src="/fluxo/logo-3d.png"
@@ -261,13 +275,16 @@ onBeforeUnmount(() => {
   display: inline-block;
   width: clamp(120px, 16vw, 200px);
   height: clamp(120px, 16vw, 200px);
-  /* Aplica o tilt baseado no mouse via custom props. */
+  /* Aplica o tilt baseado no mouse (global) via custom props. */
   transform:
     rotateX(var(--rg-flow-tilt-x, 0deg))
     rotateY(var(--rg-flow-tilt-y, 0deg));
   transform-style: preserve-3d;
-  transition: transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  /* Transição curta (140ms) pra interpolar suavemente entre os frames do rAF
+     sem parecer laggy — o mouse pode estar longe do logo e mover rápido. */
+  transition: transform 140ms cubic-bezier(0.2, 0.8, 0.2, 1);
   cursor: default;
+  will-change: transform;
 }
 
 .rg-flow__logo-3d-img {
