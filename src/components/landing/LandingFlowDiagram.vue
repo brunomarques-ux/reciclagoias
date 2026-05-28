@@ -388,12 +388,11 @@ onBeforeUnmount(() => {
     grid-template-columns: 1fr;
     gap: var(--rg-space-6);
   }
+  /* No mobile, o reveal-on-scroll + tilt do logo 3D fica bugado (a section
+     toda já entra no viewport quase no mesmo frame, e o tilt sem espaço
+     pra "respirar" parece glitch). Removemos o logo inteiro no mobile. */
   .rg-flow__logo-3d-wrap {
-    /* No mobile, o logo aparece acima do título — mesma direção de reveal. */
-    justify-self: end;
-    /* Sem reveal-on-scroll no mobile pra evitar deslocamento visual estranho. */
-    opacity: 1;
-    transform: none;
+    display: none;
   }
   .rg-flow__title {
     font-size: clamp(32px, 6vw, 44px);
@@ -407,10 +406,6 @@ onBeforeUnmount(() => {
   }
   .rg-flow__card {
     padding: var(--rg-space-3);
-  }
-  .rg-flow__logo-3d {
-    width: 100px;
-    height: 100px;
   }
 }
 

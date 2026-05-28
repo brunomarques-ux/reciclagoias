@@ -11,7 +11,9 @@ import { howItWorksSteps } from '@/data/mocks/landing';
           <span class="rg-how__eyebrow">COMO FUNCIONA</span>
           <h2 id="rg-how-title" class="rg-how__title">
             <span class="rg-how__title-line">Três passos simples</span>
-            <span class="rg-how__title-line">para começar.</span>
+            <span class="rg-how__title-line">
+              para <span class="rg-how__title-accent">começar.</span>
+            </span>
           </h2>
         </div>
         <p class="rg-how__intro">
@@ -124,6 +126,11 @@ import { howItWorksSteps } from '@/data/mocks/landing';
 /* Cada linha do título em bloco — quebra "Três passos simples" / "para começar." */
 .rg-how__title-line {
   display: block;
+}
+
+/* Palavra "começar" destacada em verde brand-500 (Figma). */
+.rg-how__title-accent {
+  color: var(--rg-primitive-brand-500);
 }
 
 .rg-how__intro {

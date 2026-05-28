@@ -160,8 +160,11 @@ onBeforeUnmount(() => observer?.disconnect());
   gap: var(--rg-space-3);
 }
 
+/* Conectores "do" e "ao" em verde brand-500 — pra criar o mesmo destaque
+   verde dos acentos das outras seções (Figma). */
 .rg-whatis__connector {
   font-weight: var(--rg-font-weight-bold);
+  color: var(--rg-primitive-brand-500);
 }
 
 /* Wrapper só pra dimensionar o ícone alinhado ao texto — sem background nem

@@ -19,9 +19,8 @@ import { committeeMembers } from '@/data/mocks/landing';
         <span class="rg-comite__eyebrow">COMITÊ GESTOR</span>
         <h2 id="rg-comite-title" class="rg-comite__title">
           <span class="rg-comite__title-line">Construído com</span>
-          <span class="rg-comite__title-line">
-            <span class="rg-comite__title-number">8</span>
-            instituições
+          <span class="rg-comite__title-line rg-comite__title-line--accent">
+            8 instituições
           </span>
           <span class="rg-comite__title-line">do Estado de Goiás.</span>
         </h2>
@@ -111,8 +110,8 @@ import { committeeMembers } from '@/data/mocks/landing';
   flex-wrap: wrap;
 }
 
-/* O "8" destacado em verde brand-500. */
-.rg-comite__title-number {
+/* A linha "8 instituições" inteira destacada em verde brand-500 (Figma 17:608). */
+.rg-comite__title-line--accent {
   color: var(--rg-primitive-brand-500);
 }
 
