@@ -26,6 +26,10 @@ interface Props {
   /** Source alternativo em WebP. Opcional — renderiza um <source> antes do <img>. */
   bgImageSrcWebp?: string;
   title?: string;
+  /** Logo SVG/PNG opcional que substitui o `title` textual no centro do hero.
+   *  Quando passado, o texto dividido em 2 partes é trocado por uma imagem
+   *  estática (sem animação translateX) — usada pra branding visual no hero. */
+  logoSrc?: string;
   eyebrow?: string;
   scrollHint?: string;
   textBlend?: boolean;
@@ -300,27 +304,41 @@ onBeforeUnmount(() => {
               </div>
             </div>
 
-            <!-- Título grande dividido em duas partes -->
+            <!-- Quando logoSrc é passado: renderiza a logo SVG centralizada
+                 (sem animação translateX). Caso contrário, mantém o título
+                 textual dividido em 2 partes que animam pra fora. -->
             <div
               :class="[
                 'rg-scroll-hero__title-wrap',
                 { 'rg-scroll-hero__title-wrap--blend': textBlend },
+                { 'rg-scroll-hero__title-wrap--logo': logoSrc },
               ]"
             >
-              <Motion
-                as="h1"
-                class="rg-scroll-hero__title"
-                :style="{ transform: `translateX(-${textTranslateX}vw)` }"
-              >
-                {{ firstWord }}
-              </Motion>
-              <Motion
-                as="span"
-                class="rg-scroll-hero__title rg-scroll-hero__title--rest"
-                :style="{ transform: `translateX(${textTranslateX}vw)` }"
-              >
-                {{ restOfTitle }}
-              </Motion>
+              <template v-if="logoSrc">
+                <h1 class="rg-scroll-hero__title-logo-h1">
+                  <img
+                    :src="logoSrc"
+                    :alt="title ?? 'Recicla Goiás'"
+                    class="rg-scroll-hero__title-logo"
+                  />
+                </h1>
+              </template>
+              <template v-else>
+                <Motion
+                  as="h1"
+                  class="rg-scroll-hero__title"
+                  :style="{ transform: `translateX(-${textTranslateX}vw)` }"
+                >
+                  {{ firstWord }}
+                </Motion>
+                <Motion
+                  as="span"
+                  class="rg-scroll-hero__title rg-scroll-hero__title--rest"
+                  :style="{ transform: `translateX(${textTranslateX}vw)` }"
+                >
+                  {{ restOfTitle }}
+                </Motion>
+              </template>
             </div>
 
             <!-- Quick action: pular animação -->
@@ -597,6 +615,32 @@ onBeforeUnmount(() => {
 }
 
 /* ---------- Título grande split ---------- */
+/* Variant logo: troca os 2 spans animados por uma logo SVG centralizada.
+   Usamos drop-shadow + filter brightness pra garantir que a logo verde
+   colorida fique legível sobre o fundo escuro do hero. */
+.rg-scroll-hero__title-wrap--logo {
+  flex-direction: column;
+  align-items: center;
+}
+
+.rg-scroll-hero__title-logo-h1 {
+  margin: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.rg-scroll-hero__title-logo {
+  display: block;
+  width: clamp(240px, 36vw, 480px);
+  height: auto;
+  /* Brightness aumenta a luminosidade dos tons verdes da logo SVG pra
+     destacar contra o fundo brand-950 do hero, sem perder a identidade. */
+  filter:
+    brightness(1.35)
+    saturate(0.95)
+    drop-shadow(0 12px 36px rgba(15, 70, 35, 0.4));
+}
+
 .rg-scroll-hero__title-wrap {
   position: relative;
   z-index: 10;

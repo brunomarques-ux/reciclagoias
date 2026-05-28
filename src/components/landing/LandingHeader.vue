@@ -73,26 +73,11 @@ onUnmounted(() => {
   >
     <div class="rg-app-header__inner">
       <a href="#top" class="rg-app-header__brand" aria-label="Recicla Goiás — início">
-        <span class="rg-app-header__brand-mark" aria-hidden="true">
-          <svg viewBox="0 0 32 32" width="28" height="28" role="img" aria-hidden="true">
-            <path
-              d="M16 2 L29 9.5 V22.5 L16 30 L3 22.5 V9.5 Z"
-              fill="var(--rg-primitive-brand-600)"
-            />
-            <path
-              d="M11 19 L15 12 L19 17 L23 11"
-              fill="none"
-              stroke="white"
-              stroke-width="2.2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-        </span>
-        <span class="rg-app-header__brand-text">
-          <strong>Recicla</strong>
-          <em>Goiás</em>
-        </span>
+        <img
+          src="/brand/recicla-logo-horizontal.svg"
+          alt="Recicla Goiás"
+          class="rg-app-header__brand-logo"
+        />
       </a>
 
       <nav class="rg-app-header__nav" aria-label="Principal">
@@ -204,30 +189,18 @@ onUnmounted(() => {
 .rg-app-header__brand {
   display: inline-flex;
   align-items: center;
-  gap: var(--rg-space-2);
 }
-.rg-app-header__brand-mark {
-  display: inline-flex;
-}
-.rg-app-header__brand-text {
-  display: inline-flex;
-  flex-direction: column;
-  line-height: 1;
-  font-family: var(--rg-font-family-sans);
-}
-.rg-app-header__brand-text strong {
-  font-size: var(--rg-font-size-lg);
-  font-weight: var(--rg-font-weight-bold);
-  color: var(--rg-color-text-primary);
-  letter-spacing: var(--rg-letter-spacing-tight);
-}
-.rg-app-header__brand-text em {
-  font-style: normal;
-  font-size: var(--rg-font-size-xs);
-  font-weight: var(--rg-font-weight-semibold);
-  color: var(--rg-color-text-brand);
-  letter-spacing: var(--rg-letter-spacing-eyebrow);
-  text-transform: uppercase;
+
+/* Logo SVG horizontal Recicla Goiás. Altura controlada (28px) pra manter
+   a navbar com a mesma altura que tinha antes da troca; a largura escala
+   proporcionalmente (ratio nativo ~2.83:1 → ~80px). */
+.rg-app-header__brand-logo {
+  display: block;
+  height: 28px;
+  width: auto;
+  /* Em modo "over hero" (fundo escuro) invertemos a renderização via filter
+     pra logo ficar visível branca/clara. */
+  transition: filter var(--rg-motion-duration-base) var(--rg-motion-ease-standard);
 }
 
 .rg-app-header__nav {
@@ -254,6 +227,20 @@ onUnmounted(() => {
   display: flex;
   gap: var(--rg-space-2);
   align-items: center;
+}
+
+/* Override dos RgButtons no header: força fonte Inter (Vuetify às vezes
+   injeta Roboto nas camadas internas do v-btn) e reduz altura pra 32px
+   (era 36px com size="sm"), garantindo que o navbar mantenha a altura
+   total atual mesmo com o brand-logo SVG de 28px. */
+.rg-app-header__ctas :deep(.rg-button.v-btn),
+.rg-app-header__ctas :deep(.rg-button .v-btn__content) {
+  font-family: var(--rg-font-family-sans) !important;
+}
+.rg-app-header__ctas :deep(.rg-button.v-btn) {
+  height: 32px !important;
+  min-height: 32px !important;
+  font-size: var(--rg-font-size-sm);
 }
 
 .rg-app-header__menu-toggle {
@@ -319,11 +306,11 @@ onUnmounted(() => {
   box-shadow: none;
 }
 
-.rg-app-header--over-hero .rg-app-header__brand-text strong {
-  color: white;
-}
-.rg-app-header--over-hero .rg-app-header__brand-text em {
-  color: var(--rg-primitive-brand-200);
+/* Over hero (fundo escuro): a logo SVG é colorida em tons verdes; aplicamos
+   um filter brightness + saturate pra deixar ela mais clara/legível sobre
+   o brand-950 sem perder a identidade. */
+.rg-app-header--over-hero .rg-app-header__brand-logo {
+  filter: brightness(1.6) saturate(0.85);
 }
 
 .rg-app-header--over-hero .rg-app-header__link {

@@ -11,6 +11,7 @@ import LandingComite from '@/components/landing/LandingComite.vue';
 import LandingFlowDiagram from '@/components/landing/LandingFlowDiagram.vue';
 import LandingSistema from '@/components/landing/LandingSistema.vue';
 import LandingFaq from '@/components/landing/LandingFaq.vue';
+import LandingCtaFinal from '@/components/landing/LandingCtaFinal.vue';
 import LandingFooter from '@/components/landing/LandingFooter.vue';
 
 const sections = ref([
@@ -31,6 +32,7 @@ const sections = ref([
       media-src="/hero/hero-video.mp4"
       bg-image-src="/hero/bg-hero-v2.jpg"
       title="Recicla Goiás"
+      logo-src="/brand/recicla-logo-horizontal.svg"
       eyebrow="Logística Reversa · Goiás 2026"
       scroll-hint="Role para descobrir"
       secondary-cta-label="Conhecer o processo"
@@ -46,6 +48,7 @@ const sections = ref([
     <LandingFlowDiagram />
     <LandingSistema />
     <LandingFaq id="duvidas" />
+    <LandingCtaFinal />
   </main>
 
   <LandingFooter />
