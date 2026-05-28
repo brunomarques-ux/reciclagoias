@@ -19,7 +19,13 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { systemFeatures, systemDescription } from '@/data/mocks/landing';
 
 const sectionRef = ref<HTMLElement | null>(null);
-const activeIndex = ref(0);
+/**
+ * `globalProgress` é a posição contínua no scroll da section, em "unidades
+ * de slide" (0 a features.length). Permite que a imagem da direita translade
+ * suavemente e a pagination bar ativa cresça gradualmente — dando feedback
+ * visual ENTRE as trocas discretas.
+ */
+const globalProgress = ref(0);
 let rafId: number | null = null;
 
 // Cor de fundo opcional por slide — todos no mesmo tom suave por enquanto.
@@ -39,7 +45,16 @@ const features = computed(() =>
   })),
 );
 
-// ============ Scroll → slide ativo ============
+// ============ Derivados do progresso contínuo ============
+/** Índice do slide atualmente "dominante" (clamped 0..N-1). */
+const activeIndex = computed(() => {
+  const n = features.value.length;
+  return Math.min(n - 1, Math.max(0, Math.floor(globalProgress.value)));
+});
+/** Quanto do slide atual já foi rolado (0..1). Usado pra animar a pagination. */
+const localProgress = computed(() => globalProgress.value - activeIndex.value);
+
+// ============ Scroll → progresso global ============
 function updateActiveSlide() {
   rafId = null;
   const section = sectionRef.value;
@@ -51,11 +66,11 @@ function updateActiveSlide() {
   const scrolledIntoSection = -rect.top;
   // Altura efetivamente rolável (a section toda menos o que cabe na tela).
   const totalScrollable = Math.max(1, sectionHeight - viewportHeight);
-  // Progresso 0..1
-  const progress = Math.max(0, Math.min(1, scrolledIntoSection / totalScrollable));
-  // Mapeia em índice 0..features.length-1
-  const idx = Math.min(features.value.length - 1, Math.floor(progress * features.value.length));
-  if (idx !== activeIndex.value) activeIndex.value = idx;
+  // Progresso 0..1 → multiplica por N pra ter posição em "unidades de slide".
+  const progress01 = Math.max(0, Math.min(1, scrolledIntoSection / totalScrollable));
+  const n = features.value.length;
+  // Clamp em [0, N - 0.0001] pra que activeIndex nunca pule pra N.
+  globalProgress.value = Math.min(n - 0.0001, progress01 * n);
 }
 
 function onScroll() {
@@ -130,18 +145,27 @@ onBeforeUnmount(() => {
               :aria-selected="i === activeIndex"
               :aria-label="`Ir para ${f.title}`"
               :class="['rg-sysscroll__page-bar', { 'is-active': i === activeIndex }]"
+              :style="i === activeIndex
+                ? { '--rg-bar-progress': localProgress } as Record<string, string | number>
+                : undefined"
               @click="goToSlide(i)"
             />
           </div>
 
           <!-- Stack do feature ativo: todos empilhados em absolute, opacity
-               + translateY transitam entre eles. -->
+               + translateY transitam entre eles. O ativo ainda recebe um
+               translateY contínuo baseado em localProgress, criando feedback
+               visual durante o scroll interno do slide (sai lentamente pra
+               cima e desfoca conforme o próximo se aproxima). -->
           <div class="rg-sysscroll__feature-stack">
             <div
               v-for="(f, i) in features"
               :key="f.title"
               :class="['rg-sysscroll__feature', { 'is-active': i === activeIndex }]"
               :aria-hidden="i !== activeIndex"
+              :style="i === activeIndex
+                ? { '--rg-feature-local': localProgress } as Record<string, string | number>
+                : undefined"
             >
               <span class="rg-sysscroll__feature-icon" aria-hidden="true">
                 <v-icon :icon="f.icon" size="28" />
@@ -159,7 +183,7 @@ onBeforeUnmount(() => {
           <div class="rg-sysscroll__image-frame">
             <div
               class="rg-sysscroll__image-stack"
-              :style="{ transform: `translateY(-${activeIndex * 100}%)` }"
+              :style="{ transform: `translateY(-${globalProgress * 100}%)` }"
             >
               <div
                 v-for="f in features"
@@ -287,7 +311,17 @@ onBeforeUnmount(() => {
 
 .rg-sysscroll__page-bar.is-active {
   width: 48px;
-  background-color: var(--rg-primitive-brand-500);
+  /* Background: track cinza claro + fill verde brand-500 que cresce de 0% a
+     100% conforme o usuário rola DENTRO do slide. Dá feedback contínuo
+     enquanto o slide ainda está "ativo" mas o usuário já está navegando. */
+  background-color: rgba(15, 23, 42, 0.15);
+  background-image: linear-gradient(
+    to right,
+    var(--rg-primitive-brand-500) 0%,
+    var(--rg-primitive-brand-500) calc(var(--rg-bar-progress, 0) * 100%),
+    transparent calc(var(--rg-bar-progress, 0) * 100%)
+  );
+  background-repeat: no-repeat;
 }
 
 .rg-sysscroll__page-bar:focus-visible {
@@ -318,8 +352,12 @@ onBeforeUnmount(() => {
 }
 
 .rg-sysscroll__feature.is-active {
-  opacity: 1;
-  transform: translateY(0);
+  /* Opacity desce levemente quando localProgress > 0.75, dando preview
+     visual de que o próximo slide está chegando. */
+  opacity: calc(1 - max(0, var(--rg-feature-local, 0) - 0.75) * 4);
+  /* TranslateY contínuo de 0 a -16px conforme o usuário rola DENTRO do slide.
+     Cria sensação de "saindo pra cima" enquanto o stack da direita translada. */
+  transform: translateY(calc(var(--rg-feature-local, 0) * -16px));
   pointer-events: auto;
 }
 
@@ -382,8 +420,9 @@ onBeforeUnmount(() => {
   inset: 0;
   height: 100%;
   width: 100%;
-  /* Transição do translateY suave (igual o componente original). */
-  transition: transform 700ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  /* Sem transition: o transform é atualizado continuamente pelo JS via
+     rAF conforme o scroll, e uma transition aqui causaria delay/lag visual.
+     A "suavidade" vem do rAF + scroll inertial do próprio browser. */
   will-change: transform;
 }
 
