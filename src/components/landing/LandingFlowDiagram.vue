@@ -306,8 +306,10 @@ onBeforeUnmount(() => {
 .rg-flow__card {
   position: relative;
   display: inline-flex;
+  /* Ocupa a largura total do `.rg-flow__inner` (= --rg-container-page) sem
+     limite menor — proporcionalmente cresce um pouco na vertical mas mantém
+     a fidelidade com o grid das demais seções. */
   width: 100%;
-  max-width: 1080px;
   padding: var(--rg-space-6);
   margin: 0;
   border: 1px solid var(--rg-primitive-brand-100);
