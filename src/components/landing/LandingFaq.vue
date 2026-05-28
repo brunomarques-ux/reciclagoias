@@ -94,8 +94,9 @@ onBeforeUnmount(() => {
           <span class="rg-faq__eyebrow">PERGUNTAS FREQUENTES</span>
           <h2 id="rg-faq-title" class="rg-faq__title">
             <span class="rg-faq__title-line">Dúvidas comuns sobre</span>
-            <span class="rg-faq__title-line rg-faq__title-line--accent">
-              o Recicla Goiás
+            <span class="rg-faq__title-line">
+              o
+              <span class="rg-faq__title-accent">Recicla Goiás</span>
             </span>
           </h2>
           <p class="rg-faq__lede">
@@ -229,8 +230,9 @@ onBeforeUnmount(() => {
   color: var(--rg-color-text-primary);
 }
 
-/* Linha "o Recicla Goiás" toda em verde brand-500 (Figma). */
-.rg-faq__title-line--accent {
+/* Apenas "Recicla Goiás" em verde brand-500 — o "o" antes fica preto
+   (text-primary), mesma cor da primeira linha. */
+.rg-faq__title-accent {
   color: var(--rg-primitive-brand-500);
 }
 
@@ -289,9 +291,12 @@ onBeforeUnmount(() => {
 /* Balão 2 — centro, MENOR (56px), blur 2px, levemente rotacionado pra cima
    e deslocado verticalmente pra dar sensação de movimento orgânico. */
 .rg-faq__balloon--2 {
-  /* Posicionado no centro horizontal do container (280px - 56px = 224px
-     restante, / 2 = 112px). */
-  left: 112px;
+  /* Centro EXATO entre os centros dos balões 1 e 3:
+     - Centro do balão 1: 48px (left:0, width:96 → center 48)
+     - Centro do balão 3: 258px (right:0, width:44 → center 258)
+     - Meio: (48 + 258) / 2 = 153px
+     - left = 153 - 28 (metade da width 56) = 125px */
+  left: 125px;
   top: -6px;
   width: 56px;
   height: 56px;
@@ -506,23 +511,25 @@ onBeforeUnmount(() => {
   }
 }
 
+@media (max-width: 960px) {
+  /* No mobile/tablet os balões 3D ficam apertados com o card "Fale Conosco"
+     e o reveal-on-scroll fica visualmente estranho (a section toda entra
+     no viewport quase no mesmo frame). Removidos no mobile, igual fizemos
+     com o logo 3D do Fluxo. */
+  .rg-faq__balloons {
+    display: none;
+  }
+}
+
 @media (max-width: 640px) {
   .rg-faq {
     padding: var(--rg-space-16) var(--rg-space-4);
   }
-  .rg-faq__balloons {
-    /* Em mobile o reveal-on-scroll fica estranho; balões em estado final. */
-    width: 220px;
-    height: 90px;
-  }
-  .rg-faq__balloon--1 { width: 72px; height: 72px; }
-  .rg-faq__balloon--2 { width: 60px; height: 60px; left: 70px; }
-  .rg-faq__balloon--3 { width: 50px; height: 50px; left: 130px; }
   .rg-faq__question {
     padding: var(--rg-space-4) var(--rg-space-5);
   }
   .rg-faq__answer {
-    padding: 0 var(--rg-space-5) var(--rg-space-4);
+    padding: var(--rg-space-2) var(--rg-space-5) var(--rg-space-4);
   }
 }
 
