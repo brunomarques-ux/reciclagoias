@@ -179,7 +179,10 @@ onUnmounted(() => {
 .rg-app-header__inner {
   max-width: var(--rg-container-page);
   margin-inline: auto;
-  padding: var(--rg-space-3) var(--rg-space-6);
+  /* Padding-y reduzido de 12px → 8px pra compensar o aumento da logo (28→36px)
+     mantendo a altura total da navbar em ~52px. A logo fica um pouquinho
+     mais perto das beiradas top/bottom, conforme combinado. */
+  padding: var(--rg-space-2) var(--rg-space-6);
   display: grid;
   grid-template-columns: auto 1fr auto auto;
   gap: var(--rg-space-6);
@@ -191,15 +194,15 @@ onUnmounted(() => {
   align-items: center;
 }
 
-/* Logo SVG horizontal Recicla Goiás. Altura controlada (28px) pra manter
-   a navbar com a mesma altura que tinha antes da troca; a largura escala
-   proporcionalmente (ratio nativo ~2.83:1 → ~80px). */
+/* Logo SVG horizontal Recicla Goiás. Altura 36px — maior que a versão
+   anterior (28px) pra ficar legível inclusive a palavra "Goiás" pequena.
+   Largura escala proporcionalmente (ratio nativo ~2.83:1 → ~102px).
+   A altura total da navbar é mantida via redução do padding-y do __inner. */
 .rg-app-header__brand-logo {
   display: block;
-  height: 28px;
+  height: 36px;
   width: auto;
-  /* Em modo "over hero" (fundo escuro) invertemos a renderização via filter
-     pra logo ficar visível branca/clara. */
+  /* Em modo "over hero" (fundo escuro) aplicamos filter pra logo ficar visível. */
   transition: filter var(--rg-motion-duration-base) var(--rg-motion-ease-standard);
 }
 

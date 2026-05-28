@@ -166,7 +166,7 @@ const year = new Date().getFullYear();
    fundo escuro do footer. */
 .rg-footer__brand-logo {
   display: block;
-  height: 40px;
+  height: 56px;
   width: auto;
   filter: brightness(1.55) saturate(0.9);
 }

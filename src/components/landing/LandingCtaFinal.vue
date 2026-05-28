@@ -52,8 +52,9 @@ import RgButton from '@/components/RgButton.vue';
 <style scoped>
 .rg-cta {
   position: relative;
-  /* Padding mais compacto que as outras seções — CTA é faixa curta. */
-  padding: var(--rg-space-12) var(--rg-space-6);
+  /* Padding vertical de 72px (48px base + 24px de respiro extra pedidos) —
+     deixa a faixa um pouco mais larga sem virar uma section grande. */
+  padding: 72px var(--rg-space-6);
   /* Mesmo tint do Como Funciona e Fluxo (alternância cromática entre seções claras). */
   background-color: #F1F7F3;
 }

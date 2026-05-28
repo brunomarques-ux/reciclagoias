@@ -17,7 +17,9 @@ import LandingFooter from '@/components/landing/LandingFooter.vue';
 const sections = ref([
   { id: 'sobre',         label: 'O que é' },
   { id: 'como-funciona', label: 'Como funciona' },
+  { id: 'premio',        label: 'Reconhecimento' },
   { id: 'comite',        label: 'Comitê' },
+  { id: 'fluxo',         label: 'Fluxo' },
   { id: 'sistema',       label: 'Sistema' },
   { id: 'duvidas',       label: 'Dúvidas' },
 ]);
@@ -32,7 +34,6 @@ const sections = ref([
       media-src="/hero/hero-video.mp4"
       bg-image-src="/hero/bg-hero-v2.jpg"
       title="Recicla Goiás"
-      logo-src="/brand/recicla-logo-horizontal.svg"
       eyebrow="Logística Reversa · Goiás 2026"
       scroll-hint="Role para descobrir"
       secondary-cta-label="Conhecer o processo"
