@@ -249,7 +249,10 @@ Componentes adaptados de bibliotecas open-source:
    → Adaptado em `RgScrollProgress.vue` (barra superior)
    → React/motion → Vue + rAF + CSS scaleX
 
-**Hero scroll-expand**: padrão "scroll-locked video expansion" inspirado em sites institucionais (apple.com). Implementação própria com `position: sticky` + scroll listener + motion-v pra animar texto.
+6. **21st.dev · Scroll Expansion Hero** ([21st.dev/community/components/arunachalam0606/scroll-expansion-hero](https://21st.dev/community/components/arunachalam0606/scroll-expansion-hero/default))
+   → Adaptado em `LandingHeroScrollExpand.vue` (vídeo central que expande conforme o scroll)
+   → React + framer-motion → Vue + motion-v + `position: sticky` + scroll listener próprio
+   → Adições nossas: classe `rg-hero-locked` que trava o scroll do body via CSS enquanto o vídeo ainda não expandiu totalmente; botão "Pular animação" que dispara o fim do progress; integração com `RgHeroHighlight` no pós-vídeo (dot pattern + lanterna do mouse + título com `RgHighlight`).
 
 ---
 
