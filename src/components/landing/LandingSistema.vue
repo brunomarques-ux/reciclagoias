@@ -19,6 +19,7 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { systemFeatures, systemDescription } from '@/data/mocks/landing';
 
 const sectionRef = ref<HTMLElement | null>(null);
+const rightColumnRef = ref<HTMLElement | null>(null);
 /**
  * `globalProgress` é a posição contínua no scroll da section, em "unidades
  * de slide" (0 a features.length). Permite que a imagem da direita translade
@@ -26,6 +27,11 @@ const sectionRef = ref<HTMLElement | null>(null);
  * visual ENTRE as trocas discretas.
  */
 const globalProgress = ref(0);
+/** Posição do mouse dentro da coluna direita (em px relativos à coluna).
+ *  Usados pela máscara radial dos dots-hover pra criar o efeito de "lanterna"
+ *  que só ilumina os dots ao redor do cursor — igual ao RgHeroHighlight. */
+const mouseX = ref(0);
+const mouseY = ref(0);
 let rafId: number | null = null;
 
 // Imagens fotográficas reais (uma por feature) + 1 splash final que aparece
@@ -89,6 +95,15 @@ function updateActiveSlide() {
 function onScroll() {
   if (rafId !== null) return;
   rafId = requestAnimationFrame(updateActiveSlide);
+}
+
+/** Atualiza --mx/--my que alimentam a máscara radial dos dots-hover. */
+function onRightMouseMove(ev: MouseEvent) {
+  const el = rightColumnRef.value;
+  if (!el) return;
+  const rect = el.getBoundingClientRect();
+  mouseX.value = ev.clientX - rect.left;
+  mouseY.value = ev.clientY - rect.top;
 }
 
 // Click na pagination → scrollTo no offset do slide correspondente.
@@ -196,11 +211,25 @@ onBeforeUnmount(() => {
              Background com dot pattern verde claro (intensifica no hover).
              Stack tem 5 itens (4 features + 1 splash) — quando o usuário
              rola além do último feature, o splash sobe revelando a marca. -->
-        <div class="rg-sysscroll__right" aria-hidden="true">
-          <!-- Camadas de dot pattern: base brand-300 sempre visível +
-               overlay brand-500 que emerge no hover do container. -->
+        <div
+          ref="rightColumnRef"
+          class="rg-sysscroll__right"
+          aria-hidden="true"
+          @mousemove="onRightMouseMove"
+        >
+          <!-- Camadas de dot pattern: base sempre visível com opacity baixa +
+               overlay com mask radial que segue o cursor, criando uma
+               "lanterna" que só ilumina os dots ao redor do mouse (mesma
+               mecânica do RgHeroHighlight no pós-vídeo do Hero). -->
           <div class="rg-sysscroll__dots rg-sysscroll__dots--base" aria-hidden="true" />
-          <div class="rg-sysscroll__dots rg-sysscroll__dots--hover" aria-hidden="true" />
+          <div
+            class="rg-sysscroll__dots rg-sysscroll__dots--hover"
+            aria-hidden="true"
+            :style="{
+              '--mx': mouseX + 'px',
+              '--my': mouseY + 'px',
+            } as Record<string, string>"
+          />
 
           <div class="rg-sysscroll__image-frame">
             <div
@@ -451,25 +480,37 @@ onBeforeUnmount(() => {
     var(--rg-primitive-brand-300) 12%,
     transparent 16%
   );
-  /* Opacity 0.45 = dots visíveis mas discretos. */
-  opacity: 0.45;
+  /* Opacity baixa pra ficar bem discreto — quase imperceptível, só dá textura
+     ao fundo. A lanterna do hover é que cria o destaque visual. */
+  opacity: 0.22;
 }
 
-/* Layer hover — pattern em brand-500 (verde forte) emerge quando o usuário
-   passa o mouse sobre a área, deixando os dots "mais fortes" sem mouse
-   tracking pesado. */
+/* Layer hover — pattern em brand-400 (um tom acima da base, sutil) mascarado
+   por um radial-gradient ao redor do cursor. A máscara cria a "lanterna":
+   só os dots dentro do raio de 220px ficam visíveis, fade até transparent
+   na borda. Mesma mecânica do RgHeroHighlight no pós-vídeo do Hero. */
 .rg-sysscroll__dots--hover {
   background-image: radial-gradient(
     circle at center,
-    var(--rg-primitive-brand-500) 12%,
+    var(--rg-primitive-brand-400) 12%,
     transparent 16%
   );
   opacity: 0;
-  transition: opacity 320ms ease;
+  transition: opacity 280ms ease;
+  -webkit-mask-image: radial-gradient(
+    220px circle at var(--mx, 50%) var(--my, 50%),
+    black 0%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    220px circle at var(--mx, 50%) var(--my, 50%),
+    black 0%,
+    transparent 100%
+  );
 }
 
 .rg-sysscroll__right:hover .rg-sysscroll__dots--hover {
-  opacity: 0.55;
+  opacity: 0.65;
 }
 
 .rg-sysscroll__image-frame {
