@@ -28,31 +28,44 @@ const sectionRef = ref<HTMLElement | null>(null);
 const globalProgress = ref(0);
 let rafId: number | null = null;
 
-// Cor de fundo opcional por slide — todos no mesmo tom suave por enquanto.
-// Cada feature ganha um tint distinto pro placeholder da imagem mock,
-// dando variedade visual sem precisar de imagens reais ainda.
-const slideTints = [
-  'linear-gradient(135deg, var(--rg-primitive-brand-400), var(--rg-primitive-brand-700))',
-  'linear-gradient(135deg, var(--rg-primitive-brand-500), var(--rg-primitive-brand-800))',
-  'linear-gradient(135deg, var(--rg-primitive-brand-300), var(--rg-primitive-brand-600))',
-  'linear-gradient(135deg, var(--rg-primitive-brand-600), var(--rg-primitive-brand-900))',
+// Imagens fotográficas reais (uma por feature) + 1 splash final que aparece
+// depois do último slide quando o usuário continua rolando — substitui o
+// "espaço branco" que aparecia antes embaixo do último slide.
+const slideImages = [
+  '/sistema/slide-1-cadastro.png',
+  '/sistema/slide-2-metas.png',
+  '/sistema/slide-3-validacao.png',
+  '/sistema/slide-4-fiscalizacao.png',
 ];
+const splashImage = '/sistema/end-splash.png';
 
 const features = computed(() =>
   systemFeatures.map((f, i) => ({
     ...f,
-    tint: slideTints[i % slideTints.length],
+    image: slideImages[i],
   })),
 );
 
+/**
+ * Total de imagens no stack (features + 1 splash). Como cada imagem ocupa
+ * 100% da altura do frame, o stack inteiro tem `STACK_LENGTH × 100%` de
+ * altura, e translateY(-globalProgress × 100%) revela a imagem certa.
+ */
+const stackLength = computed(() => features.value.length + 1);
+
 // ============ Derivados do progresso contínuo ============
-/** Índice do slide atualmente "dominante" (clamped 0..N-1). */
+/** Índice do feature dominante na coluna esquerda (clamped em 0..N-1).
+ *  Não vai pra N mesmo quando o stack avança pra o splash — a lista lateral
+ *  fica "presa" no último feature enquanto a imagem transita pro splash. */
 const activeIndex = computed(() => {
   const n = features.value.length;
   return Math.min(n - 1, Math.max(0, Math.floor(globalProgress.value)));
 });
-/** Quanto do slide atual já foi rolado (0..1). Usado pra animar a pagination. */
-const localProgress = computed(() => globalProgress.value - activeIndex.value);
+/** Quanto do slide atual já foi rolado (0..1). Clampado em 1 mesmo quando o
+ *  scroll avança pra a faixa do splash. */
+const localProgress = computed(() =>
+  Math.min(1, Math.max(0, globalProgress.value - activeIndex.value)),
+);
 
 // ============ Scroll → progresso global ============
 function updateActiveSlide() {
@@ -66,11 +79,11 @@ function updateActiveSlide() {
   const scrolledIntoSection = -rect.top;
   // Altura efetivamente rolável (a section toda menos o que cabe na tela).
   const totalScrollable = Math.max(1, sectionHeight - viewportHeight);
-  // Progresso 0..1 → multiplica por N pra ter posição em "unidades de slide".
   const progress01 = Math.max(0, Math.min(1, scrolledIntoSection / totalScrollable));
-  const n = features.value.length;
-  // Clamp em [0, N - 0.0001] pra que activeIndex nunca pule pra N.
-  globalProgress.value = Math.min(n - 0.0001, progress01 * n);
+  // Range: 0..stackLength-1 (= 0..4 com 5 imagens). globalProgress = 4 mostra
+  // o splash 100% revelado.
+  const maxProgress = stackLength.value - 1;
+  globalProgress.value = progress01 * maxProgress;
 }
 
 function onScroll() {
@@ -79,6 +92,9 @@ function onScroll() {
 }
 
 // Click na pagination → scrollTo no offset do slide correspondente.
+// O stack tem `stackLength` posições mas só queremos navegar entre as
+// `features.length` posições "úteis" (cada feature começa em uma fração
+// `i / (stackLength - 1)` do scroll total).
 function goToSlide(i: number) {
   const section = sectionRef.value;
   if (!section) return;
@@ -87,10 +103,10 @@ function goToSlide(i: number) {
   const sectionHeight = section.offsetHeight;
   const viewportHeight = window.innerHeight;
   const totalScrollable = Math.max(1, sectionHeight - viewportHeight);
-  const stepHeight = totalScrollable / features.value.length;
+  const fraction = i / (stackLength.value - 1);
   // +1px pra garantir que o `floor()` no progress aterrissa no índice certo
   window.scrollTo({
-    top: sectionAbsoluteTop + stepHeight * i + 1,
+    top: sectionAbsoluteTop + totalScrollable * fraction + 1,
     behavior: 'smooth',
   });
 }
@@ -114,7 +130,7 @@ onBeforeUnmount(() => {
     ref="sectionRef"
     class="rg-sysscroll"
     aria-labelledby="rg-sysscroll-title"
-    :style="{ '--rg-sys-total': features.length } as Record<string, string | number>"
+    :style="{ '--rg-sys-stack': stackLength } as Record<string, string | number>"
   >
     <!-- Sticky panel: ocupa exatamente 1 viewport e fica preso enquanto o
          usuário rola a section inteira (que tem altura N * 100vh). -->
@@ -177,9 +193,15 @@ onBeforeUnmount(() => {
         </div>
 
         <!-- Coluna direita: stack de imagens transladado verticalmente.
-             Por enquanto, placeholder com gradiente brand + ícone grande +
-             título (substituir por imagens reais quando recebermos). -->
+             Background com dot pattern verde claro (intensifica no hover).
+             Stack tem 5 itens (4 features + 1 splash) — quando o usuário
+             rola além do último feature, o splash sobe revelando a marca. -->
         <div class="rg-sysscroll__right" aria-hidden="true">
+          <!-- Camadas de dot pattern: base brand-300 sempre visível +
+               overlay brand-500 que emerge no hover do container. -->
+          <div class="rg-sysscroll__dots rg-sysscroll__dots--base" aria-hidden="true" />
+          <div class="rg-sysscroll__dots rg-sysscroll__dots--hover" aria-hidden="true" />
+
           <div class="rg-sysscroll__image-frame">
             <div
               class="rg-sysscroll__image-stack"
@@ -189,13 +211,24 @@ onBeforeUnmount(() => {
                 v-for="f in features"
                 :key="f.title"
                 class="rg-sysscroll__image-slide"
-                :style="{ background: f.tint }"
               >
-                <div class="rg-sysscroll__image-mock">
-                  <v-icon :icon="f.icon" size="96" />
-                  <span class="rg-sysscroll__image-label">{{ f.title }}</span>
-                  <span class="rg-sysscroll__image-hint">Mock — substituir por imagem real</span>
-                </div>
+                <img
+                  :src="f.image"
+                  :alt="f.title"
+                  class="rg-sysscroll__image-img"
+                  loading="lazy"
+                />
+              </div>
+
+              <!-- Splash final: marca Recicla Goiás. Aparece quando o usuário
+                   rola além do último feature, como "fechamento" da seção. -->
+              <div class="rg-sysscroll__image-slide rg-sysscroll__image-slide--splash">
+                <img
+                  :src="splashImage"
+                  alt="Recicla Goiás"
+                  class="rg-sysscroll__image-img"
+                  loading="lazy"
+                />
               </div>
             </div>
           </div>
@@ -206,12 +239,14 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-/* ============ Section: altura total = N viewports ============ */
+/* ============ Section: altura total = STACK_LENGTH viewports ============ */
 .rg-sysscroll {
   position: relative;
-  /* A section toda ocupa N × 100vh — cada feature "consome" 1 viewport
-     de scroll antes do próximo entrar. */
-  height: calc(var(--rg-sys-total, 4) * 100vh);
+  /* A section ocupa stackLength × 100vh (= 5 com 4 features + 1 splash).
+     Cada "fatia" do stack consome 1 viewport de scroll antes do próximo
+     entrar. O extra 100vh no final permite que o splash apareça com a
+     mesma mecânica de scroll dos outros slides. */
+  height: calc(var(--rg-sys-stack, 5) * 100vh);
   background-color: var(--rg-color-surface-base);
 }
 
@@ -396,15 +431,51 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: center;
   padding: var(--rg-space-12);
-  /* Grid pattern sutil de fundo, igual ao componente original. */
-  background-image:
-    linear-gradient(to right, rgba(15, 23, 42, 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(15, 23, 42, 0.05) 1px, transparent 1px);
-  background-size: 56px 56px;
+}
+
+/* Dot pattern — duas camadas DIV (em vez de pseudo-elements, que tinham
+   problemas de renderização no Chrome com radial-gradient + background-size
+   no mesmo contexto flex). Mesma estética do RgHeroHighlight (pós-vídeo). */
+.rg-sysscroll__dots {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-size: 24px 24px;
+  background-repeat: repeat;
+  z-index: 0;
+}
+
+.rg-sysscroll__dots--base {
+  background-image: radial-gradient(
+    circle at center,
+    var(--rg-primitive-brand-300) 12%,
+    transparent 16%
+  );
+  /* Opacity 0.45 = dots visíveis mas discretos. */
+  opacity: 0.45;
+}
+
+/* Layer hover — pattern em brand-500 (verde forte) emerge quando o usuário
+   passa o mouse sobre a área, deixando os dots "mais fortes" sem mouse
+   tracking pesado. */
+.rg-sysscroll__dots--hover {
+  background-image: radial-gradient(
+    circle at center,
+    var(--rg-primitive-brand-500) 12%,
+    transparent 16%
+  );
+  opacity: 0;
+  transition: opacity 320ms ease;
+}
+
+.rg-sysscroll__right:hover .rg-sysscroll__dots--hover {
+  opacity: 0.55;
 }
 
 .rg-sysscroll__image-frame {
   position: relative;
+  /* z-index > 0 pra ficar acima dos dot pattern layers (::before/::after). */
+  z-index: 1;
   width: min(60%, 380px);
   height: min(72vh, 620px);
   border-radius: var(--rg-radius-2xl);
@@ -427,47 +498,33 @@ onBeforeUnmount(() => {
 }
 
 /* Cada slide ocupa 100% do frame, empilhados verticalmente.
-   O stack tem altura total = N × 100%, e transladamos -100% por slide. */
+   O stack tem altura total = stackLength × 100%, e transladamos
+   -globalProgress × 100% pra revelar a imagem certa. */
 .rg-sysscroll__image-slide {
   width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 
-/* Placeholder mock: mostra o ícone gigante + título — pra ser substituído
-   por imagens reais quando recebermos do usuário. */
-.rg-sysscroll__image-mock {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--rg-space-4);
+.rg-sysscroll__image-img {
+  display: block;
   width: 100%;
   height: 100%;
-  padding: var(--rg-space-8);
-  color: white;
-  text-align: center;
+  object-fit: cover;
 }
 
-.rg-sysscroll__image-mock :deep(.v-icon) {
-  opacity: 0.92;
-  filter: drop-shadow(0 8px 24px rgba(15, 23, 42, 0.18));
+/* Splash final: imagem da marca em fundo claro — usa contain pra preservar
+   composição do logo sem cortar bordas. */
+.rg-sysscroll__image-slide--splash {
+  background-color: var(--rg-color-surface-base);
 }
 
-.rg-sysscroll__image-label {
-  font-size: var(--rg-font-size-xl);
-  font-weight: var(--rg-font-weight-bold);
-  letter-spacing: var(--rg-letter-spacing-tight);
-}
-
-.rg-sysscroll__image-hint {
-  font-size: var(--rg-font-size-xs);
-  font-weight: var(--rg-font-weight-semibold);
-  letter-spacing: var(--rg-letter-spacing-wide);
-  text-transform: uppercase;
-  opacity: 0.7;
+.rg-sysscroll__image-slide--splash .rg-sysscroll__image-img {
+  object-fit: contain;
+  padding: var(--rg-space-4);
 }
 
 /* ============ Responsivo ============ */
