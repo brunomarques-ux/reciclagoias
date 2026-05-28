@@ -477,8 +477,8 @@ onBeforeUnmount(() => {
 .rg-sysscroll__dots--base {
   background-image: radial-gradient(
     circle at center,
-    var(--rg-primitive-brand-300) 12%,
-    transparent 16%
+    var(--rg-primitive-brand-300) 9%,
+    transparent 13%
   );
   /* Opacity baixa pra ficar bem discreto — quase imperceptível, só dá textura
      ao fundo. A lanterna do hover é que cria o destaque visual. */
@@ -492,8 +492,8 @@ onBeforeUnmount(() => {
 .rg-sysscroll__dots--hover {
   background-image: radial-gradient(
     circle at center,
-    var(--rg-primitive-brand-400) 12%,
-    transparent 16%
+    var(--rg-primitive-brand-400) 9%,
+    transparent 13%
   );
   opacity: 0;
   transition: opacity 280ms ease;
