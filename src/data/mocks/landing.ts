@@ -1,94 +1,17 @@
 /**
- * Mocks centralizados da landing page.
+ * Mocks centralizados da landing page Recicla Goiás.
  *
  * Todos os nomes de empresas/pessoas aqui são fictícios e claramente
  * marcados como exemplos. Números são plausíveis mas não refletem
  * dados reais do sistema de produção.
+ *
+ * Cada bloco abaixo é consumido por exatamente uma seção da landing —
+ * mantemos só o que está em uso pra evitar mocks órfãos.
  */
 
-export type MaterialKey = 'paper' | 'plastic' | 'metal' | 'glass';
-
-export interface DashboardStat {
-  key: 'total' | MaterialKey;
-  label: string;
-  value: number;
-  unit: string;
-  delta?: { value: number; label: string };
-  icon: string;
-  tone: 'brand' | MaterialKey;
-}
-
-export const baseYear = 2024;
-
-export const dashboardStats: DashboardStat[] = [
-  {
-    key: 'total',
-    label: 'Saldo disponível',
-    value: 34970,
-    unit: 't',
-    delta: { value: 12.4, label: 'vs. 2023' },
-    icon: 'mdi-recycle-variant',
-    tone: 'brand',
-  },
-  {
-    key: 'paper',
-    label: 'Papel',
-    value: 14150,
-    unit: 't',
-    delta: { value: 8.2, label: 'vs. 2023' },
-    icon: 'mdi-newspaper-variant-outline',
-    tone: 'paper',
-  },
-  {
-    key: 'plastic',
-    label: 'Plástico',
-    value: 6970,
-    unit: 't',
-    delta: { value: 18.9, label: 'vs. 2023' },
-    icon: 'mdi-bottle-soda-classic-outline',
-    tone: 'plastic',
-  },
-  {
-    key: 'metal',
-    label: 'Metal',
-    value: 12400,
-    unit: 't',
-    delta: { value: 6.1, label: 'vs. 2023' },
-    icon: 'mdi-silverware-fork-knife',
-    tone: 'metal',
-  },
-  {
-    key: 'glass',
-    label: 'Vidro',
-    value: 1500,
-    unit: 't',
-    delta: { value: -3.4, label: 'vs. 2023' },
-    icon: 'mdi-glass-fragile',
-    tone: 'glass',
-  },
-];
-
 // ============================================================================
-// Logística Reversa — diagrama circular (S2)
-// ============================================================================
-
-export interface CycleStage {
-  key: string;
-  label: string;
-  icon: string;
-}
-
-export const reverseLogisticsCycle: CycleStage[] = [
-  { key: 'recycle',    label: 'Reciclagem',         icon: 'mdi-recycle' },
-  { key: 'industry',   label: 'Indústria',          icon: 'mdi-factory' },
-  { key: 'distrib',    label: 'Distribuição',       icon: 'mdi-truck-fast-outline' },
-  { key: 'retail',     label: 'Varejo',             icon: 'mdi-storefront-outline' },
-  { key: 'consumer',   label: 'Consumidor',         icon: 'mdi-account-group-outline' },
-  { key: 'collection', label: 'Coleta e seleção',   icon: 'mdi-trash-can-outline' },
-];
-
-// ============================================================================
-// O que é Logística Reversa — 3 cards com foto + descrição
+// "O que é Logística Reversa" — 3 cards com foto + descrição
+// Consumido por: LandingWhatIsLR.vue
 // ============================================================================
 
 export interface WhatIsCard {
@@ -127,7 +50,8 @@ export const whatIsCards: WhatIsCard[] = [
 ];
 
 // ============================================================================
-// Como Funciona — 3 passos do site atual (Cadastre-se / Painel / Planos)
+// "Como Funciona" — 3 passos do site atual (Cadastre-se / Painel / Planos)
+// Consumido por: LandingHowItWorks.vue
 // ============================================================================
 
 export interface HowItWorksStep {
@@ -163,6 +87,8 @@ export const howItWorksSteps: HowItWorksStep[] = [
 
 // ============================================================================
 // Prêmio PMI Goiás 2025
+// Consumido por: LandingPremio.vue (texto inline; este export documenta o
+// contexto institucional pra futura ampliação da seção)
 // ============================================================================
 
 export const award = {
@@ -182,7 +108,8 @@ export const award = {
 };
 
 // ============================================================================
-// Comitê — 8 secretarias / órgãos parceiros
+// Comitê Gestor — 8 secretarias / órgãos parceiros do Estado de Goiás
+// Consumido por: LandingComite.vue
 // ============================================================================
 
 export interface CommitteeMember {
@@ -204,29 +131,8 @@ export const committeeMembers: CommitteeMember[] = [
 ];
 
 // ============================================================================
-// Diagrama de fluxo da Logística Reversa (S4)
-// ============================================================================
-
-export interface FlowNode {
-  id: string;
-  label: string;
-  variant: 'soft' | 'strong' | 'brand-dark';
-}
-
-export const flowNodes: FlowNode[] = [
-  { id: 'brandOwners',     label: 'Brand Owners',                 variant: 'soft' },
-  { id: 'caixaPreta',      label: 'Caixa Preta',                  variant: 'brand-dark' },
-  { id: 'entidades',       label: 'Entidades gestoras',           variant: 'soft' },
-  { id: 'comite',          label: 'Entidades comitê de LR',       variant: 'soft' },
-  { id: 'semad',           label: 'SEMAD',                        variant: 'soft' },
-  { id: 'consumidor',      label: 'Consumidor',                   variant: 'soft' },
-  { id: 'operadores',      label: 'Operadores da reciclagem',     variant: 'soft' },
-  { id: 'industria',       label: 'Indústria recicladora',        variant: 'soft' },
-  { id: 'verificador',     label: 'Verificador de resultados',    variant: 'strong' },
-];
-
-// ============================================================================
-// Sistema Recicla Goiás (S5) — 4 funcionalidades + texto descritivo
+// Sistema Recicla Goiás — 4 funcionalidades (scrolling showcase)
+// Consumido por: LandingSistema.vue
 // ============================================================================
 
 export interface SystemFeature {
@@ -262,17 +168,16 @@ export const systemFeatures: SystemFeature[] = [
   },
 ];
 
+/** Parágrafos descritivos usados no header da seção Sistema. */
 export const systemDescription = [
   'O Sistema Recicla Goiás foi desenvolvido pela Secretaria de Estado de Indústria, Comércio e Serviços (SIC) com o objetivo de incentivar, facilitar e fortalecer a atuação dos entes envolvidos no estado de Goiás na promoção de boas práticas voltadas ao tratamento de resíduos.',
   'A solução apoia a criação, o acompanhamento e a fiscalização dos Planos de Logística Reversa, contribuindo para a conformidade ambiental e a gestão sustentável.',
   'A plataforma possibilita o cadastro de cooperativas/catadores, fabricantes, importadores, distribuidores, comerciantes e demais participantes da cadeia, promovendo a integração entre os atores envolvidos.',
 ];
 
-export const systemStatusNote =
-  'Atualmente em produção, o sistema passa por evolução contínua, com melhorias e ampliação de funcionalidades.';
-
 // ============================================================================
 // Disclaimer sazonal — Autodeclaração de Não Enquadramento
+// Consumido por: LandingDisclaimer.vue
 // ============================================================================
 
 export const autoDeclaration = {
@@ -285,7 +190,8 @@ export const autoDeclaration = {
 };
 
 // ============================================================================
-// FAQ
+// Perguntas Frequentes — 6 perguntas comuns sobre o sistema
+// Consumido por: LandingFaq.vue
 // ============================================================================
 
 export interface FaqItem {
@@ -328,6 +234,7 @@ export const faqItems: FaqItem[] = [
 
 // ============================================================================
 // Parceiros institucionais (footer)
+// Consumido por: LandingFooter.vue
 // ============================================================================
 
 export interface Partner {
@@ -343,54 +250,3 @@ export const institutionalPartners: Partner[] = [
   { short: 'SGG',      full: 'Secretaria Geral do Governo' },
   { short: 'AGR',      full: 'Agência Goiana de Regulação, Controle e Fiscalização' },
 ];
-
-// ============================================================================
-// Mantidos para compatibilidade (até remoção dos componentes antigos)
-// ============================================================================
-
-export interface ProcessStep {
-  number: string;
-  title: string;
-  description: string;
-  icon: string;
-}
-
-export const processSteps: ProcessStep[] = howItWorksSteps;
-
-export interface Benefit {
-  title: string;
-  description: string;
-  icon: string;
-}
-export const benefits: Benefit[] = [];
-
-export interface UserProfile {
-  slug: string;
-  title: string;
-  summary: string;
-  bullets: string[];
-  icon: string;
-}
-export const userProfiles: UserProfile[] = [];
-
-export interface StatusExample {
-  identifier: string;
-  operator: string;
-  material: MaterialKey;
-  massT: number;
-  status: 'aprovado' | 'enviado' | 'ajuste';
-}
-export const recentDeclarations: StatusExample[] = [];
-
-export const materialLabels: Record<MaterialKey, string> = {
-  paper: 'Papel',
-  plastic: 'Plástico',
-  metal: 'Metal',
-  glass: 'Vidro',
-};
-
-export const statusLabels: Record<StatusExample['status'], string> = {
-  aprovado: 'Aprovado',
-  enviado: 'Enviado',
-  ajuste: 'Em ajuste',
-};

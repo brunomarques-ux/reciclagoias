@@ -7,13 +7,17 @@ interface NavSection {
   label: string;
 }
 
-defineProps<{ sections: NavSection[] }>();
+const props = defineProps<{ sections: NavSection[] }>();
 
 const scrolled = ref(false);
 const overHero = ref(false);
 const drawerOpen = ref(false);
+/** ID da section atualmente "ativa" no viewport — usado pra destacar o
+ *  link correspondente na nav. Atualizado via IntersectionObserver. */
+const activeSectionId = ref<string | null>(null);
 
 let heroObserver: IntersectionObserver | null = null;
+let sectionsObserver: IntersectionObserver | null = null;
 
 function onScroll() {
   scrolled.value = window.scrollY > 16;
@@ -44,23 +48,64 @@ onMounted(async () => {
   await nextTick();
   requestAnimationFrame(() => {
     const heroEl = document.querySelector('[data-rg-hero]');
-    if (!heroEl) return;
+    if (heroEl) {
+      overHero.value = true;
+      heroObserver = new IntersectionObserver(
+        (entries) => {
+          const entry = entries[0];
+          if (entry) overHero.value = entry.intersectionRatio > 0.3;
+        },
+        { threshold: [0, 0.3, 0.6, 1] },
+      );
+      heroObserver.observe(heroEl);
+    }
 
-    overHero.value = true;
-    heroObserver = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        if (entry) overHero.value = entry.intersectionRatio > 0.3;
-      },
-      { threshold: [0, 0.3, 0.6, 1] },
-    );
-    heroObserver.observe(heroEl);
+    // ============ Active section tracking ============
+    // Observa cada section[id] referenciada na nav. A section "mais visível"
+    // (maior intersectionRatio) ganha o estado ativo, destacando o link
+    // correspondente na nav superior.
+    const sectionEls = props.sections
+      .map((s) => document.getElementById(s.id))
+      .filter((el): el is HTMLElement => el !== null);
+
+    if (sectionEls.length > 0) {
+      // Estado interno do observer: ratios por ID, recalcula o "vencedor" a
+      // cada callback.
+      const ratios = new Map<string, number>();
+      sectionsObserver = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            ratios.set(entry.target.id, entry.intersectionRatio);
+          }
+          // Acha o ID com maior ratio (mas só se passar de um threshold mínimo
+          // pra evitar "ativar" sections que mal apareceram).
+          let bestId: string | null = null;
+          let bestRatio = 0.15;
+          for (const [id, ratio] of ratios) {
+            if (ratio > bestRatio) {
+              bestRatio = ratio;
+              bestId = id;
+            }
+          }
+          activeSectionId.value = bestId;
+        },
+        {
+          // Vários thresholds = updates suaves conforme cada section entra/sai.
+          threshold: [0, 0.15, 0.3, 0.5, 0.75, 1],
+          // Considera só a parte central do viewport — evita ativar sections
+          // que estão saindo no topo ou entrando no fundo.
+          rootMargin: '-80px 0px -40% 0px',
+        },
+      );
+      sectionEls.forEach((el) => sectionsObserver?.observe(el));
+    }
   });
 });
 
 onUnmounted(() => {
   window.removeEventListener('scroll', onScroll);
   heroObserver?.disconnect();
+  sectionsObserver?.disconnect();
 });
 </script>
 
@@ -73,26 +118,11 @@ onUnmounted(() => {
   >
     <div class="rg-app-header__inner">
       <a href="#top" class="rg-app-header__brand" aria-label="Recicla Goiás — início">
-        <span class="rg-app-header__brand-mark" aria-hidden="true">
-          <svg viewBox="0 0 32 32" width="28" height="28" role="img" aria-hidden="true">
-            <path
-              d="M16 2 L29 9.5 V22.5 L16 30 L3 22.5 V9.5 Z"
-              fill="var(--rg-primitive-brand-600)"
-            />
-            <path
-              d="M11 19 L15 12 L19 17 L23 11"
-              fill="none"
-              stroke="white"
-              stroke-width="2.2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-        </span>
-        <span class="rg-app-header__brand-text">
-          <strong>Recicla</strong>
-          <em>Goiás</em>
-        </span>
+        <img
+          src="/brand/recicla-logo-horizontal.svg"
+          alt="Recicla Goiás"
+          class="rg-app-header__brand-logo"
+        />
       </a>
 
       <nav class="rg-app-header__nav" aria-label="Principal">
@@ -100,13 +130,16 @@ onUnmounted(() => {
           v-for="section in sections"
           :key="section.id"
           :href="`#${section.id}`"
-          class="rg-app-header__link"
+          :class="[
+            'rg-app-header__link',
+            { 'is-active': activeSectionId === section.id },
+          ]"
+          :aria-current="activeSectionId === section.id ? 'location' : undefined"
           @click="onNavClick($event, section.id)"
         >{{ section.label }}</a>
       </nav>
 
       <div class="rg-app-header__ctas">
-        <RgButton variant="ghost" size="sm" href="#acessar">Cadastrar-se</RgButton>
         <RgButton variant="primary" size="sm" href="#acessar" icon-right="mdi-arrow-right">
           Acessar sistema
         </RgButton>
@@ -194,7 +227,10 @@ onUnmounted(() => {
 .rg-app-header__inner {
   max-width: var(--rg-container-page);
   margin-inline: auto;
-  padding: var(--rg-space-3) var(--rg-space-6);
+  /* Padding-y reduzido de 12px → 8px pra compensar o aumento da logo (28→36px)
+     mantendo a altura total da navbar em ~52px. A logo fica um pouquinho
+     mais perto das beiradas top/bottom, conforme combinado. */
+  padding: var(--rg-space-2) var(--rg-space-6);
   display: grid;
   grid-template-columns: auto 1fr auto auto;
   gap: var(--rg-space-6);
@@ -204,30 +240,18 @@ onUnmounted(() => {
 .rg-app-header__brand {
   display: inline-flex;
   align-items: center;
-  gap: var(--rg-space-2);
 }
-.rg-app-header__brand-mark {
-  display: inline-flex;
-}
-.rg-app-header__brand-text {
-  display: inline-flex;
-  flex-direction: column;
-  line-height: 1;
-  font-family: var(--rg-font-family-sans);
-}
-.rg-app-header__brand-text strong {
-  font-size: var(--rg-font-size-lg);
-  font-weight: var(--rg-font-weight-bold);
-  color: var(--rg-color-text-primary);
-  letter-spacing: var(--rg-letter-spacing-tight);
-}
-.rg-app-header__brand-text em {
-  font-style: normal;
-  font-size: var(--rg-font-size-xs);
-  font-weight: var(--rg-font-weight-semibold);
-  color: var(--rg-color-text-brand);
-  letter-spacing: var(--rg-letter-spacing-eyebrow);
-  text-transform: uppercase;
+
+/* Logo SVG horizontal Recicla Goiás. Altura 36px — maior que a versão
+   anterior (28px) pra ficar legível inclusive a palavra "Goiás" pequena.
+   Largura escala proporcionalmente (ratio nativo ~2.83:1 → ~102px).
+   A altura total da navbar é mantida via redução do padding-y do __inner. */
+.rg-app-header__brand-logo {
+  display: block;
+  height: 36px;
+  width: auto;
+  /* Em modo "over hero" (fundo escuro) aplicamos filter pra logo ficar visível. */
+  transition: filter var(--rg-motion-duration-base) var(--rg-motion-ease-standard);
 }
 
 .rg-app-header__nav {
@@ -237,6 +261,7 @@ onUnmounted(() => {
 }
 
 .rg-app-header__link {
+  position: relative;
   padding: var(--rg-space-2) var(--rg-space-3);
   border-radius: var(--rg-radius-md);
   font-size: var(--rg-font-size-sm);
@@ -250,10 +275,42 @@ onUnmounted(() => {
   background-color: var(--rg-color-surface-muted);
 }
 
+/* Estado ativo — link da section atualmente visível no viewport ganha
+   destaque verde brand (texto + leve fundo + sublinhado animado). */
+.rg-app-header__link.is-active {
+  color: var(--rg-primitive-brand-700);
+  background-color: var(--rg-primitive-brand-50);
+  font-weight: var(--rg-font-weight-semibold);
+}
+.rg-app-header__link.is-active::after {
+  content: '';
+  position: absolute;
+  left: var(--rg-space-3);
+  right: var(--rg-space-3);
+  bottom: 2px;
+  height: 2px;
+  border-radius: var(--rg-radius-pill);
+  background-color: var(--rg-primitive-brand-500);
+}
+
 .rg-app-header__ctas {
   display: flex;
   gap: var(--rg-space-2);
   align-items: center;
+}
+
+/* Override dos RgButtons no header: força fonte Inter (Vuetify às vezes
+   injeta Roboto nas camadas internas do v-btn) e reduz altura pra 32px
+   (era 36px com size="sm"), garantindo que o navbar mantenha a altura
+   total atual mesmo com o brand-logo SVG de 28px. */
+.rg-app-header__ctas :deep(.rg-button.v-btn),
+.rg-app-header__ctas :deep(.rg-button .v-btn__content) {
+  font-family: var(--rg-font-family-sans) !important;
+}
+.rg-app-header__ctas :deep(.rg-button.v-btn) {
+  height: 32px !important;
+  min-height: 32px !important;
+  font-size: var(--rg-font-size-sm);
 }
 
 .rg-app-header__menu-toggle {
@@ -319,11 +376,11 @@ onUnmounted(() => {
   box-shadow: none;
 }
 
-.rg-app-header--over-hero .rg-app-header__brand-text strong {
-  color: white;
-}
-.rg-app-header--over-hero .rg-app-header__brand-text em {
-  color: var(--rg-primitive-brand-200);
+/* Over hero (fundo escuro): a logo SVG é colorida em tons verdes; aplicamos
+   um filter brightness + saturate pra deixar ela mais clara/legível sobre
+   o brand-950 sem perder a identidade. */
+.rg-app-header--over-hero .rg-app-header__brand-logo {
+  filter: brightness(1.6) saturate(0.85);
 }
 
 .rg-app-header--over-hero .rg-app-header__link {
@@ -332,6 +389,16 @@ onUnmounted(() => {
 .rg-app-header--over-hero .rg-app-header__link:hover {
   color: white;
   background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Estado ativo no over-hero: fundo verde brand mais visível + texto branco
+   e sublinhado em brand-300 (mais claro pra contrastar com o fundo escuro). */
+.rg-app-header--over-hero .rg-app-header__link.is-active {
+  color: white;
+  background-color: rgba(31, 131, 68, 0.32);
+}
+.rg-app-header--over-hero .rg-app-header__link.is-active::after {
+  background-color: var(--rg-primitive-brand-300);
 }
 
 .rg-app-header--over-hero .rg-app-header__menu-toggle {

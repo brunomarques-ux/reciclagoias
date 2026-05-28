@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 
 import RgAppHeader from '@/components/landing/LandingHeader.vue';
+import RgScrollProgress from '@/components/RgScrollProgress.vue';
 import LandingHeroScrollExpand from '@/components/landing/LandingHeroScrollExpand.vue';
 import LandingDisclaimer from '@/components/landing/LandingDisclaimer.vue';
 import LandingWhatIsLR from '@/components/landing/LandingWhatIsLR.vue';
@@ -11,12 +12,15 @@ import LandingComite from '@/components/landing/LandingComite.vue';
 import LandingFlowDiagram from '@/components/landing/LandingFlowDiagram.vue';
 import LandingSistema from '@/components/landing/LandingSistema.vue';
 import LandingFaq from '@/components/landing/LandingFaq.vue';
+import LandingCtaFinal from '@/components/landing/LandingCtaFinal.vue';
 import LandingFooter from '@/components/landing/LandingFooter.vue';
 
 const sections = ref([
   { id: 'sobre',         label: 'O que é' },
   { id: 'como-funciona', label: 'Como funciona' },
+  { id: 'premio',        label: 'Reconhecimento' },
   { id: 'comite',        label: 'Comitê' },
+  { id: 'fluxo',         label: 'Fluxo' },
   { id: 'sistema',       label: 'Sistema' },
   { id: 'duvidas',       label: 'Dúvidas' },
 ]);
@@ -24,8 +28,9 @@ const sections = ref([
 
 <template>
   <RgAppHeader :sections="sections" />
+  <RgScrollProgress />
 
-  <main>
+  <main id="top">
     <LandingHeroScrollExpand
       media-type="video"
       media-src="/hero/hero-video.mp4"
@@ -46,6 +51,7 @@ const sections = ref([
     <LandingFlowDiagram />
     <LandingSistema />
     <LandingFaq id="duvidas" />
+    <LandingCtaFinal />
   </main>
 
   <LandingFooter />

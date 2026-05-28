@@ -1,27 +1,49 @@
 <script setup lang="ts">
+/**
+ * CTA final — segue Figma node 45:1000.
+ *
+ * Layout simples e compacto: logo 3D pequena à esquerda + título em 2 linhas
+ * (com "logística reversa" em verde) + botão primário "Acessar sistema" à
+ * direita. Background no tint verde claro #F1F7F3 (mesmo de Como Funciona e
+ * Fluxo de Operação).
+ *
+ * Substitui a antiga seção "Acesso à plataforma" — versão anterior era
+ * uma faixa verde escura com 2 botões; agora é minimalista.
+ */
 import RgButton from '@/components/RgButton.vue';
 </script>
 
 <template>
   <section id="acessar" class="rg-cta" aria-labelledby="rg-cta-title">
     <div class="rg-cta__inner">
-      <div class="rg-cta__copy">
-        <span class="rg-cta__eyebrow">Acesso à plataforma</span>
+      <div class="rg-cta__content">
+        <!-- Logo 3D pequena (mesma do hero do Fluxo de Operação) -->
+        <img
+          src="/fluxo/logo-3d.png"
+          alt=""
+          class="rg-cta__logo"
+          aria-hidden="true"
+        />
+
         <h2 id="rg-cta-title" class="rg-cta__title">
-          Pronto para acompanhar a logística reversa da sua empresa em um só lugar?
+          <span class="rg-cta__title-line">
+            Pronto para começar a sua jornada
+          </span>
+          <span class="rg-cta__title-line">
+            de <span class="rg-cta__title-accent">logística reversa</span>?
+          </span>
         </h2>
-        <p class="rg-cta__lede">
-          Solicite acesso, escolha o perfil correto e comece a operar o Recicla Goiás
-          com rastreabilidade real e suporte do comitê gestor.
-        </p>
       </div>
 
-      <div class="rg-cta__actions">
-        <RgButton variant="primary" size="lg" href="#" icon-right="mdi-arrow-right">
+      <div class="rg-cta__action">
+        <RgButton
+          variant="primary"
+          size="lg"
+          href="#acessar"
+          icon-right="mdi-arrow-right"
+          aria-label="Acessar sistema Recicla Goiás"
+        >
           Acessar sistema
-        </RgButton>
-        <RgButton variant="outline" size="lg" href="#" icon="mdi-help-circle-outline">
-          Falar com a equipe
         </RgButton>
       </div>
     </div>
@@ -30,83 +52,86 @@ import RgButton from '@/components/RgButton.vue';
 
 <style scoped>
 .rg-cta {
-  padding: var(--rg-space-20) var(--rg-space-6);
-  background:
-    radial-gradient(800px 400px at 80% 20%, rgba(31, 131, 68, 0.45), transparent 70%),
-    linear-gradient(135deg, var(--rg-primitive-brand-900), var(--rg-primitive-brand-800));
-  color: var(--rg-color-text-on-inverse);
+  position: relative;
+  /* Padding vertical de 72px (48px base + 24px de respiro extra pedidos) —
+     deixa a faixa um pouco mais larga sem virar uma section grande. */
+  padding: 72px var(--rg-space-6);
+  /* Mesmo tint do Como Funciona e Fluxo (alternância cromática entre seções claras). */
+  background-color: #F1F7F3;
 }
 
 .rg-cta__inner {
   max-width: var(--rg-container-page);
   margin-inline: auto;
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) auto;
-  gap: var(--rg-space-12);
+  /* Conteúdo cresce, ação fixa à direita. */
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
+  gap: var(--rg-space-8);
 }
 
-.rg-cta__copy {
+.rg-cta__content {
   display: flex;
-  flex-direction: column;
-  gap: var(--rg-space-3);
+  align-items: center;
+  gap: var(--rg-space-5);
 }
 
-.rg-cta__eyebrow {
-  font-size: var(--rg-font-size-xs);
-  font-weight: var(--rg-font-weight-semibold);
-  letter-spacing: var(--rg-letter-spacing-eyebrow);
-  text-transform: uppercase;
-  color: var(--rg-primitive-brand-200);
+.rg-cta__logo {
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 18px rgba(15, 70, 35, 0.18));
 }
 
 .rg-cta__title {
   margin: 0;
-  font-size: clamp(28px, 3.5vw, 44px);
-  line-height: var(--rg-line-height-tight);
-  letter-spacing: var(--rg-letter-spacing-tight);
-  font-weight: var(--rg-font-weight-bold);
-  color: var(--rg-color-text-on-inverse);
-}
-
-.rg-cta__lede {
-  margin: 0;
-  font-size: var(--rg-font-size-lg);
-  line-height: var(--rg-line-height-relaxed);
-  color: rgba(255, 255, 255, 0.82);
-  max-width: 600px;
-}
-
-.rg-cta__actions {
   display: flex;
   flex-direction: column;
-  gap: var(--rg-space-3);
-  min-width: 220px;
+  font-size: clamp(20px, 2.2vw, 28px);
+  line-height: 1.2;
+  font-weight: var(--rg-font-weight-bold);
+  letter-spacing: var(--rg-letter-spacing-tight);
+  color: var(--rg-color-text-primary);
 }
 
-/* O botão outline na superfície escura: ajustes contextuais. */
-.rg-cta__actions :deep(.rg-button--outline) {
-  background-color: rgba(255, 255, 255, 0.06) !important;
-  color: var(--rg-color-text-on-inverse) !important;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.32);
-}
-.rg-cta__actions :deep(.rg-button--outline:hover) {
-  background-color: rgba(255, 255, 255, 0.12) !important;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+.rg-cta__title-line {
+  display: block;
 }
 
+/* "logística reversa" em verde brand-500 — mesmo padrão das outras seções. */
+.rg-cta__title-accent {
+  color: var(--rg-primitive-brand-500);
+}
+
+.rg-cta__action {
+  flex-shrink: 0;
+}
+
+/* ============ Responsivo ============ */
 @media (max-width: 960px) {
   .rg-cta__inner {
     grid-template-columns: 1fr;
-    gap: var(--rg-space-8);
+    text-align: center;
+    gap: var(--rg-space-6);
   }
-  .rg-cta__actions {
-    flex-direction: row;
-    flex-wrap: wrap;
+  .rg-cta__content {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--rg-space-4);
+  }
+  .rg-cta__title {
+    align-items: center;
   }
 }
+
 @media (max-width: 640px) {
-  .rg-cta { padding: var(--rg-space-14) var(--rg-space-4); }
-  .rg-cta__actions { flex-direction: column; }
+  .rg-cta {
+    padding: var(--rg-space-10) var(--rg-space-4);
+  }
+  .rg-cta__logo {
+    width: 56px;
+    height: 56px;
+  }
 }
 </style>
