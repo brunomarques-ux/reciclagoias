@@ -7,13 +7,17 @@ interface NavSection {
   label: string;
 }
 
-defineProps<{ sections: NavSection[] }>();
+const props = defineProps<{ sections: NavSection[] }>();
 
 const scrolled = ref(false);
 const overHero = ref(false);
 const drawerOpen = ref(false);
+/** ID da section atualmente "ativa" no viewport — usado pra destacar o
+ *  link correspondente na nav. Atualizado via IntersectionObserver. */
+const activeSectionId = ref<string | null>(null);
 
 let heroObserver: IntersectionObserver | null = null;
+let sectionsObserver: IntersectionObserver | null = null;
 
 function onScroll() {
   scrolled.value = window.scrollY > 16;
@@ -44,23 +48,64 @@ onMounted(async () => {
   await nextTick();
   requestAnimationFrame(() => {
     const heroEl = document.querySelector('[data-rg-hero]');
-    if (!heroEl) return;
+    if (heroEl) {
+      overHero.value = true;
+      heroObserver = new IntersectionObserver(
+        (entries) => {
+          const entry = entries[0];
+          if (entry) overHero.value = entry.intersectionRatio > 0.3;
+        },
+        { threshold: [0, 0.3, 0.6, 1] },
+      );
+      heroObserver.observe(heroEl);
+    }
 
-    overHero.value = true;
-    heroObserver = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        if (entry) overHero.value = entry.intersectionRatio > 0.3;
-      },
-      { threshold: [0, 0.3, 0.6, 1] },
-    );
-    heroObserver.observe(heroEl);
+    // ============ Active section tracking ============
+    // Observa cada section[id] referenciada na nav. A section "mais visível"
+    // (maior intersectionRatio) ganha o estado ativo, destacando o link
+    // correspondente na nav superior.
+    const sectionEls = props.sections
+      .map((s) => document.getElementById(s.id))
+      .filter((el): el is HTMLElement => el !== null);
+
+    if (sectionEls.length > 0) {
+      // Estado interno do observer: ratios por ID, recalcula o "vencedor" a
+      // cada callback.
+      const ratios = new Map<string, number>();
+      sectionsObserver = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            ratios.set(entry.target.id, entry.intersectionRatio);
+          }
+          // Acha o ID com maior ratio (mas só se passar de um threshold mínimo
+          // pra evitar "ativar" sections que mal apareceram).
+          let bestId: string | null = null;
+          let bestRatio = 0.15;
+          for (const [id, ratio] of ratios) {
+            if (ratio > bestRatio) {
+              bestRatio = ratio;
+              bestId = id;
+            }
+          }
+          activeSectionId.value = bestId;
+        },
+        {
+          // Vários thresholds = updates suaves conforme cada section entra/sai.
+          threshold: [0, 0.15, 0.3, 0.5, 0.75, 1],
+          // Considera só a parte central do viewport — evita ativar sections
+          // que estão saindo no topo ou entrando no fundo.
+          rootMargin: '-80px 0px -40% 0px',
+        },
+      );
+      sectionEls.forEach((el) => sectionsObserver?.observe(el));
+    }
   });
 });
 
 onUnmounted(() => {
   window.removeEventListener('scroll', onScroll);
   heroObserver?.disconnect();
+  sectionsObserver?.disconnect();
 });
 </script>
 
@@ -85,13 +130,16 @@ onUnmounted(() => {
           v-for="section in sections"
           :key="section.id"
           :href="`#${section.id}`"
-          class="rg-app-header__link"
+          :class="[
+            'rg-app-header__link',
+            { 'is-active': activeSectionId === section.id },
+          ]"
+          :aria-current="activeSectionId === section.id ? 'location' : undefined"
           @click="onNavClick($event, section.id)"
         >{{ section.label }}</a>
       </nav>
 
       <div class="rg-app-header__ctas">
-        <RgButton variant="ghost" size="sm" href="#acessar">Cadastrar-se</RgButton>
         <RgButton variant="primary" size="sm" href="#acessar" icon-right="mdi-arrow-right">
           Acessar sistema
         </RgButton>
@@ -213,6 +261,7 @@ onUnmounted(() => {
 }
 
 .rg-app-header__link {
+  position: relative;
   padding: var(--rg-space-2) var(--rg-space-3);
   border-radius: var(--rg-radius-md);
   font-size: var(--rg-font-size-sm);
@@ -224,6 +273,24 @@ onUnmounted(() => {
 .rg-app-header__link:hover {
   color: var(--rg-color-text-primary);
   background-color: var(--rg-color-surface-muted);
+}
+
+/* Estado ativo — link da section atualmente visível no viewport ganha
+   destaque verde brand (texto + leve fundo + sublinhado animado). */
+.rg-app-header__link.is-active {
+  color: var(--rg-primitive-brand-700);
+  background-color: var(--rg-primitive-brand-50);
+  font-weight: var(--rg-font-weight-semibold);
+}
+.rg-app-header__link.is-active::after {
+  content: '';
+  position: absolute;
+  left: var(--rg-space-3);
+  right: var(--rg-space-3);
+  bottom: 2px;
+  height: 2px;
+  border-radius: var(--rg-radius-pill);
+  background-color: var(--rg-primitive-brand-500);
 }
 
 .rg-app-header__ctas {
@@ -322,6 +389,16 @@ onUnmounted(() => {
 .rg-app-header--over-hero .rg-app-header__link:hover {
   color: white;
   background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Estado ativo no over-hero: fundo verde brand mais visível + texto branco
+   e sublinhado em brand-300 (mais claro pra contrastar com o fundo escuro). */
+.rg-app-header--over-hero .rg-app-header__link.is-active {
+  color: white;
+  background-color: rgba(31, 131, 68, 0.32);
+}
+.rg-app-header--over-hero .rg-app-header__link.is-active::after {
+  background-color: var(--rg-primitive-brand-300);
 }
 
 .rg-app-header--over-hero .rg-app-header__menu-toggle {

@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 
 import RgAppHeader from '@/components/landing/LandingHeader.vue';
+import RgScrollProgress from '@/components/RgScrollProgress.vue';
 import LandingHeroScrollExpand from '@/components/landing/LandingHeroScrollExpand.vue';
 import LandingDisclaimer from '@/components/landing/LandingDisclaimer.vue';
 import LandingWhatIsLR from '@/components/landing/LandingWhatIsLR.vue';
@@ -27,6 +28,7 @@ const sections = ref([
 
 <template>
   <RgAppHeader :sections="sections" />
+  <RgScrollProgress />
 
   <main>
     <LandingHeroScrollExpand
