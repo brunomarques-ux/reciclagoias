@@ -250,6 +250,10 @@ onBeforeUnmount(() => {
   gap: var(--rg-space-6);
 }
 
+/* Container alinhado à mesma largura do card "Fale Conosco" abaixo (280px):
+   o balão 1 começa no left:0 (alinhado ao início do card) e o balão 3
+   termina no right:0 (alinhado ao fim do card), criando uma composição
+   horizontal balanceada com o card. */
 .rg-faq__balloons {
   position: relative;
   width: 280px;
@@ -257,46 +261,60 @@ onBeforeUnmount(() => {
 }
 
 /* Balões: usam --p (0..1) pra animar opacity e translateY conforme o scroll
-   atinge cada balão. Cada um tem tamanho, posição e blur distintos. */
+   atinge cada balão. Cada um tem tamanho, posição, rotação e blur distintos
+   pra criar a sensação de "movimento desalinhado", igual ao Figma. */
 .rg-faq__balloon {
   position: absolute;
   object-fit: contain;
   opacity: var(--p, 0);
-  /* Começa em translateY -180% (acima da section, "escondido atrás do Sistema")
-     e desce até 0 conforme p vai de 0 a 1. */
-  transform: translateY(calc((1 - var(--p, 0)) * -180%));
+  /* Começa em translateY -180% (acima da section, "escondido atrás do
+     Sistema") e desce até 0 conforme p vai de 0 a 1. A rotação inicial
+     vem do CSS por classe (ver --1/--2/--3 abaixo) e é PRESERVADA — o
+     translateY do reveal NÃO sobrescreve, é multiplicado. */
   will-change: transform, opacity;
-  filter: drop-shadow(0 12px 24px rgba(15, 70, 35, 0.18));
 }
 
-/* Balão 1 — esquerda, maior, sem blur (chega primeiro). */
+/* Balão 1 — esquerda, maior, sem blur, sem rotação (chega primeiro).
+   Alinhado ao início do card "Fale Conosco" (left:0). */
 .rg-faq__balloon--1 {
   left: 0;
   top: 0;
   width: 96px;
   height: 96px;
   z-index: 3;
+  transform: translateY(calc((1 - var(--p, 0)) * -180%));
+  filter: drop-shadow(0 12px 24px rgba(15, 70, 35, 0.18));
 }
 
-/* Balão 2 — centro, médio, blur 2px (chega no meio). */
+/* Balão 2 — centro, MENOR (56px), blur 2px, levemente rotacionado pra cima
+   e deslocado verticalmente pra dar sensação de movimento orgânico. */
 .rg-faq__balloon--2 {
-  left: 88px;
-  top: 8px;
-  width: 80px;
-  height: 80px;
+  /* Posicionado no centro horizontal do container (280px - 56px = 224px
+     restante, / 2 = 112px). */
+  left: 112px;
+  top: -6px;
+  width: 56px;
+  height: 56px;
   z-index: 2;
+  transform:
+    translateY(calc((1 - var(--p, 0)) * -180%))
+    rotate(-10deg);
   filter:
     blur(2px)
     drop-shadow(0 10px 18px rgba(15, 70, 35, 0.15));
 }
 
-/* Balão 3 — direita, menor, blur 4px (chega por último). */
+/* Balão 3 — direita, AINDA MENOR (44px), blur 4px, rotacionado pra baixo
+   e deslocado um pouco pra baixo. Alinhado ao final do card (right:0). */
 .rg-faq__balloon--3 {
-  left: 168px;
-  top: 18px;
-  width: 64px;
-  height: 64px;
+  right: 0;
+  top: 16px;
+  width: 44px;
+  height: 44px;
   z-index: 1;
+  transform:
+    translateY(calc((1 - var(--p, 0)) * -180%))
+    rotate(12deg);
   filter:
     blur(4px)
     drop-shadow(0 8px 14px rgba(15, 70, 35, 0.12));
@@ -337,6 +355,9 @@ onBeforeUnmount(() => {
   text-transform: uppercase;
   color: #647488;
   line-height: var(--rg-line-height-snug);
+  /* Centralizado no card pra balancear com o CTA "Fale Conosco" abaixo, que
+     já é text-align center via flex. */
+  text-align: center;
 }
 
 .rg-faq__contact-cta {
@@ -434,7 +455,11 @@ onBeforeUnmount(() => {
 }
 
 .rg-faq__answer {
-  padding: 0 var(--rg-space-6) var(--rg-space-5);
+  /* Padding-top var(--rg-space-2) = 8px pra dar respiro entre o botão da
+     pergunta e o texto da resposta — antes começava colado, sem zona de
+     silêncio. Não usamos o mesmo do bottom (20px) pra não inflar demais
+     a altura do item aberto. */
+  padding: var(--rg-space-2) var(--rg-space-6) var(--rg-space-5);
 }
 
 .rg-faq__answer p {
