@@ -129,7 +129,11 @@ onBeforeUnmount(() => {
           </div>
 
           <!-- Card "Não encontrou sua dúvida? Fale Conosco" -->
-          <a class="rg-faq__contact" href="#contato">
+          <a
+            class="rg-faq__contact"
+            href="mailto:logisticareversa.meioambiente@gov.goias.br?subject=D%C3%BAvida%20sobre%20o%20Recicla%20Goi%C3%A1s"
+            aria-label="Enviar e-mail com sua dúvida"
+          >
             <span class="rg-faq__contact-label">
               NÃO ENCONTROU SUA DÚVIDA?
             </span>

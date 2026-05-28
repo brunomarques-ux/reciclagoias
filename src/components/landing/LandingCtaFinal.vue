@@ -39,8 +39,9 @@ import RgButton from '@/components/RgButton.vue';
         <RgButton
           variant="primary"
           size="lg"
-          href="#"
+          href="#acessar"
           icon-right="mdi-arrow-right"
+          aria-label="Acessar sistema Recicla Goiás"
         >
           Acessar sistema
         </RgButton>

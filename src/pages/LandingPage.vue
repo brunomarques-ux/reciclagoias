@@ -30,7 +30,7 @@ const sections = ref([
   <RgAppHeader :sections="sections" />
   <RgScrollProgress />
 
-  <main>
+  <main id="top">
     <LandingHeroScrollExpand
       media-type="video"
       media-src="/hero/hero-video.mp4"
