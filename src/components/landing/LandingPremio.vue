@@ -532,5 +532,14 @@ onBeforeUnmount(() => observer?.disconnect());
   .rg-premio__meta {
     grid-template-columns: 1fr;
   }
+  /* No mobile o CTA "Conhecer o PMI Goiás" estica pra ocupar a largura total
+     do bloco de descrição — vira um botão "block-level" pra ganhar peso visual
+     e ficar fácil de tocar. No desktop continua inline-flex (align-self:
+     flex-start), seguindo o desenho original. */
+  .rg-premio__cta {
+    display: flex;
+    align-self: stretch;
+    justify-content: center;
+  }
 }
 </style>

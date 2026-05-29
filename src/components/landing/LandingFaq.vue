@@ -535,6 +535,12 @@ onBeforeUnmount(() => {
   .rg-faq__answer {
     padding: var(--rg-space-2) var(--rg-space-5) var(--rg-space-4);
   }
+  /* No mobile o card "Não encontrou sua dúvida?" ocupa a largura total
+     da coluna pra ganhar peso visual — o limite 280px só faz sentido no
+     desktop, onde ele divide espaço com os balões 3D à esquerda. */
+  .rg-faq__contact {
+    max-width: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

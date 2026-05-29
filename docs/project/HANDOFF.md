@@ -2,7 +2,13 @@
 
 > Documento de transferência da landing page prototipada → time de desenvolvimento que vai integrá-la ao **Sistema Recicla Goiás** em produção (Vuetify + Vue).
 
-**Versão:** 1.0 · **Data:** Maio 2026 · **Repositório:** [`brunomarques-ux/reciclagoias`](https://github.com/brunomarques-ux/reciclagoias)
+**Versão:** 1.1 · **Data:** Maio 2026 · **Repositório:** [`brunomarques-ux/reciclagoias`](https://github.com/brunomarques-ux/reciclagoias)
+
+**Mudanças vs 1.0** (PRs #8, #9, #10, #11):
+- Reconhecimento: certificado substituído pelo **logo PMI Goiás oficial** + bloco descritivo institucional; **3 highlights** entram da esquerda em sequência ao scroll.
+- Como Funciona: sequência **animada completa** — bolinhas crescem, cards entram baixo→cima, linha tracejada preenche em verde, checks fazem pop, seta final pulsa infinito.
+- Comitê Gestor: **contador 0→8** no título + reveal sequencial das 8 instituições (250ms por step, total ~2s).
+- Mobile: CTAs "Não encontrou sua dúvida?" e "Conhecer o PMI Goiás" agora ocupam **largura total** no mobile.
 
 ---
 
@@ -176,6 +182,26 @@ Section ocupa `stackLength × 100vh` (= 5 viewports com 4 slides + splash). Stic
 ### FAQ accordion não-exclusivo (`LandingFaq.vue`)
 Substitui o `v-expansion-panels` do Vuetify por implementação custom — múltiplos itens abertos simultaneamente via `Set<number>` reativo. Transição CSS de `max-height` 0→500px + opacity. 3 balões 3D no header com **reveal sequencial** (cada um termina em uma fração diferente do scroll progress: 45%, 73%, 100%).
 
+### Sequência animada do Como Funciona (`LandingHowItWorks.vue`)
+Quando a section entra no viewport (`IntersectionObserver` threshold 0.35), dispara timeline 0–4000ms **CSS-only** (via `animation-delay`) coordenando:
+- **3 bullets numerados** crescem (`scale 0 → 1`) com `cubic-bezier(0.34, 1.56, 0.64, 1)` em 0/1200/2400ms.
+- **3 cards** entram de baixo (translateY 24 → 0) sincronizados com cada bullet.
+- **Linha tracejada** dividida em 3 segmentos `--1/--2/--3`, cada um aparece (fade-in) só conforme o avanço — começa invisível.
+- **Fill verde brand-500** preenche cada segmento via `scaleX(0 → 1)` com `transform-origin: left`, terminando **exatamente** na próxima bolinha (largura `33.333%` precisa).
+- **2 checks** (entre 1↔2 e 2↔3) fazem pop após o fill chegar.
+- **Arrow** no fim: cor verde brand-500, fade-in após segmento 3 + **pulso horizontal infinito** (`translateX -6px ↔ +6px`, 1500ms) sinalizando continuidade.
+- Bullets de intro à direita (introLines) entram com blur + translateX, stagger 60ms.
+
+### Reconhecimento — bullets entrando da esquerda (`LandingPremio.vue`)
+IntersectionObserver com threshold 0.3 marca a section como `is-visible`. Os 3 highlights (`<li class="rg-premio__highlight">`) recebem `--rg-h-i` por index, ficam inicialmente em `opacity 0 + translateX(-32px)`, e entram com transition 540ms `cubic-bezier(0.2, 0.8, 0.2, 1)` em stagger de **240ms**. Logo PMI agora é PNG oficial (`/premio/pmi-goias-logo.png`).
+
+### Comitê Gestor — contador 0→8 + reveal sequencial (`LandingComite.vue`)
+IntersectionObserver threshold 0.3 dispara uma sequência de ~2s:
+- Counter no título sobe **0 → 8** em incrementos de **250ms** (delay inicial 150ms).
+- A cada incremento, a instituição correspondente é revelada de cima pra baixo (`opacity 0 + translateY(-8px) + scale(0.97)` → `1 + 0 + 1`).
+- O `<span>` do counter usa `:key="counter"` pra forçar re-render → dispara `@keyframes` de pop com overshoot (scale 0.6 → 1.12 → 1) em 260ms.
+- A11y: `aria-live="polite"` anuncia só o valor final; `aria-hidden` no número visual.
+
 ---
 
 ## 7. Tokens & convenções
@@ -217,7 +243,7 @@ Escala base 4px. Mais usados: `--rg-space-2` (8), `--rg-space-3` (12), `--rg-spa
 | `public/brand/` | Logos SVG (horizontal + isotipo) |
 | `public/hero/` | bg-hero-v2.jpg, hero-video.mp4 |
 | `public/whatis/` | card1/2/3 (jpg/webp) + pin/factory icons (PNG) |
-| `public/premio/` | certificado.png + 4 ícones (medal/people/calendar/trophy) |
+| `public/premio/` | **pmi-goias-logo.png** (logo oficial PMI) + certificado legacy + 4 ícones (medal/people/calendar/trophy) |
 | `public/fluxo/` | diagrama-fluxo.png + logo-3d.png |
 | `public/sistema/` | 4 slides (cadastro/metas/validação/fiscalização) + end-splash |
 | `public/faq/` | doubt-icon.png |
