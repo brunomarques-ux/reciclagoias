@@ -1,9 +1,4 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import RgLightbox from '@/components/RgLightbox.vue';
-
-const lightboxOpen = ref(false);
-
 const highlights = [
   {
     icon: '/premio/medal-icon.png',
@@ -20,6 +15,15 @@ const highlights = [
     title: '18º Seminário',
     sub: 'Em Gestão, Projetos e Liderança',
   },
+];
+
+/** Metadados oficiais da premiação extraídos do certificado e do site
+ *  institucional do PMI Goiás. */
+const awardMeta = [
+  { label: 'Categoria', value: 'Projeto' },
+  { label: 'Edição', value: '2025 · 18º Seminário' },
+  { label: 'Cidade', value: 'Goiânia, GO' },
+  { label: 'Outorga', value: 'GETI/SIC + CLR/SIC' },
 ];
 </script>
 
@@ -65,18 +69,25 @@ const highlights = [
         </ul>
       </header>
 
-      <!-- Certificado clicável: imagem PNG transparente, centralizada, altura fixa 500px -->
-      <div class="rg-premio__cert-wrap">
-        <button
-          type="button"
-          class="rg-premio__cert"
-          aria-label="Abrir certificado em tamanho ampliado · Melhor Projeto PMI Goiás 2025"
-          @click="lightboxOpen = true"
+      <!-- Showcase: logo PMI Goiás à esquerda + bloco descritivo à direita.
+           Substitui o certificado em destaque conforme decisão dos stakeholders
+           (foco institucional na entidade outorgante em vez do documento). -->
+      <div class="rg-premio__showcase">
+        <!-- Card branco com a logo PMI Goiás centralizada e fita de destaque -->
+        <a
+          class="rg-premio__pmi-card"
+          href="https://pmigo.org.br/"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Conhecer o PMI Goiás · abre em nova aba"
         >
+          <!-- Logo PMI Goiás. Placeholder SVG enquanto o arquivo oficial não
+               chega — substituir por public/premio/pmi-goias-logo.png ou .svg
+               oficial fornecido pelo stakeholder. -->
           <img
-            src="/premio/certificado.png"
-            alt="Certificado Melhor Projeto 2025 do PMI Goiás concedido ao Projeto Recicla Goiás"
-            class="rg-premio__cert-img"
+            src="/premio/pmi-goias-logo.svg"
+            alt="Logo PMI Goiás · Project Management Institute Goiás, Brazil"
+            class="rg-premio__pmi-logo"
             loading="lazy"
           />
           <span class="rg-premio__ribbon" aria-hidden="true">
@@ -85,20 +96,41 @@ const highlights = [
             </svg>
             MELHOR PROJETO 2025
           </span>
-          <span class="rg-premio__cert-hint" aria-hidden="true">
-            <v-icon icon="mdi-magnify-plus-outline" size="16" />
-            Clique para ampliar
-          </span>
-        </button>
+        </a>
+
+        <!-- Bloco descritivo: institucional + meta da premiação -->
+        <div class="rg-premio__info">
+          <h3 class="rg-premio__info-title">Sobre o reconhecimento</h3>
+          <p class="rg-premio__info-text">
+            O <strong>Project Management Institute · PMI Goiás</strong> é o capítulo regional
+            do PMI no estado, dedicado a promover a excelência em gerenciamento de projetos
+            no setor público e privado. A categoria <strong>Melhor Projeto</strong> reconhece
+            iniciativas com impacto público mensurável, governança sólida e resultados
+            entregues dentro do escopo, prazo e custo definidos.
+          </p>
+          <p class="rg-premio__info-text">
+            O <strong>Projeto Recicla Goiás</strong> foi laureado durante o 18º Seminário
+            Em Gestão, Projetos e Liderança, em Goiânia.
+          </p>
+
+          <dl class="rg-premio__meta">
+            <div
+              v-for="m in awardMeta"
+              :key="m.label"
+              class="rg-premio__meta-item"
+            >
+              <dt class="rg-premio__meta-label">{{ m.label }}</dt>
+              <dd class="rg-premio__meta-value">{{ m.value }}</dd>
+            </div>
+          </dl>
+
+          <a class="rg-premio__cta" href="https://pmigo.org.br/" target="_blank" rel="noopener noreferrer">
+            <v-icon icon="mdi-open-in-new" size="16" />
+            Conhecer o PMI Goiás
+          </a>
+        </div>
       </div>
     </div>
-
-    <RgLightbox
-      v-model="lightboxOpen"
-      image-src="/premio/certificado.png"
-      alt="Certificado Melhor Projeto 2025 · PMI Goiás · Projeto Recicla Goiás"
-      :zoomable="true"
-    />
   </section>
 </template>
 
@@ -248,54 +280,51 @@ const highlights = [
   line-height: var(--rg-line-height-snug);
 }
 
-/* ============ Certificado ============ */
-.rg-premio__cert-wrap {
-  display: flex;
-  justify-content: center;
-  isolation: isolate; /* contém o mix-blend-mode da img */
+/* ============ Showcase: logo PMI + bloco descritivo ============ */
+.rg-premio__showcase {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: var(--rg-space-10);
+  align-items: stretch;
 }
 
-.rg-premio__cert {
+/* Card branco com a logo PMI Goiás centralizada e fita "Melhor Projeto" */
+.rg-premio__pmi-card {
   position: relative;
-  display: inline-flex;
-  padding: 0;
-  margin: 0;
-  border: none;
-  /* `appearance: none` + `border: none` neutralizam o estilo nativo do <button>;
-     `background-color: transparent` zera o fundo padrão sem precisar de !important. */
-  background-color: transparent;
-  cursor: zoom-in;
-  border-radius: 0;
-  overflow: visible;
-  transition: transform var(--rg-motion-duration-base) var(--rg-motion-ease-standard);
-  -webkit-appearance: none;
-  appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--rg-space-12);
+  background-color: var(--rg-color-surface-base);
+  border: 1px solid var(--rg-color-border-subtle);
+  border-radius: var(--rg-radius-2xl);
+  text-decoration: none;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 12px 32px rgba(15, 23, 42, 0.06);
+  transition:
+    transform var(--rg-motion-duration-base) var(--rg-motion-ease-standard),
+    box-shadow var(--rg-motion-duration-base) var(--rg-motion-ease-standard);
 }
 
-.rg-premio__cert:hover { transform: translateY(-3px); }
-.rg-premio__cert:hover .rg-premio__cert-hint { opacity: 1; transform: translate(-50%, 0); }
+.rg-premio__pmi-card:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 2px 4px rgba(15, 23, 42, 0.06),
+    0 20px 44px rgba(15, 23, 42, 0.10);
+}
 
-.rg-premio__cert:focus-visible {
+.rg-premio__pmi-card:focus-visible {
   outline: 3px solid var(--rg-color-action-primary);
-  outline-offset: 6px;
-  border-radius: var(--rg-radius-md);
+  outline-offset: 4px;
 }
 
-/* PNG vem do Figma com cantos brancos (não transparentes, RGB 253-255).
-   `mix-blend-mode: multiply` sobre o fundo branco da seção funde esses
-   cantos quase-brancos com o background, fazendo "sumir" a box retangular
-   sem alterar visualmente a moldura verde nem o texto. */
-.rg-premio__cert-img {
+.rg-premio__pmi-logo {
   display: block;
-  height: 500px;
-  width: auto;
-  max-width: 100%;
+  width: 100%;
+  max-width: 360px;
+  height: auto;
   object-fit: contain;
-  background-color: transparent;
-  mix-blend-mode: multiply;
-  /* Sem drop-shadow direto: o `mix-blend-mode: multiply` interfere no blending
-     do filter. Se for preciso adicionar sombra no futuro, aplicar via box-shadow
-     no `.rg-premio__cert-wrap` (que tem `isolation: isolate`). */
 }
 
 .rg-premio__ribbon {
@@ -317,27 +346,96 @@ const highlights = [
   pointer-events: none;
 }
 
-.rg-premio__cert-hint {
-  position: absolute;
-  left: 50%;
-  bottom: var(--rg-space-5);
-  transform: translate(-50%, 6px);
+/* Bloco descritivo à direita: subtítulo + 2 parágrafos + metadata + CTA */
+.rg-premio__info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--rg-space-4);
+}
+
+.rg-premio__info-title {
+  margin: 0;
+  font-size: var(--rg-font-size-2xl);
+  font-weight: var(--rg-font-weight-bold);
+  color: var(--rg-color-text-primary);
+  letter-spacing: var(--rg-letter-spacing-tight);
+}
+
+.rg-premio__info-text {
+  margin: 0;
+  font-size: var(--rg-font-size-md);
+  line-height: var(--rg-line-height-relaxed);
+  color: var(--rg-color-text-secondary);
+}
+
+.rg-premio__info-text strong {
+  color: var(--rg-color-text-primary);
+  font-weight: var(--rg-font-weight-semibold);
+}
+
+/* Metadata em grid 2x2 ou 4x1 — categoria, edição, cidade, outorga. */
+.rg-premio__meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--rg-space-3) var(--rg-space-6);
+  margin: var(--rg-space-3) 0 0;
+  padding: var(--rg-space-4) var(--rg-space-5);
+  background-color: var(--rg-primitive-brand-50);
+  border-radius: var(--rg-radius-lg);
+  border-left: 3px solid var(--rg-primitive-brand-500);
+}
+
+.rg-premio__meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.rg-premio__meta-label {
+  font-size: var(--rg-font-size-xs);
+  font-weight: var(--rg-font-weight-bold);
+  letter-spacing: var(--rg-letter-spacing-wide);
+  text-transform: uppercase;
+  color: var(--rg-primitive-brand-700);
+}
+
+.rg-premio__meta-value {
+  margin: 0;
+  font-size: var(--rg-font-size-sm);
+  font-weight: var(--rg-font-weight-semibold);
+  color: var(--rg-color-text-primary);
+  line-height: var(--rg-line-height-snug);
+}
+
+/* CTA "Conhecer o PMI Goiás" */
+.rg-premio__cta {
   display: inline-flex;
   align-items: center;
-  gap: var(--rg-space-1);
-  padding: var(--rg-space-2) var(--rg-space-3);
-  background-color: rgba(15, 23, 42, 0.78);
-  color: white;
-  border-radius: var(--rg-radius-pill);
-  font-size: var(--rg-font-size-xs);
+  gap: var(--rg-space-2);
+  align-self: flex-start;
+  margin-top: var(--rg-space-2);
+  padding: var(--rg-space-3) var(--rg-space-5);
+  background-color: var(--rg-color-surface-base);
+  border: 1px solid var(--rg-color-border-base);
+  border-radius: var(--rg-radius-md);
+  font-size: var(--rg-font-size-sm);
   font-weight: var(--rg-font-weight-semibold);
-  letter-spacing: var(--rg-letter-spacing-base);
-  opacity: 0;
+  color: var(--rg-color-text-primary);
+  text-decoration: none;
   transition:
-    opacity var(--rg-motion-duration-base) var(--rg-motion-ease-standard),
-    transform var(--rg-motion-duration-base) var(--rg-motion-ease-standard);
-  pointer-events: none;
-  backdrop-filter: blur(6px);
+    background-color var(--rg-motion-duration-base) var(--rg-motion-ease-standard),
+    border-color var(--rg-motion-duration-base) var(--rg-motion-ease-standard);
+}
+
+.rg-premio__cta:hover {
+  background-color: var(--rg-primitive-brand-50);
+  border-color: var(--rg-primitive-brand-300);
+}
+
+.rg-premio__cta :deep(.v-icon) {
+  color: var(--rg-primitive-brand-600);
 }
 
 /* ============ Responsivo ============ */
@@ -355,11 +453,25 @@ const highlights = [
     width: 40px;
     height: 40px;
   }
-  .rg-premio__cert-img { height: 360px; }
+  /* Showcase empilha em 1 coluna no mobile/tablet — card PMI em cima,
+     bloco descritivo embaixo. */
+  .rg-premio__showcase {
+    grid-template-columns: 1fr;
+  }
+  .rg-premio__pmi-card {
+    padding: var(--rg-space-8);
+  }
+  .rg-premio__pmi-logo {
+    max-width: 280px;
+  }
 }
 
 @media (max-width: 640px) {
-  .rg-premio { padding: var(--rg-space-14) var(--rg-space-4); }
-  .rg-premio__cert-img { height: auto; max-height: 60vh; }
+  .rg-premio {
+    padding: var(--rg-space-14) var(--rg-space-4);
+  }
+  .rg-premio__meta {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
