@@ -152,6 +152,40 @@ async function goToSection(ev: MouseEvent, hash: string | undefined) {
   }
 }
 
+/**
+ * Bug fix: quando o hero está locked (`rg-hero-locked` no <html> com
+ * `overflow-y: hidden`), clicar em <a href="#..."> do header só atualiza a
+ * URL — o browser não consegue scrollar enquanto o body está travado.
+ *
+ * Cobertura em duas frentes:
+ * 1. `hashchange` para navegação que efetivamente muda o hash (entrada com URL
+ *    `#sobre`, botão voltar/avançar, etc.). NÃO dispara em `history.pushState`.
+ * 2. Custom event `rg:expand-hero` despachado pelo `LandingHeader` quando o
+ *    usuário clica em um link da nav e o hero ainda está travado — o header
+ *    aguarda o hero soltar antes de chamar `scrollIntoView`.
+ */
+async function onHashChange() {
+  const hash = window.location.hash;
+  if (!hash || !hash.startsWith('#') || hash === '#top') return;
+  if (!mediaFullyExpanded.value) {
+    setProgress(1);
+    // 2x rAF: 1º frame pra Vue reagir ao watch, 2º pra DOM aplicar a classe.
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+    });
+  }
+  const target = document.querySelector(hash);
+  if (target instanceof HTMLElement) {
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+/** Disparado pelo LandingHeader quando o usuário clica na nav e o hero ainda
+ *  não está expandido. Apenas solta o lock — o header faz o scroll. */
+function onExpandHero() {
+  if (!mediaFullyExpanded.value) setProgress(1);
+}
+
 /** Trava a rolagem do body enquanto o hero está em modo de lock,
  *  evitando a scrollbar visível "voando" no canto direito. */
 watch(mediaFullyExpanded, (expanded) => {
@@ -167,6 +201,8 @@ onMounted(() => {
   window.addEventListener('touchstart', onTouchStart, { passive: false });
   window.addEventListener('touchmove', onTouchMove, { passive: false });
   window.addEventListener('touchend', onTouchEnd);
+  window.addEventListener('hashchange', onHashChange);
+  window.addEventListener('rg:expand-hero', onExpandHero);
   // Inicia já em modo locked (oculta scrollbar do body)
   document.documentElement.classList.add('rg-hero-locked');
 });
@@ -178,6 +214,8 @@ onBeforeUnmount(() => {
   window.removeEventListener('touchstart', onTouchStart);
   window.removeEventListener('touchmove', onTouchMove);
   window.removeEventListener('touchend', onTouchEnd);
+  window.removeEventListener('hashchange', onHashChange);
+  window.removeEventListener('rg:expand-hero', onExpandHero);
   document.documentElement.classList.remove('rg-hero-locked');
 });
 </script>
