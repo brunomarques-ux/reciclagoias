@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { ref, onMounted, onBeforeUnmount } from 'vue';
+
 const highlights = [
   {
     icon: '/premio/medal-icon.png',
@@ -25,10 +27,44 @@ const awardMeta = [
   { label: 'Cidade', value: 'Goiânia, GO' },
   { label: 'Outorga', value: 'GETI/SIC + CLR/SIC' },
 ];
+
+// ============ Reveal-on-enter dos 3 highlights ============
+// Quando a section entra no viewport, os 3 highlights da direita entram em
+// sequência (fade-in + translateX da esquerda pra direita), com stagger 240ms.
+const sectionRef = ref<HTMLElement | null>(null);
+const isVisible = ref(false);
+let observer: IntersectionObserver | null = null;
+
+onMounted(() => {
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduced) {
+    isVisible.value = true;
+    return;
+  }
+  if (!sectionRef.value) return;
+  observer = new IntersectionObserver(
+    (entries) => {
+      const entry = entries[0];
+      if (entry?.isIntersecting) {
+        isVisible.value = true;
+        observer?.disconnect();
+      }
+    },
+    { threshold: 0.3 },
+  );
+  observer.observe(sectionRef.value);
+});
+
+onBeforeUnmount(() => observer?.disconnect());
 </script>
 
 <template>
-  <section id="premio" class="rg-premio" aria-labelledby="rg-premio-title">
+  <section
+    id="premio"
+    ref="sectionRef"
+    :class="['rg-premio', { 'is-visible': isVisible }]"
+    aria-labelledby="rg-premio-title"
+  >
     <div class="rg-premio__inner">
       <!-- Header: copy à esquerda + highlights à direita -->
       <header class="rg-premio__header">
@@ -57,7 +93,12 @@ const awardMeta = [
         </div>
 
         <ul class="rg-premio__highlights" role="list">
-          <li v-for="h in highlights" :key="h.title" class="rg-premio__highlight">
+          <li
+            v-for="(h, i) in highlights"
+            :key="h.title"
+            class="rg-premio__highlight"
+            :style="{ '--rg-h-i': i } as Record<string, string | number>"
+          >
             <span class="rg-premio__highlight-icon-wrap" aria-hidden="true">
               <img :src="h.icon" alt="" class="rg-premio__highlight-icon" />
             </span>
@@ -81,11 +122,9 @@ const awardMeta = [
           rel="noopener noreferrer"
           aria-label="Conhecer o PMI Goiás · abre em nova aba"
         >
-          <!-- Logo PMI Goiás. Placeholder SVG enquanto o arquivo oficial não
-               chega — substituir por public/premio/pmi-goias-logo.png ou .svg
-               oficial fornecido pelo stakeholder. -->
+          <!-- Logo PMI Goiás (PNG oficial fornecido pelo stakeholder). -->
           <img
-            src="/premio/pmi-goias-logo.svg"
+            src="/premio/pmi-goias-logo.png"
             alt="Logo PMI Goiás · Project Management Institute Goiás, Brazil"
             class="rg-premio__pmi-logo"
             loading="lazy"
@@ -239,6 +278,26 @@ const awardMeta = [
   box-shadow:
     0 1px 2px rgba(15, 23, 42, 0.04),
     0 6px 18px rgba(15, 23, 42, 0.06);
+  /* Estado inicial: invisível e deslocado pra esquerda. Quando a section
+     fica visível (is-visible), cada highlight entra com fade + translateX
+     em sequência (stagger de 240ms baseado no --rg-h-i index). */
+  opacity: 0;
+  transform: translateX(-32px);
+  transition:
+    opacity 540ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 540ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition-delay: calc(var(--rg-h-i, 0) * 240ms);
+}
+
+.rg-premio.is-visible .rg-premio__highlight {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rg-premio__highlight {
+    transition: none !important;
+  }
 }
 
 /* Wrapper retangular do ícone (igual ao Figma):
