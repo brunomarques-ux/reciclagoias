@@ -98,9 +98,14 @@ onBeforeUnmount(() => {
       <div class="rg-how__body">
         <!-- Linha superior · bullets numerados com conectores -->
         <div class="rg-how__bullets" aria-hidden="true">
-          <!-- Linha tracejada base (cinza) -->
-          <span class="rg-how__line" />
-          <!-- Segmentos de preenchimento verde (animam scaleX 0→1) -->
+          <!-- Linha tracejada em 3 segmentos (1→2, 2→3, 3→arrow).
+               Cada segmento começa invisível e aparece junto com o fill verde
+               correspondente, conforme o avanço da animação. -->
+          <span class="rg-how__line-dash rg-how__line-dash--1" />
+          <span class="rg-how__line-dash rg-how__line-dash--2" />
+          <span class="rg-how__line-dash rg-how__line-dash--3" />
+          <!-- Segmentos de preenchimento verde (animam scaleX 0→1).
+               Terminam exatamente na bolinha seguinte. -->
           <span class="rg-how__line-fill rg-how__line-fill--1" />
           <span class="rg-how__line-fill rg-how__line-fill--2" />
           <!-- Checks no meio de cada segmento (animam scale 0 → 1.2 → 1 com pop) -->
@@ -278,18 +283,58 @@ onBeforeUnmount(() => {
   height: 64px;
 }
 
-/* Linha tracejada base (cinza) — sempre visível. */
-.rg-how__line {
+/* Linhas tracejadas em 3 segmentos (1→2, 2→3, 3→arrow).
+   Cada uma começa INVISÍVEL e aparece (fade-in) junto com o avanço da
+   animação — só vai sendo revelada conforme o usuário "chega" no próximo
+   passo. Posições alinham perfeitamente com os bullets (16.666%, 50%,
+   83.333%) e a flecha (~92%). */
+.rg-how__line-dash {
   position: absolute;
   top: 50%;
-  left: 16.666%;
-  right: 8%;
+  height: 0;
   border-top: 2px dashed var(--rg-color-border-base);
   transform: translateY(-50%);
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.rg-how__line-dash--1 {
+  left: 16.666%;
+  width: 33.333%;
+}
+
+.rg-how__line-dash--2 {
+  left: 50%;
+  width: 33.333%;
+}
+
+.rg-how__line-dash--3 {
+  left: 83.333%;
+  right: 8%;
+}
+
+.rg-how.is-animating .rg-how__line-dash--1 {
+  opacity: 1;
+  /* Aparece junto com o fill 1 começar (depois do card 1) */
+  transition-delay: 800ms;
+}
+
+.rg-how.is-animating .rg-how__line-dash--2 {
+  opacity: 1;
+  /* Aparece junto com o fill 2 começar (depois do card 2) */
+  transition-delay: 2200ms;
+}
+
+.rg-how.is-animating .rg-how__line-dash--3 {
+  opacity: 1;
+  /* Último segmento (sem fill verde — só fica tracejado): aparece junto
+     com o card 3 + arrow no fim da animação. */
+  transition-delay: 3000ms;
 }
 
 /* Segmentos de preenchimento verde que sobrepõem a linha tracejada,
-   animando scaleX 0 → 1 com transform-origin left. */
+   animando scaleX 0 → 1 com transform-origin left. Largura calculada pra
+   terminar EXATAMENTE na bolinha seguinte (sem extrapolar). */
 .rg-how__line-fill {
   position: absolute;
   top: 50%;
@@ -302,13 +347,15 @@ onBeforeUnmount(() => {
 }
 
 .rg-how__line-fill--1 {
+  /* De 16.666% (bullet 1) até 50% (bullet 2) — largura exata 33.333% */
   left: 16.666%;
-  width: calc(50% - 16.666% + 8.333%);
+  width: 33.333%;
 }
 
 .rg-how__line-fill--2 {
+  /* De 50% (bullet 2) até 83.333% (bullet 3) — largura exata 33.333% */
   left: 50%;
-  width: calc(83.333% - 50%);
+  width: 33.333%;
 }
 
 .rg-how.is-animating .rg-how__line-fill--1 {
@@ -563,6 +610,7 @@ onBeforeUnmount(() => {
   .rg-how__bullet-inner,
   .rg-how__card,
   .rg-how__line-fill,
+  .rg-how__line-dash,
   .rg-how__check,
   .rg-how__arrow,
   .rg-how__intro-line {
