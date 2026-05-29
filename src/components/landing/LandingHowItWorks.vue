@@ -105,9 +105,11 @@ onBeforeUnmount(() => {
           <span class="rg-how__line-dash rg-how__line-dash--2" />
           <span class="rg-how__line-dash rg-how__line-dash--3" />
           <!-- Segmentos de preenchimento verde (animam scaleX 0→1).
-               Terminam exatamente na bolinha seguinte. -->
+               Terminam exatamente na bolinha seguinte. O segmento 3 vai da
+               bolinha 3 até a setinha (parado meio segundo depois do card 3). -->
           <span class="rg-how__line-fill rg-how__line-fill--1" />
           <span class="rg-how__line-fill rg-how__line-fill--2" />
+          <span class="rg-how__line-fill rg-how__line-fill--3" />
           <!-- Checks no meio de cada segmento (animam scale 0 → 1.2 → 1 com pop) -->
           <span class="rg-how__check rg-how__check--1">
             <svg viewBox="0 0 24 24" width="12" height="12">
@@ -358,6 +360,14 @@ onBeforeUnmount(() => {
   width: 33.333%;
 }
 
+.rg-how__line-fill--3 {
+  /* Da bolinha 3 (83.333%) até a setinha (~92%, antes da arrow). */
+  left: 83.333%;
+  width: calc(92% - 83.333%);
+  /* Duração mais curta (~400ms) — é um trechinho pequeno. */
+  transition-duration: 400ms;
+}
+
 .rg-how.is-animating .rg-how__line-fill--1 {
   transform: translateY(-50%) scaleX(1);
   /* Começa depois do card 1 (400ms bullet + 400ms card = 800ms) */
@@ -368,6 +378,13 @@ onBeforeUnmount(() => {
   transform: translateY(-50%) scaleX(1);
   /* Começa depois do card 2 (800ms + 600ms linha + 400ms bullet 2 + 400ms card 2 = 2200ms) */
   transition-delay: 2200ms;
+}
+
+.rg-how.is-animating .rg-how__line-fill--3 {
+  transform: translateY(-50%) scaleX(1);
+  /* Espera ~500ms depois do card 3 (3100ms + 500ms = 3600ms) pra dar um
+     respiro antes da seta aparecer. */
+  transition-delay: 3600ms;
 }
 
 .rg-how__check {
@@ -411,16 +428,26 @@ onBeforeUnmount(() => {
   position: absolute;
   top: 50%;
   right: 2%;
-  transform: translateY(-50%);
-  color: var(--rg-color-border-strong);
+  /* Cor verde brand pra combinar com o fill verde que termina aqui. */
+  color: var(--rg-primitive-brand-500);
   opacity: 0;
+  /* Fade-in suave; depois disso entra no @keyframes rg-arrow-pulse. */
+  transform: translateY(-50%) translateX(0);
   transition: opacity 400ms ease;
 }
 
 .rg-how.is-animating .rg-how__arrow {
   opacity: 1;
-  /* Aparece junto com o card 3 */
-  transition-delay: 3000ms;
+  /* Aparece DEPOIS do fill 3 terminar (3600ms delay + 400ms duration = 4000ms) */
+  transition-delay: 4000ms;
+  /* Pulso horizontal contínuo: vai-e-vem direita-esquerda, simulando fluxo. */
+  animation: rg-arrow-pulse 1500ms cubic-bezier(0.45, 0, 0.55, 1) 4000ms infinite;
+}
+
+/* Pulso horizontal da seta no fim do timeline. */
+@keyframes rg-arrow-pulse {
+  0%, 100% { transform: translateY(-50%) translateX(-6px); }
+  50% { transform: translateY(-50%) translateX(6px); }
 }
 
 .rg-how__bullets-grid {
