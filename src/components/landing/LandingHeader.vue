@@ -28,12 +28,22 @@ function onScroll() {
  * "teleporte" instantâneo do anchor link nativo. O offset do header fixo é
  * tratado via `scroll-margin-top` definido em globals.css.
  */
-function onNavClick(ev: MouseEvent, hash: string) {
+async function onNavClick(ev: MouseEvent, hash: string) {
   // Permite Ctrl/Cmd+click ou middle-click pra abrir em nova aba (comportamento default).
   if (ev.metaKey || ev.ctrlKey || ev.shiftKey || ev.button !== 0) return;
   const target = document.getElementById(hash);
   if (!target) return; // link quebrado → deixa o browser tratar
   ev.preventDefault();
+  // Bug fix: se o hero ainda está travado (`overflow-y: hidden` no <html>),
+  // o scrollIntoView não funciona. Despachamos um evento que o hero escuta
+  // pra soltar o lock e aguardamos 2x rAF (Vue reage ao watch + DOM aplica
+  // a remoção da classe) antes de scrollar.
+  if (document.documentElement.classList.contains('rg-hero-locked')) {
+    window.dispatchEvent(new CustomEvent('rg:expand-hero'));
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+    });
+  }
   target.scrollIntoView({ behavior: 'smooth', block: 'start' });
   // Atualiza a URL sem refresh nem reposicionamento do scroll.
   if (history.pushState) history.pushState(null, '', `#${hash}`);
