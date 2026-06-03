@@ -95,6 +95,7 @@ html {
    seções via nav. Sem isso, o título da seção fica escondido atrás do header.
    Aplicado em qualquer elemento que sirva de target de hash. */
 section[id],
+[id^="autodeclaracao"],
 [id^="sobre"],
 [id^="como-funciona"],
 [id^="premio"],

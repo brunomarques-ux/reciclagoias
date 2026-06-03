@@ -5,6 +5,8 @@ import RgButton from '@/components/RgButton.vue';
 interface NavSection {
   id: string;
   label: string;
+  /** Marca o item como atalho destacado (ex.: Autodeclaração — prazo aberto). */
+  highlight?: boolean;
 }
 
 const props = defineProps<{ sections: NavSection[] }>();
@@ -142,7 +144,10 @@ onUnmounted(() => {
           :href="`#${section.id}`"
           :class="[
             'rg-app-header__link',
-            { 'is-active': activeSectionId === section.id },
+            {
+              'is-active': activeSectionId === section.id,
+              'rg-app-header__link--highlight': section.highlight,
+            },
           ]"
           :aria-current="activeSectionId === section.id ? 'location' : undefined"
           @click="onNavClick($event, section.id)"
@@ -178,7 +183,10 @@ onUnmounted(() => {
             v-for="section in sections"
             :key="section.id"
             :href="`#${section.id}`"
-            class="rg-app-header__drawer-link"
+            :class="[
+              'rg-app-header__drawer-link',
+              { 'rg-app-header__drawer-link--highlight': section.highlight },
+            ]"
             @click="onNavClick($event, section.id)"
           >
             {{ section.label }}
@@ -274,11 +282,15 @@ onUnmounted(() => {
   position: relative;
   padding: var(--rg-space-2) var(--rg-space-3);
   border-radius: var(--rg-radius-md);
+  /* Borda transparente na base: o item destacado ganha borda visível sem
+     alterar a altura/alinhamento dos demais links. */
+  border: 1px solid transparent;
   font-size: var(--rg-font-size-sm);
   font-weight: var(--rg-font-weight-medium);
   color: var(--rg-color-text-secondary);
   transition: color var(--rg-motion-duration-fast) var(--rg-motion-ease-standard),
-              background-color var(--rg-motion-duration-fast) var(--rg-motion-ease-standard);
+              background-color var(--rg-motion-duration-fast) var(--rg-motion-ease-standard),
+              border-color var(--rg-motion-duration-fast) var(--rg-motion-ease-standard);
 }
 .rg-app-header__link:hover {
   color: var(--rg-color-text-primary);
@@ -301,6 +313,21 @@ onUnmounted(() => {
   height: 2px;
   border-radius: var(--rg-radius-pill);
   background-color: var(--rg-primitive-brand-500);
+}
+
+/* Atalho destacado (Autodeclaração · prazo aberto). Usa o âmbar do badge
+   "Prazo aberto" do disclaimer pra sinalizar item sazonal/urgente, sem
+   competir com o verde brand do estado ativo. Definido depois de .is-active
+   pra prevalecer caso a section esteja simultaneamente ativa no viewport. */
+.rg-app-header__link--highlight {
+  color: #B45309;
+  background-color: rgba(252, 211, 77, 0.16);
+  border-color: rgba(252, 211, 77, 0.55);
+  font-weight: var(--rg-font-weight-semibold);
+}
+.rg-app-header__link--highlight:hover {
+  color: #92400E;
+  background-color: rgba(252, 211, 77, 0.28);
 }
 
 .rg-app-header__ctas {
@@ -357,6 +384,12 @@ onUnmounted(() => {
   font-weight: var(--rg-font-weight-medium);
   color: var(--rg-color-text-primary);
 }
+
+/* Atalho destacado no drawer mobile: texto âmbar + semibold (leve destaque). */
+.rg-app-header__drawer-link--highlight {
+  color: #B45309;
+  font-weight: var(--rg-font-weight-semibold);
+}
 .rg-app-header__drawer-ctas {
   display: flex;
   flex-direction: column;
@@ -409,6 +442,17 @@ onUnmounted(() => {
 }
 .rg-app-header--over-hero .rg-app-header__link.is-active::after {
   background-color: var(--rg-primitive-brand-300);
+}
+
+/* Atalho destacado sobre o hero escuro: âmbar mais claro pra contrastar. */
+.rg-app-header--over-hero .rg-app-header__link--highlight {
+  color: #FCD34D;
+  background-color: rgba(252, 211, 77, 0.16);
+  border-color: rgba(252, 211, 77, 0.5);
+}
+.rg-app-header--over-hero .rg-app-header__link--highlight:hover {
+  color: white;
+  background-color: rgba(252, 211, 77, 0.28);
 }
 
 .rg-app-header--over-hero .rg-app-header__menu-toggle {

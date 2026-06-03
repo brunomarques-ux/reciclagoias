@@ -16,13 +16,15 @@ import LandingCtaFinal from '@/components/landing/LandingCtaFinal.vue';
 import LandingFooter from '@/components/landing/LandingFooter.vue';
 
 const sections = ref([
-  { id: 'sobre',         label: 'O que é' },
-  { id: 'como-funciona', label: 'Como funciona' },
-  { id: 'premio',        label: 'Reconhecimento' },
-  { id: 'comite',        label: 'Comitê' },
-  { id: 'fluxo',         label: 'Fluxo' },
-  { id: 'sistema',       label: 'Sistema' },
-  { id: 'duvidas',       label: 'Dúvidas' },
+  { id: 'sobre',          label: 'O que é' },
+  { id: 'como-funciona',  label: 'Como funciona' },
+  { id: 'premio',         label: 'Reconhecimento' },
+  { id: 'comite',         label: 'Comitê' },
+  { id: 'fluxo',          label: 'Fluxo' },
+  { id: 'sistema',        label: 'Sistema' },
+  { id: 'duvidas',        label: 'Dúvidas' },
+  // Atalho sazonal com leve destaque (prazo aberto) → banner logo após a hero.
+  { id: 'autodeclaracao', label: 'Autodeclaração', highlight: true },
 ]);
 </script>
 

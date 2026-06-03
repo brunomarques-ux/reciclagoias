@@ -243,7 +243,9 @@ onBeforeUnmount(() => {
   grid-template-columns: 1fr auto 24px;
   align-items: center;
   gap: var(--rg-space-6);
-  padding: var(--rg-space-5) var(--rg-space-2);
+  /* Padding vertical 28px (space-7): após remover o ícone de 56px, as linhas
+     ficavam apertadas — esse respiro extra recompõe a altura confortável. */
+  padding: var(--rg-space-7) var(--rg-space-2);
   border-bottom: 1px solid var(--rg-primitive-brand-100);
   /* Estado inicial: invisível e ligeiramente acima — quando a JS marca a
      linha como `is-revealed`, ela faz um "pop" pra posição final.
@@ -341,7 +343,7 @@ onBeforeUnmount(() => {
     grid-template-columns: 1fr 24px;
     grid-template-rows: auto auto;
     gap: var(--rg-space-2) var(--rg-space-4);
-    padding: var(--rg-space-4) var(--rg-space-2);
+    padding: var(--rg-space-5) var(--rg-space-2);
   }
   .rg-comite__name {
     grid-column: 1;

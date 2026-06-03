@@ -69,21 +69,21 @@ export const howItWorksSteps: HowItWorksStep[] = [
     number: '1',
     title: 'Escolha seu perfil',
     description:
-      'Identifique o perfil que melhor representa sua atuação: empresa, entidade gestora, verificador ou operador logístico.',
+      'Identifique e escolha o perfil que melhor representa a sua atuação no sistema.',
     icon: 'mdi-account-search-outline',
   },
   {
     number: '2',
     title: 'Cadastre e ative',
     description:
-      'Faça o cadastro com os dados da sua organização e ative o perfil escolhido para começar a operar.',
+      'Faça o cadastro com os dados corretos e ative o perfil escolhido.',
     icon: 'mdi-account-plus-outline',
   },
   {
     number: '3',
     title: 'Acesse o sistema',
     description:
-      'Use o painel e as funcionalidades específicas do seu perfil para acompanhar planos, comprovações e obrigações.',
+      'Use o painel e as funcionalidades do seu perfil para acompanhar as suas obrigações.',
     icon: 'mdi-monitor-dashboard',
   },
 ];
@@ -245,10 +245,9 @@ export interface Partner {
 }
 
 export const institutionalPartners: Partner[] = [
-  { short: 'SIC',      full: 'Secretaria de Indústria e Comércio' },
+  { short: 'SIC',      full: 'Secretaria de Indústria, Comércio e Serviços' },
   { short: 'SEMAD',    full: 'Secretaria de Meio Ambiente e Desenvolvimento Sustentável' },
   { short: 'RETOMADA', full: 'Secretaria da Retomada' },
   { short: 'ECONOMIA', full: 'Secretaria da Economia' },
   { short: 'SGG',      full: 'Secretaria Geral do Governo' },
-  { short: 'AGR',      full: 'Agência Goiana de Regulação, Controle e Fiscalização' },
 ];

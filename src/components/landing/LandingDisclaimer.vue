@@ -3,7 +3,7 @@ import { autoDeclaration } from '@/data/mocks/landing';
 </script>
 
 <template>
-  <aside class="rg-disclaimer" :aria-label="autoDeclaration.title">
+  <aside id="autodeclaracao" class="rg-disclaimer" :aria-label="autoDeclaration.title">
     <div class="rg-disclaimer__inner">
       <div class="rg-disclaimer__copy">
         <span class="rg-disclaimer__badge">
