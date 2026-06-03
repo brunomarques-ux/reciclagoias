@@ -29,11 +29,12 @@ const isAnimating = ref(false);
 let observer: IntersectionObserver | null = null;
 
 // Frases do intro fragmentadas por linha pra animar uma por uma.
+// Mantém o ritmo de 4 linhas curtas, agora generalista (não foca em entidade gestora).
 const introLines = [
-  'Da criação',
-  'da conta ao',
-  'acompanhamento',
-  'das obrigações.',
+  'Da escolha',
+  'do perfil',
+  'ao acesso ao',
+  'sistema.',
 ];
 
 onMounted(() => {

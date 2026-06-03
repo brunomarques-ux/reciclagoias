@@ -423,9 +423,9 @@ onBeforeUnmount(() => {
                     </span>
                   </h2>
                   <p class="rg-scroll-hero__content-lede">
-                    Aqui empresas, entidades gestoras, verificadores e o comitê acompanham
-                    declarações, certificados e regularidade em um só lugar, com rastreabilidade
-                    ponta a ponta.
+                    Aqui empresas, entidades gestoras, verificadores e operadores logísticos
+                    acompanham declarações, certificados e regularidade em um só lugar, com
+                    rastreabilidade ponta a ponta.
                   </p>
 
                   <div class="rg-scroll-hero__content-ctas">

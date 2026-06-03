@@ -50,7 +50,10 @@ export const whatIsCards: WhatIsCard[] = [
 ];
 
 // ============================================================================
-// "Como Funciona" — 3 passos do site atual (Cadastre-se / Painel / Planos)
+// "Como Funciona" — 3 passos genéricos multi-perfil
+// Escolha do perfil → cadastro e ativação → acesso ao sistema. Tom propositalmente
+// generalista pra contemplar todos os perfis (empresa, entidade gestora,
+// verificador de resultados, operador logístico) — não foca só na entidade gestora.
 // Consumido por: LandingHowItWorks.vue
 // ============================================================================
 
@@ -64,24 +67,24 @@ export interface HowItWorksStep {
 export const howItWorksSteps: HowItWorksStep[] = [
   {
     number: '1',
-    title: 'Cadastre-se',
+    title: 'Escolha seu perfil',
     description:
-      'Crie sua conta e informe os dados da sua empresa ou organização.',
-    icon: 'mdi-account-plus',
+      'Identifique o perfil que melhor representa sua atuação: empresa, entidade gestora, verificador ou operador logístico.',
+    icon: 'mdi-account-search-outline',
   },
   {
     number: '2',
-    title: 'Acesse o painel',
+    title: 'Cadastre e ative',
     description:
-      'Visualize metas, relatórios e obrigações do seu plano em um painel centralizado.',
-    icon: 'mdi-monitor-dashboard',
+      'Faça o cadastro com os dados da sua organização e ative o perfil escolhido para começar a operar.',
+    icon: 'mdi-account-plus-outline',
   },
   {
     number: '3',
-    title: 'Gerencie seus planos',
+    title: 'Acesse o sistema',
     description:
-      'Acompanhe comprovações, pendências e ações de logística reversa.',
-    icon: 'mdi-clipboard-check-outline',
+      'Use o painel e as funcionalidades específicas do seu perfil para acompanhar planos, comprovações e obrigações.',
+    icon: 'mdi-monitor-dashboard',
   },
 ];
 
@@ -115,19 +118,18 @@ export const award = {
 export interface CommitteeMember {
   short: string;
   full: string;
-  icon: string;
   url?: string;
 }
 
 export const committeeMembers: CommitteeMember[] = [
-  { short: 'SEMAD',          full: 'Secretaria de Estado de Meio Ambiente e Desenvolvimento Sustentável', icon: 'mdi-leaf',                    url: 'https://www.meioambiente.go.gov.br/' },
-  { short: 'SIC',            full: 'Secretaria de Estado de Indústria, Comércio e Serviços',              icon: 'mdi-factory',                 url: 'https://www.sic.go.gov.br/' },
-  { short: 'RETOMADA',       full: 'Secretaria de Estado da Retomada',                                    icon: 'mdi-trending-up',             url: 'https://www.retomada.go.gov.br/' },
-  { short: 'ECONOMIA',       full: 'Secretaria de Estado da Economia',                                    icon: 'mdi-bank-outline',            url: 'https://www.economia.go.gov.br/' },
-  { short: 'SGG / IMB',      full: 'Secretaria-Geral da Governadoria · Instituto Mauro Borges',           icon: 'mdi-office-building-outline', url: 'https://www.imb.go.gov.br/' },
-  { short: 'GOIÁS PARCERIAS',full: 'Companhia de Investimentos e Parcerias do Estado de Goiás',           icon: 'mdi-handshake-outline',       url: 'https://www.goiasparcerias.go.gov.br/' },
-  { short: 'AGR',            full: 'Agência de Regulação, Controle e Fiscalização de Serviços Públicos', icon: 'mdi-shield-check-outline',    url: 'https://www.agr.go.gov.br/' },
-  { short: 'MPGO',           full: 'Ministério Público do Estado de Goiás',                               icon: 'mdi-gavel',                   url: 'https://www.mpgo.mp.br/' },
+  { short: 'SEMAD',          full: 'Secretaria de Estado de Meio Ambiente e Desenvolvimento Sustentável', url: 'https://www.meioambiente.go.gov.br/' },
+  { short: 'SIC',            full: 'Secretaria de Estado de Indústria, Comércio e Serviços',              url: 'https://www.sic.go.gov.br/' },
+  { short: 'RETOMADA',       full: 'Secretaria de Estado da Retomada',                                    url: 'https://www.retomada.go.gov.br/' },
+  { short: 'ECONOMIA',       full: 'Secretaria de Estado da Economia',                                    url: 'https://www.economia.go.gov.br/' },
+  { short: 'SGG / IMB',      full: 'Secretaria-Geral da Governadoria · Instituto Mauro Borges',           url: 'https://www.imb.go.gov.br/' },
+  { short: 'GOIÁS PARCERIAS',full: 'Companhia de Investimentos e Parcerias do Estado de Goiás',           url: 'https://www.goiasparcerias.go.gov.br/' },
+  { short: 'AGR',            full: 'Agência de Regulação, Controle e Fiscalização de Serviços Públicos', url: 'https://www.agr.go.gov.br/' },
+  { short: 'MPGO',           full: 'Ministério Público do Estado de Goiás',                               url: 'https://www.mpgo.mp.br/' },
 ];
 
 // ============================================================================
