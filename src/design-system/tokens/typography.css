@@ -39,10 +39,11 @@
   --rg-line-height-relaxed: 1.65;
 
   /* Weight */
-  --rg-font-weight-regular:  400;
-  --rg-font-weight-medium:   500;
-  --rg-font-weight-semibold: 600;
-  --rg-font-weight-bold:     700;
+  --rg-font-weight-regular:   400;
+  --rg-font-weight-medium:    500;
+  --rg-font-weight-semibold:  600;
+  --rg-font-weight-bold:      700;
+  --rg-font-weight-extrabold: 800;
 
   /* Letter spacing */
   --rg-letter-spacing-tight:  -0.02em;

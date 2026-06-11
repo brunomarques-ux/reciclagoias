@@ -3,7 +3,7 @@ import { autoDeclaration } from '@/data/mocks/landing';
 </script>
 
 <template>
-  <aside class="rg-disclaimer" :aria-label="autoDeclaration.title">
+  <aside id="autodeclaracao" class="rg-disclaimer" :aria-label="autoDeclaration.title">
     <div class="rg-disclaimer__inner">
       <div class="rg-disclaimer__copy">
         <span class="rg-disclaimer__badge">
@@ -114,11 +114,40 @@ import { autoDeclaration } from '@/data/mocks/landing';
   transition:
     transform var(--rg-motion-duration-fast) var(--rg-motion-ease-standard),
     background-color var(--rg-motion-duration-fast) var(--rg-motion-ease-standard);
+  /* Pulso leve contínuo: respiro de scale + anel branco que expande e
+     dissolve, sinalizando o prazo aberto sem competir com o conteúdo. */
+  animation: rg-disclaimer-cta-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes rg-disclaimer-cta-pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.45);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 12px rgba(255, 255, 255, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+  }
 }
 
 .rg-disclaimer__cta:hover {
   background-color: var(--rg-primitive-brand-50);
   transform: translateY(-1px);
+  /* Pausa o pulso no hover — o transform do hover assume sem briga. */
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rg-disclaimer__cta {
+    animation: none;
+  }
 }
 
 @media (max-width: 720px) {

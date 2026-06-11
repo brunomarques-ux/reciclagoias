@@ -4,10 +4,6 @@
  * compõem o comitê. Versão light-theme (background --rg-color-surface-base,
  * igual ao Reconhecimento), com o "8" destacado em verde brand no título.
  *
- * Ícones MDI mantidos da versão anterior porque o Figma exporta esses ícones
- * quebrados — o conjunto MDI (leaf, factory, trending-up, bank-outline, etc)
- * mapeia 1:1 com a intenção do design.
- *
  * ====================== Animação de entrada (reveal-on-enter) ======================
  * Quando a section entra no viewport, dispara:
  *   1. Contador no título: 0 → 8 em ~2s (250ms por incremento, ritmo constante).
@@ -112,18 +108,13 @@ onBeforeUnmount(() => {
           :key="member.short"
           :class="['rg-comite__row', { 'is-revealed': i < revealedCount }]"
         >
-          <!-- Col 1 · Ícone em chip verde clarinho -->
-          <span class="rg-comite__icon-chip" aria-hidden="true">
-            <v-icon :icon="member.icon" size="26" />
-          </span>
-
-          <!-- Col 2 · Nome completo -->
+          <!-- Col 1 · Nome completo -->
           <span class="rg-comite__name">{{ member.full }}</span>
 
-          <!-- Col 3 · Sigla pill -->
+          <!-- Col 2 · Sigla pill -->
           <span class="rg-comite__sigla">{{ member.short }}</span>
 
-          <!-- Col 4 · Link externo (ícone só, sem botão wrapper) -->
+          <!-- Col 3 · Link externo (ícone só, sem botão wrapper) -->
           <a
             :href="member.url ?? '#'"
             target="_blank"
@@ -248,11 +239,13 @@ onBeforeUnmount(() => {
 
 .rg-comite__row {
   display: grid;
-  /* 4 colunas: ícone fixo | nome (cresce) | sigla pill | link externo */
-  grid-template-columns: 56px 1fr auto 24px;
+  /* 3 colunas: nome (cresce) | sigla pill | link externo */
+  grid-template-columns: 1fr auto 24px;
   align-items: center;
   gap: var(--rg-space-6);
-  padding: var(--rg-space-5) var(--rg-space-2);
+  /* Padding vertical 28px (space-7): após remover o ícone de 56px, as linhas
+     ficavam apertadas — esse respiro extra recompõe a altura confortável. */
+  padding: var(--rg-space-7) var(--rg-space-2);
   border-bottom: 1px solid var(--rg-primitive-brand-100);
   /* Estado inicial: invisível e ligeiramente acima — quando a JS marca a
      linha como `is-revealed`, ela faz um "pop" pra posição final.
@@ -290,20 +283,7 @@ onBeforeUnmount(() => {
   }
 }
 
-/* Col 1 · Ícone wrapper retangular verde claro com borda */
-.rg-comite__icon-chip {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 56px;
-  height: 56px;
-  border-radius: var(--rg-radius-lg);
-  background-color: var(--rg-primitive-brand-50);
-  border: 1px solid var(--rg-primitive-brand-200);
-  color: var(--rg-primitive-brand-600);
-}
-
-/* Col 2 · Nome completo da instituição */
+/* Col 1 · Nome completo da instituição */
 .rg-comite__name {
   font-size: var(--rg-font-size-md);
   font-weight: var(--rg-font-weight-semibold);
@@ -311,7 +291,7 @@ onBeforeUnmount(() => {
   line-height: var(--rg-line-height-snug);
 }
 
-/* Col 3 · Sigla pill verde claro */
+/* Col 2 · Sigla pill verde claro */
 .rg-comite__sigla {
   display: inline-flex;
   align-items: center;
@@ -326,7 +306,7 @@ onBeforeUnmount(() => {
   white-space: nowrap;
 }
 
-/* Col 4 · Link externo (só ícone, sem botão visível) */
+/* Col 3 · Link externo (só ícone, sem botão visível) */
 .rg-comite__link {
   display: inline-flex;
   align-items: center;
@@ -360,28 +340,23 @@ onBeforeUnmount(() => {
     font-size: clamp(28px, 7vw, 42px);
   }
   .rg-comite__row {
-    grid-template-columns: 48px 1fr 24px;
+    grid-template-columns: 1fr 24px;
     grid-template-rows: auto auto;
-    gap: var(--rg-space-3) var(--rg-space-4);
-    padding: var(--rg-space-4) var(--rg-space-2);
-  }
-  .rg-comite__icon-chip {
-    grid-row: 1 / span 2;
-    width: 48px;
-    height: 48px;
+    gap: var(--rg-space-2) var(--rg-space-4);
+    padding: var(--rg-space-5) var(--rg-space-2);
   }
   .rg-comite__name {
-    grid-column: 2;
+    grid-column: 1;
     grid-row: 1;
     font-size: var(--rg-font-size-sm);
   }
   .rg-comite__sigla {
-    grid-column: 2;
+    grid-column: 1;
     grid-row: 2;
     justify-self: start;
   }
   .rg-comite__link {
-    grid-column: 3;
+    grid-column: 2;
     grid-row: 1 / span 2;
     align-self: center;
   }

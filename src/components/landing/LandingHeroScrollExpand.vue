@@ -423,9 +423,9 @@ onBeforeUnmount(() => {
                     </span>
                   </h2>
                   <p class="rg-scroll-hero__content-lede">
-                    Aqui empresas, entidades gestoras, verificadores e o comitê acompanham
-                    declarações, certificados e regularidade em um só lugar, com rastreabilidade
-                    ponta a ponta.
+                    Aqui empresas, entidades gestoras, verificadores e operadores logísticos
+                    acompanham declarações, certificados e regularidade em um só lugar, com
+                    rastreabilidade ponta a ponta.
                   </p>
 
                   <div class="rg-scroll-hero__content-ctas">
@@ -513,9 +513,7 @@ onBeforeUnmount(() => {
 .rg-scroll-hero__bg-overlay {
   position: absolute;
   inset: 0;
-  /* Overlay escurecido para garantir leitura do título sobre a foto.
-     0.57 = 5% mais claro que o anterior (0.62), pra mostrar mais da nova bg-hero-v2
-     (refeita sem o texto quebrado por IA da v1). */
+  /* Overlay escurecido para garantir leitura do título sobre a foto. */
   background-color: rgba(7, 38, 20, 0.57);
 }
 
@@ -712,8 +710,8 @@ onBeforeUnmount(() => {
 }
 
 .rg-scroll-hero__title--rest {
-  font-weight: var(--rg-font-weight-bold);
-  font-style: italic;
+  /* "GOIÁS" sem itálico e um degrau acima do "RECICLA" (700) em peso. */
+  font-weight: var(--rg-font-weight-extrabold);
 }
 
 /* ---------- Skip button ---------- */

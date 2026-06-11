@@ -16,13 +16,15 @@ import LandingCtaFinal from '@/components/landing/LandingCtaFinal.vue';
 import LandingFooter from '@/components/landing/LandingFooter.vue';
 
 const sections = ref([
-  { id: 'sobre',         label: 'O que é' },
-  { id: 'como-funciona', label: 'Como funciona' },
-  { id: 'premio',        label: 'Reconhecimento' },
-  { id: 'comite',        label: 'Comitê' },
-  { id: 'fluxo',         label: 'Fluxo' },
-  { id: 'sistema',       label: 'Sistema' },
-  { id: 'duvidas',       label: 'Dúvidas' },
+  { id: 'sobre',          label: 'O que é' },
+  { id: 'como-funciona',  label: 'Como funciona' },
+  { id: 'premio',         label: 'Reconhecimento' },
+  { id: 'comite',         label: 'Comitê' },
+  { id: 'fluxo',          label: 'Fluxo' },
+  { id: 'sistema',        label: 'Sistema' },
+  { id: 'duvidas',        label: 'Dúvidas' },
+  // Atalho sazonal com leve destaque (prazo aberto) → banner logo após a hero.
+  { id: 'autodeclaracao', label: 'Autodeclaração', highlight: true },
 ]);
 </script>
 
@@ -33,10 +35,11 @@ const sections = ref([
   <main id="top">
     <LandingHeroScrollExpand
       media-type="video"
-      media-src="/hero/hero-video.mp4"
-      bg-image-src="/hero/bg-hero-v2.jpg"
-      title="Recicla Goiás"
-      eyebrow="Logística Reversa · Goiás 2026"
+      media-src="/hero/hero-video-v2.mp4"
+      bg-image-src="/hero/bg-hero-v3.jpg"
+      bg-image-src-webp="/hero/bg-hero-v3.webp"
+      title="RECICLA GOIÁS"
+      :eyebrow="'Logística Reversa · Goiás\u00A02026'"
       scroll-hint="Role para descobrir"
       secondary-cta-label="Conhecer o processo"
       secondary-cta-href="#sobre"

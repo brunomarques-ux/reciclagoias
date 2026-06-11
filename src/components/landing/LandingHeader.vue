@@ -5,6 +5,8 @@ import RgButton from '@/components/RgButton.vue';
 interface NavSection {
   id: string;
   label: string;
+  /** Marca o item como atalho destacado (ex.: Autodeclaração — prazo aberto). */
+  highlight?: boolean;
 }
 
 const props = defineProps<{ sections: NavSection[] }>();
@@ -142,7 +144,10 @@ onUnmounted(() => {
           :href="`#${section.id}`"
           :class="[
             'rg-app-header__link',
-            { 'is-active': activeSectionId === section.id },
+            {
+              'is-active': activeSectionId === section.id,
+              'rg-app-header__link--highlight': section.highlight,
+            },
           ]"
           :aria-current="activeSectionId === section.id ? 'location' : undefined"
           @click="onNavClick($event, section.id)"
@@ -178,7 +183,10 @@ onUnmounted(() => {
             v-for="section in sections"
             :key="section.id"
             :href="`#${section.id}`"
-            class="rg-app-header__drawer-link"
+            :class="[
+              'rg-app-header__drawer-link',
+              { 'rg-app-header__drawer-link--highlight': section.highlight },
+            ]"
             @click="onNavClick($event, section.id)"
           >
             {{ section.label }}
@@ -272,13 +280,21 @@ onUnmounted(() => {
 
 .rg-app-header__link {
   position: relative;
-  padding: var(--rg-space-2) var(--rg-space-3);
+  /* Vertical 10px (fora da escala de 4px de propósito): meio-termo calibrado
+     no feedback — 8px ficava colado, 12px sobrava. Itens fecham em 43px e o
+     header em 60px (1px borda + 2×8px inner + 43px). Se mudar, atualizar o
+     `top` do RgScrollProgress, que cola na base do header. */
+  padding: 10px var(--rg-space-3);
   border-radius: var(--rg-radius-md);
+  /* Borda transparente na base: o item destacado ganha borda visível sem
+     alterar a altura/alinhamento dos demais links. */
+  border: 1px solid transparent;
   font-size: var(--rg-font-size-sm);
   font-weight: var(--rg-font-weight-medium);
   color: var(--rg-color-text-secondary);
   transition: color var(--rg-motion-duration-fast) var(--rg-motion-ease-standard),
-              background-color var(--rg-motion-duration-fast) var(--rg-motion-ease-standard);
+              background-color var(--rg-motion-duration-fast) var(--rg-motion-ease-standard),
+              border-color var(--rg-motion-duration-fast) var(--rg-motion-ease-standard);
 }
 .rg-app-header__link:hover {
   color: var(--rg-color-text-primary);
@@ -303,6 +319,21 @@ onUnmounted(() => {
   background-color: var(--rg-primitive-brand-500);
 }
 
+/* Atalho destacado (Autodeclaração · prazo aberto). Usa o âmbar do badge
+   "Prazo aberto" do disclaimer pra sinalizar item sazonal/urgente, sem
+   competir com o verde brand do estado ativo. Definido depois de .is-active
+   pra prevalecer caso a section esteja simultaneamente ativa no viewport. */
+.rg-app-header__link--highlight {
+  color: #B45309;
+  background-color: rgba(252, 211, 77, 0.16);
+  border-color: rgba(252, 211, 77, 0.55);
+  font-weight: var(--rg-font-weight-semibold);
+}
+.rg-app-header__link--highlight:hover {
+  color: #92400E;
+  background-color: rgba(252, 211, 77, 0.28);
+}
+
 .rg-app-header__ctas {
   display: flex;
   gap: var(--rg-space-2);
@@ -310,16 +341,16 @@ onUnmounted(() => {
 }
 
 /* Override dos RgButtons no header: força fonte Inter (Vuetify às vezes
-   injeta Roboto nas camadas internas do v-btn) e reduz altura pra 32px
-   (era 36px com size="sm"), garantindo que o navbar mantenha a altura
-   total atual mesmo com o brand-logo SVG de 28px. */
+   injeta Roboto nas camadas internas do v-btn) e fixa a altura em 43px —
+   mesma altura computada do chip "Autodeclaração" (14px × lh 1.5 + 2×10px
+   de padding + 2×1px de borda), pros dois fecharem na mesma caixa. */
 .rg-app-header__ctas :deep(.rg-button.v-btn),
 .rg-app-header__ctas :deep(.rg-button .v-btn__content) {
   font-family: var(--rg-font-family-sans) !important;
 }
 .rg-app-header__ctas :deep(.rg-button.v-btn) {
-  height: 32px !important;
-  min-height: 32px !important;
+  height: 43px !important;
+  min-height: 43px !important;
   font-size: var(--rg-font-size-sm);
 }
 
@@ -356,6 +387,12 @@ onUnmounted(() => {
   font-size: var(--rg-font-size-md);
   font-weight: var(--rg-font-weight-medium);
   color: var(--rg-color-text-primary);
+}
+
+/* Atalho destacado no drawer mobile: texto âmbar + semibold (leve destaque). */
+.rg-app-header__drawer-link--highlight {
+  color: #B45309;
+  font-weight: var(--rg-font-weight-semibold);
 }
 .rg-app-header__drawer-ctas {
   display: flex;
@@ -409,6 +446,17 @@ onUnmounted(() => {
 }
 .rg-app-header--over-hero .rg-app-header__link.is-active::after {
   background-color: var(--rg-primitive-brand-300);
+}
+
+/* Atalho destacado sobre o hero escuro: âmbar mais claro pra contrastar. */
+.rg-app-header--over-hero .rg-app-header__link--highlight {
+  color: #FCD34D;
+  background-color: rgba(252, 211, 77, 0.16);
+  border-color: rgba(252, 211, 77, 0.5);
+}
+.rg-app-header--over-hero .rg-app-header__link--highlight:hover {
+  color: white;
+  background-color: rgba(252, 211, 77, 0.28);
 }
 
 .rg-app-header--over-hero .rg-app-header__menu-toggle {
