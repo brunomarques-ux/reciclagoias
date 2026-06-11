@@ -337,16 +337,16 @@ onUnmounted(() => {
 }
 
 /* Override dos RgButtons no header: força fonte Inter (Vuetify às vezes
-   injeta Roboto nas camadas internas do v-btn) e reduz altura pra 32px
-   (era 36px com size="sm"), garantindo que o navbar mantenha a altura
-   total atual mesmo com o brand-logo SVG de 28px. */
+   injeta Roboto nas camadas internas do v-btn) e fixa a altura em 39px —
+   mesma altura computada do chip "Autodeclaração" (14px × lh 1.5 + 2×8px
+   de padding + 2×1px de borda), pros dois fecharem na mesma caixa. */
 .rg-app-header__ctas :deep(.rg-button.v-btn),
 .rg-app-header__ctas :deep(.rg-button .v-btn__content) {
   font-family: var(--rg-font-family-sans) !important;
 }
 .rg-app-header__ctas :deep(.rg-button.v-btn) {
-  height: 32px !important;
-  min-height: 32px !important;
+  height: 39px !important;
+  min-height: 39px !important;
   font-size: var(--rg-font-size-sm);
 }
 
