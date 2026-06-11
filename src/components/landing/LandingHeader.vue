@@ -280,7 +280,9 @@ onUnmounted(() => {
 
 .rg-app-header__link {
   position: relative;
-  padding: var(--rg-space-2) var(--rg-space-3);
+  /* Vertical 12px (era 8px): +4px de respiro pra cima e pra baixo nos itens
+     da nav — o header inteiro ganha altura junto. */
+  padding: var(--rg-space-3) var(--rg-space-3);
   border-radius: var(--rg-radius-md);
   /* Borda transparente na base: o item destacado ganha borda visível sem
      alterar a altura/alinhamento dos demais links. */
@@ -337,16 +339,16 @@ onUnmounted(() => {
 }
 
 /* Override dos RgButtons no header: força fonte Inter (Vuetify às vezes
-   injeta Roboto nas camadas internas do v-btn) e fixa a altura em 39px —
-   mesma altura computada do chip "Autodeclaração" (14px × lh 1.5 + 2×8px
+   injeta Roboto nas camadas internas do v-btn) e fixa a altura em 47px —
+   mesma altura computada do chip "Autodeclaração" (14px × lh 1.5 + 2×12px
    de padding + 2×1px de borda), pros dois fecharem na mesma caixa. */
 .rg-app-header__ctas :deep(.rg-button.v-btn),
 .rg-app-header__ctas :deep(.rg-button .v-btn__content) {
   font-family: var(--rg-font-family-sans) !important;
 }
 .rg-app-header__ctas :deep(.rg-button.v-btn) {
-  height: 39px !important;
-  min-height: 39px !important;
+  height: 47px !important;
+  min-height: 47px !important;
   font-size: var(--rg-font-size-sm);
 }
 
