@@ -64,10 +64,12 @@ onBeforeUnmount(() => {
 <style scoped>
 .rg-scroll-progress {
   position: fixed;
-  /* Cola logo abaixo da navbar glass (que tem altura ~52px). z-index 29 fica
-     ATRÁS do header (30) pra não ser coberto pelo blur do glass mas também
-     não sobrepor menus dropdown que viessem do header. */
-  top: 52px;
+  /* Cola na base do header fixo: 60px = 1px borda + 2×8px padding do __inner
+     + 43px dos itens da nav (ver LandingHeader). Se a altura do header mudar,
+     este top PRECISA acompanhar — com o valor errado a linha verde do trilho
+     atravessa os botões da nav sobre o hero escuro (onde o header é
+     transparente e não a esconde). z-index 29 fica ATRÁS do header (30). */
+  top: 60px;
   left: 0;
   right: 0;
   height: 3px;
