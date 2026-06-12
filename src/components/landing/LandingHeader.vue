@@ -7,6 +7,9 @@ interface NavSection {
   label: string;
   /** Marca o item como atalho destacado (ex.: Autodeclaração — prazo aberto). */
   highlight?: boolean;
+  /** Item de menor prioridade — some do header entre 961–1280px (onde os 10
+   *  itens não cabem), mas permanece no drawer mobile e via scroll. */
+  secondary?: boolean;
 }
 
 const props = defineProps<{ sections: NavSection[] }>();
@@ -147,6 +150,7 @@ onUnmounted(() => {
             {
               'is-active': activeSectionId === section.id,
               'rg-app-header__link--highlight': section.highlight,
+              'rg-app-header__link--secondary': section.secondary,
             },
           ]"
           :aria-current="activeSectionId === section.id ? 'location' : undefined"
@@ -286,6 +290,9 @@ onUnmounted(() => {
      `top` do RgScrollProgress, que cola na base do header. */
   padding: 10px var(--rg-space-3);
   border-radius: var(--rg-radius-md);
+  /* Com 10 itens na nav, labels de 2+ palavras quebravam linha e estouravam
+     a altura do header — cada item fica sempre em linha única. */
+  white-space: nowrap;
   /* Borda transparente na base: o item destacado ganha borda visível sem
      alterar a altura/alinhamento dos demais links. */
   border: 1px solid transparent;
@@ -401,7 +408,27 @@ onUnmounted(() => {
   margin-top: auto;
 }
 
-@media (max-width: 960px) {
+/* Breakpoint intermediário: entre 1121–1280px os 10 itens não cabem ao lado
+   do CTA — escondemos os secondary (Comitê/Fluxo, âncoras de menor intenção
+   de navegação) e compactamos paddings/gaps. As seções seguem acessíveis por
+   scroll e no drawer. O sectionsObserver observa as sections do DOM (não os
+   links), então o tracking de seção ativa continua íntegro. */
+@media (max-width: 1280px) {
+  .rg-app-header__link--secondary {
+    display: none;
+  }
+  .rg-app-header__link {
+    padding-inline: var(--rg-space-2);
+  }
+  .rg-app-header__inner {
+    gap: var(--rg-space-4);
+  }
+}
+
+/* Com 10 seções na nav, o drawer assume mais cedo que os 960px clássicos:
+   abaixo de 1120px nem a versão compacta com secondary escondidos fecha a
+   conta (logo + 8 itens + CTA > viewport). */
+@media (max-width: 1120px) {
   .rg-app-header__inner {
     grid-template-columns: auto 1fr auto;
     gap: var(--rg-space-3);

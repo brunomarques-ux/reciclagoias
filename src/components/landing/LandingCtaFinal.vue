@@ -57,7 +57,7 @@ import RgButton from '@/components/RgButton.vue';
      deixa a faixa um pouco mais larga sem virar uma section grande. */
   padding: 72px var(--rg-space-6);
   /* Mesmo tint do Como Funciona e Fluxo (alternância cromática entre seções claras). */
-  background-color: #F1F7F3;
+  background-color: var(--rg-color-surface-soft-tint);
 }
 
 .rg-cta__inner {

@@ -3,8 +3,13 @@
  * Seção Perguntas Frequentes — segue Figma node 17:823.
  *
  * Layout: header split (copy à esquerda; à direita 3 balões 3D de "?" com
- * blur progressivo + card "Fale Conosco"). Abaixo, acordeão NÃO-exclusivo
- * (múltiplos items abertos simultaneamente) com 6 perguntas.
+ * blur progressivo + card "Fale Conosco"). Abaixo, toolbar de busca +
+ * acordeão NÃO-exclusivo (múltiplos items abertos simultaneamente).
+ *
+ * Busca: filtra pergunta E resposta, caixa/acento-insensitive, com highlight
+ * dos matches via <mark> (sem v-html — ver utils/textSearch). Sem busca
+ * ativa, mostra só as INITIAL_COUNT primeiras perguntas + botão revelar;
+ * com busca, filtra o conjunto inteiro (o limite é ignorado).
  *
  * Microinteração nos balões 3D: reveal-on-scroll SEQUENCIAL — os 3 balões
  * descem de cima conforme o usuário rola pra section, mas com delays
@@ -13,21 +18,89 @@
  * chega por último, ao terminar o scroll. Mesma mecânica do logo 3D da
  * seção Fluxo de Operação.
  */
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 import { faqItems } from '@/data/mocks/landing';
+import { matchesQuery, highlightSegments } from '@/utils/textSearch';
+import RgExpandTransition from '@/components/RgExpandTransition.vue';
 
 defineProps<{ id?: string }>();
 
 // ============ Acordeão não-exclusivo ============
-// Set permite abrir múltiplos ao mesmo tempo. Primeiro item aberto por default
-// (replica o estado inicial do Figma).
-const openItems = ref<Set<number>>(new Set([0]));
+// Set de IDs estáveis (não índices: a busca filtra a lista e os índices
+// mudam). Primeiro item aberto por default (replica o estado do Figma).
+const openItems = ref<Set<string>>(new Set(faqItems[0] ? [faqItems[0].id] : []));
 
-function toggle(i: number) {
-  const next = new Set(openItems.value);
-  if (next.has(i)) next.delete(i);
-  else next.add(i);
-  openItems.value = next; // reatribui pra Vue detectar a mudança
+// ============ Busca + revelar mais ============
+/** Quantas perguntas aparecem antes do "Mostrar todas" (sem busca ativa). */
+const INITIAL_COUNT = 6;
+
+const query = ref('');
+const showAll = ref(false);
+
+const trimmedQuery = computed(() => query.value.trim());
+
+/** Filtro sobre o conjunto INTEIRO — a busca ignora o limite do revelar. */
+const filteredItems = computed(() => {
+  const q = trimmedQuery.value;
+  if (!q) return faqItems;
+  return faqItems.filter(
+    (item) => matchesQuery(item.question, q) || matchesQuery(item.answer, q),
+  );
+});
+
+const visibleItems = computed(() => {
+  if (trimmedQuery.value) return filteredItems.value;
+  return showAll.value ? faqItems : faqItems.slice(0, INITIAL_COUNT);
+});
+
+const hiddenCount = computed(() => faqItems.length - INITIAL_COUNT);
+
+/** Contador anunciado por aria-live — vira feedback da busca quando ativa. */
+const countLabel = computed(() => {
+  const q = trimmedQuery.value;
+  if (!q) return `${faqItems.length} perguntas`;
+  const n = filteredItems.value.length;
+  return n === 1 ? `1 resultado para “${q}”` : `${n} resultados para “${q}”`;
+});
+
+// Itens cujo match está SÓ na resposta abrem automaticamente durante a
+// busca — sem isso o usuário vê o resultado sem entender por quê. O estado
+// manual (openItems) é preservado ao limpar a query.
+const searchAutoOpen = ref<Set<string>>(new Set());
+
+watch(trimmedQuery, (q) => {
+  if (!q) {
+    searchAutoOpen.value = new Set();
+    return;
+  }
+  const next = new Set<string>();
+  for (const item of faqItems) {
+    if (!matchesQuery(item.question, q) && matchesQuery(item.answer, q)) {
+      next.add(item.id);
+    }
+  }
+  searchAutoOpen.value = next;
+});
+
+function isOpen(id: string): boolean {
+  return openItems.value.has(id) || searchAutoOpen.value.has(id);
+}
+
+function toggle(id: string) {
+  const nextOpen = new Set(openItems.value);
+  const nextAuto = new Set(searchAutoOpen.value);
+  if (isOpen(id)) {
+    nextOpen.delete(id);
+    nextAuto.delete(id);
+  } else {
+    nextOpen.add(id);
+  }
+  openItems.value = nextOpen; // reatribui pra Vue detectar a mudança
+  searchAutoOpen.value = nextAuto;
+}
+
+function clearQuery() {
+  query.value = '';
 }
 
 // ============ Reveal-on-scroll dos 3 balões ============
@@ -145,40 +218,114 @@ onBeforeUnmount(() => {
         </div>
       </header>
 
+      <!-- Toolbar: busca por string (pergunta + resposta) e contador -->
+      <div class="rg-faq__toolbar">
+        <div class="rg-faq__search">
+          <v-icon icon="mdi-magnify" size="20" class="rg-faq__search-icon" aria-hidden="true" />
+          <label class="rg-faq__sr-only" for="rg-faq-search-input">
+            Buscar nas perguntas frequentes
+          </label>
+          <input
+            id="rg-faq-search-input"
+            v-model="query"
+            type="search"
+            class="rg-faq__search-input"
+            placeholder="Buscar por termo — ex.: empresa aderente, nota fiscal…"
+            autocomplete="off"
+          />
+          <button
+            v-if="trimmedQuery"
+            type="button"
+            class="rg-faq__search-clear"
+            aria-label="Limpar busca"
+            @click="clearQuery"
+          >
+            <v-icon icon="mdi-close" size="18" />
+          </button>
+        </div>
+        <span class="rg-faq__count" aria-live="polite">{{ countLabel }}</span>
+      </div>
+
       <!-- Acordeão (não-exclusivo: múltiplos items abertos simultaneamente) -->
-      <ul class="rg-faq__list" role="list">
+      <ul v-if="visibleItems.length > 0" class="rg-faq__list" role="list">
         <li
-          v-for="(item, i) in faqItems"
-          :key="item.question"
-          :class="['rg-faq__item', { 'is-open': openItems.has(i) }]"
+          v-for="item in visibleItems"
+          :key="item.id"
+          :class="['rg-faq__item', { 'is-open': isOpen(item.id) }]"
         >
           <button
             type="button"
             class="rg-faq__question"
-            :aria-expanded="openItems.has(i)"
-            :aria-controls="`rg-faq-answer-${i}`"
-            @click="toggle(i)"
+            :aria-expanded="isOpen(item.id)"
+            :aria-controls="`rg-faq-answer-${item.id}`"
+            @click="toggle(item.id)"
           >
-            <span class="rg-faq__question-text">{{ item.question }}</span>
+            <span class="rg-faq__question-text">
+              <template
+                v-for="(seg, si) in highlightSegments(item.question, trimmedQuery)"
+                :key="si"
+              ><mark v-if="seg.hit" class="rg-faq__mark">{{ seg.text }}</mark><template v-else>{{ seg.text }}</template></template>
+            </span>
             <span class="rg-faq__toggle" aria-hidden="true">
               <v-icon
-                :icon="openItems.has(i) ? 'mdi-minus' : 'mdi-plus'"
+                :icon="isOpen(item.id) ? 'mdi-minus' : 'mdi-plus'"
                 size="20"
               />
             </span>
           </button>
 
-          <Transition name="rg-faq-expand">
+          <RgExpandTransition>
             <div
-              v-if="openItems.has(i)"
-              :id="`rg-faq-answer-${i}`"
+              v-if="isOpen(item.id)"
+              :id="`rg-faq-answer-${item.id}`"
               class="rg-faq__answer"
             >
-              <p>{{ item.answer }}</p>
+              <p>
+                <template
+                  v-for="(seg, si) in highlightSegments(item.answer, trimmedQuery)"
+                  :key="si"
+                ><mark v-if="seg.hit" class="rg-faq__mark">{{ seg.text }}</mark><template v-else>{{ seg.text }}</template></template>
+              </p>
             </div>
-          </Transition>
+          </RgExpandTransition>
         </li>
       </ul>
+
+      <!-- Empty state da busca: nenhum match -->
+      <div v-else class="rg-faq__empty">
+        <img src="/faq/doubt-icon.png" alt="" class="rg-faq__empty-icon" aria-hidden="true" />
+        <p class="rg-faq__empty-text">
+          Nenhuma pergunta encontrada para
+          <strong>“{{ trimmedQuery }}”</strong>.
+        </p>
+        <a
+          class="rg-faq__empty-cta"
+          href="mailto:logisticareversa.meioambiente@gov.goias.br?subject=D%C3%BAvida%20sobre%20o%20Recicla%20Goi%C3%A1s"
+        >
+          <v-icon icon="mdi-help-circle-outline" size="18" />
+          Fale Conosco
+        </a>
+      </div>
+
+      <!-- Revelar mais — só sem busca ativa (a busca filtra o conjunto todo) -->
+      <div
+        v-if="!trimmedQuery && hiddenCount > 0"
+        class="rg-faq__reveal"
+      >
+        <button
+          type="button"
+          class="rg-faq__reveal-btn"
+          :aria-expanded="showAll"
+          @click="showAll = !showAll"
+        >
+          {{ showAll ? 'Mostrar menos' : `Mostrar todas as ${faqItems.length} perguntas` }}
+          <v-icon
+            icon="mdi-chevron-down"
+            size="20"
+            :class="['rg-faq__reveal-chevron', { 'is-flipped': showAll }]"
+          />
+        </button>
+      </div>
     </div>
   </section>
 </template>
@@ -478,27 +625,230 @@ onBeforeUnmount(() => {
   color: var(--rg-color-text-secondary);
 }
 
-/* Transition de expand/collapse do acordeão.
-   Animamos via max-height + opacity. O max-height "grande" (500px) cobre
-   qualquer resposta textual sem corte e ainda mantém a animação suave. */
-.rg-faq-expand-enter-active,
-.rg-faq-expand-leave-active {
-  overflow: hidden;
+/* Expand/collapse das respostas: delegado ao RgExpandTransition (altura real
+   medida no DOM — sem o teto de max-height que cortava respostas longas). */
+
+/* ============ Toolbar de busca ============ */
+.rg-faq__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rg-space-4);
+  /* Cola a toolbar na lista (o gap do __inner é 48px — exagerado aqui). */
+  margin-bottom: calc(var(--rg-space-8) * -1);
+}
+
+.rg-faq__search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  max-width: 520px;
+}
+
+.rg-faq__search-icon {
+  position: absolute;
+  left: var(--rg-space-4);
+  color: var(--rg-color-text-muted);
+  pointer-events: none;
+}
+
+.rg-faq__search-input {
+  width: 100%;
+  height: 48px;
+  padding: 0 var(--rg-space-12) 0 var(--rg-space-12);
+  background-color: var(--rg-color-surface-base);
+  border: 1px solid var(--rg-color-border-base);
+  border-radius: var(--rg-radius-lg);
+  font-family: inherit;
+  font-size: var(--rg-font-size-sm);
+  color: var(--rg-color-text-primary);
   transition:
-    max-height 320ms cubic-bezier(0.2, 0.8, 0.2, 1),
-    opacity 200ms ease;
+    border-color var(--rg-motion-duration-fast) var(--rg-motion-ease-standard),
+    box-shadow var(--rg-motion-duration-fast) var(--rg-motion-ease-standard);
 }
 
-.rg-faq-expand-enter-from,
-.rg-faq-expand-leave-to {
-  max-height: 0;
-  opacity: 0;
+.rg-faq__search-input::placeholder {
+  color: var(--rg-color-text-muted);
 }
 
-.rg-faq-expand-enter-to,
-.rg-faq-expand-leave-from {
-  max-height: 500px;
-  opacity: 1;
+.rg-faq__search-input:hover {
+  border-color: var(--rg-color-border-strong);
+}
+
+.rg-faq__search-input:focus {
+  outline: none;
+  border-color: var(--rg-primitive-brand-500);
+  box-shadow: 0 0 0 3px rgba(39, 156, 80, 0.18);
+}
+
+/* Esconde o "x" nativo do input type=search — usamos o botão próprio. */
+.rg-faq__search-input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.rg-faq__search-clear {
+  position: absolute;
+  right: var(--rg-space-3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: none;
+  border-radius: var(--rg-radius-pill);
+  color: var(--rg-color-text-muted);
+  cursor: pointer;
+  transition:
+    color var(--rg-motion-duration-fast) var(--rg-motion-ease-standard),
+    background-color var(--rg-motion-duration-fast) var(--rg-motion-ease-standard);
+}
+
+.rg-faq__search-clear:hover {
+  color: var(--rg-color-text-primary);
+  background-color: var(--rg-color-surface-subtle);
+}
+
+.rg-faq__search-clear:focus-visible {
+  outline: 2px solid var(--rg-color-action-primary);
+  outline-offset: 1px;
+}
+
+.rg-faq__count {
+  font-size: var(--rg-font-size-sm);
+  font-weight: var(--rg-font-weight-medium);
+  color: var(--rg-color-text-muted);
+  white-space: nowrap;
+}
+
+/* Label invisível do input (acessível a leitores de tela). */
+.rg-faq__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Highlight dos matches da busca — verde clarinho da marca em vez do
+   amarelo default de <mark>, herdando a cor do texto ao redor. */
+.rg-faq__mark {
+  background-color: var(--rg-primitive-brand-100);
+  color: inherit;
+  border-radius: 3px;
+  padding: 0 1px;
+}
+
+/* ============ Empty state da busca ============ */
+.rg-faq__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--rg-space-4);
+  padding: var(--rg-space-12) var(--rg-space-6);
+  text-align: center;
+  border: 1px dashed var(--rg-color-border-base);
+  border-radius: var(--rg-radius-xl);
+}
+
+.rg-faq__empty-icon {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  opacity: 0.85;
+}
+
+.rg-faq__empty-text {
+  margin: 0;
+  font-size: var(--rg-font-size-md);
+  color: var(--rg-color-text-secondary);
+}
+
+.rg-faq__empty-text strong {
+  color: var(--rg-color-text-primary);
+  font-weight: var(--rg-font-weight-semibold);
+  overflow-wrap: anywhere;
+}
+
+.rg-faq__empty-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rg-space-2);
+  padding: var(--rg-space-3) var(--rg-space-5);
+  background-color: var(--rg-color-surface-base);
+  border: 1px solid var(--rg-color-border-base);
+  border-radius: var(--rg-radius-md);
+  font-size: var(--rg-font-size-sm);
+  font-weight: var(--rg-font-weight-semibold);
+  color: var(--rg-color-text-primary);
+  text-decoration: none;
+  transition:
+    background-color var(--rg-motion-duration-base) var(--rg-motion-ease-standard),
+    border-color var(--rg-motion-duration-base) var(--rg-motion-ease-standard);
+}
+
+.rg-faq__empty-cta:hover {
+  background-color: var(--rg-primitive-brand-50);
+  border-color: var(--rg-primitive-brand-300);
+}
+
+.rg-faq__empty-cta :deep(.v-icon) {
+  color: var(--rg-primitive-brand-600);
+}
+
+/* ============ Revelar mais ============ */
+.rg-faq__reveal {
+  display: flex;
+  justify-content: center;
+  /* Aproxima o botão da lista (compensa parte do gap de 48px do __inner). */
+  margin-top: calc(var(--rg-space-6) * -1);
+}
+
+.rg-faq__reveal-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rg-space-2);
+  padding: var(--rg-space-3) var(--rg-space-6);
+  background-color: var(--rg-color-surface-base);
+  border: 1px solid var(--rg-color-border-base);
+  border-radius: var(--rg-radius-pill);
+  font-family: inherit;
+  font-size: var(--rg-font-size-sm);
+  font-weight: var(--rg-font-weight-semibold);
+  color: var(--rg-color-text-primary);
+  cursor: pointer;
+  transition:
+    background-color var(--rg-motion-duration-base) var(--rg-motion-ease-standard),
+    border-color var(--rg-motion-duration-base) var(--rg-motion-ease-standard),
+    transform var(--rg-motion-duration-base) var(--rg-motion-ease-standard);
+}
+
+.rg-faq__reveal-btn:hover {
+  background-color: var(--rg-primitive-brand-50);
+  border-color: var(--rg-primitive-brand-300);
+  transform: translateY(-1px);
+}
+
+.rg-faq__reveal-btn:focus-visible {
+  outline: 2px solid var(--rg-color-action-primary);
+  outline-offset: 2px;
+}
+
+.rg-faq__reveal-btn :deep(.v-icon) {
+  color: var(--rg-primitive-brand-600);
+}
+
+.rg-faq__reveal-chevron {
+  transition: transform var(--rg-motion-duration-slow) var(--rg-motion-ease-emphasized);
+}
+
+.rg-faq__reveal-chevron.is-flipped {
+  transform: rotate(180deg);
 }
 
 /* ============ Responsivo ============ */
@@ -541,12 +891,23 @@ onBeforeUnmount(() => {
   .rg-faq__contact {
     max-width: none;
   }
+  /* Toolbar empilha: busca full-width em cima, contador embaixo. */
+  .rg-faq__toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--rg-space-2);
+  }
+  .rg-faq__search {
+    max-width: none;
+  }
+  .rg-faq__count {
+    text-align: right;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .rg-faq__balloon,
-  .rg-faq-expand-enter-active,
-  .rg-faq-expand-leave-active {
+  .rg-faq__reveal-chevron {
     transition: none !important;
   }
   .rg-faq__balloon {

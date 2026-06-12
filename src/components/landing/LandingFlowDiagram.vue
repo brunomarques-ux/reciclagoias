@@ -196,7 +196,7 @@ onBeforeUnmount(() => {
   /* Padding vertical consistente com as demais seções claras. */
   padding: var(--rg-space-24) var(--rg-space-6);
   /* Mesmo tint do "Como funciona" — alternância cromática entre seções claras. */
-  background-color: #F1F7F3;
+  background-color: var(--rg-color-surface-soft-tint);
   /* Permite que o logo 3D estoure pra cima sem causar scrollbar. */
   overflow: hidden;
 }
