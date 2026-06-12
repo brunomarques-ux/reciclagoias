@@ -159,10 +159,10 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .rg-how {
-  /* Verde muito claro do Figma (in-between branco e brand-50). Local porque é
-     exclusivo desta section + dos chips de check; se aparecer em uma 3ª seção
-     vira candidato a `--rg-color-surface-soft-tint` no DS. */
-  --rg-how-bg-tint: #F1F7F3;
+  /* Verde muito claro do Figma (in-between branco e brand-50). Promovido a
+     token do DS na 4ª ocorrência (HowItWorks, FlowDiagram, CtaFinal, Perfis);
+     o alias local segue alimentando os chips de check e bullets. */
+  --rg-how-bg-tint: var(--rg-color-surface-soft-tint);
 
   position: relative;
   /* Padding vertical 96px — 16px a mais pra respiro entre seções. */

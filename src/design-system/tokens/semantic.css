@@ -13,6 +13,10 @@
   --rg-color-surface-raised:  var(--rg-primitive-neutral-0);     /* cards principais */
   --rg-color-surface-inverse: var(--rg-primitive-brand-800);     /* blocos institucionais escuros */
   --rg-color-surface-brand:   var(--rg-primitive-brand-50);      /* destaques de marca */
+  /* Verde muito claro (entre branco e brand-50) — fundo de seções com tint.
+     Promovido de var local (era --rg-how-bg-tint no LandingHowItWorks) ao
+     aparecer pela 4ª vez: HowItWorks, FlowDiagram, CtaFinal e Perfis. */
+  --rg-color-surface-soft-tint: #F1F7F3;
 
   /* ----- Text ----- */
   --rg-color-text-primary:   var(--rg-primitive-neutral-900);
