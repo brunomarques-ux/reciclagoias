@@ -17,20 +17,17 @@ import LandingFaq from '@/components/landing/LandingFaq.vue';
 import LandingCtaFinal from '@/components/landing/LandingCtaFinal.vue';
 import LandingFooter from '@/components/landing/LandingFooter.vue';
 
+// Curadoria por tarefa do visitante (entender → me identificar → sou
+// obrigado? → como começo → objeções). Prêmios/Comitê/Fluxo/Sistema saem do
+// header — numa one-page o scroll é a navegação primária e o footer carrega
+// o mapa completo. O atalho sazonal de Autodeclaração vive no grupo de AÇÕES
+// do header (LandingHeader), não na navegação.
 const sections = ref([
   { id: 'sobre',          label: 'O que é' },
   { id: 'perfis',         label: 'Perfis' },
   { id: 'enquadramento',  label: 'Quem adere' },
   { id: 'como-funciona',  label: 'Como funciona' },
-  { id: 'premio',         label: 'Prêmios' },
-  // secondary: escondidos no header entre 961–1280px (não cabem os 10 itens);
-  // continuam no drawer mobile e acessíveis por scroll.
-  { id: 'comite',         label: 'Comitê', secondary: true },
-  { id: 'fluxo',          label: 'Fluxo',  secondary: true },
-  { id: 'sistema',        label: 'Sistema' },
   { id: 'duvidas',        label: 'Dúvidas' },
-  // Atalho sazonal com leve destaque (prazo aberto) → banner logo após a hero.
-  { id: 'autodeclaracao', label: 'Autodeclaração', highlight: true },
 ]);
 </script>
 
