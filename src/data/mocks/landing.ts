@@ -58,6 +58,15 @@ export const whatIsCards: WhatIsCard[] = [
 
 export type ProfileSlug = 'empresa' | 'gestora' | 'operador' | 'verificador';
 
+/** Badge de destaque do painel — todos os perfis têm um (padrão aprovado no
+ *  Figma: texto à esquerda + quadrado tonal 44px com ícone à direita).
+ *  tone 'amber' = restrição/prazo legal; 'green' = integridade de processo. */
+export interface ProfileBadge {
+  text: string;
+  icon: string;
+  tone: 'amber' | 'green';
+}
+
 export interface SystemProfile {
   slug: ProfileSlug;
   name: string;
@@ -73,8 +82,8 @@ export interface SystemProfile {
   description: string;
   /** 3–5 atribuições, derivadas do decreto. */
   responsibilities: string[];
-  /** Observação legal exibida em box destacado — opcional. */
-  legalNote?: string;
+  /** Destaque legal/processual do perfil. */
+  badge: ProfileBadge;
 }
 
 export const systemProfiles: SystemProfile[] = [
@@ -85,15 +94,18 @@ export const systemProfiles: SystemProfile[] = [
     icon: 'mdi-domain',
     tagline: 'Quem tem a obrigação legal',
     description:
-      'Fabricantes, importadores, distribuidores e comerciantes de produtos que geram embalagens pós-consumo em Goiás — incluindo detentores de marca e quem envasa, monta ou manufatura em nome deles. Com ou sem sede no estado, a obrigação é a mesma: garantir que uma massa equivalente de embalagens retorne ao ciclo produtivo.',
+      'Fabricantes, importadores, distribuidores e comerciantes de produtos que geram embalagens pós-consumo em Goiás, incluindo detentores de marca e quem envasa, monta ou manufatura em nome deles. Com ou sem sede no estado, a obrigação é a mesma: garantir que uma massa equivalente de embalagens retorne ao ciclo produtivo.',
     responsibilities: [
       'Aderir a um sistema coletivo de logística reversa — ou estruturar um sistema individual próprio',
       'Declarar a quantidade de embalagens colocadas no mercado estadual a cada ano',
       'Comprovar as metas de recuperação por meio dos certificados RECICLAGOIÁS',
       'Orientar consumidores e apoiar pontos de entrega voluntária',
     ],
-    legalNote:
-      'Empresas que optam pelo modelo individual cumprem os mesmos requisitos das entidades gestoras do modelo coletivo (art. 14).',
+    badge: {
+      text: 'Empresas que optam pelo modelo individual cumprem os mesmos requisitos das entidades gestoras do modelo coletivo (art. 14).',
+      icon: 'mdi-scale-balance',
+      tone: 'amber',
+    },
   },
   {
     slug: 'gestora',
@@ -102,7 +114,7 @@ export const systemProfiles: SystemProfile[] = [
     icon: 'mdi-office-building-cog-outline',
     tagline: 'Quem orquestra o sistema coletivo',
     description:
-      'Pessoa jurídica que estrutura, implementa e operacionaliza o sistema de logística reversa em modelo coletivo — representa um grupo de empresas aderentes perante o Estado e cuida de todo o ciclo de comprovação por elas.',
+      'Pessoa jurídica que estrutura, implementa e operacionaliza o sistema de logística reversa em modelo coletivo, representa um grupo de empresas aderentes perante o Estado e cuida de todo o ciclo de comprovação por elas. É a porta de entrada do modelo coletivo: organiza operadores, contratos e prazos num único fluxo.',
     responsibilities: [
       'Protocolar o sistema na SEMAD, com metas progressivas por grupo de embalagem',
       'Qualificar e reunir empresas aderentes e operadores',
@@ -110,6 +122,11 @@ export const systemProfiles: SystemProfile[] = [
       'Emitir o certificado RECICLAGOIÁS a partir das notas fiscais homologadas',
       'Entregar o relatório anual de desempenho até 31 de março',
     ],
+    badge: {
+      text: 'Sistemas coletivos devem ser protocolados na SEMAD com antecedência mínima de 180 dias da entrega do relatório anual (art. 4º).',
+      icon: 'mdi-calendar-clock',
+      tone: 'amber',
+    },
   },
   {
     slug: 'operador',
@@ -118,13 +135,18 @@ export const systemProfiles: SystemProfile[] = [
     icon: 'mdi-truck-outline',
     tagline: 'Quem devolve o material ao ciclo',
     description:
-      'Cooperativas e associações de catadores, agentes de reciclagem, serviços públicos de limpeza urbana, consórcios, empresas, MEIs e organizações da sociedade civil que restituem embalagens recicláveis ao setor produtivo.',
+      'Cooperativas e associações de catadores, agentes de reciclagem, serviços públicos de limpeza urbana, consórcios, empresas, MEIs e organizações da sociedade civil que restituem embalagens recicláveis ao setor produtivo. São quem dá materialidade à logística reversa: cada venda de material gera a nota fiscal que alimenta o sistema.',
     responsibilities: [
       'Coletar, triar e destinar embalagens pós-consumo ao reaproveitamento',
       'Emitir as notas fiscais eletrônicas que comprovam a venda do material reciclável',
       'Garantir a rastreabilidade até o destinador final (CDF emitido via MTR do Sinir)',
       'Manter as responsabilidades em dia perante os órgãos ambientais',
     ],
+    badge: {
+      text: 'Cada nota fiscal emitida precisa de rastreabilidade comprovada até o destinador final, CDF emitido via MTR do Sinir (art. 5º).',
+      icon: 'mdi-truck-check-outline',
+      tone: 'green',
+    },
   },
   {
     slug: 'verificador',
@@ -133,15 +155,18 @@ export const systemProfiles: SystemProfile[] = [
     icon: 'mdi-check-decagram-outline',
     tagline: 'Quem audita e dá fé aos números',
     description:
-      'Pessoa jurídica independente, contratada pela entidade gestora e homologada pelo Ministério do Meio Ambiente e Mudança do Clima, responsável pela credibilidade de todo o sistema.',
+      'Pessoa jurídica independente, contratada pela entidade gestora e homologada pelo Ministério do Meio Ambiente e Mudança do Clima, responsável pela credibilidade de todo o sistema. Atua como camada de auditoria entre operadores, gestoras e o poder público, garantindo que cada tonelada declarada tenha existência real e única.',
     responsibilities: [
       'Homologar as notas fiscais eletrônicas emitidas pelos operadores',
       'Validar as notas eletronicamente junto à Receita Federal',
       'Garantir unicidade e evitar a dupla contagem da massa reciclada',
       'Custodiar os arquivos digitais das notas por no mínimo 5 anos',
     ],
-    legalNote:
-      'É vedado ao verificador comercializar resultados ou emitir, comprar e vender certificados de crédito de reciclagem (art. 9º, § 1º).',
+    badge: {
+      text: 'É vedado ao verificador comercializar resultados ou emitir, comprar e vender certificados de crédito de reciclagem (art. 9º, § 1º).',
+      icon: 'mdi-scale-balance',
+      tone: 'amber',
+    },
   },
 ];
 

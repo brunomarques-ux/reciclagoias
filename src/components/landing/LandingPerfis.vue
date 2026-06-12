@@ -1,15 +1,28 @@
 <script setup lang="ts">
 /**
- * Seção "Perfis do sistema" — os 4 perfis do Decreto 10.255/2023.
+ * Seção "Perfis do sistema" — espelho do component set "Seção Perfis do
+ * Sistema" do Figma (SisRev - Rascunho · Componentes · Recicla Goiás).
  *
- * Três blocos:
- *   1. Seletor de perfil — tablist WAI-ARIA (4 tabs com ícone + tagline,
- *      roving tabindex, setas ←/→/Home/End);
- *   2. Painel de detalhe — troca com <Transition mode="out-in">;
- *   3. Faixa do ciclo de operação — 6 passos conectados (nós que fazem pop
- *      sequencial + conectores que preenchem, mesma linguagem visual do
- *      "Como funciona") + chip de reinício fechando o ciclo. Clicar num nó
- *      ativa o perfil correspondente no painel.
+ * Blocos:
+ *   1. Header split — heading à esquerda; lede à direita alinhada à direita
+ *      com fio verde embaixo (mesma linguagem do intro do Como Funciona),
+ *      ambos alinhados pela base.
+ *   2. Seletor de perfil — tablist WAI-ARIA; tabs entram progressivamente
+ *      (Empresa já ativa) e a ativa pulsa (anel suave, padrão do CTA do
+ *      disclaimer). Troca de estado com fade (transition de cores).
+ *   3. Painel — troca com fade puro (out-in); badge de destaque por perfil
+ *      (texto + quadrado tonal 44px com ícone — âmbar = legal, verde =
+ *      processo).
+ *   4. Ciclo de operação — pista oval fechada (racetrack) com 6 nós
+ *      numerados, setas de direção, selo central e um PULSO de energia
+ *      contínuo que percorre a pista (offset-path) acendendo cada nó ao
+ *      passar. Desktop usa a pista (escalada pra caber); mobile degrada
+ *      pra timeline vertical com o mesmo blink sequencial.
+ *
+ * Animações de entrada (IntersectionObserver → .is-visible):
+ *   heading fade + desliza da esquerda; lede fade + desliza da direita;
+ *   tabs surgem em sequência; pista se desenha (stroke-dash) e os nós dão
+ *   pop; então o pulso começa.
  */
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import {
@@ -55,37 +68,105 @@ function nameFor(slug: ProfileSlug): string {
   return systemProfiles.find((p) => p.slug === slug)?.name ?? slug;
 }
 
-// ============ Reveal-on-enter do ciclo ============
-const cycleRef = ref<HTMLElement | null>(null);
-const cycleVisible = ref(false);
+// ============ Geometria da pista (design fixo 1200×396, do Figma) ============
+// Pista: rounded-rect x:120 y:88 w:960 h:224 r:112 → laterais são
+// semicírculos perfeitos (r = h/2). Path começa no nó 1 e roda em sentido
+// horário — o MESMO path alimenta o desenho do traço e o offset-path do pulso.
+const TRACK_PATH =
+  'M 331 88 H 968 A 112 112 0 0 1 968 312 H 232 A 112 112 0 0 1 232 88 H 331';
+// Perímetro: 2×736 (retas) + 2π×112 (semicírculos) ≈ 2176 — usado no CSS
+// (stroke-dasharray do desenho da pista).
+/** Duração de uma volta completa do pulso. */
+const PULSE_SECONDS = 12;
+/** Atraso até o pulso começar (espera o desenho da pista + pops). */
+const PULSE_START = 1.6;
+
+/** Posição de cada nó na pista + fração do perímetro até ele (pra sincronizar
+ *  o blink do nó com a passagem do pulso). Frações derivadas da geometria:
+ *  retas de 736px valem ~0.3382 do perímetro cada; semicírculos ~0.1617. */
+const NODE_GEO = [
+  { x: 331, y: 88, top: true, frac: 0 },
+  { x: 600, y: 88, top: true, frac: 0.1236 },
+  { x: 869, y: 88, top: true, frac: 0.2473 },
+  { x: 869, y: 312, top: false, frac: 0.5 },
+  { x: 600, y: 312, top: false, frac: 0.6236 },
+  { x: 331, y: 312, top: false, frac: 0.7473 },
+];
+
+const cycleSteps = computed(() =>
+  profileCycle.map((step, i) => ({
+    ...step,
+    geo: NODE_GEO[i]!,
+    blinkDelay: `${(PULSE_START + NODE_GEO[i]!.frac * PULSE_SECONDS).toFixed(2)}s`,
+  })),
+);
+
+/** Setas de direção embutidas na pista (sentido horário). */
+const TRACK_ARROWS = [
+  { x: 465, y: 88, rot: 0 },
+  { x: 734, y: 88, rot: 0 },
+  { x: 1080, y: 200, rot: 90 },
+  { x: 734, y: 312, rot: 180 },
+  { x: 465, y: 312, rot: 180 },
+  { x: 120, y: 200, rot: 270 },
+];
+
+// ============ Escala da pista pro container ============
+// O loop tem design fixo de 1200px; abaixo disso escala via transform
+// (offset-path não aceita percentuais — geometria precisa ser absoluta).
+const loopOuterRef = ref<HTMLElement | null>(null);
+const loopScale = ref(1);
+let resizeObserver: ResizeObserver | null = null;
+
+function updateScale() {
+  const el = loopOuterRef.value;
+  if (!el) return;
+  loopScale.value = Math.min(1, el.clientWidth / 1200);
+}
+
+// ============ Entrada (reveal-on-enter) ============
+const sectionRef = ref<HTMLElement | null>(null);
+const isVisible = ref(false);
 let observer: IntersectionObserver | null = null;
 
 onMounted(() => {
+  updateScale();
+  resizeObserver = new ResizeObserver(updateScale);
+  if (loopOuterRef.value) resizeObserver.observe(loopOuterRef.value);
+
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (reduced) {
-    cycleVisible.value = true;
+    isVisible.value = true;
     return;
   }
-  if (!cycleRef.value) return;
+  if (!sectionRef.value) return;
   observer = new IntersectionObserver(
     (entries) => {
       if (entries[0]?.isIntersecting) {
-        cycleVisible.value = true;
+        isVisible.value = true;
         observer?.disconnect();
       }
     },
-    { threshold: 0.3 },
+    { threshold: 0.2 },
   );
-  observer.observe(cycleRef.value);
+  observer.observe(sectionRef.value);
 });
 
-onBeforeUnmount(() => observer?.disconnect());
+onBeforeUnmount(() => {
+  observer?.disconnect();
+  resizeObserver?.disconnect();
+});
 </script>
 
 <template>
-  <section id="perfis" class="rg-perfis" aria-labelledby="rg-perfis-title">
+  <section
+    id="perfis"
+    ref="sectionRef"
+    :class="['rg-perfis', { 'is-visible': isVisible }]"
+    aria-labelledby="rg-perfis-title"
+  >
     <div class="rg-perfis__inner">
-      <!-- Header split: heading à esquerda · lede à direita -->
+      <!-- Header split: heading à esquerda · lede + fio à direita, base alinhada -->
       <header class="rg-perfis__header">
         <div class="rg-perfis__heading">
           <span class="rg-perfis__eyebrow">QUEM PARTICIPA</span>
@@ -96,14 +177,17 @@ onBeforeUnmount(() => observer?.disconnect());
             </span>
           </h2>
         </div>
-        <p class="rg-perfis__lede">
-          O Decreto 10.255/2023 define quem faz o quê na logística reversa de
-          Goiás. Cada perfil tem o seu papel — e o ciclo só fecha com os
-          quatro juntos.
-        </p>
+        <div class="rg-perfis__lede-wrap">
+          <p class="rg-perfis__lede">
+            O Decreto 10.255/2023 define quem faz o quê na logística reversa
+            de Goiás. Cada perfil tem o seu papel, e o ciclo só fecha com os
+            quatro juntos.
+          </p>
+          <span class="rg-perfis__lede-rule" aria-hidden="true" />
+        </div>
       </header>
 
-      <!-- Seletor de perfil (tablist) -->
+      <!-- Seletor de perfil (tablist) — tabs entram em sequência -->
       <div
         class="rg-perfis__selector"
         role="tablist"
@@ -120,6 +204,7 @@ onBeforeUnmount(() => observer?.disconnect());
           aria-controls="rg-perfis-panel"
           :tabindex="active === p.slug ? 0 : -1"
           :class="['rg-perfis__tab', { 'is-active': active === p.slug }]"
+          :style="{ '--rg-tab-i': i } as Record<string, string | number>"
           @click="setActive(p.slug)"
           @keydown="onTabKeydown($event, i)"
         >
@@ -133,21 +218,26 @@ onBeforeUnmount(() => observer?.disconnect());
         </button>
       </div>
 
-      <!-- Painel de detalhe do perfil ativo -->
+      <!-- Painel de detalhe do perfil ativo — troca com fade -->
       <div
         id="rg-perfis-panel"
         role="tabpanel"
         :aria-labelledby="`rg-perfis-tab-${active}`"
         class="rg-perfis__panel"
       >
-        <Transition name="rg-perfis-swap" mode="out-in">
+        <Transition name="rg-perfis-fade" mode="out-in">
           <div :key="activeProfile.slug" class="rg-perfis__panel-content">
             <div class="rg-perfis__panel-main">
               <h3 class="rg-perfis__panel-name">{{ activeProfile.name }}</h3>
               <p class="rg-perfis__panel-desc">{{ activeProfile.description }}</p>
-              <aside v-if="activeProfile.legalNote" class="rg-perfis__legal">
-                <v-icon icon="mdi-scale-balance" size="18" aria-hidden="true" />
-                <p>{{ activeProfile.legalNote }}</p>
+              <aside
+                class="rg-perfis__badge"
+                :data-tone="activeProfile.badge.tone"
+              >
+                <p class="rg-perfis__badge-text">{{ activeProfile.badge.text }}</p>
+                <span class="rg-perfis__badge-icon" aria-hidden="true">
+                  <v-icon :icon="activeProfile.badge.icon" size="22" />
+                </span>
               </aside>
             </div>
             <div class="rg-perfis__panel-side">
@@ -171,38 +261,102 @@ onBeforeUnmount(() => observer?.disconnect());
         </Transition>
       </div>
 
-      <!-- Faixa do ciclo de operação -->
-      <div
-        ref="cycleRef"
-        :class="['rg-perfis__cycle-wrap', { 'is-visible': cycleVisible }]"
-      >
+      <!-- Ciclo de operação — pista oval com pulso contínuo (desktop) -->
+      <div class="rg-perfis__cycle-wrap">
         <span class="rg-perfis__cycle-eyebrow">O CICLO DE OPERAÇÃO</span>
-        <ol class="rg-perfis__cycle" aria-label="Ciclo de operação entre os perfis">
-          <li
-            v-for="(step, i) in profileCycle"
-            :key="`${step.profile}-${i}`"
-            class="rg-perfis__cycle-step"
-            :style="{ '--rg-step-i': i } as Record<string, string | number>"
+
+        <div ref="loopOuterRef" class="rg-perfis__loop-outer" :style="{ height: `${396 * loopScale}px` }">
+          <div
+            class="rg-perfis__loop"
+            :style="{ transform: `scale(${loopScale})` } as Record<string, string>"
+            role="list"
+            aria-label="Ciclo de operação entre os perfis"
           >
-            <!-- Conector entre o nó anterior e este (preenche em sequência) -->
-            <span v-if="i > 0" class="rg-perfis__cycle-connector" aria-hidden="true" />
+            <!-- Pista (desenha na entrada; mesmo path do offset do pulso) -->
+            <svg class="rg-perfis__track" viewBox="0 0 1200 396" aria-hidden="true">
+              <path class="rg-perfis__track-path" :d="TRACK_PATH" />
+            </svg>
+
+            <!-- Pulso de energia que percorre a pista infinitamente -->
+            <span class="rg-perfis__pulse" aria-hidden="true" />
+
+            <!-- Setas de direção (sentido horário) -->
+            <span
+              v-for="(a, i) in TRACK_ARROWS"
+              :key="`arrow-${i}`"
+              class="rg-perfis__arrow"
+              :style="{ left: `${a.x}px`, top: `${a.y}px`, '--rg-arrow-rot': `${a.rot}deg` } as Record<string, string>"
+              aria-hidden="true"
+            >
+              <v-icon icon="mdi-chevron-right" size="16" />
+            </span>
+
+            <!-- Nós numerados + rótulos -->
+            <template v-for="(step, i) in cycleSteps" :key="`step-${i}`">
+              <button
+                type="button"
+                role="listitem"
+                :class="['rg-perfis__node', { 'is-active': active === step.profile }]"
+                :style="{
+                  left: `${step.geo.x - 22}px`,
+                  top: `${step.geo.y - 22}px`,
+                  '--rg-node-i': i,
+                  '--rg-blink-delay': step.blinkDelay,
+                } as Record<string, string | number>"
+                :aria-label="`${step.label} — ver perfil ${nameFor(step.profile)}`"
+                @click="setActive(step.profile)"
+              >
+                <v-icon :icon="iconFor(step.profile)" size="22" />
+              </button>
+              <span
+                class="rg-perfis__num"
+                :style="{ left: `${step.geo.x + 8}px`, top: `${step.geo.y - 26}px`, '--rg-node-i': i } as Record<string, string | number>"
+                aria-hidden="true"
+              >{{ i + 1 }}</span>
+              <span
+                class="rg-perfis__node-label"
+                :style="{
+                  left: `${step.geo.x - 105}px`,
+                  top: step.geo.top ? `${step.geo.y - 80}px` : `${step.geo.y + 34}px`,
+                  '--rg-node-i': i,
+                } as Record<string, string | number>"
+              >{{ step.label }}</span>
+            </template>
+
+            <!-- Selo central -->
+            <span class="rg-perfis__seal" aria-hidden="true">
+              <v-icon icon="mdi-recycle-variant" size="30" />
+            </span>
+            <span class="rg-perfis__seal-caption" aria-hidden="true">CICLO CONTÍNUO</span>
+          </div>
+        </div>
+
+        <!-- Timeline vertical (mobile) — mesmo blink sequencial, sem pista -->
+        <ol class="rg-perfis__cycle-mobile" aria-label="Ciclo de operação entre os perfis">
+          <li
+            v-for="(step, i) in cycleSteps"
+            :key="`m-${i}`"
+            class="rg-perfis__m-step"
+          >
+            <span v-if="i > 0" class="rg-perfis__m-conn" aria-hidden="true" />
             <button
               type="button"
-              :class="['rg-perfis__cycle-node', { 'is-active': active === step.profile }]"
+              :class="['rg-perfis__node', 'rg-perfis__node--m', { 'is-active': active === step.profile }]"
+              :style="{ '--rg-node-i': i, '--rg-blink-delay': step.blinkDelay } as Record<string, string | number>"
               :aria-label="`${step.label} — ver perfil ${nameFor(step.profile)}`"
               @click="setActive(step.profile)"
             >
-              <v-icon :icon="iconFor(step.profile)" size="18" />
+              <v-icon :icon="iconFor(step.profile)" size="20" />
+              <span class="rg-perfis__num rg-perfis__num--m" aria-hidden="true">{{ i + 1 }}</span>
             </button>
-            <span class="rg-perfis__cycle-label">{{ step.label }}</span>
+            <span class="rg-perfis__m-label">{{ step.label }}</span>
           </li>
-          <!-- Fechamento do ciclo: chip de reinício -->
-          <li class="rg-perfis__cycle-step rg-perfis__cycle-step--restart" aria-hidden="true">
-            <span class="rg-perfis__cycle-connector rg-perfis__cycle-connector--restart" />
-            <span class="rg-perfis__cycle-restart">
-              <v-icon icon="mdi-recycle-variant" size="18" />
+          <li class="rg-perfis__m-step rg-perfis__m-step--seal" aria-hidden="true">
+            <span class="rg-perfis__m-conn" />
+            <span class="rg-perfis__seal rg-perfis__seal--m">
+              <v-icon icon="mdi-recycle-variant" size="20" />
             </span>
-            <span class="rg-perfis__cycle-label">e o ciclo recomeça</span>
+            <span class="rg-perfis__m-label rg-perfis__m-label--seal">CICLO CONTÍNUO</span>
           </li>
         </ol>
       </div>
@@ -226,10 +380,12 @@ onBeforeUnmount(() => observer?.disconnect());
   gap: var(--rg-space-10);
 }
 
-/* ============ Header ============ */
+/* ============ Header (split, base alinhada — Figma) ============ */
 .rg-perfis__header {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(320px, 1fr);
+  grid-template-columns: minmax(0, 1fr) 420px;
+  justify-content: space-between;
+  /* Base do título alinhada com a base do bloco lede+fio. */
   align-items: end;
   gap: var(--rg-space-16);
 }
@@ -238,6 +394,17 @@ onBeforeUnmount(() => observer?.disconnect());
   display: flex;
   flex-direction: column;
   gap: var(--rg-space-3);
+  /* Entrada: desliza da esquerda pra direita com fade (junto do eyebrow). */
+  opacity: 0;
+  transform: translateX(-24px);
+  transition:
+    opacity 700ms var(--rg-motion-ease-standard),
+    transform 700ms var(--rg-motion-ease-standard);
+}
+
+.rg-perfis.is-visible .rg-perfis__heading {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 .rg-perfis__eyebrow {
@@ -267,12 +434,39 @@ onBeforeUnmount(() => observer?.disconnect());
   color: var(--rg-primitive-brand-500);
 }
 
+/* Bloco lede: texto alinhado à direita + fio verde embaixo (mesma linguagem
+   do intro do Como Funciona). Entrada: desliza da direita pra esquerda. */
+.rg-perfis__lede-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--rg-space-6);
+  opacity: 0;
+  transform: translateX(24px);
+  transition:
+    opacity 700ms var(--rg-motion-ease-standard) 100ms,
+    transform 700ms var(--rg-motion-ease-standard) 100ms;
+}
+
+.rg-perfis.is-visible .rg-perfis__lede-wrap {
+  opacity: 1;
+  transform: translateX(0);
+}
+
 .rg-perfis__lede {
   margin: 0;
-  max-width: 48ch;
   font-size: var(--rg-font-size-md);
   line-height: var(--rg-line-height-relaxed);
   color: var(--rg-color-text-secondary);
+  text-align: right;
+}
+
+.rg-perfis__lede-rule {
+  display: block;
+  width: 16px;
+  height: 4.5px;
+  border-radius: var(--rg-radius-pill);
+  background-color: var(--rg-color-action-primary);
 }
 
 /* ============ Seletor (tablist) ============ */
@@ -294,22 +488,30 @@ onBeforeUnmount(() => observer?.disconnect());
   font-family: inherit;
   text-align: left;
   cursor: pointer;
-  box-shadow:
-    0 1px 2px rgba(15, 23, 42, 0.04),
-    0 6px 18px rgba(15, 23, 42, 0.05);
+  /* Estados trocam com FADE (cores transicionam) — pedido do design. */
   transition:
-    border-color var(--rg-motion-duration-base) var(--rg-motion-ease-standard),
-    background-color var(--rg-motion-duration-base) var(--rg-motion-ease-standard),
+    border-color 300ms var(--rg-motion-ease-standard),
+    background-color 300ms var(--rg-motion-ease-standard),
     transform var(--rg-motion-duration-base) var(--rg-motion-ease-standard),
-    box-shadow var(--rg-motion-duration-base) var(--rg-motion-ease-standard);
+    box-shadow 300ms var(--rg-motion-ease-standard),
+    opacity 600ms var(--rg-motion-ease-standard);
+  /* Entrada progressiva: cada tab surge em sequência (Empresa primeiro,
+     já marcada; depois Gestora, Operador e Verificador). */
+  opacity: 0;
+  transform: translateY(10px);
+  transition-delay: 0ms, 0ms, 0ms, 0ms, calc(280ms + var(--rg-tab-i, 0) * 160ms);
 }
 
-.rg-perfis__tab:hover {
+.rg-perfis.is-visible .rg-perfis__tab {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Depois da entrada, hover/clique respondem sem o delay da entrada. */
+.rg-perfis.is-visible .rg-perfis__tab:hover {
+  transition-delay: 0ms;
   transform: translateY(-2px);
   border-color: var(--rg-primitive-brand-200);
-  box-shadow:
-    0 2px 4px rgba(15, 23, 42, 0.05),
-    0 12px 28px rgba(15, 23, 42, 0.08);
 }
 
 .rg-perfis__tab:focus-visible {
@@ -320,8 +522,27 @@ onBeforeUnmount(() => observer?.disconnect());
 .rg-perfis__tab.is-active {
   border-color: var(--rg-primitive-brand-500);
   background-color: var(--rg-primitive-brand-50);
-  /* Borda 2px sem mudar layout (mesmo truque do FAQ aberto). */
-  box-shadow: inset 0 0 0 1px var(--rg-primitive-brand-500);
+  /* Anel "neon" suave pulsando em volta da tab ativa — mesmo padrão do CTA
+     destacado do disclaimer (expande e esvai). O inset mantém a borda 2px. */
+  animation: rg-perfis-tab-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes rg-perfis-tab-pulse {
+  0% {
+    box-shadow:
+      inset 0 0 0 1px var(--rg-primitive-brand-500),
+      0 0 0 0 rgba(39, 156, 80, 0.35);
+  }
+  70% {
+    box-shadow:
+      inset 0 0 0 1px var(--rg-primitive-brand-500),
+      0 0 0 10px rgba(39, 156, 80, 0);
+  }
+  100% {
+    box-shadow:
+      inset 0 0 0 1px var(--rg-primitive-brand-500),
+      0 0 0 0 rgba(39, 156, 80, 0);
+  }
 }
 
 .rg-perfis__tab-icon {
@@ -337,7 +558,7 @@ onBeforeUnmount(() => observer?.disconnect());
   flex: none;
   transition:
     transform var(--rg-motion-duration-base) var(--rg-motion-ease-standard),
-    background-color var(--rg-motion-duration-base) var(--rg-motion-ease-standard);
+    background-color 300ms var(--rg-motion-ease-standard);
 }
 
 .rg-perfis__tab.is-active .rg-perfis__tab-icon {
@@ -373,14 +594,26 @@ onBeforeUnmount(() => observer?.disconnect());
   box-shadow:
     0 1px 2px rgba(15, 23, 42, 0.04),
     0 12px 32px rgba(15, 23, 42, 0.06);
+  /* Painel entra junto com a primeira tab (Empresa). */
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 600ms var(--rg-motion-ease-standard) 360ms,
+    transform 600ms var(--rg-motion-ease-standard) 360ms;
+}
+
+.rg-perfis.is-visible .rg-perfis__panel {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .rg-perfis__panel-content {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  /* Main flexível + Side fixa em 400px (proporção do Figma). */
+  grid-template-columns: minmax(0, 1fr) 400px;
   gap: var(--rg-space-12);
   /* Altura mínima cobre o perfil mais alto — a troca não bomba o layout. */
-  min-height: 300px;
+  min-height: 280px;
 }
 
 .rg-perfis__panel-main {
@@ -404,29 +637,55 @@ onBeforeUnmount(() => observer?.disconnect());
   color: var(--rg-color-text-secondary);
 }
 
-/* Nota legal — borda esquerda âmbar (paleta do badge "Prazo aberto"). */
-.rg-perfis__legal {
+/* Badge de destaque — texto à esquerda + quadrado tonal 44px com ícone à
+   direita (padrão do Figma). Tom por semântica: âmbar = restrição/prazo
+   legal; verde = integridade de processo. */
+.rg-perfis__badge {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: 1fr auto;
   gap: var(--rg-space-3);
-  align-items: start;
+  align-items: center;
   margin-top: auto;
   padding: var(--rg-space-4) var(--rg-space-5);
-  background-color: var(--rg-color-feedback-warning-soft);
-  border-left: 3px solid var(--rg-primitive-amber-500);
   border-radius: var(--rg-radius-lg);
+  border-left: 3px solid transparent;
 }
 
-.rg-perfis__legal :deep(.v-icon) {
-  color: var(--rg-primitive-amber-700);
-  margin-top: 2px;
+.rg-perfis__badge[data-tone='amber'] {
+  background-color: #fdf6e7;
+  border-left-color: var(--rg-primitive-amber-500);
 }
 
-.rg-perfis__legal p {
+.rg-perfis__badge[data-tone='green'] {
+  background-color: var(--rg-primitive-brand-50);
+  border-left-color: var(--rg-primitive-brand-500);
+}
+
+.rg-perfis__badge-text {
   margin: 0;
   font-size: var(--rg-font-size-sm);
   line-height: var(--rg-line-height-relaxed);
   color: var(--rg-color-text-secondary);
+}
+
+.rg-perfis__badge-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--rg-radius-md);
+  flex: none;
+}
+
+.rg-perfis__badge[data-tone='amber'] .rg-perfis__badge-icon {
+  background-color: #faebc9;
+  color: var(--rg-primitive-amber-700);
+}
+
+.rg-perfis__badge[data-tone='green'] .rg-perfis__badge-icon {
+  background-color: var(--rg-primitive-brand-100);
+  color: var(--rg-primitive-brand-700);
 }
 
 .rg-perfis__panel-side {
@@ -476,34 +735,26 @@ onBeforeUnmount(() => observer?.disconnect());
   flex: none;
 }
 
-/* Troca do painel: sai rápido pra cima, entra com ênfase de baixo. */
-.rg-perfis-swap-enter-active {
-  transition:
-    opacity 280ms var(--rg-motion-ease-emphasized),
-    transform 280ms var(--rg-motion-ease-emphasized);
+/* Troca do painel: FADE puro (pedido do design). */
+.rg-perfis-fade-enter-active {
+  transition: opacity 240ms var(--rg-motion-ease-standard);
 }
 
-.rg-perfis-swap-leave-active {
-  transition:
-    opacity 180ms var(--rg-motion-ease-accelerate),
-    transform 180ms var(--rg-motion-ease-accelerate);
+.rg-perfis-fade-leave-active {
+  transition: opacity 160ms var(--rg-motion-ease-accelerate);
 }
 
-.rg-perfis-swap-enter-from {
+.rg-perfis-fade-enter-from,
+.rg-perfis-fade-leave-to {
   opacity: 0;
-  transform: translateY(12px);
 }
 
-.rg-perfis-swap-leave-to {
-  opacity: 0;
-  transform: translateY(-8px);
-}
-
-/* ============ Ciclo de operação ============ */
+/* ============ Ciclo de operação — pista (desktop) ============ */
 .rg-perfis__cycle-wrap {
   display: flex;
   flex-direction: column;
   gap: var(--rg-space-6);
+  align-items: center;
 }
 
 .rg-perfis__cycle-eyebrow {
@@ -515,56 +766,112 @@ onBeforeUnmount(() => observer?.disconnect());
   text-align: center;
 }
 
-.rg-perfis__cycle {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  /* 6 passos + chip de reinício. */
-  grid-template-columns: repeat(7, 1fr);
-  align-items: start;
-}
-
-.rg-perfis__cycle-step {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--rg-space-3);
-  padding: 0 var(--rg-space-2);
-}
-
-/* Conector: liga o centro do nó anterior ao deste passo. Cada li desenha o
-   trecho à sua esquerda — linha na altura do centro do nó (20px). */
-.rg-perfis__cycle-connector {
-  position: absolute;
-  top: 20px;
-  /* Vai do centro do passo anterior (-50%) até o centro deste (50%). */
-  left: -50%;
+.rg-perfis__loop-outer {
   width: 100%;
-  height: 2px;
-  background-color: var(--rg-primitive-brand-500);
-  transform: scaleX(0);
-  transform-origin: left center;
-  transition: transform 420ms cubic-bezier(0.65, 0, 0.35, 1);
-  /* Preenche depois do pop do nó anterior. */
-  transition-delay: calc((var(--rg-step-i, 0) - 1) * 180ms + 240ms);
-  border-radius: 1px;
+  /* Altura definida via style inline (396 × escala). */
+}
+
+.rg-perfis__loop {
+  position: relative;
+  width: 1200px;
+  height: 396px;
+  transform-origin: top left;
+}
+
+.rg-perfis__track {
+  position: absolute;
+  inset: 0;
+  width: 1200px;
+  height: 396px;
   pointer-events: none;
 }
 
-.rg-perfis__cycle-wrap.is-visible .rg-perfis__cycle-connector {
-  transform: scaleX(1);
+/* A pista "se desenha" na entrada (stroke-dash do perímetro até zero). */
+.rg-perfis__track-path {
+  fill: none;
+  stroke: var(--rg-primitive-brand-200);
+  stroke-width: 2;
+  stroke-dasharray: 2176;
+  stroke-dashoffset: 2176;
 }
 
-.rg-perfis__cycle-node {
-  position: relative;
-  z-index: 1;
+.rg-perfis.is-visible .rg-perfis__track-path {
+  animation: rg-perfis-track-draw 1.1s var(--rg-motion-ease-emphasized) 0.25s forwards;
+}
+
+@keyframes rg-perfis-track-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+/* Pulso de energia: ponto brilhante que percorre o MESMO path da pista em
+   loop infinito — a cada passagem por um nó, o nó pisca (blink sincronizado
+   por delay). O movimento contínuo materializa o "ciclo contínuo". */
+.rg-perfis__pulse {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--rg-radius-pill);
+  background-color: var(--rg-primitive-brand-500);
+  box-shadow:
+    0 0 6px 2px rgba(39, 156, 80, 0.55),
+    0 0 16px 6px rgba(39, 156, 80, 0.25);
+  offset-path: path('M 331 88 H 968 A 112 112 0 0 1 968 312 H 232 A 112 112 0 0 1 232 88 H 331');
+  offset-rotate: 0deg;
+  opacity: 0;
+}
+
+.rg-perfis.is-visible .rg-perfis__pulse {
+  animation: rg-perfis-pulse-travel 12s linear 1.6s infinite;
+}
+
+@keyframes rg-perfis-pulse-travel {
+  0% {
+    offset-distance: 0%;
+    opacity: 0;
+  }
+  2% {
+    opacity: 1;
+  }
+  98% {
+    opacity: 1;
+  }
+  100% {
+    offset-distance: 100%;
+    opacity: 0;
+  }
+}
+
+/* Setas de direção sobre a pista (com "respiro" no fundo da seção). */
+.rg-perfis__arrow {
+  position: absolute;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--rg-radius-pill);
+  background-color: var(--rg-color-surface-soft-tint);
+  color: var(--rg-primitive-brand-500);
+  transform: translate(-50%, -50%) rotate(var(--rg-arrow-rot, 0deg));
+  opacity: 0;
+  transition: opacity 500ms ease 1.2s;
+  pointer-events: none;
+}
+
+.rg-perfis.is-visible .rg-perfis__arrow {
+  opacity: 1;
+}
+
+/* Nós sobre a pista — pop de entrada em sequência + blink quando o pulso
+   passa + anel persistente no perfil ativo. */
+.rg-perfis__node {
+  position: absolute;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
   border: none;
   border-radius: var(--rg-radius-pill);
   background-image: linear-gradient(
@@ -578,96 +885,223 @@ onBeforeUnmount(() => observer?.disconnect());
   box-shadow:
     0 5px 12px rgba(31, 131, 68, 0.32),
     0 0 0 0.5px rgba(255, 255, 255, 0.1) inset;
-  /* Pop sequencial (mesma linguagem dos bullets do Como Funciona). */
   transform: scale(0);
   opacity: 0;
   transition:
-    transform 420ms cubic-bezier(0.34, 1.56, 0.64, 1),
-    opacity 240ms ease,
-    box-shadow var(--rg-motion-duration-base) var(--rg-motion-ease-standard);
-  transition-delay: calc(var(--rg-step-i, 0) * 180ms);
+    transform 420ms cubic-bezier(0.34, 1.56, 0.64, 1) calc(450ms + var(--rg-node-i, 0) * 120ms),
+    opacity 240ms ease calc(450ms + var(--rg-node-i, 0) * 120ms),
+    box-shadow 300ms var(--rg-motion-ease-standard);
 }
 
-.rg-perfis__cycle-wrap.is-visible .rg-perfis__cycle-node {
+.rg-perfis.is-visible .rg-perfis__node {
   transform: scale(1);
   opacity: 1;
 }
 
-/* Hover/active: anel verde claro em volta do nó (delay zerado pra resposta
-   imediata depois que a entrada já aconteceu). */
-.rg-perfis__cycle-wrap.is-visible .rg-perfis__cycle-node:hover {
+.rg-perfis.is-visible .rg-perfis__node:hover {
   transition-delay: 0ms;
   transform: scale(1.12);
 }
 
-.rg-perfis__cycle-node.is-active {
+.rg-perfis__node.is-active {
   box-shadow:
     0 5px 12px rgba(31, 131, 68, 0.32),
     0 0 0 4px var(--rg-primitive-brand-100);
 }
 
-.rg-perfis__cycle-node:focus-visible {
+.rg-perfis__node:focus-visible {
   outline: 2px solid var(--rg-color-action-primary);
   outline-offset: 3px;
 }
 
-.rg-perfis__cycle-restart {
-  position: relative;
-  z-index: 1;
+/* Blink do nó na passagem do pulso: um anel se expande e esvai, partindo do
+   instante em que o pulso alcança a fração do perímetro daquele nó. */
+.rg-perfis__node::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  border: 2px solid var(--rg-primitive-brand-400);
+  opacity: 0;
+  transform: scale(0.8);
+  pointer-events: none;
+}
+
+.rg-perfis.is-visible .rg-perfis__node::after {
+  animation: rg-perfis-node-blink 12s linear var(--rg-blink-delay, 1.6s) infinite;
+}
+
+@keyframes rg-perfis-node-blink {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.8);
+  }
+  3% {
+    opacity: 0.4;
+    transform: scale(1.7);
+  }
+  5%, 100% {
+    opacity: 0;
+    transform: scale(1.9);
+  }
+}
+
+/* Badge numerado do nó. */
+.rg-perfis__num {
+  position: absolute;
+  z-index: 3;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 18px;
+  height: 18px;
   border-radius: var(--rg-radius-pill);
-  background-color: var(--rg-color-surface-base);
-  border: 2px dashed var(--rg-primitive-brand-400);
+  background-color: var(--rg-color-text-primary);
+  border: 2px solid var(--rg-color-surface-soft-tint);
+  color: white;
+  font-size: 10px;
+  font-weight: var(--rg-font-weight-bold);
+  opacity: 0;
+  transition: opacity 300ms ease calc(550ms + var(--rg-node-i, 0) * 120ms);
+  pointer-events: none;
+}
+
+.rg-perfis.is-visible .rg-perfis__num {
+  opacity: 1;
+}
+
+.rg-perfis__node-label {
+  position: absolute;
+  width: 210px;
+  font-size: 12.5px;
+  font-weight: var(--rg-font-weight-medium);
+  line-height: 17px;
+  color: var(--rg-primitive-neutral-700);
+  text-align: center;
+  opacity: 0;
+  transition: opacity 360ms ease calc(600ms + var(--rg-node-i, 0) * 120ms);
+}
+
+.rg-perfis.is-visible .rg-perfis__node-label {
+  opacity: 1;
+}
+
+/* Selo central + legenda. */
+.rg-perfis__seal {
+  position: absolute;
+  left: 568px;
+  top: 160px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--rg-radius-pill);
+  background-color: var(--rg-primitive-brand-50);
+  border: 1.5px solid var(--rg-primitive-brand-100);
   color: var(--rg-primitive-brand-600);
   transform: scale(0);
   opacity: 0;
   transition:
-    transform 420ms cubic-bezier(0.34, 1.56, 0.64, 1),
-    opacity 240ms ease;
-  /* Entra por último, junto do conector de retorno. */
-  transition-delay: calc(6 * 180ms + 240ms);
+    transform 420ms cubic-bezier(0.34, 1.56, 0.64, 1) 1.25s,
+    opacity 240ms ease 1.25s;
 }
 
-.rg-perfis__cycle-step--restart {
-  /* índice 6 pro delay do conector. */
-  --rg-step-i: 6;
-}
-
-.rg-perfis__cycle-connector--restart {
-  /* Trecho final tracejado — sinaliza o retorno ao início do ciclo. */
-  background: none;
-  border-top: 2px dashed var(--rg-primitive-brand-400);
-  height: 0;
-}
-
-.rg-perfis__cycle-wrap.is-visible .rg-perfis__cycle-restart {
+.rg-perfis.is-visible .rg-perfis__seal {
   transform: scale(1);
   opacity: 1;
 }
 
-.rg-perfis__cycle-label {
-  font-size: var(--rg-font-size-xs);
-  font-weight: var(--rg-font-weight-medium);
-  line-height: var(--rg-line-height-snug);
-  color: var(--rg-color-text-secondary);
+.rg-perfis__seal-caption {
+  position: absolute;
+  left: 500px;
+  top: 234px;
+  width: 200px;
+  font-size: 11px;
+  font-weight: var(--rg-font-weight-semibold);
+  letter-spacing: var(--rg-letter-spacing-eyebrow);
+  text-transform: uppercase;
+  color: var(--rg-color-text-muted);
   text-align: center;
-  max-width: 16ch;
-  /* Fade junto com o pop do nó. */
   opacity: 0;
-  transition: opacity 360ms ease;
-  transition-delay: calc(var(--rg-step-i, 0) * 180ms + 160ms);
+  transition: opacity 360ms ease 1.4s;
 }
 
-.rg-perfis__cycle-wrap.is-visible .rg-perfis__cycle-label {
+.rg-perfis.is-visible .rg-perfis__seal-caption {
   opacity: 1;
 }
 
-.rg-perfis__cycle-step--restart .rg-perfis__cycle-label {
-  font-style: italic;
+/* ============ Ciclo mobile (timeline vertical) ============ */
+.rg-perfis__cycle-mobile {
+  display: none;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex-direction: column;
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+}
+
+.rg-perfis__m-step {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--rg-space-4);
+  padding: var(--rg-space-2) 0;
+}
+
+.rg-perfis__m-conn {
+  position: absolute;
+  top: -14px;
+  left: 21px;
+  width: 2px;
+  height: 26px;
+  background-color: var(--rg-primitive-brand-300);
+}
+
+.rg-perfis__node--m {
+  position: relative;
+  left: auto;
+  top: auto;
+  width: 44px;
+  height: 44px;
+  transform: scale(1);
+  opacity: 1;
+  transition: box-shadow 300ms var(--rg-motion-ease-standard);
+}
+
+.rg-perfis__num--m {
+  left: auto;
+  top: -4px;
+  right: -4px;
+  opacity: 1;
+  transition: none;
+}
+
+.rg-perfis__m-label {
+  font-size: var(--rg-font-size-sm);
+  font-weight: var(--rg-font-weight-medium);
+  line-height: var(--rg-line-height-snug);
+  color: var(--rg-primitive-neutral-700);
+}
+
+.rg-perfis__seal--m {
+  position: relative;
+  left: auto;
+  top: auto;
+  width: 44px;
+  height: 44px;
+  transform: scale(1);
+  opacity: 1;
+  transition: none;
+}
+
+.rg-perfis__m-label--seal {
+  font-size: 11px;
+  font-weight: var(--rg-font-weight-semibold);
+  letter-spacing: var(--rg-letter-spacing-wide);
+  text-transform: uppercase;
   color: var(--rg-color-text-muted);
 }
 
@@ -681,8 +1115,13 @@ onBeforeUnmount(() => observer?.disconnect());
   .rg-perfis__title {
     font-size: clamp(32px, 6vw, 44px);
   }
-  /* Tablist vira grade 2×2 — os 4 perfis ficam todos visíveis de uma vez
-     (a fileira scrollável cortava tabs e escondia opções no mobile). */
+  /* Lede volta pra esquerda no empilhado (fio acompanha). */
+  .rg-perfis__lede-wrap {
+    align-items: flex-start;
+  }
+  .rg-perfis__lede {
+    text-align: left;
+  }
   .rg-perfis__selector {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -697,37 +1136,12 @@ onBeforeUnmount(() => observer?.disconnect());
 }
 
 @media (max-width: 768px) {
-  /* Ciclo degrada pra timeline vertical — é conteúdo, não some.
-     width: fit-content centra o bloco (nó + label mais longo) no viewport,
-     com respiro harmônico dos dois lados em vez de colado à esquerda. */
-  .rg-perfis__cycle {
-    grid-template-columns: 1fr;
-    gap: var(--rg-space-2);
-    width: fit-content;
-    max-width: 100%;
-    margin-inline: auto;
+  /* Pista sai; timeline vertical entra (conteúdo preservado). */
+  .rg-perfis__loop-outer {
+    display: none;
   }
-  .rg-perfis__cycle-step {
-    flex-direction: row;
-    align-items: center;
-    gap: var(--rg-space-4);
-    padding: var(--rg-space-2) 0;
-  }
-  /* Conector vira trecho vertical à esquerda, entre os nós. */
-  .rg-perfis__cycle-connector {
-    top: -14px;
-    left: 19px;
-    width: 2px;
-    height: 24px;
-    transform: scaleY(0);
-    transform-origin: top center;
-  }
-  .rg-perfis__cycle-wrap.is-visible .rg-perfis__cycle-connector {
-    transform: scaleY(1);
-  }
-  .rg-perfis__cycle-label {
-    text-align: left;
-    max-width: none;
+  .rg-perfis__cycle-mobile {
+    display: flex;
   }
 }
 
@@ -738,8 +1152,7 @@ onBeforeUnmount(() => observer?.disconnect());
   .rg-perfis__panel {
     padding: var(--rg-space-6) var(--rg-space-5);
   }
-  /* Na grade 2×2 apertada, tab compacta: ícone em cima, só o nome embaixo
-     (a tagline vive no painel de detalhe logo abaixo). */
+  /* Tab compacta na grade 2×2: ícone em cima, só o nome. */
   .rg-perfis__tab {
     grid-template-columns: 1fr;
     justify-items: center;
@@ -759,16 +1172,35 @@ onBeforeUnmount(() => observer?.disconnect());
   }
 }
 
+/* ============ Reduced motion: estado final, sem pulso ============ */
 @media (prefers-reduced-motion: reduce) {
+  .rg-perfis__heading,
+  .rg-perfis__lede-wrap,
   .rg-perfis__tab,
   .rg-perfis__tab-icon,
-  .rg-perfis__cycle-node,
-  .rg-perfis__cycle-connector,
-  .rg-perfis__cycle-restart,
-  .rg-perfis__cycle-label,
-  .rg-perfis-swap-enter-active,
-  .rg-perfis-swap-leave-active {
+  .rg-perfis__panel,
+  .rg-perfis__node,
+  .rg-perfis__num,
+  .rg-perfis__node-label,
+  .rg-perfis__arrow,
+  .rg-perfis__seal,
+  .rg-perfis__seal-caption,
+  .rg-perfis-fade-enter-active,
+  .rg-perfis-fade-leave-active {
     transition: none !important;
+    animation: none !important;
+  }
+  .rg-perfis__tab.is-active {
+    animation: none !important;
+    box-shadow: inset 0 0 0 1px var(--rg-primitive-brand-500);
+  }
+  .rg-perfis__track-path {
+    stroke-dashoffset: 0;
+    animation: none !important;
+  }
+  .rg-perfis__pulse,
+  .rg-perfis__node::after {
+    display: none !important;
   }
 }
 </style>
