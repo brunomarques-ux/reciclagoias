@@ -681,20 +681,10 @@ onBeforeUnmount(() => observer?.disconnect());
   .rg-perfis__title {
     font-size: clamp(32px, 6vw, 44px);
   }
-  /* Tablist vira fileira horizontal scrollável com snap. */
+  /* Tablist vira grade 2×2 — os 4 perfis ficam todos visíveis de uma vez
+     (a fileira scrollável cortava tabs e escondia opções no mobile). */
   .rg-perfis__selector {
-    grid-template-columns: none;
-    grid-auto-flow: column;
-    grid-auto-columns: minmax(220px, 1fr);
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    padding-bottom: var(--rg-space-2);
-    /* Respiro pro box-shadow dos tabs não cortar. */
-    margin-inline: calc(var(--rg-space-1) * -1);
-    padding-inline: var(--rg-space-1);
-  }
-  .rg-perfis__tab {
-    scroll-snap-align: start;
+    grid-template-columns: repeat(2, 1fr);
   }
   .rg-perfis__panel {
     padding: var(--rg-space-8);
@@ -707,13 +697,15 @@ onBeforeUnmount(() => observer?.disconnect());
 }
 
 @media (max-width: 768px) {
-  /* Ciclo degrada pra timeline vertical — é conteúdo, não some. */
+  /* Ciclo degrada pra timeline vertical — é conteúdo, não some.
+     width: fit-content centra o bloco (nó + label mais longo) no viewport,
+     com respiro harmônico dos dois lados em vez de colado à esquerda. */
   .rg-perfis__cycle {
     grid-template-columns: 1fr;
     gap: var(--rg-space-2);
-    max-width: 420px;
+    width: fit-content;
+    max-width: 100%;
     margin-inline: auto;
-    width: 100%;
   }
   .rg-perfis__cycle-step {
     flex-direction: row;
@@ -745,6 +737,25 @@ onBeforeUnmount(() => observer?.disconnect());
   }
   .rg-perfis__panel {
     padding: var(--rg-space-6) var(--rg-space-5);
+  }
+  /* Na grade 2×2 apertada, tab compacta: ícone em cima, só o nome embaixo
+     (a tagline vive no painel de detalhe logo abaixo). */
+  .rg-perfis__tab {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+    gap: var(--rg-space-2);
+    padding: var(--rg-space-4) var(--rg-space-3);
+  }
+  .rg-perfis__tab-icon {
+    width: 44px;
+    height: 44px;
+  }
+  .rg-perfis__tab-text {
+    align-items: center;
+  }
+  .rg-perfis__tab-tagline {
+    display: none;
   }
 }
 

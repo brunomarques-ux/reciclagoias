@@ -130,10 +130,10 @@ type EligibilityResult = (typeof eligibilityResults)[EligibilityResultKey];
               </p>
 
               <div class="rg-enquadra__actions">
-                <RgButton variant="outline" size="lg" @click="answer(true)">
+                <RgButton variant="secondary" size="lg" @click="answer(true)">
                   Sim
                 </RgButton>
-                <RgButton variant="outline" size="lg" @click="answer(false)">
+                <RgButton variant="secondary" size="lg" @click="answer(false)">
                   Não
                 </RgButton>
               </div>
@@ -194,29 +194,34 @@ type EligibilityResult = (typeof eligibilityResults)[EligibilityResultKey];
         </div>
       </div>
 
-      <!-- Exceções (permanente, abaixo do grid) -->
-      <aside class="rg-enquadra__exceptions" aria-labelledby="rg-enquadra-exceptions-title">
-        <div class="rg-enquadra__exceptions-main">
+      <!-- Linha inferior: exceções e atalho da autodeclaração lado a lado,
+           como cards irmãos (card-dentro-de-card ficava confuso). -->
+      <div class="rg-enquadra__bottom">
+        <aside class="rg-enquadra__exceptions" aria-labelledby="rg-enquadra-exceptions-title">
           <div class="rg-enquadra__exceptions-head">
             <v-icon icon="mdi-tag-off-outline" size="18" aria-hidden="true" />
             <strong id="rg-enquadra-exceptions-title">{{ eligibilityExceptions.title }}</strong>
           </div>
           <p class="rg-enquadra__exceptions-intro">{{ eligibilityExceptions.intro }}</p>
           <ul class="rg-enquadra__exceptions-list" role="list">
-            <li v-for="item in eligibilityExceptions.items" :key="item">{{ item }}</li>
+            <li v-for="item in eligibilityExceptions.items" :key="item">
+              <v-icon icon="mdi-minus-circle-outline" size="16" aria-hidden="true" />
+              {{ item }}
+            </li>
           </ul>
           <span class="rg-enquadra__exceptions-ref">{{ eligibilityExceptions.legalRef }}</span>
-        </div>
-        <a class="rg-enquadra__exceptions-cta" href="#autodeclaracao">
-          <span class="rg-enquadra__exceptions-cta-label">
+        </aside>
+
+        <a class="rg-enquadra__notified" href="#autodeclaracao">
+          <span class="rg-enquadra__notified-label">
             FOI NOTIFICADO E NÃO SE ENQUADRA?
           </span>
-          <span class="rg-enquadra__exceptions-cta-action">
+          <span class="rg-enquadra__notified-action">
             <v-icon icon="mdi-file-document-edit-outline" size="18" />
             Autodeclaração de Não Enquadramento
           </span>
         </a>
-      </aside>
+      </div>
     </div>
   </section>
 </template>
@@ -302,12 +307,15 @@ type EligibilityResult = (typeof eligibilityResults)[EligibilityResultKey];
 /* ============ Card do quiz ============ */
 .rg-enquadra__quiz {
   padding: var(--rg-space-10);
-  background-color: var(--rg-color-surface-base);
-  border: 1px solid var(--rg-color-border-subtle);
+  /* Stroke verde + sombra esverdeada + leve gradiente: o quiz é o elemento
+     interativo protagonista da seção e precisa se destacar do fundo branco. */
+  background: linear-gradient(180deg, #FFFFFF 0%, #F7FBF8 100%);
+  border: 1px solid var(--rg-primitive-brand-300);
   border-radius: var(--rg-radius-2xl);
   box-shadow:
-    0 1px 2px rgba(15, 23, 42, 0.04),
-    0 12px 32px rgba(15, 23, 42, 0.08);
+    inset 0 0 0 1px rgba(39, 156, 80, 0.12),
+    0 1px 2px rgba(18, 82, 42, 0.05),
+    0 16px 40px rgba(31, 131, 68, 0.14);
   /* Cobre a pergunta/resultado mais altos — troca não bomba o layout. */
   min-height: 340px;
   display: flex;
@@ -534,23 +542,23 @@ type EligibilityResult = (typeof eligibilityResults)[EligibilityResultKey];
   transform: translateX(-16px);
 }
 
-/* ============ Exceções ============ */
-.rg-enquadra__exceptions {
+/* ============ Linha inferior: exceções + autodeclaração ============ */
+.rg-enquadra__bottom {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: var(--rg-space-8);
-  align-items: center;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: var(--rg-space-6);
+  align-items: stretch;
+}
+
+.rg-enquadra__exceptions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rg-space-3);
   padding: var(--rg-space-6) var(--rg-space-8);
   background-color: var(--rg-primitive-neutral-50);
   border: 1px solid var(--rg-color-border-subtle);
   border-left: 3px solid var(--rg-primitive-amber-500);
   border-radius: var(--rg-radius-xl);
-}
-
-.rg-enquadra__exceptions-main {
-  display: flex;
-  flex-direction: column;
-  gap: var(--rg-space-2);
 }
 
 .rg-enquadra__exceptions-head {
@@ -575,26 +583,34 @@ type EligibilityResult = (typeof eligibilityResults)[EligibilityResultKey];
   color: var(--rg-color-text-secondary);
 }
 
+/* Listagem vertical — os itens são longos demais pra chip. */
 .rg-enquadra__exceptions-list {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: var(--rg-space-2);
 }
 
 .rg-enquadra__exceptions-list li {
-  padding: var(--rg-space-1) var(--rg-space-3);
-  background-color: var(--rg-color-surface-base);
-  border: 1px solid var(--rg-color-border-subtle);
-  border-radius: var(--rg-radius-pill);
-  font-size: var(--rg-font-size-xs);
-  font-weight: var(--rg-font-weight-medium);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--rg-space-2);
+  align-items: start;
+  font-size: var(--rg-font-size-sm);
+  line-height: var(--rg-line-height-relaxed);
   color: var(--rg-color-text-secondary);
 }
 
+.rg-enquadra__exceptions-list li :deep(.v-icon) {
+  color: var(--rg-primitive-amber-600);
+  margin-top: 3px;
+}
+
 .rg-enquadra__exceptions-ref {
+  margin-top: auto;
+  padding-top: var(--rg-space-2);
   font-size: var(--rg-font-size-2xs);
   font-weight: var(--rg-font-weight-semibold);
   letter-spacing: var(--rg-letter-spacing-wide);
@@ -602,33 +618,39 @@ type EligibilityResult = (typeof eligibilityResults)[EligibilityResultKey];
   color: var(--rg-color-text-muted);
 }
 
-/* CTA pra autodeclaração — mesmo padrão do card "Fale Conosco" do FAQ. */
-.rg-enquadra__exceptions-cta {
+/* Card irmão: atalho pra autodeclaração — mesmo padrão do card
+   "Fale Conosco" do FAQ, conteúdo centralizado verticalmente. */
+.rg-enquadra__notified {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: var(--rg-space-3);
-  padding: var(--rg-space-4) var(--rg-space-5);
+  padding: var(--rg-space-6);
   background-color: var(--rg-color-surface-base);
   border: 1px solid var(--rg-color-border-subtle);
   border-radius: var(--rg-radius-xl);
   text-decoration: none;
-  max-width: 320px;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 6px 18px rgba(15, 23, 42, 0.05);
   transition:
     transform var(--rg-motion-duration-base) var(--rg-motion-ease-standard),
-    background-color var(--rg-motion-duration-base) var(--rg-motion-ease-standard);
+    background-color var(--rg-motion-duration-base) var(--rg-motion-ease-standard),
+    border-color var(--rg-motion-duration-base) var(--rg-motion-ease-standard);
 }
 
-.rg-enquadra__exceptions-cta:hover {
+.rg-enquadra__notified:hover {
   transform: translateY(-2px);
   background-color: var(--rg-primitive-brand-50);
+  border-color: var(--rg-primitive-brand-200);
 }
 
-.rg-enquadra__exceptions-cta:focus-visible {
+.rg-enquadra__notified:focus-visible {
   outline: 2px solid var(--rg-color-action-primary);
   outline-offset: 2px;
 }
 
-.rg-enquadra__exceptions-cta-label {
+.rg-enquadra__notified-label {
   font-size: 11px;
   font-weight: var(--rg-font-weight-semibold);
   letter-spacing: var(--rg-letter-spacing-wide);
@@ -638,7 +660,7 @@ type EligibilityResult = (typeof eligibilityResults)[EligibilityResultKey];
   line-height: var(--rg-line-height-snug);
 }
 
-.rg-enquadra__exceptions-cta-action {
+.rg-enquadra__notified-action {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -653,7 +675,7 @@ type EligibilityResult = (typeof eligibilityResults)[EligibilityResultKey];
   text-align: center;
 }
 
-.rg-enquadra__exceptions-cta-action :deep(.v-icon) {
+.rg-enquadra__notified-action :deep(.v-icon) {
   color: var(--rg-primitive-brand-600);
   flex: none;
 }
@@ -671,12 +693,8 @@ type EligibilityResult = (typeof eligibilityResults)[EligibilityResultKey];
     min-height: 0;
     padding: var(--rg-space-8);
   }
-  .rg-enquadra__exceptions {
+  .rg-enquadra__bottom {
     grid-template-columns: 1fr;
-    gap: var(--rg-space-5);
-  }
-  .rg-enquadra__exceptions-cta {
-    max-width: none;
   }
 }
 
@@ -691,6 +709,9 @@ type EligibilityResult = (typeof eligibilityResults)[EligibilityResultKey];
     grid-template-columns: 1fr;
   }
   .rg-enquadra__exceptions {
+    padding: var(--rg-space-5);
+  }
+  .rg-enquadra__notified {
     padding: var(--rg-space-5);
   }
   .rg-enquadra__result-actions {

@@ -48,8 +48,10 @@ const year = new Date().getFullYear();
           <h4>Navegação</h4>
           <ul>
             <li><a href="#sobre">O que é Logística Reversa</a></li>
+            <li><a href="#perfis">Perfis do sistema</a></li>
+            <li><a href="#enquadramento">Quem precisa aderir</a></li>
             <li><a href="#como-funciona">Como funciona</a></li>
-            <li><a href="#premio">Reconhecimento</a></li>
+            <li><a href="#premio">Prêmios e reconhecimentos</a></li>
             <li><a href="#comite">Comitê gestor</a></li>
             <li><a href="#fluxo">Fluxo de operação</a></li>
             <li><a href="#sistema">Sistema Recicla Goiás</a></li>
