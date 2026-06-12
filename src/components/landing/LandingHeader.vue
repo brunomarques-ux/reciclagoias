@@ -5,11 +5,6 @@ import RgButton from '@/components/RgButton.vue';
 interface NavSection {
   id: string;
   label: string;
-  /** Marca o item como atalho destacado (ex.: Autodeclaração — prazo aberto). */
-  highlight?: boolean;
-  /** Item de menor prioridade — some do header entre 961–1280px (onde os 10
-   *  itens não cabem), mas permanece no drawer mobile e via scroll. */
-  secondary?: boolean;
 }
 
 const props = defineProps<{ sections: NavSection[] }>();
@@ -147,11 +142,7 @@ onUnmounted(() => {
           :href="`#${section.id}`"
           :class="[
             'rg-app-header__link',
-            {
-              'is-active': activeSectionId === section.id,
-              'rg-app-header__link--highlight': section.highlight,
-              'rg-app-header__link--secondary': section.secondary,
-            },
+            { 'is-active': activeSectionId === section.id },
           ]"
           :aria-current="activeSectionId === section.id ? 'location' : undefined"
           @click="onNavClick($event, section.id)"
@@ -159,6 +150,13 @@ onUnmounted(() => {
       </nav>
 
       <div class="rg-app-header__ctas">
+        <!-- Ação SAZONAL (prazo aberto): vive no grupo de ações, não na
+             navegação — quando o período fechar, remover sem afetar a nav. -->
+        <a
+          href="#autodeclaracao"
+          class="rg-app-header__seasonal"
+          @click="onNavClick($event, 'autodeclaracao')"
+        >Autodeclaração</a>
         <RgButton variant="primary" size="sm" href="#acessar" icon-right="mdi-arrow-right">
           Acessar sistema
         </RgButton>
@@ -187,13 +185,19 @@ onUnmounted(() => {
             v-for="section in sections"
             :key="section.id"
             :href="`#${section.id}`"
-            :class="[
-              'rg-app-header__drawer-link',
-              { 'rg-app-header__drawer-link--highlight': section.highlight },
-            ]"
+            class="rg-app-header__drawer-link"
             @click="onNavClick($event, section.id)"
           >
             {{ section.label }}
+            <v-icon icon="mdi-chevron-right" size="18" />
+          </a>
+          <!-- Ação sazonal (prazo aberto) — remover quando o período fechar. -->
+          <a
+            href="#autodeclaracao"
+            class="rg-app-header__drawer-link rg-app-header__drawer-link--highlight"
+            @click="onNavClick($event, 'autodeclaracao')"
+          >
+            Autodeclaração
             <v-icon icon="mdi-chevron-right" size="18" />
           </a>
         </nav>
@@ -266,12 +270,14 @@ onUnmounted(() => {
 
 /* Logo SVG horizontal Recicla Goiás. Altura 36px — maior que a versão
    anterior (28px) pra ficar legível inclusive a palavra "Goiás" pequena.
-   Largura escala proporcionalmente (ratio nativo ~2.83:1 → ~102px).
-   A altura total da navbar é mantida via redução do padding-y do __inner. */
+   Largura EXPLÍCITA (ratio nativo 300×106 → 102px na altura 36): com
+   width:auto a coluna `auto` do grid colapsava o img pra 0px de largura
+   (proporção intrínseca não resolvida + max-width:100%) e a logo sumia. */
 .rg-app-header__brand-logo {
   display: block;
   height: 36px;
-  width: auto;
+  width: 102px;
+  flex: none;
   /* Em modo "over hero" (fundo escuro) aplicamos filter pra logo ficar visível. */
   transition: filter var(--rg-motion-duration-base) var(--rg-motion-ease-standard);
 }
@@ -326,25 +332,38 @@ onUnmounted(() => {
   background-color: var(--rg-primitive-brand-500);
 }
 
-/* Atalho destacado (Autodeclaração · prazo aberto). Usa o âmbar do badge
-   "Prazo aberto" do disclaimer pra sinalizar item sazonal/urgente, sem
-   competir com o verde brand do estado ativo. Definido depois de .is-active
-   pra prevalecer caso a section esteja simultaneamente ativa no viewport. */
-.rg-app-header__link--highlight {
-  color: #B45309;
-  background-color: rgba(252, 211, 77, 0.16);
-  border-color: rgba(252, 211, 77, 0.55);
-  font-weight: var(--rg-font-weight-semibold);
-}
-.rg-app-header__link--highlight:hover {
-  color: #92400E;
-  background-color: rgba(252, 211, 77, 0.28);
-}
-
 .rg-app-header__ctas {
   display: flex;
   gap: var(--rg-space-2);
   align-items: center;
+}
+
+/* Ação sazonal (Autodeclaração · prazo aberto) — vive no grupo de AÇÕES, ao
+   lado do CTA primário, não na navegação. Âmbar do badge "Prazo aberto" do
+   disclaimer; quando o período fechar, remove-se o elemento sem deixar
+   buraco na nav. Altura pareada com o RgButton sm do grupo (43px). */
+.rg-app-header__seasonal {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px var(--rg-space-3);
+  border: 1px solid rgba(252, 211, 77, 0.55);
+  border-radius: var(--rg-radius-md);
+  font-size: var(--rg-font-size-sm);
+  font-weight: var(--rg-font-weight-semibold);
+  color: #B45309;
+  background-color: rgba(252, 211, 77, 0.16);
+  white-space: nowrap;
+  transition:
+    color var(--rg-motion-duration-fast) var(--rg-motion-ease-standard),
+    background-color var(--rg-motion-duration-fast) var(--rg-motion-ease-standard);
+}
+.rg-app-header__seasonal:hover {
+  color: #92400E;
+  background-color: rgba(252, 211, 77, 0.28);
+}
+.rg-app-header__seasonal:focus-visible {
+  outline: 2px solid #B45309;
+  outline-offset: 2px;
 }
 
 /* Override dos RgButtons no header: força fonte Inter (Vuetify às vezes
@@ -408,27 +427,9 @@ onUnmounted(() => {
   margin-top: auto;
 }
 
-/* Breakpoint intermediário: entre 1121–1280px os 10 itens não cabem ao lado
-   do CTA — escondemos os secondary (Comitê/Fluxo, âncoras de menor intenção
-   de navegação) e compactamos paddings/gaps. As seções seguem acessíveis por
-   scroll e no drawer. O sectionsObserver observa as sections do DOM (não os
-   links), então o tracking de seção ativa continua íntegro. */
-@media (max-width: 1280px) {
-  .rg-app-header__link--secondary {
-    display: none;
-  }
-  .rg-app-header__link {
-    padding-inline: var(--rg-space-2);
-  }
-  .rg-app-header__inner {
-    gap: var(--rg-space-4);
-  }
-}
-
-/* Com 10 seções na nav, o drawer assume mais cedo que os 960px clássicos:
-   abaixo de 1120px nem a versão compacta com secondary escondidos fecha a
-   conta (logo + 8 itens + CTA > viewport). */
-@media (max-width: 1120px) {
+/* Com a nav enxuta (5 âncoras + 2 ações), o desktop fecha a conta até ~960px
+   — o drawer volta a entrar só no breakpoint clássico. */
+@media (max-width: 960px) {
   .rg-app-header__inner {
     grid-template-columns: auto 1fr auto;
     gap: var(--rg-space-3);
@@ -475,13 +476,13 @@ onUnmounted(() => {
   background-color: var(--rg-primitive-brand-300);
 }
 
-/* Atalho destacado sobre o hero escuro: âmbar mais claro pra contrastar. */
-.rg-app-header--over-hero .rg-app-header__link--highlight {
+/* Ação sazonal sobre o hero escuro: âmbar mais claro pra contrastar. */
+.rg-app-header--over-hero .rg-app-header__seasonal {
   color: #FCD34D;
   background-color: rgba(252, 211, 77, 0.16);
   border-color: rgba(252, 211, 77, 0.5);
 }
-.rg-app-header--over-hero .rg-app-header__link--highlight:hover {
+.rg-app-header--over-hero .rg-app-header__seasonal:hover {
   color: white;
   background-color: rgba(252, 211, 77, 0.28);
 }
