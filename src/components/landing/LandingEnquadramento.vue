@@ -16,7 +16,7 @@
  * (via @after-enter — não dispara no mount inicial); contador de progresso
  * em aria-live.
  */
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import {
   eligibilityQuestions,
   eligibilityResults,
@@ -25,6 +25,36 @@ import {
   type EligibilityResultKey,
 } from '@/data/mocks/landing';
 import RgButton from '@/components/RgButton.vue';
+
+/** Ícones das exceções (1:1 com eligibilityExceptions.items): agrotóxicos,
+ *  óleos lubrificantes e medicamentos (Decreto federal 10.388/2020). */
+const exceptionIcons = ['mdi-flask-outline', 'mdi-oil', 'mdi-pill'];
+
+// ============ Entrada (reveal-on-enter, mesmo padrão da seção Perfis) ============
+const sectionRef = ref<HTMLElement | null>(null);
+const isVisible = ref(false);
+let observer: IntersectionObserver | null = null;
+
+onMounted(() => {
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduced) {
+    isVisible.value = true;
+    return;
+  }
+  if (!sectionRef.value) return;
+  observer = new IntersectionObserver(
+    (entries) => {
+      if (entries[0]?.isIntersecting) {
+        isVisible.value = true;
+        observer?.disconnect();
+      }
+    },
+    { threshold: 0.2 },
+  );
+  observer.observe(sectionRef.value);
+});
+
+onBeforeUnmount(() => observer?.disconnect());
 
 const step = ref(0);
 const result = ref<EligibilityResultKey | null>(null);
@@ -78,26 +108,44 @@ type EligibilityResult = (typeof eligibilityResults)[EligibilityResultKey];
 </script>
 
 <template>
-  <section id="enquadramento" class="rg-enquadra" aria-labelledby="rg-enquadra-title">
+  <section
+    id="enquadramento"
+    ref="sectionRef"
+    :class="['rg-enquadra', { 'is-visible': isVisible }]"
+    aria-labelledby="rg-enquadra-title"
+  >
     <div class="rg-enquadra__inner">
       <div class="rg-enquadra__grid">
-        <!-- Copy à esquerda -->
+        <!-- Copy à esquerda: heading + hint e, 40px abaixo, o atalho da
+             autodeclaração (movido da linha de baixo — Figma) -->
         <div class="rg-enquadra__copy">
-          <span class="rg-enquadra__eyebrow">ENQUADRAMENTO</span>
-          <h2 id="rg-enquadra-title" class="rg-enquadra__title">
-            <span class="rg-enquadra__title-line">Sua empresa</span>
-            <span class="rg-enquadra__title-line">
-              precisa <span class="rg-enquadra__title-accent">aderir?</span>
+          <div class="rg-enquadra__copy-head">
+            <span class="rg-enquadra__eyebrow">ENQUADRAMENTO</span>
+            <h2 id="rg-enquadra-title" class="rg-enquadra__title">
+              <span class="rg-enquadra__title-line">Sua empresa</span>
+              <span class="rg-enquadra__title-line">
+                precisa <span class="rg-enquadra__title-accent">aderir?</span>
+              </span>
+            </h2>
+            <p class="rg-enquadra__lede">
+              Responda essas três perguntas rápidas e descubra se sua operação
+              se enquadra no Recicla Goiás
+            </p>
+            <p class="rg-enquadra__disclaimer">
+              <v-icon icon="mdi-information-outline" size="14" aria-hidden="true" />
+              Resultado orientativo, não substitui análise jurídica.
+            </p>
+          </div>
+
+          <a class="rg-enquadra__notified" href="#autodeclaracao">
+            <span class="rg-enquadra__notified-label">
+              FOI NOTIFICADO E NÃO SE ENQUADRA?
             </span>
-          </h2>
-          <p class="rg-enquadra__lede">
-            Responda três perguntas rápidas e descubra se o Decreto 10.255/2023
-            se aplica à sua operação — e o que fazer em cada caso.
-          </p>
-          <p class="rg-enquadra__disclaimer">
-            <v-icon icon="mdi-information-outline" size="14" aria-hidden="true" />
-            Resultado orientativo — não substitui análise jurídica.
-          </p>
+            <span class="rg-enquadra__notified-action">
+              <v-icon icon="mdi-file-document-edit-outline" size="18" />
+              Autodeclaração de Não Enquadramento
+            </span>
+          </a>
         </div>
 
         <!-- Card do quiz à direita -->
@@ -130,12 +178,12 @@ type EligibilityResult = (typeof eligibilityResults)[EligibilityResultKey];
               </p>
 
               <div class="rg-enquadra__actions">
-                <RgButton variant="secondary" size="lg" @click="answer(true)">
+                <button type="button" class="rg-enquadra__answer" @click="answer(true)">
                   Sim
-                </RgButton>
-                <RgButton variant="secondary" size="lg" @click="answer(false)">
+                </button>
+                <button type="button" class="rg-enquadra__answer" @click="answer(false)">
                   Não
-                </RgButton>
+                </button>
               </div>
 
               <button
@@ -194,34 +242,29 @@ type EligibilityResult = (typeof eligibilityResults)[EligibilityResultKey];
         </div>
       </div>
 
-      <!-- Linha inferior: exceções e atalho da autodeclaração lado a lado,
-           como cards irmãos (card-dentro-de-card ficava confuso). -->
-      <div class="rg-enquadra__bottom">
-        <aside class="rg-enquadra__exceptions" aria-labelledby="rg-enquadra-exceptions-title">
-          <div class="rg-enquadra__exceptions-head">
-            <v-icon icon="mdi-tag-off-outline" size="18" aria-hidden="true" />
-            <strong id="rg-enquadra-exceptions-title">{{ eligibilityExceptions.title }}</strong>
-          </div>
-          <p class="rg-enquadra__exceptions-intro">{{ eligibilityExceptions.intro }}</p>
-          <ul class="rg-enquadra__exceptions-list" role="list">
-            <li v-for="item in eligibilityExceptions.items" :key="item">
-              <v-icon icon="mdi-minus-circle-outline" size="16" aria-hidden="true" />
-              {{ item }}
-            </li>
-          </ul>
-          <span class="rg-enquadra__exceptions-ref">{{ eligibilityExceptions.legalRef }}</span>
-        </aside>
-
-        <a class="rg-enquadra__notified" href="#autodeclaracao">
-          <span class="rg-enquadra__notified-label">
-            FOI NOTIFICADO E NÃO SE ENQUADRA?
-          </span>
-          <span class="rg-enquadra__notified-action">
-            <v-icon icon="mdi-file-document-edit-outline" size="18" />
-            Autodeclaração de Não Enquadramento
-          </span>
-        </a>
-      </div>
+      <!-- Exceções em largura total — itens em 3 colunas com ícone, pra
+           ocupar a horizontal sem espaço morto. -->
+      <aside class="rg-enquadra__exceptions" aria-labelledby="rg-enquadra-exceptions-title">
+        <div class="rg-enquadra__exceptions-head">
+          <v-icon icon="mdi-tag-off-outline" size="18" aria-hidden="true" />
+          <strong id="rg-enquadra-exceptions-title">{{ eligibilityExceptions.title }}</strong>
+        </div>
+        <p class="rg-enquadra__exceptions-intro">{{ eligibilityExceptions.intro }}</p>
+        <ul class="rg-enquadra__exceptions-list" role="list">
+          <li
+            v-for="(item, i) in eligibilityExceptions.items"
+            :key="item"
+            class="rg-enquadra__exceptions-item"
+            :style="{ '--rg-exc-i': i } as Record<string, string | number>"
+          >
+            <span class="rg-enquadra__exceptions-icon" aria-hidden="true">
+              <v-icon :icon="exceptionIcons[i] ?? 'mdi-minus-circle-outline'" size="20" />
+            </span>
+            {{ item }}
+          </li>
+        </ul>
+        <span class="rg-enquadra__exceptions-ref">{{ eligibilityExceptions.legalRef }}</span>
+      </aside>
     </div>
   </section>
 </template>
@@ -250,10 +293,29 @@ type EligibilityResult = (typeof eligibilityResults)[EligibilityResultKey];
 }
 
 /* ============ Copy ============ */
+/* 40px entre o bloco de heading (que termina no hint) e o card da
+   autodeclaração — espaçamento do Figma. */
 .rg-enquadra__copy {
   display: flex;
   flex-direction: column;
+  gap: var(--rg-space-10);
+}
+
+.rg-enquadra__copy-head {
+  display: flex;
+  flex-direction: column;
   gap: var(--rg-space-4);
+  /* Entrada: desliza da esquerda com fade (espelha o header da seção Perfis). */
+  opacity: 0;
+  transform: translateX(-24px);
+  transition:
+    opacity 700ms var(--rg-motion-ease-standard),
+    transform 700ms var(--rg-motion-ease-standard);
+}
+
+.rg-enquadra.is-visible .rg-enquadra__copy-head {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 .rg-enquadra__eyebrow {
@@ -321,6 +383,17 @@ type EligibilityResult = (typeof eligibilityResults)[EligibilityResultKey];
   display: flex;
   flex-direction: column;
   justify-content: center;
+  /* Entrada: desliza da direita com fade, logo após a copy. */
+  opacity: 0;
+  transform: translateX(24px);
+  transition:
+    opacity 700ms var(--rg-motion-ease-standard) 100ms,
+    transform 700ms var(--rg-motion-ease-standard) 100ms;
+}
+
+.rg-enquadra.is-visible .rg-enquadra__quiz {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 .rg-enquadra__question-view {
@@ -383,6 +456,39 @@ type EligibilityResult = (typeof eligibilityResults)[EligibilityResultKey];
   grid-template-columns: 1fr 1fr;
   gap: var(--rg-space-3);
   margin-top: var(--rg-space-2);
+}
+
+/* Botões de resposta — outline verde (Figma): borda 2px brand-700, texto
+   verde semibold, fundo transparente. */
+.rg-enquadra__answer {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px var(--rg-space-4);
+  background: transparent;
+  border: 2px solid var(--rg-primitive-brand-700);
+  border-radius: var(--rg-radius-lg);
+  font-family: inherit;
+  font-size: var(--rg-font-size-md);
+  font-weight: var(--rg-font-weight-semibold);
+  color: var(--rg-primitive-brand-700);
+  cursor: pointer;
+  transition:
+    background-color var(--rg-motion-duration-fast) var(--rg-motion-ease-standard),
+    transform var(--rg-motion-duration-fast) var(--rg-motion-ease-standard);
+}
+
+.rg-enquadra__answer:hover {
+  background-color: var(--rg-primitive-brand-50);
+}
+
+.rg-enquadra__answer:active {
+  transform: translateY(1px);
+}
+
+.rg-enquadra__answer:focus-visible {
+  outline: 2px solid var(--rg-color-action-primary);
+  outline-offset: 2px;
 }
 
 .rg-enquadra__restart {
@@ -511,9 +617,13 @@ type EligibilityResult = (typeof eligibilityResults)[EligibilityResultKey];
   white-space: nowrap;
 }
 
+/* Ações do resultado nas duas extremidades do card (Figma): primário à
+   esquerda, "Refazer verificação" à direita. */
 .rg-enquadra__result-actions {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  width: 100%;
   gap: var(--rg-space-4);
   margin-top: var(--rg-space-2);
   flex-wrap: wrap;
@@ -542,23 +652,27 @@ type EligibilityResult = (typeof eligibilityResults)[EligibilityResultKey];
   transform: translateX(-16px);
 }
 
-/* ============ Linha inferior: exceções + autodeclaração ============ */
-.rg-enquadra__bottom {
-  display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
-  gap: var(--rg-space-6);
-  align-items: stretch;
-}
-
+/* ============ Exceções (largura total, itens em 3 colunas) ============ */
 .rg-enquadra__exceptions {
   display: flex;
   flex-direction: column;
-  gap: var(--rg-space-3);
+  gap: var(--rg-space-4);
   padding: var(--rg-space-6) var(--rg-space-8);
   background-color: var(--rg-primitive-neutral-50);
   border: 1px solid var(--rg-color-border-subtle);
   border-left: 3px solid var(--rg-primitive-amber-500);
   border-radius: var(--rg-radius-xl);
+  /* Entrada: sobe com fade depois do grid principal. */
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 600ms var(--rg-motion-ease-standard) 320ms,
+    transform 600ms var(--rg-motion-ease-standard) 320ms;
+}
+
+.rg-enquadra.is-visible .rg-enquadra__exceptions {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .rg-enquadra__exceptions-head {
@@ -583,29 +697,47 @@ type EligibilityResult = (typeof eligibilityResults)[EligibilityResultKey];
   color: var(--rg-color-text-secondary);
 }
 
-/* Listagem vertical — os itens são longos demais pra chip. */
+/* Itens em 3 colunas com chip de ícone — aproveita a horizontal do card
+   full-width sem espaço morto. Entram com stagger leve. */
 .rg-enquadra__exceptions-list {
   list-style: none;
   margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--rg-space-2);
+  padding: var(--rg-space-2) 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--rg-space-6);
 }
 
-.rg-enquadra__exceptions-list li {
+.rg-enquadra__exceptions-item {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: var(--rg-space-2);
-  align-items: start;
+  gap: var(--rg-space-3);
+  align-items: center;
   font-size: var(--rg-font-size-sm);
   line-height: var(--rg-line-height-relaxed);
   color: var(--rg-color-text-secondary);
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 500ms var(--rg-motion-ease-standard) calc(480ms + var(--rg-exc-i, 0) * 120ms),
+    transform 500ms var(--rg-motion-ease-standard) calc(480ms + var(--rg-exc-i, 0) * 120ms);
 }
 
-.rg-enquadra__exceptions-list li :deep(.v-icon) {
-  color: var(--rg-primitive-amber-600);
-  margin-top: 3px;
+.rg-enquadra.is-visible .rg-enquadra__exceptions-item {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.rg-enquadra__exceptions-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--rg-radius-md);
+  background-color: #faebc9;
+  color: var(--rg-primitive-amber-700);
+  flex: none;
 }
 
 .rg-enquadra__exceptions-ref {
@@ -618,31 +750,34 @@ type EligibilityResult = (typeof eligibilityResults)[EligibilityResultKey];
   color: var(--rg-color-text-muted);
 }
 
-/* Card irmão: atalho pra autodeclaração — mesmo padrão do card
-   "Fale Conosco" do FAQ, conteúdo centralizado verticalmente. */
+/* Atalho pra autodeclaração — agora na coluna da copy, 40px abaixo do hint,
+   no mesmo padrão do card de decreto/"Fale Conosco" (cinza claro + box
+   branca interna). Entra com fade-up depois da copy. */
 .rg-enquadra__notified {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   gap: var(--rg-space-3);
-  padding: var(--rg-space-6);
-  background-color: var(--rg-color-surface-base);
+  padding: var(--rg-space-4) var(--rg-space-2) var(--rg-space-2);
+  max-width: 364px;
+  background-color: #F6F6F6;
   border: 1px solid var(--rg-color-border-subtle);
   border-radius: var(--rg-radius-xl);
   text-decoration: none;
-  box-shadow:
-    0 1px 2px rgba(15, 23, 42, 0.04),
-    0 6px 18px rgba(15, 23, 42, 0.05);
+  opacity: 0;
+  transform: translateY(12px);
   transition:
-    transform var(--rg-motion-duration-base) var(--rg-motion-ease-standard),
-    background-color var(--rg-motion-duration-base) var(--rg-motion-ease-standard),
-    border-color var(--rg-motion-duration-base) var(--rg-motion-ease-standard);
+    opacity 600ms var(--rg-motion-ease-standard) 220ms,
+    transform 600ms var(--rg-motion-ease-standard) 220ms,
+    background-color var(--rg-motion-duration-base) var(--rg-motion-ease-standard);
+}
+
+.rg-enquadra.is-visible .rg-enquadra__notified {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .rg-enquadra__notified:hover {
-  transform: translateY(-2px);
-  background-color: var(--rg-primitive-brand-50);
-  border-color: var(--rg-primitive-brand-200);
+  background-color: #EFEFEF;
 }
 
 .rg-enquadra__notified:focus-visible {
@@ -693,8 +828,10 @@ type EligibilityResult = (typeof eligibilityResults)[EligibilityResultKey];
     min-height: 0;
     padding: var(--rg-space-8);
   }
-  .rg-enquadra__bottom {
+  /* Itens das exceções empilham no tablet estreito. */
+  .rg-enquadra__exceptions-list {
     grid-template-columns: 1fr;
+    gap: var(--rg-space-3);
   }
 }
 
@@ -712,7 +849,7 @@ type EligibilityResult = (typeof eligibilityResults)[EligibilityResultKey];
     padding: var(--rg-space-5);
   }
   .rg-enquadra__notified {
-    padding: var(--rg-space-5);
+    max-width: none;
   }
   .rg-enquadra__result-actions {
     flex-direction: column;
@@ -726,7 +863,12 @@ type EligibilityResult = (typeof eligibilityResults)[EligibilityResultKey];
 @media (prefers-reduced-motion: reduce) {
   .rg-enquadra-swap-enter-active,
   .rg-enquadra-swap-leave-active,
-  .rg-enquadra__dot {
+  .rg-enquadra__dot,
+  .rg-enquadra__copy-head,
+  .rg-enquadra__quiz,
+  .rg-enquadra__notified,
+  .rg-enquadra__exceptions,
+  .rg-enquadra__exceptions-item {
     transition: none !important;
   }
 }
