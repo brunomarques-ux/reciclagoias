@@ -230,7 +230,7 @@ onBeforeUnmount(() => {
             v-model="query"
             type="search"
             class="rg-faq__search-input"
-            placeholder="Buscar por termo — ex.: empresa aderente, nota fiscal…"
+            placeholder="Buscar por termo, como empresa aderente ou nota fiscal…"
             autocomplete="off"
           />
           <button

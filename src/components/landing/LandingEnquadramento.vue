@@ -131,10 +131,6 @@ type EligibilityResult = (typeof eligibilityResults)[EligibilityResultKey];
               Responda essas três perguntas rápidas e descubra se sua operação
               se enquadra no Recicla Goiás
             </p>
-            <p class="rg-enquadra__disclaimer">
-              <v-icon icon="mdi-information-outline" size="14" aria-hidden="true" />
-              Resultado orientativo, não substitui análise jurídica.
-            </p>
           </div>
 
           <a class="rg-enquadra__notified" href="#autodeclaracao">
@@ -242,7 +238,14 @@ type EligibilityResult = (typeof eligibilityResults)[EligibilityResultKey];
         </div>
       </div>
 
-      <!-- Exceções em largura total — itens em 3 colunas com ícone, pra
+      <!-- Hint orientativo: bullet discreto sob o quiz, alinhado à direita,
+           entre o grid e as exceções. -->
+      <p class="rg-enquadra__disclaimer">
+        <v-icon icon="mdi-information-outline" size="14" aria-hidden="true" />
+        Resultado orientativo, não substitui análise jurídica.
+      </p>
+
+      <!-- Exceções em largura total: itens em 3 colunas com ícone, pra
            ocupar a horizontal sem espaço morto. -->
       <aside class="rg-enquadra__exceptions" aria-labelledby="rg-enquadra-exceptions-title">
         <div class="rg-enquadra__exceptions-head">
@@ -289,16 +292,17 @@ type EligibilityResult = (typeof eligibilityResults)[EligibilityResultKey];
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
   gap: var(--rg-space-16);
-  align-items: center;
+  /* stretch: a coluna da copy ganha a altura do card do quiz, permitindo
+     encostar o card de autodeclaração na base, alinhado com a base do quiz. */
+  align-items: stretch;
 }
 
 /* ============ Copy ============ */
-/* 40px entre o bloco de heading (que termina no hint) e o card da
-   autodeclaração — espaçamento do Figma. */
+/* Heading no topo; o card de autodeclaração é empurrado pra base (margin-top
+   auto no .rg-enquadra__notified) pra alinhar com a base do card do quiz. */
 .rg-enquadra__copy {
   display: flex;
   flex-direction: column;
-  gap: var(--rg-space-10);
 }
 
 .rg-enquadra__copy-head {
@@ -354,10 +358,15 @@ type EligibilityResult = (typeof eligibilityResults)[EligibilityResultKey];
 }
 
 .rg-enquadra__disclaimer {
+  /* Bullet discreto, alinhado à direita (sob o quiz). O margin-top negativo
+     "cola" o hint no quiz, comendo parte do gap de 40px do inner, e mantém
+     o respiro cheio antes das exceções. */
+  align-self: flex-end;
   display: inline-flex;
   align-items: center;
   gap: var(--rg-space-2);
   margin: 0;
+  margin-top: calc(var(--rg-space-8) * -1);
   font-size: var(--rg-font-size-xs);
   color: var(--rg-color-text-muted);
 }
@@ -754,6 +763,8 @@ type EligibilityResult = (typeof eligibilityResults)[EligibilityResultKey];
    no mesmo padrão do card de decreto/"Fale Conosco" (cinza claro + box
    branca interna). Entra com fade-up depois da copy. */
 .rg-enquadra__notified {
+  /* Empurrado pra base da coluna, alinhando com a base do card do quiz. */
+  margin-top: auto;
   display: flex;
   flex-direction: column;
   gap: var(--rg-space-3);
@@ -827,6 +838,19 @@ type EligibilityResult = (typeof eligibilityResults)[EligibilityResultKey];
   .rg-enquadra__quiz {
     min-height: 0;
     padding: var(--rg-space-8);
+  }
+  /* Empilhado: o card de autodeclaração volta a seguir a copy com gap fixo
+     (sem coluna esticada, o margin-top auto não tem espaço pra empurrar). */
+  .rg-enquadra__copy {
+    gap: var(--rg-space-6);
+  }
+  .rg-enquadra__notified {
+    margin-top: 0;
+  }
+  /* Hint volta pra esquerda, acompanhando o fluxo empilhado. */
+  .rg-enquadra__disclaimer {
+    align-self: flex-start;
+    margin-top: 0;
   }
   /* Itens das exceções empilham no tablet estreito. */
   .rg-enquadra__exceptions-list {

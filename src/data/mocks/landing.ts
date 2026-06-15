@@ -96,7 +96,7 @@ export const systemProfiles: SystemProfile[] = [
     description:
       'Fabricantes, importadores, distribuidores e comerciantes de produtos que geram embalagens pós-consumo em Goiás, incluindo detentores de marca e quem envasa, monta ou manufatura em nome deles. Com ou sem sede no estado, a obrigação é a mesma: garantir que uma massa equivalente de embalagens retorne ao ciclo produtivo.',
     responsibilities: [
-      'Aderir a um sistema coletivo de logística reversa — ou estruturar um sistema individual próprio',
+      'Aderir a um sistema coletivo de logística reversa, ou estruturar um sistema individual próprio',
       'Declarar a quantidade de embalagens colocadas no mercado estadual a cada ano',
       'Comprovar as metas de recuperação por meio dos certificados RECICLAGOIÁS',
       'Orientar consumidores e apoiar pontos de entrega voluntária',
@@ -435,7 +435,7 @@ export const awards: Award[] = [
       '3º lugar no Prêmio Goiás Sustentável, concedido pela Secretaria de Meio Ambiente e Desenvolvimento Sustentável.',
     detailTitle: 'Sobre a premiação',
     detailParagraphs: [
-      'O Prêmio Goiás Sustentável é uma iniciativa do Estado de Goiás, conduzida pela Secretaria de Meio Ambiente e Desenvolvimento Sustentável — SEMAD, que reconhece projetos e práticas com impacto real na agenda ambiental do estado.',
+      'O Prêmio Goiás Sustentável é uma iniciativa do Estado de Goiás, conduzida pela Secretaria de Meio Ambiente e Desenvolvimento Sustentável (SEMAD), que reconhece projetos e práticas com impacto real na agenda ambiental do estado.',
       'Em 10 de junho de 2026, o Recicla Goiás conquistou o 3º lugar da premiação, consolidando o sistema como referência em logística reversa e economia circular no setor público.',
     ],
     meta: [
@@ -576,7 +576,7 @@ export const faqItems: FaqItem[] = [
     id: 'entidade-gestora',
     question: 'O que é uma entidade gestora?',
     answer:
-      'É a pessoa jurídica que estrutura, implementa e operacionaliza o sistema de logística reversa em modelo coletivo — ela representa as empresas aderentes, protocola o sistema na SEMAD, contrata o verificador de resultados e emite os certificados RECICLAGOIÁS.',
+      'É a pessoa jurídica que estrutura, implementa e operacionaliza o sistema de logística reversa em modelo coletivo. Ela representa as empresas aderentes, protocola o sistema na SEMAD, contrata o verificador de resultados e emite os certificados RECICLAGOIÁS.',
   },
   {
     id: 'operador-quem-pode',
@@ -614,7 +614,7 @@ export const faqItems: FaqItem[] = [
     id: 'dupla-contagem',
     question: 'Como o sistema evita a dupla contagem da massa reciclada?',
     answer:
-      'O verificador de resultados registra, armazena e sistematiza as notas fiscais preservando a unicidade e a não colidência das massas — cada nota só lastreia um certificado. A custódia dos arquivos digitais por no mínimo 5 anos garante a auditabilidade.',
+      'O verificador de resultados registra, armazena e sistematiza as notas fiscais preservando a unicidade e a não colidência das massas: cada nota só lastreia um certificado. A custódia dos arquivos digitais por no mínimo 5 anos garante a auditabilidade.',
   },
   {
     id: 'sancoes',
@@ -645,7 +645,7 @@ export const faqItems: FaqItem[] = [
     id: 'tratamento-energetico',
     question: 'Resíduos enviados pra tratamento energético contam pras metas?',
     answer:
-      'Não. Para a emissão do RECICLAGOIÁS não são admitidos os resíduos enviados para tratamento energético — apenas materiais que retornam ao ciclo produtivo como matéria-prima.',
+      'Não. Para a emissão do RECICLAGOIÁS não são admitidos os resíduos enviados para tratamento energético. Valem apenas os materiais que retornam ao ciclo produtivo como matéria-prima.',
   },
   {
     id: 'prazo-relatorio',
@@ -670,7 +670,7 @@ export const faqItems: FaqItem[] = [
     id: 'empresa-bloqueada',
     question: 'O que acontece quando uma empresa é bloqueada?',
     answer:
-      'A empresa mantém acesso ao histórico para fins de auditoria, mas perde a possibilidade de operações transacionais — emissão de certificados, criação de planos e compras.',
+      'A empresa mantém acesso ao histórico para fins de auditoria, mas perde a possibilidade de operações transacionais: emissão de certificados, criação de planos e compras.',
   },
   {
     id: 'visibilidade-dados',
