@@ -303,7 +303,7 @@ onBeforeUnmount(() => {
                   '--rg-node-i': i,
                   '--rg-blink-delay': step.blinkDelay,
                 } as Record<string, string | number>"
-                :aria-label="`${step.label} — ver perfil ${nameFor(step.profile)}`"
+                :aria-label="`${step.label}, ver perfil ${nameFor(step.profile)}`"
                 @click="setActive(step.profile)"
               >
                 <v-icon :icon="iconFor(step.profile)" size="22" />
@@ -343,7 +343,7 @@ onBeforeUnmount(() => {
               type="button"
               :class="['rg-perfis__node', 'rg-perfis__node--m', { 'is-active': active === step.profile }]"
               :style="{ '--rg-node-i': i, '--rg-blink-delay': step.blinkDelay } as Record<string, string | number>"
-              :aria-label="`${step.label} — ver perfil ${nameFor(step.profile)}`"
+              :aria-label="`${step.label}, ver perfil ${nameFor(step.profile)}`"
               @click="setActive(step.profile)"
             >
               <v-icon :icon="iconFor(step.profile)" size="20" />

@@ -162,7 +162,7 @@ onBeforeUnmount(() => {
           @click="lightboxOpen = true"
         >
           <img
-            src="/fluxo/diagrama-fluxo.png"
+            src="/fluxo/diagrama-fluxo-v2.png"
             alt="Diagrama do fluxo da logística reversa: Brand Owners → Caixa Preta → Entidades Gestoras → Comitê → SEMAD, com ramificações para Consumidor, Operadores da Reciclagem, Indústria Recicladora e Verificador de Resultados."
             class="rg-flow__card-img"
             loading="lazy"
@@ -183,7 +183,7 @@ onBeforeUnmount(() => {
 
     <RgLightbox
       v-model="lightboxOpen"
-      image-src="/fluxo/diagrama-fluxo.png"
+      image-src="/fluxo/diagrama-fluxo-v2.png"
       alt="Diagrama do fluxo da logística reversa Recicla Goiás"
       :zoomable="true"
     />
@@ -306,32 +306,23 @@ onBeforeUnmount(() => {
 .rg-flow__card {
   position: relative;
   display: inline-flex;
-  /* Ocupa a largura total do `.rg-flow__inner` (= --rg-container-page) sem
-     limite menor — proporcionalmente cresce um pouco na vertical mas mantém
-     a fidelidade com o grid das demais seções. */
+  /* A arte v2 do diagrama já desenha o próprio "card" (moldura, fundo e
+     cantos fazem parte da imagem) — o button vira só um wrapper clicável
+     transparente, sem padding/borda/sombra duplicando a moldura. */
   width: 100%;
-  padding: var(--rg-space-6);
+  padding: 0;
   margin: 0;
-  border: 1px solid var(--rg-primitive-brand-100);
-  background-color: var(--rg-color-surface-base);
+  border: none;
+  background: transparent;
   border-radius: var(--rg-radius-2xl);
   cursor: zoom-in;
-  overflow: hidden;
-  box-shadow:
-    0 1px 2px rgba(15, 23, 42, 0.04),
-    0 12px 32px rgba(15, 23, 42, 0.06);
-  transition:
-    transform var(--rg-motion-duration-base) var(--rg-motion-ease-standard),
-    box-shadow var(--rg-motion-duration-base) var(--rg-motion-ease-standard);
+  transition: transform var(--rg-motion-duration-base) var(--rg-motion-ease-standard);
   -webkit-appearance: none;
   appearance: none;
 }
 
 .rg-flow__card:hover {
   transform: translateY(-3px);
-  box-shadow:
-    0 2px 4px rgba(15, 23, 42, 0.06),
-    0 20px 44px rgba(15, 23, 42, 0.10);
 }
 
 .rg-flow__card:hover .rg-flow__card-hint {

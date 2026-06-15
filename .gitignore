@@ -45,3 +45,11 @@ lerna-debug.log*
 
 # Vercel
 .vercel
+
+# Claude Code (config local de sessão)
+.claude/
+
+# Fontes de design / referências pesadas (PSD, vídeos, originais).
+# O que o site usa fica em public/. Versionamos só o hand-off do dev.
+docs/*
+!docs/HANDOFF-DESENVOLVIMENTO.md

@@ -32,15 +32,6 @@ const year = new Date().getFullYear();
             Plataforma de gestão da logística reversa do Estado de Goiás, mantida
             pela Secretaria de Indústria e Comércio em conjunto com o comitê gestor.
           </p>
-
-          <!-- Selo de reconhecimento PMI Goiás 2025 -->
-          <a href="#premio" class="rg-footer__badge">
-            <v-icon icon="mdi-trophy-outline" size="16" />
-            <span>
-              <strong>Melhor Projeto 2025</strong>
-              <em>PMI Goiás · 18º Seminário</em>
-            </span>
-          </a>
         </div>
 
         <!-- Coluna 2: Navegação -->
@@ -78,8 +69,13 @@ const year = new Date().getFullYear();
               <span class="rg-footer__contact-icon">
                 <v-icon icon="mdi-email-outline" size="18" />
               </span>
-              <a href="mailto:logisticareversa.meioambiente@gov.goias.br">
-                logisticareversa.meioambiente@gov.goias.br
+              <!-- Quebra controlada no @ (cada parte é atômica via nowrap),
+                   evitando partir "gov" no meio quando a coluna é estreita. -->
+              <a
+                href="mailto:logisticareversa.meioambiente@gov.goias.br"
+                class="rg-footer__email"
+              >
+                <span>logisticareversa.meioambiente</span><span>@gov.goias.br</span>
               </a>
             </li>
             <li>
@@ -181,53 +177,6 @@ const year = new Date().getFullYear();
   max-width: 38ch;
 }
 
-/* Selo Melhor Projeto 2025 com link pro Reconhecimento */
-.rg-footer__badge {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--rg-space-3);
-  align-self: flex-start;
-  padding: var(--rg-space-3) var(--rg-space-4);
-  background: linear-gradient(135deg, rgba(252, 211, 77, 0.16), rgba(245, 158, 11, 0.08));
-  border: 1px solid rgba(252, 211, 77, 0.32);
-  border-radius: var(--rg-radius-lg);
-  text-decoration: none;
-  transition:
-    transform var(--rg-motion-duration-base) var(--rg-motion-ease-standard),
-    border-color var(--rg-motion-duration-base) var(--rg-motion-ease-standard);
-}
-
-.rg-footer__badge:hover {
-  transform: translateY(-2px);
-  border-color: rgba(252, 211, 77, 0.6);
-}
-
-.rg-footer__badge :deep(.v-icon) {
-  color: #FCD34D;
-  flex-shrink: 0;
-}
-
-.rg-footer__badge span {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  line-height: var(--rg-line-height-snug);
-}
-
-.rg-footer__badge strong {
-  font-size: var(--rg-font-size-sm);
-  font-weight: var(--rg-font-weight-bold);
-  color: #FCD34D;
-  letter-spacing: var(--rg-letter-spacing-tight);
-}
-
-.rg-footer__badge em {
-  font-style: normal;
-  font-size: var(--rg-font-size-xs);
-  color: rgba(252, 211, 77, 0.7);
-  letter-spacing: var(--rg-letter-spacing-base);
-}
-
 /* ============ Cabeçalhos das colunas auxiliares ============ */
 .rg-footer__nav h4,
 .rg-footer__partners h4,
@@ -306,6 +255,16 @@ const year = new Date().getFullYear();
 
 .rg-footer__contacts a:hover {
   color: white;
+}
+
+/* E-mail: cada metade é atômica (nowrap), então a única quebra possível é
+   entre os dois spans, ou seja, exatamente no @ — nunca no meio de "gov". */
+.rg-footer__email {
+  word-break: normal;
+}
+
+.rg-footer__email span {
+  white-space: nowrap;
 }
 
 .rg-footer__contact-icon {
