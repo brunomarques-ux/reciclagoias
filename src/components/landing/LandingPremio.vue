@@ -274,10 +274,14 @@ onBeforeUnmount(() => {
 
 .rg-premio__desc {
   margin: 0;
+  /* Encosta o bloco na direita da coluna e alinha o texto à direita, mesmo
+     padrão da lede de Perfis / Como funciona (textos à direita da página). */
+  margin-left: auto;
   max-width: 44ch;
   font-size: var(--rg-font-size-md);
   line-height: var(--rg-line-height-relaxed);
   color: var(--rg-color-text-secondary);
+  text-align: right;
 }
 
 /* ============ Viewport da troca list/detail ============ */
@@ -341,6 +345,11 @@ onBeforeUnmount(() => {
     grid-template-columns: 1fr;
     align-items: start;
     gap: var(--rg-space-4);
+  }
+  /* Empilhado: o texto volta a alinhar à esquerda, no fluxo natural. */
+  .rg-premio__desc {
+    margin-left: 0;
+    text-align: left;
   }
   .rg-premio__title { font-size: clamp(32px, 6vw, 44px); }
   .rg-premio__title-line {
