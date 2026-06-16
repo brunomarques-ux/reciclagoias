@@ -171,10 +171,10 @@ onBeforeUnmount(() => {
         <div class="rg-perfis__heading">
           <span class="rg-perfis__eyebrow">QUEM PARTICIPA</span>
           <h2 id="rg-perfis-title" class="rg-perfis__title">
-            <span class="rg-perfis__title-line">Um sistema,</span>
             <span class="rg-perfis__title-line">
-              quatro <span class="rg-perfis__title-accent">perfis.</span>
+              Os quatro <span class="rg-perfis__title-accent">perfis</span>
             </span>
+            <span class="rg-perfis__title-line">do sistema.</span>
           </h2>
         </div>
         <div class="rg-perfis__lede-wrap">
