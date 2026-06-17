@@ -87,7 +87,7 @@ export type Slide =
   | { kind: 'capa' | 'intro' | 'perfis' | 'agradecimento'; steps?: number }
   | { kind: 'timeline'; steps: number }
   | { kind: 'cover'; profile: ProfileKey; name: string; role: string }
-  | { kind: 'screen'; profile: ProfileKey; image: string; title: string; desc: string; notes?: string[]; portrait?: boolean; steps?: number };
+  | { kind: 'screen'; profile: ProfileKey; image: string; title: string; desc: string; notes?: string[]; portrait?: boolean; split?: boolean; steps?: number };
 
 export const SLIDES: Slide[] = [
   { kind: 'capa' },
@@ -101,26 +101,26 @@ export const SLIDES: Slide[] = [
   { kind: 'screen', profile: 'eg', image: B + 'incluir-plano.png', title: 'Incluir plano', desc: 'Assistente em 6 etapas para a gestora criar um plano: dados gerais, responsável, ações, empresas e metas.' },
   { kind: 'screen', profile: 'eg', image: B + 'resumo-plano-1.png', title: 'Resumo do plano · 1/2', desc: 'Síntese consolidada do plano de logística reversa, com dados e imagens, para conferência.', notes: [NPDF], portrait: true },
   { kind: 'screen', profile: 'eg', image: B + 'resumo-plano-2.png', title: 'Resumo do plano · 2/2', desc: 'Continuação do resumo consolidado do plano.', notes: [NPDF], portrait: true },
-  { kind: 'screen', profile: 'eg', image: B + 'listagem-relatorios.png', title: 'Listagem de relatórios', desc: 'Relatórios anuais enviados, organizados por ano-base e situação.' },
+  { kind: 'screen', profile: 'eg', image: B + 'listagem-relatorios.png', title: 'Listagem de relatórios', desc: 'Relatórios anuais enviados, organizados por ano base e situação.' },
   { kind: 'screen', profile: 'eg', image: B + 'incluir-relatorio.png', title: 'Incluir relatório', desc: 'Preenchimento do relatório anual de desempenho, passo a passo.' },
   { kind: 'screen', profile: 'eg', image: B + 'resumo-relatorio-1.png', title: 'Resumo do relatório · 1/2', desc: 'Síntese consolidada do relatório anual para conferência final.', notes: [NADM, NPDF], portrait: true },
   { kind: 'screen', profile: 'eg', image: B + 'resumo-relatorio-2.png', title: 'Resumo do relatório · 2/2', desc: 'Continuação do resumo consolidado do relatório anual.', notes: [NADM, NPDF], portrait: true },
-  { kind: 'screen', profile: 'eg', image: B + 'certificados-massa.png', title: 'Certificados de massa', desc: 'Certificados RECICLAGOIÁS de massa emitidos, com quantidade e situação.' },
+  { kind: 'screen', profile: 'eg', image: B + 'certificados-massa.png', title: 'Certificados de massa', desc: 'Certificados RECICLAGOIÁS de massa emitidos, com quantidade e situação.', split: true },
   { kind: 'screen', profile: 'eg', image: B + 'visualizacao-certificado.png', title: 'Detalhes do certificado', desc: 'Detalhes do certificado RECICLAGOIÁS emitido, pronto para conferência e download.', notes: [NPDF], portrait: true },
-  { kind: 'screen', profile: 'eg', image: B + 'nao-conformidade.png', title: 'Não conformidade', desc: 'Apontamentos e justificativas de não conformidade do plano ou do relatório.', notes: [NADM] },
-  { kind: 'screen', profile: 'eg', image: B + 'operadores-massa.png', title: 'Operadores e massa', desc: 'Listagem de operadores e suas respectivas quantidade de massa disponíveis.', notes: [NADM] },
+  { kind: 'screen', profile: 'eg', image: B + 'nao-conformidade.png', title: 'Não conformidade', desc: 'Apontamentos e justificativas de não conformidade do plano ou do relatório.', notes: [NADM], split: true },
+  { kind: 'screen', profile: 'eg', image: B + 'operadores-massa.png', title: 'Operadores e massa', desc: 'Listagem de operadores e suas respectivas quantidade de massa disponíveis.', notes: [NADM], split: true },
   // Admin
   { kind: 'cover', profile: 'admin', name: 'Admin', role: 'Governa o sistema: aprova cadastros, perfis e desbloqueia empresas.' },
-  { kind: 'screen', profile: 'admin', image: B + 'home-admin.png', title: 'Painel do administrador', desc: 'Visão geral de governança do sistema: cadastros, aprovações, indicadores e prazos.' },
+  { kind: 'screen', profile: 'admin', image: B + 'home-admin.png', title: 'Painel do administrador', desc: 'Visão geral de governança do sistema: cadastros, aprovações, indicadores e prazos.', split: true },
   { kind: 'screen', profile: 'admin', image: B + 'parametros-admin.png', title: 'Parâmetros gerais', desc: 'Configuração dos parâmetros gerais do sistema, como prazos e regras de operação.' },
   { kind: 'screen', profile: 'admin', image: B + 'justificativa-admin.png', title: 'Detalhe da justificativa', desc: 'Análise da justificativa de não enquadramento enviada, para aprovação ou recusa pelo administrador.', portrait: true },
   // Verificador
   { kind: 'cover', profile: 'vr', name: 'Verificador de Resultados', role: 'Audita e homologa as notas fiscais, garantindo a unicidade das massas.' },
-  { kind: 'screen', profile: 'vr', image: B + 'home-vr.png', title: 'Painel do verificador', desc: 'Visão geral das notas a homologar e do andamento da verificação.' },
-  { kind: 'screen', profile: 'vr', image: B + 'listagem-notas-vr.png', title: 'Listagem de notas', desc: 'Notas fiscais para validação e homologação, com a situação de cada uma.' },
+  { kind: 'screen', profile: 'vr', image: B + 'home-vr.png', title: 'Painel do verificador', desc: 'Visão geral das notas a homologar e do andamento da verificação.', split: true },
+  { kind: 'screen', profile: 'vr', image: B + 'listagem-notas-vr.png', title: 'Listagem de notas', desc: 'Notas fiscais para validação e homologação, com a situação de cada uma.', split: true },
   // Operador
   { kind: 'cover', profile: 'op', name: 'Operador Logístico', role: 'Registra a operação e a rastreabilidade do material até o destino final.' },
-  { kind: 'screen', profile: 'op', image: B + 'home-op.png', title: 'Painel do operador', desc: 'Visão geral da operação: saldo de massa, certificados e movimentações recentes.' },
+  { kind: 'screen', profile: 'op', image: B + 'home-op.png', title: 'Painel do operador', desc: 'Visão geral da operação: saldo de massa, certificados e movimentações recentes.', split: true },
   { kind: 'screen', profile: 'op', image: B + 'emitir-certificado-op.png', title: 'Emitir certificado', desc: 'Emissão do certificado a partir da massa recuperada e das notas fiscais.' },
   { kind: 'screen', profile: 'op', image: B + 'visualizar-certificado-op.png', title: 'Visualizar certificado', desc: 'Detalhe do certificado emitido pelo operador.', notes: [NADM], portrait: true },
   { kind: 'screen', profile: 'op', image: B + 'extrato-op.png', title: 'Extrato', desc: 'Extrato de movimentações de massa e de certificados do operador.', portrait: true },

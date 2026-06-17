@@ -11,18 +11,25 @@ interface Props {
   desc: string;
   notes?: string[];
   portrait?: boolean;
+  split?: boolean;
 }
-const props = withDefaults(defineProps<Props>(), { notes: () => [], portrait: false });
+const props = withDefaults(defineProps<Props>(), { notes: () => [], portrait: false, split: false });
 const label = computed(() => PROFILES[props.profile].label);
 </script>
 
 <template>
   <SlideFrame :foot-right="label">
-    <div class="screen" :class="{ 'screen--portrait': portrait }">
+    <div class="screen" :class="{ 'screen--portrait': portrait, 'screen--split': split }">
+      <!-- lado a lado: legenda numa coluna à esquerda, fora da imagem -->
+      <ScreenCaption
+        v-if="split"
+        class="screen__cap screen__cap--aside"
+        :profile="profile" :title="title" :desc="desc" :notes="notes"
+      />
       <div class="screen__shot">
         <img :src="image" :alt="title" class="screen__img" decoding="sync" />
         <ScreenCaption
-          v-if="!portrait"
+          v-if="!portrait && !split"
           class="screen__cap screen__cap--overlap"
           :profile="profile" :title="title" :desc="desc" :notes="notes"
         />
@@ -50,6 +57,12 @@ const label = computed(() => PROFILES[props.profile].label);
    margem esquerda do slide, alinhada à base da imagem — espelha o Figma. */
 .screen--portrait { align-items: flex-end; padding-bottom: 58px; }
 .screen--portrait .screen__img { max-width: 1640px; max-height: none; height: 820px; }
+
+/* lado a lado: legenda numa coluna à esquerda + imagem grande à direita, sem sobrepor */
+.screen--split { gap: 72px; }
+.screen--split .screen__shot { flex: 1; min-width: 0; justify-content: center; }
+.screen--split .screen__img { max-width: 100%; max-height: 820px; }
+.screen__cap--aside { flex: none; animation: capCorner .55s .18s cubic-bezier(.2,0,0,1) both; }
 
 /* horizontais: legenda sobreposta no canto inferior-esquerdo da própria tela */
 .screen__cap--overlap { position: absolute; left: 26px; bottom: 39px; animation: capIn .55s .18s cubic-bezier(.2,0,0,1) both; }

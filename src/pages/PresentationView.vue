@@ -26,7 +26,7 @@ const currentProps = computed(() => {
   const s = current.value as any;
   if (s.kind === 'timeline') return { step: st.value };
   if (s.kind === 'cover') return { profile: s.profile, name: s.name, role: s.role };
-  if (s.kind === 'screen') return { profile: s.profile, image: s.image, title: s.title, desc: s.desc, notes: s.notes, portrait: s.portrait };
+  if (s.kind === 'screen') return { profile: s.profile, image: s.image, title: s.title, desc: s.desc, notes: s.notes, portrait: s.portrait, split: s.split };
   return {};
 });
 const globalPos = computed(() => {
