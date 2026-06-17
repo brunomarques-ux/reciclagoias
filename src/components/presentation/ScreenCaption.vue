@@ -19,7 +19,8 @@ const p = computed(() => PROFILES[props.profile]);
 
 <style scoped>
 .cap {
-  width: 440px;
+  width: max-content;
+  max-width: 440px;
   background: rgba(255,255,255,.98);
   border: 1px solid var(--rg-primitive-neutral-200);
   border-radius: 18px;

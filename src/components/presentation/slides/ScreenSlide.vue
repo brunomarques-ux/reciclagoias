@@ -18,9 +18,9 @@ const label = computed(() => PROFILES[props.profile].label);
 
 <template>
   <SlideFrame :foot-right="label">
-    <div class="screen">
-      <div class="screen__shot" :class="{ 'is-portrait': portrait }">
-        <img :src="image" :alt="title" class="screen__img" />
+    <div class="screen" :class="{ 'screen--portrait': portrait }">
+      <div class="screen__shot">
+        <img :src="image" :alt="title" class="screen__img" decoding="sync" />
         <ScreenCaption
           v-if="!portrait"
           class="screen__cap screen__cap--overlap"
@@ -41,16 +41,20 @@ const label = computed(() => PROFILES[props.profile].label);
 .screen__shot { position: relative; display: inline-flex; animation: shotIn .6s cubic-bezier(.2,0,0,1) both; }
 .screen__img {
   display: block; width: auto; height: auto;
-  max-width: 1560px; max-height: 768px;
+  max-width: 1640px; max-height: 820px;
   border-radius: 14px; border: 1px solid var(--rg-primitive-neutral-200);
   box-shadow: 0 30px 70px rgba(15,23,42,.18), 0 10px 24px rgba(15,23,42,.08);
 }
-.screen__shot.is-portrait .screen__img { max-height: 824px; }
+
+/* verticais: imagem grande encostada embaixo (gap p/ o rodapé) + legenda na
+   margem esquerda do slide, alinhada à base da imagem — espelha o Figma. */
+.screen--portrait { align-items: flex-end; padding-bottom: 58px; }
+.screen--portrait .screen__img { max-width: 1640px; max-height: none; height: 820px; }
 
 /* horizontais: legenda sobreposta no canto inferior-esquerdo da própria tela */
-.screen__cap--overlap { position: absolute; left: 26px; bottom: 26px; animation: capIn .55s .18s cubic-bezier(.2,0,0,1) both; }
-/* verticais: legenda na margem inferior-esquerda do slide (não tampa a tela) */
-.screen__cap--corner { position: absolute; left: 0; bottom: 0; animation: capCorner .55s .18s cubic-bezier(.2,0,0,1) both; }
+.screen__cap--overlap { position: absolute; left: 26px; bottom: 39px; animation: capIn .55s .18s cubic-bezier(.2,0,0,1) both; }
+/* verticais: legenda na margem esquerda, base alinhada com a base da imagem */
+.screen__cap--corner { position: absolute; left: 0; bottom: 58px; animation: capCorner .55s .18s cubic-bezier(.2,0,0,1) both; }
 
 @keyframes shotIn { from { opacity: 0; transform: translateY(14px) scale(.985); } to { opacity: 1; transform: none; } }
 @keyframes capIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }

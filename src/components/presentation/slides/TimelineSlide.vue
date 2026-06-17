@@ -50,12 +50,9 @@ const CHECK = '<path d="M20 6 9 17l-5-5"/>';
           </div>
           <div class="tl-card">
             <span class="tl-card-h">O QUE FOI ENTREGUE</span>
-            <div v-for="(b, i) in m.bullets" :key="i" class="tl-b" :class="{ 'is-hi': b.hi }" :style="{ '--bi': i }">
-              <span class="tl-chk" :class="{ 'is-hi': b.hi }"><svg viewBox="0 0 24 24" v-html="CHECK" /></span>
-              <div class="tl-btxt">
-                <span v-if="b.hi" class="tl-tag">{{ b.tag }}</span>
-                <p class="tl-bline"><b>{{ b.name }}</b><template v-if="b.desc"> · {{ b.desc }}</template></p>
-              </div>
+            <div v-for="(b, i) in m.bullets" :key="i" class="tl-b" :style="{ '--bi': i }">
+              <span class="tl-chk"><svg viewBox="0 0 24 24" v-html="CHECK" /></span>
+              <p class="tl-bline"><b>{{ b.name }}</b><template v-if="b.desc"> · {{ b.desc }}</template></p>
             </div>
           </div>
         </div>
@@ -104,14 +101,9 @@ const CHECK = '<path d="M20 6 9 17l-5-5"/>';
 
 .tl-card { flex: 1; display: flex; flex-direction: column; gap: 18px; padding: 34px 40px 36px; border-radius: 24px; background: #fff; border: 1px solid var(--rg-primitive-neutral-200); box-shadow: 0 22px 48px rgba(15,23,42,.13), 0 6px 16px rgba(15,23,42,.06); }
 .tl-card-h { font-size: 14px; font-weight: 700; letter-spacing: .06em; color: var(--rg-primitive-brand-700); }
-.tl-b { display: flex; gap: 14px; align-items: flex-start; animation: bIn .45s both; animation-delay: calc(.25s + var(--bi, 0) * .1s); }
-.tl-b.is-hi { align-items: center; padding: 15px 20px 15px 18px; border-radius: 14px; background: var(--rg-primitive-brand-50); border: 1px solid var(--rg-primitive-brand-200); }
+.tl-b { display: flex; gap: 14px; align-items: center; animation: bIn .45s both; animation-delay: calc(.25s + var(--bi, 0) * .1s); }
 .tl-chk { flex: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--rg-primitive-brand-50); border: 1px solid var(--rg-primitive-brand-200); }
-.tl-chk.is-hi { background: var(--rg-primitive-brand-100); border-color: transparent; }
 .tl-chk svg { width: 17px; height: 17px; fill: none; stroke: var(--rg-primitive-brand-600); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
-.tl-chk.is-hi svg { stroke: var(--rg-primitive-brand-700); }
-.tl-btxt { display: flex; flex-direction: column; gap: 4px; }
-.tl-tag { font-size: 11px; font-weight: 700; letter-spacing: .08em; color: var(--rg-primitive-brand-700); }
 .tl-bline { margin: 0; font-size: 18px; line-height: 1.4; color: var(--rg-primitive-neutral-600); }
 .tl-bline b { color: var(--rg-primitive-neutral-900); font-weight: 600; }
 

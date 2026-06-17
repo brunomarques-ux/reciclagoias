@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onBeforeUnmount } from 'vue';
 import { useWindowSize } from '@vueuse/core';
-import { SLIDES, type Slide } from '@/components/presentation/data';
+import { SLIDES, SCREEN_IMAGES, type Slide } from '@/components/presentation/data';
 import CapaSlide from '@/components/presentation/slides/CapaSlide.vue';
 import IntroSlide from '@/components/presentation/slides/IntroSlide.vue';
 import PerfisSlide from '@/components/presentation/slides/PerfisSlide.vue';
@@ -74,11 +74,14 @@ const scale = computed(() => Math.min(width.value / 1920, height.value / 1080));
 
 const showHint = ref(true);
 let hintT: number | undefined;
+// Mantém as imagens em cache pra que a troca de slide não dê "piscada".
+const preloaded: HTMLImageElement[] = [];
 onMounted(() => {
   window.addEventListener('keydown', onKey);
   document.addEventListener('fullscreenchange', onFsChange);
   document.documentElement.classList.add('rg-deck-open');
   hintT = window.setTimeout(() => (showHint.value = false), 4200);
+  SCREEN_IMAGES.forEach((src) => { const im = new Image(); im.src = src; preloaded.push(im); });
 });
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKey);

@@ -40,29 +40,47 @@ export const TL_ICONS = [
 export const TL_LABELS = ['Mapeamento', 'Módulo Planos', 'Módulo Admin', 'Relatório · VR', 'Operador Logístico'];
 export const TL_DATES = ['Out–Dez 2023', 'Out 2024', 'Jan 2025', 'Fev 2025', 'Jan 2026'];
 
-export interface Bullet { name: string; desc?: string; hi?: boolean; tag?: string }
+export interface Bullet { name: string; desc?: string }
 export interface Marco { eyebrow: string; title: string; accent: string; dateShort: string; lede: string; bullets: Bullet[] }
 
+// Conteúdo espelhado 1:1 dos frames "LT · 0x" do Figma (sem destaques).
 export const MARCOS: Marco[] = [
   { eyebrow: 'MARCO 01 · OUTUBRO A DEZEMBRO DE 2023', title: 'Mapeamento do processo', accent: 'processo', dateShort: 'Out–Dez 2023',
     lede: 'O entendimento ponta a ponta da logística reversa em Goiás e o desenho do sistema.',
-    bullets: [{ name: 'Mapeamento e entendimento do processo', desc: 'da logística reversa do estado' }, { name: 'Prototipação de todo o sistema inicial', hi: true, tag: 'DESTAQUE' }] },
+    bullets: [
+      { name: 'Mapeamento e entendimento do processo', desc: 'da logística reversa do estado' },
+      { name: 'Definição das telas e da jornada', desc: 'que originaram os módulos seguintes' },
+      { name: 'Prototipação', desc: 'de todo o sistema inicial' },
+    ] },
   { eyebrow: 'MARCO 02 · OUTUBRO DE 2024', title: 'Módulo Planos', accent: 'Planos', dateShort: 'Out 2024',
     lede: 'O primeiro módulo do sistema: onde a entidade gestora cria o seu plano de logística reversa.',
-    bullets: [{ name: 'Criação do plano de logística reversa', desc: 'pela entidade gestora', hi: true, tag: 'O QUE É' }, { name: 'Reúne metas, ações e empresas aderentes', desc: 'em um único fluxo' }] },
+    bullets: [
+      { name: 'Criação do plano de logística reversa', desc: 'pela entidade gestora' },
+      { name: 'Reúne metas, ações e empresas aderentes', desc: 'em um único fluxo' },
+    ] },
   { eyebrow: 'MARCO 03 · JANEIRO DE 2025', title: 'Módulo Admin', accent: 'Admin', dateShort: 'Jan 2025',
     lede: 'O painel de governança do sistema e suas funcionalidades de controle.',
-    bullets: [{ name: 'Aprovação de empresas e perfis de acesso' }, { name: 'Autorização de empresas bloqueadas', desc: 'e demais ações administrativas' }, { name: 'Configuração dos parâmetros gerais', desc: 'do sistema' }] },
+    bullets: [
+      { name: 'Aprovação de empresas e perfis de acesso' },
+      { name: 'Autorização de empresas bloqueadas', desc: 'e demais ações administrativas' },
+      { name: 'Configuração dos parâmetros gerais', desc: 'do sistema' },
+    ] },
   { eyebrow: 'MARCO 04 · FEVEREIRO DE 2025', title: 'Relatório e Verificador', accent: 'Verificador', dateShort: 'Fev 2025',
     lede: 'O modelo de relatório anual e a chegada do perfil de Verificador de Resultados.',
-    bullets: [{ name: 'Modelo de relatório anual de desempenho' }, { name: 'Perfil do Verificador de Resultados', desc: 'audita e homologa as notas', hi: true, tag: 'NOVO PERFIL' }] },
+    bullets: [
+      { name: 'Perfil do Verificador de Resultados', desc: 'audita e homologa as notas' },
+      { name: 'Modelo de relatório anual de desempenho' },
+    ] },
   { eyebrow: 'MARCO 05 · JANEIRO DE 2026', title: 'Operador Logístico', accent: 'Logístico', dateShort: 'Jan 2026',
-    lede: 'O marco mais recente: o perfil de Operador Logístico, que devolve o material ao ciclo.',
-    bullets: [{ name: 'Perfil do Operador Logístico', hi: true, tag: 'NOVO PERFIL' }, { name: 'Registro da operação e rastreabilidade', desc: 'do material até o destino final' }] },
+    lede: 'O marco mais recente: o perfil de Operador Logístico.',
+    bullets: [
+      { name: 'Perfil do Operador Logístico', desc: 'do material até o destino final' },
+      { name: 'Registro da operação e rastreabilidade', desc: 'do material até o destino final' },
+    ] },
 ];
 
 const NADM = 'Mesma visualização no perfil Admin.';
-const NPDF = 'Nesta tela é possível exportar o PDF do resumo.';
+const NPDF = 'É possível exportar o PDF do resumo.';
 const B = '/apresentacao/';
 
 export type Slide =
@@ -88,14 +106,14 @@ export const SLIDES: Slide[] = [
   { kind: 'screen', profile: 'eg', image: B + 'resumo-relatorio-1.png', title: 'Resumo do relatório · 1/2', desc: 'Síntese consolidada do relatório anual para conferência final.', notes: [NADM, NPDF], portrait: true },
   { kind: 'screen', profile: 'eg', image: B + 'resumo-relatorio-2.png', title: 'Resumo do relatório · 2/2', desc: 'Continuação do resumo consolidado do relatório anual.', notes: [NADM, NPDF], portrait: true },
   { kind: 'screen', profile: 'eg', image: B + 'certificados-massa.png', title: 'Certificados de massa', desc: 'Certificados RECICLAGOIÁS de massa emitidos, com quantidade e situação.' },
-  { kind: 'screen', profile: 'eg', image: B + 'visualizacao-certificado.png', title: 'Visualização do certificado', desc: 'O certificado RECICLAGOIÁS emitido, pronto para conferência e download.', portrait: true },
+  { kind: 'screen', profile: 'eg', image: B + 'visualizacao-certificado.png', title: 'Detalhes do certificado', desc: 'Detalhes do certificado RECICLAGOIÁS emitido, pronto para conferência e download.', notes: [NPDF], portrait: true },
   { kind: 'screen', profile: 'eg', image: B + 'nao-conformidade.png', title: 'Não conformidade', desc: 'Apontamentos e justificativas de não conformidade do plano ou do relatório.', notes: [NADM] },
-  { kind: 'screen', profile: 'eg', image: B + 'operadores-massa.png', title: 'Operadores e massa', desc: 'Operadores vinculados ao plano e a massa recuperada por cada um.', notes: [NADM] },
+  { kind: 'screen', profile: 'eg', image: B + 'operadores-massa.png', title: 'Operadores e massa', desc: 'Listagem de operadores e suas respectivas quantidade de massa disponíveis.', notes: [NADM] },
   // Admin
   { kind: 'cover', profile: 'admin', name: 'Admin', role: 'Governa o sistema: aprova cadastros, perfis e desbloqueia empresas.' },
   { kind: 'screen', profile: 'admin', image: B + 'home-admin.png', title: 'Painel do administrador', desc: 'Visão geral de governança do sistema: cadastros, aprovações, indicadores e prazos.' },
   { kind: 'screen', profile: 'admin', image: B + 'parametros-admin.png', title: 'Parâmetros gerais', desc: 'Configuração dos parâmetros gerais do sistema, como prazos e regras de operação.' },
-  { kind: 'screen', profile: 'admin', image: B + 'justificativa-admin.png', title: 'Detalhe da justificativa', desc: 'Análise da justificativa enviada, para aprovação ou recusa pelo administrador.', portrait: true },
+  { kind: 'screen', profile: 'admin', image: B + 'justificativa-admin.png', title: 'Detalhe da justificativa', desc: 'Análise da justificativa de não enquadramento enviada, para aprovação ou recusa pelo administrador.', portrait: true },
   // Verificador
   { kind: 'cover', profile: 'vr', name: 'Verificador de Resultados', role: 'Audita e homologa as notas fiscais, garantindo a unicidade das massas.' },
   { kind: 'screen', profile: 'vr', image: B + 'home-vr.png', title: 'Painel do verificador', desc: 'Visão geral das notas a homologar e do andamento da verificação.' },
@@ -109,3 +127,8 @@ export const SLIDES: Slide[] = [
   { kind: 'screen', profile: 'op', image: B + 'visualizar-saldo-op.png', title: 'Visualizar saldo', desc: 'Saldo de massa disponível do operador, por material reciclável.' },
   { kind: 'agradecimento' },
 ];
+
+/** URLs de todas as telas — usado para pré-carregar e evitar flash na troca de slide. */
+export const SCREEN_IMAGES: string[] = SLIDES
+  .filter((s): s is Extract<Slide, { kind: 'screen' }> => s.kind === 'screen')
+  .map((s) => s.image);
