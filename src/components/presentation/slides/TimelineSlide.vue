@@ -26,7 +26,7 @@ const CHECK = '<path d="M20 6 9 17l-5-5"/>';
           <div class="tl-line" />
           <div class="tl-progress" :style="{ width: step * 20 + '%' }" />
           <div class="tl-row tl-nodes">
-            <span v-for="(ic, i) in TL_ICONS" :key="i" class="tl-cell">
+            <span v-for="(ic, i) in TL_ICONS" :key="i" class="tl-cell" :style="{ '--ci': i }">
               <span class="tl-node" :class="i < step ? 'done' : i === step ? 'active' : 'pending'">
                 <svg v-if="i < step" viewBox="0 0 24 24" class="tl-ic" v-html="CHECK" />
                 <svg v-else viewBox="0 0 24 24" class="tl-ic" v-html="ic" />
@@ -50,7 +50,7 @@ const CHECK = '<path d="M20 6 9 17l-5-5"/>';
           </div>
           <div class="tl-card">
             <span class="tl-card-h">O QUE FOI ENTREGUE</span>
-            <div v-for="(b, i) in m.bullets" :key="i" class="tl-b" :class="{ 'is-hi': b.hi }">
+            <div v-for="(b, i) in m.bullets" :key="i" class="tl-b" :class="{ 'is-hi': b.hi }" :style="{ '--bi': i }">
               <span class="tl-chk" :class="{ 'is-hi': b.hi }"><svg viewBox="0 0 24 24" v-html="CHECK" /></span>
               <div class="tl-btxt">
                 <span v-if="b.hi" class="tl-tag">{{ b.tag }}</span>
@@ -68,17 +68,17 @@ const CHECK = '<path d="M20 6 9 17l-5-5"/>';
 .tl { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 46px; }
 
 /* rail */
-.tl-rail { display: flex; flex-direction: column; }
+.tl-rail { display: flex; flex-direction: column; animation: railIn .5s ease-out both; }
 .tl-eyebrow { text-align: center; font-size: 14px; font-weight: 700; letter-spacing: .08em; color: var(--rg-primitive-brand-700); opacity: .9; margin-bottom: 16px; }
 .tl-row { display: flex; }
 .tl-row > * { flex: 1; text-align: center; }
 .tl-label { font-size: 14px; font-weight: 600; letter-spacing: .04em; color: var(--rg-primitive-neutral-500); transition: color .4s; }
 .tl-label.on { font-weight: 700; color: var(--rg-primitive-brand-700); }
 .tl-track { position: relative; height: 56px; margin: 14px 0; }
-.tl-line { position: absolute; left: 10%; right: 10%; top: 50%; height: 3px; transform: translateY(-50%); background: #dce6df; border-radius: 3px; }
+.tl-line { position: absolute; left: 10%; right: 10%; top: 50%; height: 3px; transform: translateY(-50%); transform-origin: 0 50%; background: #dce6df; border-radius: 3px; animation: lineDraw .7s .15s cubic-bezier(.2,0,0,1) both; }
 .tl-progress { position: absolute; left: 10%; top: 50%; height: 4px; transform: translateY(-50%); background: linear-gradient(90deg, var(--rg-primitive-brand-500), var(--rg-primitive-brand-400)); border-radius: 4px; transition: width .5s cubic-bezier(.2,0,0,1); }
 .tl-nodes { position: absolute; inset: 0; align-items: center; }
-.tl-cell { display: flex; align-items: center; justify-content: center; }
+.tl-cell { display: flex; align-items: center; justify-content: center; animation: cellPop .5s both; animation-delay: calc(.3s + var(--ci, 0) * .09s); }
 .tl-node {
   width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
   transition: all .45s cubic-bezier(.2,0,0,1);
@@ -104,7 +104,7 @@ const CHECK = '<path d="M20 6 9 17l-5-5"/>';
 
 .tl-card { flex: 1; display: flex; flex-direction: column; gap: 18px; padding: 34px 40px 36px; border-radius: 24px; background: #fff; border: 1px solid var(--rg-primitive-neutral-200); box-shadow: 0 22px 48px rgba(15,23,42,.13), 0 6px 16px rgba(15,23,42,.06); }
 .tl-card-h { font-size: 14px; font-weight: 700; letter-spacing: .06em; color: var(--rg-primitive-brand-700); }
-.tl-b { display: flex; gap: 14px; align-items: flex-start; }
+.tl-b { display: flex; gap: 14px; align-items: flex-start; animation: bIn .45s both; animation-delay: calc(.25s + var(--bi, 0) * .1s); }
 .tl-b.is-hi { align-items: center; padding: 15px 20px 15px 18px; border-radius: 14px; background: var(--rg-primitive-brand-50); border: 1px solid var(--rg-primitive-brand-200); }
 .tl-chk { flex: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--rg-primitive-brand-50); border: 1px solid var(--rg-primitive-brand-200); }
 .tl-chk.is-hi { background: var(--rg-primitive-brand-100); border-color: transparent; }
@@ -118,4 +118,9 @@ const CHECK = '<path d="M20 6 9 17l-5-5"/>';
 .tlswap-enter-active, .tlswap-leave-active { transition: opacity .4s, transform .4s; }
 .tlswap-enter-from { opacity: 0; transform: translateY(16px); }
 .tlswap-leave-to { opacity: 0; transform: translateY(-12px); }
+
+@keyframes railIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: none; } }
+@keyframes lineDraw { from { transform: translateY(-50%) scaleX(0); } to { transform: translateY(-50%) scaleX(1); } }
+@keyframes cellPop { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes bIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 </style>
