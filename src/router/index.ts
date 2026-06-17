@@ -6,6 +6,11 @@ const routes: RouteRecordRaw[] = [
     name: 'landing',
     component: () => import('@/pages/LandingPage.vue'),
   },
+  {
+    path: '/apresentacao',
+    name: 'apresentacao',
+    component: () => import('@/pages/PresentationView.vue'),
+  },
 ];
 
 export const router = createRouter({
