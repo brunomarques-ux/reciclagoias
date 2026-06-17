@@ -4,11 +4,11 @@ import IsoMark from '../IsoMark.vue';
 </script>
 
 <template>
-  <SlideFrame foot-right="OBRIGADO" :watermark="true">
+  <SlideFrame :watermark="true">
     <div class="ag">
       <IsoMark :size="92" class="anim" style="--d:0s" />
-      <h1 class="ag__title anim" style="--d:.1s">Obrigado.</h1>
-      <p class="ag__lede anim" style="--d:.2s">Recicla Goiás — a nova plataforma de logística reversa do estado de Goiás.</p>
+      <h1 class="ag__title anim" style="--d:.1s">Obrigada.</h1>
+      <p class="ag__lede anim" style="--d:.2s">Recicla Goiás, a nova plataforma de logística reversa do estado de Goiás.</p>
     </div>
   </SlideFrame>
 </template>
