@@ -8,11 +8,14 @@ import PerfisSlide from '@/components/presentation/slides/PerfisSlide.vue';
 import TimelineSlide from '@/components/presentation/slides/TimelineSlide.vue';
 import ScreenSlide from '@/components/presentation/slides/ScreenSlide.vue';
 import CoverSlide from '@/components/presentation/slides/CoverSlide.vue';
+import HomeSlide from '@/components/presentation/slides/HomeSlide.vue';
+import MontageSlide from '@/components/presentation/slides/MontageSlide.vue';
 import AgradecimentoSlide from '@/components/presentation/slides/AgradecimentoSlide.vue';
 
 const COMPS: Record<string, any> = {
   capa: CapaSlide, intro: IntroSlide, perfis: PerfisSlide,
-  timeline: TimelineSlide, screen: ScreenSlide, cover: CoverSlide, agradecimento: AgradecimentoSlide,
+  timeline: TimelineSlide, screen: ScreenSlide, cover: CoverSlide,
+  home: HomeSlide, montage: MontageSlide, agradecimento: AgradecimentoSlide,
 };
 const stepsOf = (s: Slide) => ('steps' in s && s.steps ? s.steps : 1);
 
@@ -26,6 +29,7 @@ const currentProps = computed(() => {
   const s = current.value as any;
   if (s.kind === 'timeline') return { step: st.value };
   if (s.kind === 'cover') return { profile: s.profile, name: s.name, role: s.role };
+  if (s.kind === 'montage') return { front: s.front, back: s.back, title: s.title, desc: s.desc, notes: s.notes };
   if (s.kind === 'screen') return { profile: s.profile, image: s.image, title: s.title, desc: s.desc, notes: s.notes, portrait: s.portrait, split: s.split };
   return {};
 });

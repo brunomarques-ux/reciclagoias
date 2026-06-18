@@ -84,9 +84,10 @@ const NPDF = 'É possível exportar o PDF do resumo.';
 const B = '/apresentacao/';
 
 export type Slide =
-  | { kind: 'capa' | 'intro' | 'perfis' | 'agradecimento'; steps?: number }
+  | { kind: 'capa' | 'intro' | 'perfis' | 'agradecimento' | 'home'; steps?: number }
   | { kind: 'timeline'; steps: number }
   | { kind: 'cover'; profile: ProfileKey; name: string; role: string }
+  | { kind: 'montage'; front: string; back: string; title: string; desc: string; notes?: string[]; steps?: number }
   | { kind: 'screen'; profile: ProfileKey; image: string; title: string; desc: string; notes?: string[]; portrait?: boolean; split?: boolean; steps?: number };
 
 export const SLIDES: Slide[] = [
@@ -94,11 +95,17 @@ export const SLIDES: Slide[] = [
   { kind: 'intro' },
   { kind: 'perfis' },
   { kind: 'timeline', steps: 5 },
+  // A home pública + o formulário público de não enquadramento (antes das telas internas)
+  { kind: 'home' },
+  { kind: 'montage', front: B + 'nao-enq-1.png', back: B + 'nao-enq-2.png',
+    title: 'Não enquadramento',
+    desc: 'Formulário público em que a empresa autodeclara, passo a passo, que não se enquadra na logística reversa — conforme o Decreto 10.255/2023.',
+    notes: ['Da abertura à confirmação, com anexos e verificação.'] },
   // Entidade Gestora
   { kind: 'cover', profile: 'eg', name: 'Entidade Gestora', role: 'Orquestra o sistema coletivo e cria os planos de logística reversa.' },
   { kind: 'screen', profile: 'eg', image: B + 'home-eg.png', title: 'Painel inicial', desc: 'A tela inicial reúne prazos, status de planos, relatórios e certificados em um só lugar, com gráficos de acompanhamento.' },
-  { kind: 'screen', profile: 'eg', image: B + 'listagem-planos.png', title: 'Listagem de planos', desc: 'Todos os planos da gestora, com ano, status e ações disponíveis.', notes: [NADM] },
-  { kind: 'screen', profile: 'eg', image: B + 'incluir-plano.png', title: 'Incluir plano', desc: 'Assistente em 6 etapas para a gestora criar um plano: dados gerais, responsável, ações, empresas e metas.' },
+  { kind: 'screen', profile: 'eg', image: B + 'listagem-planos.png', title: 'Listagem de planos', desc: 'Todos os planos da entidade gestora, com ano, status e ações disponíveis.', notes: [NADM] },
+  { kind: 'screen', profile: 'eg', image: B + 'incluir-plano.png', title: 'Incluir plano', desc: 'Assistente em 6 etapas para a entidade gestora criar um plano: dados gerais, responsável, ações, empresas e metas.' },
   { kind: 'screen', profile: 'eg', image: B + 'resumo-plano-1.png', title: 'Resumo do plano · 1/2', desc: 'Síntese consolidada do plano de logística reversa, com dados e imagens, para conferência.', notes: [NPDF], portrait: true },
   { kind: 'screen', profile: 'eg', image: B + 'resumo-plano-2.png', title: 'Resumo do plano · 2/2', desc: 'Continuação do resumo consolidado do plano.', notes: [NPDF], portrait: true },
   { kind: 'screen', profile: 'eg', image: B + 'listagem-relatorios.png', title: 'Listagem de relatórios', desc: 'Relatórios anuais enviados, organizados por ano base e situação.' },
@@ -113,7 +120,8 @@ export const SLIDES: Slide[] = [
   { kind: 'cover', profile: 'admin', name: 'Admin', role: 'Governa o sistema: aprova cadastros, perfis e desbloqueia empresas.' },
   { kind: 'screen', profile: 'admin', image: B + 'home-admin.png', title: 'Painel do administrador', desc: 'Visão geral de governança do sistema: cadastros, aprovações, indicadores e prazos.', split: true },
   { kind: 'screen', profile: 'admin', image: B + 'parametros-admin.png', title: 'Parâmetros gerais', desc: 'Configuração dos parâmetros gerais do sistema, como prazos e regras de operação.' },
-  { kind: 'screen', profile: 'admin', image: B + 'justificativa-admin.png', title: 'Detalhe da justificativa', desc: 'Análise da justificativa de não enquadramento enviada, para aprovação ou recusa pelo administrador.', portrait: true },
+  { kind: 'screen', profile: 'admin', image: B + 'admin-nao-enq-1.png', title: 'Formulário de não enquadramento · 1/2', desc: 'A visão do administrador sobre a autodeclaração enviada: responsável, empresa e dados do registro.', split: true },
+  { kind: 'screen', profile: 'admin', image: B + 'admin-nao-enq-2.png', title: 'Formulário de não enquadramento · 2/2', desc: 'Detalhamento da justificativa, documentos anexados e declarações aceitas pela empresa.', portrait: true },
   // Verificador
   { kind: 'cover', profile: 'vr', name: 'Verificador de Resultados', role: 'Audita e homologa as notas fiscais, garantindo a unicidade das massas.' },
   { kind: 'screen', profile: 'vr', image: B + 'home-vr.png', title: 'Painel do verificador', desc: 'Visão geral das notas a homologar e do andamento da verificação.', split: true },
@@ -128,7 +136,7 @@ export const SLIDES: Slide[] = [
   { kind: 'agradecimento' },
 ];
 
-/** URLs de todas as telas — usado para pré-carregar e evitar flash na troca de slide. */
-export const SCREEN_IMAGES: string[] = SLIDES
-  .filter((s): s is Extract<Slide, { kind: 'screen' }> => s.kind === 'screen')
-  .map((s) => s.image);
+/** URLs de todas as imagens (telas + montagens) — pré-carregadas para evitar flash na troca. */
+export const SCREEN_IMAGES: string[] = SLIDES.flatMap((s) =>
+  s.kind === 'screen' ? [s.image] : s.kind === 'montage' ? [s.front, s.back] : [],
+);
