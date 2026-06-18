@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { PROFILES, type ProfileKey } from './data';
-const props = defineProps<{ profile: ProfileKey; title: string; desc: string; notes?: string[] }>();
-const p = computed(() => PROFILES[props.profile]);
+// Aceita um perfil (deriva chip/ícone) OU um chip/ícone custom (telas sem perfil).
+const props = defineProps<{ profile?: ProfileKey; chip?: string; icon?: string; title: string; desc: string; notes?: string[] }>();
+const label = computed(() => props.chip ?? (props.profile ? PROFILES[props.profile].label : ''));
+const ic = computed(() => props.icon ?? (props.profile ? PROFILES[props.profile].icon : ''));
 </script>
 
 <template>
   <div class="cap">
     <span class="cap__chip">
-      <svg viewBox="0 0 24 24" class="cap__chip-ic" v-html="p.icon" />
-      {{ p.label }}
+      <svg viewBox="0 0 24 24" class="cap__chip-ic" v-html="ic" />
+      {{ label }}
     </span>
     <h2 class="cap__title">{{ title }}</h2>
     <p class="cap__desc">{{ desc }}</p>
