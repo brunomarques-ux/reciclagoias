@@ -102,13 +102,17 @@ const vBtnProps = computed(() => {
   box-shadow: var(--rg-elevation-2);
 }
 
-/* Secondary (neutro escuro) */
+/* Secondary (contorno verde da marca: stroke + texto verde).
+   Usa border (não box-shadow) porque o elevation-0 do Vuetify sobrescreve
+   box-shadow com !important; a border deixa o box-shadow livre pro anel de foco. */
 .rg-button--secondary {
-  background-color: var(--rg-color-action-neutral) !important;
-  color: var(--rg-color-text-on-brand) !important;
+  background-color: transparent !important;
+  color: var(--rg-primitive-brand-700) !important;
+  border: 1.5px solid var(--rg-primitive-brand-600) !important;
 }
 .rg-button--secondary:hover:not(:disabled) {
-  background-color: var(--rg-color-action-neutral-hover) !important;
+  background-color: var(--rg-primitive-brand-50) !important;
+  border-color: var(--rg-primitive-brand-700) !important;
 }
 
 /* Outline */

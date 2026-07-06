@@ -19,8 +19,22 @@ const COMPS: Record<string, any> = {
 };
 const stepsOf = (s: Slide) => ('steps' in s && s.steps ? s.steps : 1);
 
-const si = ref(0); // slide index
-const st = ref(0); // step within slide
+// ?step=N (1-based) → posição inicial (si, st). Resolvido no setup p/ não disparar transição de entrada.
+function resolveStep(g: number): [number, number] {
+  let n = Math.max(0, Math.round(g) - 1);
+  for (let i = 0; i < SLIDES.length; i++) {
+    const steps = stepsOf(SLIDES[i]);
+    if (n < steps) return [i, n];
+    n -= steps;
+  }
+  return [SLIDES.length - 1, stepsOf(SLIDES[SLIDES.length - 1]) - 1];
+}
+const _q = new URLSearchParams(window.location.search);
+const _sp = parseInt(_q.get('step') || '', 10);
+const [_si0, _st0] = Number.isFinite(_sp) ? resolveStep(_sp) : [0, 0];
+
+const si = ref(_si0); // slide index
+const st = ref(_st0); // step within slide
 const dir = ref(1); // navigation direction (for transition)
 
 const total = SLIDES.length;
@@ -50,6 +64,9 @@ function prev() {
 }
 function goStart() { dir.value = -1; si.value = 0; st.value = 0; }
 function goEnd() { dir.value = 1; si.value = total - 1; st.value = stepsOf(SLIDES[total - 1]) - 1; }
+
+// Modo export (?export=1): esconde a navegação/dica/barra p/ capturar o slide limpo.
+const exportMode = ref(_q.get('export') === '1');
 
 function onKey(e: KeyboardEvent) {
   const k = e.key;
@@ -84,8 +101,12 @@ onMounted(() => {
   window.addEventListener('keydown', onKey);
   document.addEventListener('fullscreenchange', onFsChange);
   document.documentElement.classList.add('rg-deck-open');
-  hintT = window.setTimeout(() => (showHint.value = false), 4200);
-  SCREEN_IMAGES.forEach((src) => { const im = new Image(); im.src = src; preloaded.push(im); });
+  if (exportMode.value) showHint.value = false;
+  else hintT = window.setTimeout(() => (showHint.value = false), 4200);
+  // No modo export capturamos um slide por vez — sem preload (evita corrida de imagens).
+  if (!exportMode.value) {
+    SCREEN_IMAGES.forEach((src) => { const im = new Image(); im.src = src; preloaded.push(im); });
+  }
 });
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKey);
@@ -96,7 +117,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div ref="root" class="deck">
+  <div ref="root" class="deck" :class="{ 'deck--export': exportMode }">
     <div class="deck__viewport" @click="onStageClick">
       <div class="deck__stage" :style="{ transform: `scale(${scale})` }">
         <Transition :name="dir >= 0 ? 'deck-next' : 'deck-prev'" mode="out-in">
@@ -127,6 +148,8 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .deck { position: fixed; inset: 0; background: #0b120e; overflow: hidden; }
+.deck--export { background: #000; }
+.deck--export .deck__chrome, .deck--export .deck__progress, .deck--export .deck__hint { display: none !important; }
 .deck__viewport { position: absolute; inset: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .deck__stage {
   position: relative; flex: none;
