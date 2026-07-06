@@ -296,6 +296,17 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
   padding: var(--rg-space-4);
 }
 
+/* Exceção: sobre o overlay escuro, o secundário verde some. Aqui ele fica
+   branco (stroke + texto), garantindo contraste. Só vale dentro da barra. */
+.cx-cert__bar :deep(.rg-button--secondary) {
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.7) !important;
+}
+.cx-cert__bar :deep(.rg-button--secondary:hover:not(:disabled)) {
+  background-color: rgba(255, 255, 255, 0.14) !important;
+  border-color: #ffffff !important;
+}
+
 .cx-cert__close {
   position: absolute;
   top: var(--rg-space-4);
