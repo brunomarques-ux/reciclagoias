@@ -9,7 +9,8 @@
  * varredura só encena o tempo de resposta, com timing honesto (curto
  * quando o CNPJ não existe). A certidão/relatório abre em overlay A4.
  */
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
 import ConsultaShell from '@/components/consulta/ConsultaShell.vue';
 import ConsultaBusca from '@/components/consulta/ConsultaBusca.vue';
 import ConsultaVarredura from '@/components/consulta/ConsultaVarredura.vue';
@@ -18,6 +19,8 @@ import ConsultaResultPendencia from '@/components/consulta/ConsultaResultPendenc
 import ConsultaResultNaoEncontrado from '@/components/consulta/ConsultaResultNaoEncontrado.vue';
 import ConsultaCertidao from '@/components/consulta/ConsultaCertidao.vue';
 import {
+  empresaPendencia,
+  empresaRegular,
   findEmpresaByCnpj,
   type ConsultaEmpresa,
   type ConsultaStatus,
@@ -60,6 +63,53 @@ function novaConsulta() {
 function abrirCertidao(tipo: 'certidao-regular' | 'relatorio-pendencias') {
   certidaoTipo.value = tipo;
 }
+
+/**
+ * Deep-links de demonstração (?demo=) — abrem qualquer estado direto,
+ * sem passar pelo fluxo. Usados nos testes, na captura de telas e na
+ * geração dos PDFs (headless print). Não fazem parte do produto final.
+ *   regular | pendencia | nao-encontrado | varredura (congelada)
+ *   certidao-regular | certidao-pendencias (abre o overlay A4)
+ */
+const route = useRoute();
+const demoHold = ref(false);
+
+onMounted(() => {
+  const demo = route.query.demo;
+  if (typeof demo !== 'string') return;
+
+  const abrirResultado = (emp: ConsultaEmpresa | null, cnpj: string) => {
+    empresa.value = emp;
+    cnpjConsultado.value = cnpj;
+    finalizarVarredura();
+  };
+
+  switch (demo) {
+    case 'regular':
+      abrirResultado(empresaRegular, empresaRegular.cnpj);
+      break;
+    case 'pendencia':
+      abrirResultado(empresaPendencia, empresaPendencia.cnpj);
+      break;
+    case 'nao-encontrado':
+      abrirResultado(null, '11.111.111/0001-11');
+      break;
+    case 'varredura':
+      empresa.value = empresaRegular;
+      cnpjConsultado.value = empresaRegular.cnpj;
+      demoHold.value = true;
+      etapa.value = 'varredura';
+      break;
+    case 'certidao-regular':
+      abrirResultado(empresaRegular, empresaRegular.cnpj);
+      certidaoTipo.value = 'certidao-regular';
+      break;
+    case 'certidao-pendencias':
+      abrirResultado(empresaPendencia, empresaPendencia.cnpj);
+      certidaoTipo.value = 'relatorio-pendencias';
+      break;
+  }
+});
 </script>
 
 <template>
@@ -74,6 +124,7 @@ function abrirCertidao(tipo: 'certidao-regular' | 'relatorio-pendencias') {
         key="varredura"
         :cnpj="cnpjConsultado"
         :resultado="resultado"
+        :hold="demoHold"
         @done="finalizarVarredura"
         @cancel="novaConsulta"
       />
@@ -108,9 +159,10 @@ function abrirCertidao(tipo: 'certidao-regular' | 'relatorio-pendencias') {
     </Transition>
 
     <ConsultaCertidao
-      v-if="certidaoTipo && empresa"
+      v-if="empresa"
+      :open="certidaoTipo !== null"
       :empresa="empresa"
-      :tipo="certidaoTipo"
+      :tipo="certidaoTipo ?? 'certidao-regular'"
       :emitida-em="consultaEm"
       @close="certidaoTipo = null"
     />

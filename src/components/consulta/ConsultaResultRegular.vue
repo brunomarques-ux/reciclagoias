@@ -31,24 +31,24 @@ const emit = defineEmits<{
         </span>
       </span>
 
-      <span class="cx-result__badge">
+      <span class="cx-result__badge cx-in" style="--d: 80ms">
         <v-icon icon="mdi-check-bold" size="14" aria-hidden="true" />
         SITUAÇÃO REGULAR
       </span>
 
-      <h2 class="cx-result__title">
+      <h2 class="cx-result__title cx-in" style="--d: 140ms">
         Empresa regular no <span class="cx-result__title-accent">Recicla Goiás</span>
       </h2>
 
-      <p class="cx-result__subtitle">
+      <p class="cx-result__subtitle cx-in" style="--d: 200ms">
         A consulta confirma que a empresa está em conformidade com as obrigações de logística
         reversa do Decreto estadual nº 10.255/2023, na data e hora indicadas abaixo.
       </p>
 
-      <hr class="cx-result__divider" />
+      <hr class="cx-result__divider cx-in" style="--d: 260ms" />
 
       <!-- Identificação -->
-      <section class="cx-result__ident" aria-label="Empresa consultada">
+      <section class="cx-result__ident cx-in" style="--d: 300ms" aria-label="Empresa consultada">
         <header>
           <v-icon icon="mdi-office-building-outline" size="18" aria-hidden="true" />
           Empresa consultada
@@ -61,7 +61,7 @@ const emit = defineEmits<{
       </section>
 
       <!-- Autenticação -->
-      <section class="cx-result__auth" aria-label="Código de autenticação">
+      <section class="cx-result__auth cx-in" style="--d: 380ms" aria-label="Código de autenticação">
         <div class="cx-result__auth-left">
           <small>CÓDIGO DE AUTENTICAÇÃO</small>
           <strong class="cx-num">{{ empresa.codigoAutenticacao }}</strong>
@@ -72,7 +72,7 @@ const emit = defineEmits<{
       </section>
 
       <!-- Ações -->
-      <div class="cx-result__ctas">
+      <div class="cx-result__ctas cx-in" style="--d: 460ms">
         <RgButton variant="primary" size="lg" icon="mdi-download-outline" class="cx-result__cta-main" @click="emit('certidao')">
           Baixar certidão (PDF)
         </RgButton>
@@ -84,7 +84,7 @@ const emit = defineEmits<{
         </RgButton>
       </div>
 
-      <p class="cx-result__disclaimer">
+      <p class="cx-result__disclaimer cx-in" style="--d: 540ms">
         Consulta de caráter informativo, gerada a partir dos dados do Sistema Recicla Goiás na
         data e hora indicadas. Não substitui a certidão oficial nem as comprovações exigidas pela
         SEMAD. Para fé pública, baixe a certidão em PDF e valide o código de autenticação.
@@ -160,6 +160,16 @@ const emit = defineEmits<{
   0% { transform: scale(0.6); opacity: 0; }
   60% { transform: scale(1.08); opacity: 1; }
   100% { transform: scale(1); }
+}
+
+/* Entrada em cascata dos blocos do card (--d = delay por bloco) */
+.cx-in {
+  animation: cx-fade-up 0.45s var(--rg-motion-ease-emphasized) backwards;
+  animation-delay: var(--d, 0ms);
+}
+
+@keyframes cx-fade-up {
+  from { opacity: 0; transform: translateY(10px); }
 }
 
 .cx-result__badge {
@@ -343,10 +353,15 @@ const emit = defineEmits<{
     flex-direction: column;
     align-items: stretch;
   }
+  /* Em coluna, flex: 1 age na VERTICAL e esmaga a altura do botão. */
+  .cx-result__cta-main {
+    flex: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .cx-result__selo {
+  .cx-result__selo,
+  .cx-in {
     animation: none !important;
   }
 }

@@ -25,22 +25,22 @@ const emit = defineEmits<{ (e: 'nova-consulta'): void }>();
         </span>
       </span>
 
-      <span class="cx-nf__badge">
+      <span class="cx-nf__badge cx-in" style="--d: 80ms">
         <v-icon icon="mdi-information-outline" size="14" aria-hidden="true" />
         NÃO ENCONTRADO
       </span>
 
-      <h2 class="cx-nf__title">
+      <h2 class="cx-nf__title cx-in" style="--d: 140ms">
         Não encontramos este CNPJ<br />
         no <span class="cx-nf__title-accent">Recicla Goiás</span>
       </h2>
 
-      <p class="cx-nf__subtitle">
+      <p class="cx-nf__subtitle cx-in" style="--d: 200ms">
         O CNPJ consultado não consta na base do Recicla Goiás. Isso pode significar que a empresa
         ainda não aderiu a um sistema de logística reversa, ou que houve um erro de digitação.
       </p>
 
-      <span class="cx-nf__cnpj">
+      <span class="cx-nf__cnpj cx-in" style="--d: 260ms">
         <v-icon icon="mdi-office-building-outline" size="16" aria-hidden="true" />
         <small>CNPJ</small>
         {{ cnpj }}
@@ -48,7 +48,7 @@ const emit = defineEmits<{ (e: 'nova-consulta'): void }>();
 
       <hr class="cx-nf__divider" />
 
-      <section class="cx-nf__help" aria-label="O que você pode fazer">
+      <section class="cx-nf__help cx-in" style="--d: 340ms" aria-label="O que você pode fazer">
         <h3>O que você pode fazer</h3>
         <ul>
           <li>
@@ -72,9 +72,11 @@ const emit = defineEmits<{ (e: 'nova-consulta'): void }>();
         </ul>
       </section>
 
-      <RgButton variant="primary" size="lg" icon="mdi-refresh" block @click="emit('nova-consulta')">
-        Nova consulta
-      </RgButton>
+      <div class="cx-nf__cta cx-in" style="--d: 420ms">
+        <RgButton variant="primary" size="lg" icon="mdi-refresh" block @click="emit('nova-consulta')">
+          Nova consulta
+        </RgButton>
+      </div>
     </div>
   </div>
 </template>
@@ -145,6 +147,20 @@ const emit = defineEmits<{ (e: 'nova-consulta'): void }>();
   0% { transform: scale(0.6); opacity: 0; }
   60% { transform: scale(1.08); opacity: 1; }
   100% { transform: scale(1); }
+}
+
+/* Entrada em cascata dos blocos do card (--d = delay por bloco) */
+.cx-in {
+  animation: cx-fade-up 0.45s var(--rg-motion-ease-emphasized) backwards;
+  animation-delay: var(--d, 0ms);
+}
+
+@keyframes cx-fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+}
+
+.cx-nf__cta {
+  width: 100%;
 }
 
 .cx-nf__badge {
@@ -271,7 +287,8 @@ const emit = defineEmits<{ (e: 'nova-consulta'): void }>();
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .cx-nf__selo {
+  .cx-nf__selo,
+  .cx-in {
     animation: none !important;
   }
 }

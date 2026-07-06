@@ -150,25 +150,25 @@ onMounted(() => {
             <span><v-icon icon="mdi-check-decagram" size="40" /></span>
           </span>
 
-          <span class="cx-val__badge is-ok">
+          <span class="cx-val__badge is-ok cx-in" style="--d: 80ms">
             <v-icon icon="mdi-check-bold" size="14" aria-hidden="true" />
             DOCUMENTO AUTÊNTICO
           </span>
 
-          <h2 class="cx-val__result-title">
+          <h2 class="cx-val__result-title cx-in" style="--d: 140ms">
             Este documento foi emitido pelo
             <span class="cx-val__title-accent">Recicla Goiás</span>
           </h2>
 
-          <p class="cx-val__result-sub" v-if="viaQr">
+          <p class="cx-val__result-sub cx-in" style="--d: 200ms" v-if="viaQr">
             Você chegou aqui pelo QR Code do documento. A autenticidade foi confirmada
             automaticamente.
           </p>
-          <p class="cx-val__result-sub" v-else>
+          <p class="cx-val__result-sub cx-in" style="--d: 200ms" v-else>
             O código informado confere com um documento emitido pelo sistema.
           </p>
 
-          <section class="cx-val__doc" aria-label="Dados do documento">
+          <section class="cx-val__doc cx-in" style="--d: 280ms" aria-label="Dados do documento">
             <header>
               <v-icon icon="mdi-file-document-outline" size="18" aria-hidden="true" />
               Dados do documento
@@ -204,13 +204,13 @@ onMounted(() => {
             </dl>
           </section>
 
-          <p class="cx-val__note">
+          <p class="cx-val__note cx-in" style="--d: 360ms">
             A validação confirma a autenticidade do documento na data de emissão. A situação da
             empresa pode ter mudado desde então; para a situação atual, faça uma nova consulta por
             CNPJ.
           </p>
 
-          <div class="cx-val__ctas">
+          <div class="cx-val__ctas cx-in" style="--d: 440ms">
             <RgButton variant="primary" size="lg" icon="mdi-magnify" class="cx-val__cta-main" to="/consulta">
               Consultar situação atual
             </RgButton>
@@ -230,23 +230,23 @@ onMounted(() => {
             <span><v-icon icon="mdi-file-question-outline" size="36" /></span>
           </span>
 
-          <span class="cx-val__badge is-nf">
+          <span class="cx-val__badge is-nf cx-in" style="--d: 80ms">
             <v-icon icon="mdi-information-outline" size="14" aria-hidden="true" />
             DOCUMENTO NÃO LOCALIZADO
           </span>
 
-          <h2 class="cx-val__result-title">
+          <h2 class="cx-val__result-title cx-in" style="--d: 140ms">
             Não encontramos um documento<br />
             com este código
           </h2>
 
-          <p class="cx-val__result-sub">
+          <p class="cx-val__result-sub cx-in" style="--d: 200ms">
             O código
             <strong class="cx-num">{{ codigo }}</strong>
             não corresponde a nenhum documento emitido pelo Recicla Goiás.
           </p>
 
-          <section class="cx-val__doc" aria-label="O que isso pode significar">
+          <section class="cx-val__doc cx-in" style="--d: 280ms" aria-label="O que isso pode significar">
             <header>
               <v-icon icon="mdi-information-outline" size="18" aria-hidden="true" />
               O que isso pode significar
@@ -261,7 +261,7 @@ onMounted(() => {
             </ul>
           </section>
 
-          <div class="cx-val__ctas">
+          <div class="cx-val__ctas cx-in" style="--d: 360ms">
             <RgButton variant="primary" size="lg" icon="mdi-refresh" class="cx-val__cta-main" @click="novaValidacao">
               Tentar outro código
             </RgButton>
@@ -541,6 +541,16 @@ onMounted(() => {
   100% { transform: scale(1); }
 }
 
+/* Entrada em cascata dos blocos do card (--d = delay por bloco) */
+.cx-in {
+  animation: cx-fade-up 0.45s var(--rg-motion-ease-emphasized) backwards;
+  animation-delay: var(--d, 0ms);
+}
+
+@keyframes cx-fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+}
+
 .cx-val__badge {
   display: inline-flex;
   align-items: center;
@@ -700,12 +710,17 @@ onMounted(() => {
     flex-direction: column;
     align-items: stretch;
   }
+  /* Em coluna, flex: 1 age na VERTICAL e esmaga a altura do botão. */
+  .cx-val__cta-main {
+    flex: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .cx-val__dot,
   .cx-val__ring-arc,
-  .cx-val__selo {
+  .cx-val__selo,
+  .cx-in {
     animation: none !important;
   }
   .cx-swap-enter-active,

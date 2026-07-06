@@ -31,27 +31,27 @@ const emit = defineEmits<{
         </span>
       </span>
 
-      <span class="cx-pend__badge">
+      <span class="cx-pend__badge cx-in" style="--d: 80ms">
         <v-icon icon="mdi-alert-circle-outline" size="14" aria-hidden="true" />
         COM PENDÊNCIA
       </span>
 
-      <h2 class="cx-pend__title">
+      <h2 class="cx-pend__title cx-in" style="--d: 140ms">
         Empresa com pendências<br />
         no <span class="cx-pend__title-accent">Recicla Goiás</span>
       </h2>
 
-      <p class="cx-pend__subtitle">
+      <p class="cx-pend__subtitle cx-in" style="--d: 200ms">
         Encontramos a empresa no Recicla Goiás, mas há obrigações de logística reversa em aberto.
         Veja o que precisa ser regularizado.
       </p>
 
-      <p class="cx-pend__date">Consulta realizada em {{ consultaEm }}.</p>
+      <p class="cx-pend__date cx-in" style="--d: 240ms">Consulta realizada em {{ consultaEm }}.</p>
 
-      <hr class="cx-pend__divider" />
+      <hr class="cx-pend__divider cx-in" style="--d: 280ms" />
 
       <!-- Identificação -->
-      <section class="cx-pend__ident" aria-label="Empresa consultada">
+      <section class="cx-pend__ident cx-in" style="--d: 320ms" aria-label="Empresa consultada">
         <header>
           <v-icon icon="mdi-office-building-outline" size="18" aria-hidden="true" />
           Empresa consultada
@@ -65,7 +65,7 @@ const emit = defineEmits<{
       </section>
 
       <!-- Pendências -->
-      <section class="cx-pend__list" aria-label="Pendências identificadas">
+      <section class="cx-pend__list cx-in" style="--d: 400ms" aria-label="Pendências identificadas">
         <header>
           <h3>Pendências identificadas</h3>
           <span class="cx-pend__count">{{ empresa.pendencias?.length }} pendências</span>
@@ -91,7 +91,7 @@ const emit = defineEmits<{
       </section>
 
       <!-- Como regularizar -->
-      <section class="cx-pend__reg" aria-label="Como regularizar">
+      <section class="cx-pend__reg cx-in" style="--d: 640ms" aria-label="Como regularizar">
         <header>
           <v-icon icon="mdi-shield-check-outline" size="20" aria-hidden="true" />
           Como regularizar
@@ -109,7 +109,7 @@ const emit = defineEmits<{
       </section>
 
       <!-- Aviso legal -->
-      <p class="cx-pend__legal">
+      <p class="cx-pend__legal cx-in" style="--d: 700ms">
         <v-icon icon="mdi-information-outline" size="16" aria-hidden="true" />
         Consulta orientativa. O descumprimento das obrigações de logística reversa pode sujeitar a
         empresa às penalidades da Lei federal nº 9.605/1998 e do Decreto federal nº 6.514/2008.
@@ -117,7 +117,7 @@ const emit = defineEmits<{
       </p>
 
       <!-- Ações -->
-      <div class="cx-pend__ctas">
+      <div class="cx-pend__ctas cx-in" style="--d: 760ms">
         <RgButton
           variant="primary"
           size="lg"
@@ -212,6 +212,16 @@ const emit = defineEmits<{
   0% { transform: scale(0.6); opacity: 0; }
   60% { transform: scale(1.08); opacity: 1; }
   100% { transform: scale(1); }
+}
+
+/* Entrada em cascata dos blocos do card (--d = delay por bloco) */
+.cx-in {
+  animation: cx-fade-up 0.45s var(--rg-motion-ease-emphasized) backwards;
+  animation-delay: var(--d, 0ms);
+}
+
+@keyframes cx-fade-up {
+  from { opacity: 0; transform: translateY(10px); }
 }
 
 .cx-pend__badge {
@@ -362,9 +372,9 @@ const emit = defineEmits<{
   border: 1px solid var(--cx-amber-border);
   border-radius: var(--rg-radius-xl);
   background-color: var(--rg-color-surface-base);
-  /* Entrada em cascata quando o resultado aparece */
+  /* Entrada em cascata quando o resultado aparece (após o header da lista) */
   animation: cx-item-in 0.5s var(--rg-motion-ease-emphasized) backwards;
-  animation-delay: calc(var(--cx-i, 0) * 90ms + 150ms);
+  animation-delay: calc(var(--cx-i, 0) * 90ms + 480ms);
 }
 
 @keyframes cx-item-in {
@@ -502,11 +512,16 @@ const emit = defineEmits<{
     flex-direction: column;
     align-items: stretch;
   }
+  /* Em coluna, flex: 1 age na VERTICAL e esmaga a altura do botão. */
+  .cx-pend__cta-main {
+    flex: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .cx-pend__selo,
-  .cx-pend__item {
+  .cx-pend__item,
+  .cx-in {
     animation: none !important;
   }
 }

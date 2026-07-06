@@ -17,6 +17,8 @@ const props = defineProps<{
   cnpj: string;
   /** Resultado já resolvido pelo pai — define o timing (curto p/ não encontrado). */
   resultado: ConsultaStatus;
+  /** Congela na etapa 2 sem resolver (demonstração/captura via ?demo=varredura). */
+  hold?: boolean;
 }>();
 
 const emit = defineEmits<{ (e: 'done'): void; (e: 'cancel'): void }>();
@@ -42,6 +44,12 @@ function schedule(fn: () => void, ms: number) {
 onMounted(() => {
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const beat = reduced ? 350 : 850;
+
+  if (props.hold) {
+    // Demonstração: para na etapa 2 e não resolve.
+    schedule(() => (active.value = 1), beat);
+    return;
+  }
 
   if (!encontrado.value) {
     // Curto e honesto: localiza (não acha) e resolve.

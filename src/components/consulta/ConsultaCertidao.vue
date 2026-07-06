@@ -17,6 +17,8 @@ import RgButton from '@/components/RgButton.vue';
 import type { ConsultaEmpresa } from '@/data/mocks/consulta';
 
 const props = defineProps<{
+  /** Controla a visibilidade (fica montado pra animar abrir E fechar). */
+  open: boolean;
   empresa: ConsultaEmpresa;
   /** 'certidao-regular' | 'relatorio-pendencias' */
   tipo: 'certidao-regular' | 'relatorio-pendencias';
@@ -32,7 +34,7 @@ function print() {
 }
 
 function onKeydown(ev: KeyboardEvent) {
-  if (ev.key === 'Escape') emit('close');
+  if (ev.key === 'Escape' && props.open) emit('close');
 }
 
 onMounted(() => window.addEventListener('keydown', onKeydown));
@@ -41,7 +43,8 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
 
 <template>
   <Teleport to="body">
-    <div class="cx-cert" role="dialog" aria-modal="true" aria-label="Prévia da certidão" @click.self="emit('close')">
+    <Transition name="cx-cert-fade">
+    <div v-if="open" class="cx-cert" role="dialog" aria-modal="true" aria-label="Prévia da certidão" @click.self="emit('close')">
       <div class="cx-cert__bar">
         <RgButton variant="primary" size="md" icon="mdi-download-outline" @click="print">
           Baixar PDF
@@ -215,6 +218,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
         </article>
       </div>
     </div>
+    </Transition>
   </Teleport>
 </template>
 
@@ -644,16 +648,35 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
   }
 }
 
+/* Fade do overlay (abre e fecha suave) */
+.cx-cert-fade-enter-active,
+.cx-cert-fade-leave-active {
+  transition: opacity 240ms var(--rg-motion-ease-standard);
+}
+
+.cx-cert-fade-enter-from,
+.cx-cert-fade-leave-to {
+  opacity: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .cx-cert__paper {
     animation: none !important;
   }
+  .cx-cert-fade-enter-active,
+  .cx-cert-fade-leave-active {
+    transition: none !important;
+  }
 }
 </style>
 
-<!-- Impressão: só o papel, sem app nem overlay escuro -->
+<!-- Impressão: só o papel, sem app nem overlay escuro, 1 página A4 -->
 <style>
 @media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
   body > #app {
     display: none !important;
   }
@@ -674,6 +697,9 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
     box-shadow: none !important;
     border-radius: 0 !important;
     animation: none !important;
+    /* Compacta o documento pra caber em 1 página A4 */
+    zoom: 0.82;
+    padding: 48px 56px !important;
   }
 }
 </style>
