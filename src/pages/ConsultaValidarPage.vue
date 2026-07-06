@@ -41,6 +41,8 @@ function validar(code: string) {
   hint.value = '';
   estado.value = 'validando';
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // ?instant=1 pula a espera do loading (QA, demonstração e captura de tela)
+  const instant = route.query.instant === '1';
   window.setTimeout(() => {
     certidao.value = findCertidaoByCodigo(normalized);
     validadoEm.value = new Intl.DateTimeFormat('pt-BR', {
@@ -50,7 +52,7 @@ function validar(code: string) {
       .format(new Date())
       .replace(',', ' às ');
     estado.value = certidao.value ? 'valido' : 'invalido';
-  }, reduced ? 300 : 1400);
+  }, instant ? 0 : reduced ? 300 : 1400);
 }
 
 function novaValidacao() {
