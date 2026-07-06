@@ -76,7 +76,7 @@ const emit = defineEmits<{
         <RgButton variant="primary" size="lg" icon="mdi-download-outline" class="cx-result__cta-main" @click="emit('certidao')">
           Baixar certidão (PDF)
         </RgButton>
-        <RgButton variant="outline" size="lg" icon="mdi-printer-outline" @click="emit('imprimir')">
+        <RgButton variant="secondary" size="lg" icon="mdi-printer-outline" @click="emit('imprimir')">
           Imprimir
         </RgButton>
         <RgButton variant="ghost" size="lg" icon="mdi-refresh" @click="emit('nova-consulta')">

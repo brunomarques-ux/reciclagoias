@@ -127,7 +127,7 @@ const emit = defineEmits<{
         >
           Regularizar situação
         </RgButton>
-        <RgButton variant="outline" size="lg" icon="mdi-download-outline" @click="emit('relatorio')">
+        <RgButton variant="secondary" size="lg" icon="mdi-download-outline" @click="emit('relatorio')">
           Baixar relatório (PDF)
         </RgButton>
       </div>

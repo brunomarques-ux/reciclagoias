@@ -216,7 +216,7 @@ onMounted(() => {
             <RgButton variant="primary" size="lg" icon="mdi-magnify" class="cx-val__cta-main" to="/consulta">
               Consultar situação atual
             </RgButton>
-            <RgButton variant="ghost" size="lg" icon="mdi-refresh" @click="novaValidacao">
+            <RgButton variant="secondary" size="lg" icon="mdi-refresh" @click="novaValidacao">
               Validar outro documento
             </RgButton>
           </div>
@@ -267,7 +267,7 @@ onMounted(() => {
             <RgButton variant="primary" size="lg" icon="mdi-refresh" class="cx-val__cta-main" @click="novaValidacao">
               Tentar outro código
             </RgButton>
-            <RgButton variant="ghost" size="lg" icon="mdi-magnify" to="/consulta">
+            <RgButton variant="secondary" size="lg" icon="mdi-magnify" to="/consulta">
               Consultar por CNPJ
             </RgButton>
           </div>

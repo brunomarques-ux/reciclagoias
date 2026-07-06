@@ -7,14 +7,19 @@
  * atesto (ou pendências, na variante âmbar), base legal, validade e
  * rodapé de autenticação com código + QR.
  *
- * "Baixar PDF" e "Imprimir" abrem o diálogo de impressão do navegador
- * (salvar como PDF); o @media print global esconde o app e imprime só
- * o papel. O QR é um link real pra /consulta/validar?codigo=..., que
- * simula o escaneamento no protótipo.
+ * Duas ações distintas:
+ *  - "Baixar PDF": gera o arquivo no cliente (html2pdf) e dispara o
+ *    download, com toast confirmando. No produto real vira um endpoint
+ *    server-side (ver docs/HANDOFF-CONSULTA-REGULARIDADE.md §4.4).
+ *  - "Imprimir": abre o diálogo de impressão do navegador; o @media print
+ *    global esconde o app e imprime só o papel (1 página A4).
+ * O QR é um link real pra /consulta/validar?codigo=..., que simula o
+ * escaneamento no protótipo.
  */
-import { onBeforeUnmount, onMounted } from 'vue';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 import RgButton from '@/components/RgButton.vue';
-import type { ConsultaEmpresa } from '@/data/mocks/consulta';
+import { useToast } from '@/composables/useToast';
+import { onlyDigits, type ConsultaEmpresa } from '@/data/mocks/consulta';
 
 const props = defineProps<{
   /** Controla a visibilidade (fica montado pra animar abrir E fechar). */
@@ -27,10 +32,60 @@ const props = defineProps<{
 
 const emit = defineEmits<{ (e: 'close'): void }>();
 
+const { toast } = useToast();
 const isRegular = () => props.tipo === 'certidao-regular';
 
+/** Referência ao papel A4, alvo da geração do PDF. */
+const paperRef = ref<HTMLElement | null>(null);
+const downloading = ref(false);
+
+function nomeArquivo() {
+  const cnpj = onlyDigits(props.empresa.cnpj);
+  return isRegular()
+    ? `certidao-situacao-cadastral-${cnpj}.pdf`
+    : `relatorio-de-pendencias-${cnpj}.pdf`;
+}
+
+/** Imprimir: diálogo do navegador (o @media print imprime só o papel). */
 function print() {
   window.print();
+}
+
+/**
+ * Baixar PDF: gera o arquivo no cliente e dispara o download. Usa o
+ * tamanho real do papel como formato (px) pra sair em página única,
+ * fiel ao que está na tela. Toast confirma quando o download começa.
+ */
+async function download() {
+  // Elemento único no DOM (overlay teleportado); querySelector é mais
+  // robusto que o template ref dentro do Teleport + Transition.
+  const el = paperRef.value ?? document.querySelector<HTMLElement>('.cx-cert__paper');
+  if (!el || downloading.value) return;
+  downloading.value = true;
+  try {
+    const html2pdf = (await import('html2pdf.js')).default;
+    await html2pdf()
+      .set({
+        margin: 0,
+        filename: nomeArquivo(),
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+        jsPDF: {
+          unit: 'px',
+          format: [el.offsetWidth, el.offsetHeight],
+          orientation: 'portrait',
+          hotfixes: ['px_scaling'],
+        },
+        pagebreak: { mode: ['avoid-all'] },
+      })
+      .from(el)
+      .save();
+    toast('Download iniciado', `${nomeArquivo()} está sendo salvo.`, 'success');
+  } catch {
+    toast('Não foi possível gerar o PDF', 'Tente novamente ou use Imprimir.', 'error');
+  } finally {
+    downloading.value = false;
+  }
 }
 
 function onKeydown(ev: KeyboardEvent) {
@@ -46,7 +101,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
     <Transition name="cx-cert-fade">
     <div v-if="open" class="cx-cert" role="dialog" aria-modal="true" aria-label="Prévia da certidão" @click.self="emit('close')">
       <div class="cx-cert__bar">
-        <RgButton variant="primary" size="md" icon="mdi-download-outline" @click="print">
+        <RgButton variant="primary" size="md" icon="mdi-download-outline" :loading="downloading" @click="download">
           Baixar PDF
         </RgButton>
         <RgButton variant="secondary" size="md" icon="mdi-printer-outline" @click="print">
@@ -58,7 +113,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
       </div>
 
       <div class="cx-cert__scroll">
-        <article class="cx-cert__paper">
+        <article ref="paperRef" class="cx-cert__paper">
           <!-- 1) Cabeçalho institucional -->
           <header class="cx-cert__head">
             <div class="cx-cert__head-row">

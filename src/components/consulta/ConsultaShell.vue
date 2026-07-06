@@ -6,6 +6,7 @@
  * no slot; o header é idêntico em todos, como no Figma (Julho/26).
  */
 import { ref } from 'vue';
+import RgToast from './RgToast.vue';
 
 const showComoFunciona = ref(false);
 </script>
@@ -79,6 +80,8 @@ const showComoFunciona = ref(false);
         </div>
       </Transition>
     </Teleport>
+
+    <RgToast />
   </div>
 </template>
 
