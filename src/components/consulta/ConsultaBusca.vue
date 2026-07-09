@@ -9,12 +9,13 @@
  */
 import { computed, ref } from 'vue';
 import RgButton from '@/components/RgButton.vue';
+import ConsultaCaptcha from '@/components/consulta/ConsultaCaptcha.vue';
 import { maskCnpj, onlyDigits } from '@/data/mocks/consulta';
 
 const emit = defineEmits<{ (e: 'consultar', cnpj: string): void }>();
 
 const cnpj = ref('');
-const captchaState = ref<'idle' | 'checking' | 'done'>('idle');
+const captchaOk = ref(false);
 const shake = ref(false);
 const hint = ref('');
 
@@ -27,22 +28,13 @@ function onInput(ev: Event) {
   if (cnpjCompleto.value) hint.value = '';
 }
 
-function toggleCaptcha() {
-  if (captchaState.value !== 'idle') return;
-  captchaState.value = 'checking';
-  window.setTimeout(() => {
-    captchaState.value = 'done';
-    hint.value = '';
-  }, 900);
-}
-
 function submit() {
   if (!cnpjCompleto.value) {
     hint.value = 'Digite o CNPJ completo (14 dígitos).';
     bounce();
     return;
   }
-  if (captchaState.value !== 'done') {
+  if (!captchaOk.value) {
     hint.value = 'Confirme que você não é um robô.';
     bounce();
     return;
@@ -90,31 +82,7 @@ function bounce() {
       </div>
 
       <!-- Captcha mock (visual): clique marca depois de um pequeno delay -->
-      <button
-        type="button"
-        :class="['cx-busca__captcha', { 'is-done': captchaState === 'done' }]"
-        :aria-pressed="captchaState === 'done'"
-        @click="toggleCaptcha"
-      >
-        <span class="cx-busca__captcha-left">
-          <span :class="['cx-busca__checkbox', `is-${captchaState}`]" aria-hidden="true">
-            <v-progress-circular
-              v-if="captchaState === 'checking'"
-              indeterminate
-              size="18"
-              width="2"
-              color="var(--rg-primitive-brand-600)"
-            />
-            <v-icon v-else-if="captchaState === 'done'" icon="mdi-check-bold" size="18" />
-          </span>
-          Não sou um robô
-        </span>
-        <span class="cx-busca__captcha-right" aria-hidden="true">
-          <v-icon icon="mdi-refresh" size="24" />
-          <small>reCAPTCHA</small>
-          <small class="cx-busca__captcha-terms">Privacidade · Termos</small>
-        </span>
-      </button>
+      <ConsultaCaptcha v-model="captchaOk" />
 
       <p v-if="hint" class="cx-busca__hint" role="alert">{{ hint }}</p>
 
@@ -247,78 +215,6 @@ function bounce() {
   color: var(--rg-color-text-tertiary);
 }
 
-/* ============ Captcha mock ============ */
-.cx-busca__captcha {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--rg-space-4);
-  min-height: 74px;
-  padding-inline: var(--rg-space-5);
-  border: 1px solid var(--rg-color-border-base);
-  border-radius: var(--rg-radius-xl);
-  background-color: var(--rg-color-surface-base);
-  font-family: inherit;
-  font-size: var(--rg-font-size-sm);
-  color: var(--rg-color-text-primary);
-  cursor: pointer;
-  transition: border-color var(--rg-motion-duration-fast) var(--rg-motion-ease-standard);
-}
-
-.cx-busca__captcha.is-done {
-  border-color: var(--rg-primitive-brand-100);
-  cursor: default;
-}
-
-.cx-busca__captcha-left {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--rg-space-3);
-}
-
-.cx-busca__checkbox {
-  display: grid;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  border: 2px solid var(--rg-color-border-strong);
-  border-radius: var(--rg-radius-sm);
-  color: var(--rg-primitive-brand-600);
-  transition: border-color var(--rg-motion-duration-fast) var(--rg-motion-ease-standard);
-}
-
-.cx-busca__checkbox.is-checking {
-  border-color: transparent;
-}
-
-.cx-busca__checkbox.is-done {
-  border-color: var(--rg-primitive-brand-600);
-  animation: cx-pop 0.3s var(--rg-motion-ease-emphasized);
-}
-
-@keyframes cx-pop {
-  0% { transform: scale(0.7); }
-  60% { transform: scale(1.12); }
-  100% { transform: scale(1); }
-}
-
-.cx-busca__captcha-right {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1px;
-  color: var(--rg-primitive-brand-500);
-}
-
-.cx-busca__captcha-right small {
-  font-size: 9px;
-  color: var(--rg-color-text-tertiary);
-}
-
-.cx-busca__captcha-terms {
-  font-size: 8px !important;
-}
-
 .cx-busca__hint {
   margin: 0;
   font-size: var(--rg-font-size-xs);
@@ -384,8 +280,7 @@ function bounce() {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .cx-busca__card.is-shake,
-  .cx-busca__checkbox.is-done {
+  .cx-busca__card.is-shake {
     animation: none !important;
   }
 }
