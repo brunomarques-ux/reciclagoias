@@ -187,13 +187,13 @@ flowchart TD
 
 | Estado | Quando ocorre | UI mostrada | Componente fonte |
 |---|---|---|---|
-| **Form** | Entrada sem `?codigo=` | Pill "VALIDAÇÃO DE DOCUMENTO", título "Confira se uma certidão é **autêntica**", card 560px: input de código (uppercase automático) + CTA "Validar documento". Linha sobre o QR + link de volta pra consulta | `pages/ConsultaValidarPage.vue` |
+| **Form** | Entrada sem `?codigo=` | Pill "VALIDAÇÃO DE DOCUMENTO", título "Confira se uma certidão é **autêntica**", card 560px: input de código (uppercase automático) + **captcha "Não sou um robô"** (mesmo componente da busca) + CTA "Validar documento". Linha sobre o QR + link de volta pra consulta | `pages/ConsultaValidarPage.vue` |
+| **Chegada pelo QR/certidão** | `?codigo=` na URL | Campo de código vem **pré-preenchido** + nota "Código preenchido pelo documento. Confirme que você não é um robô e valide". A checagem NÃO roda sozinha: exige captcha + clique (barreira anti-robô, mesma da busca) | `ConsultaValidarPage.vue` |
 | **Código curto no submit** | `< 6` caracteres úteis | Hint vermelho "Informe o código completo impresso no documento." | `ConsultaValidarPage.vue` |
-| **Validando** | Submit ok OU chegada via QR | Pill "VALIDANDO" (dot pulsa), card com anel girando + "Conferindo o documento" + eco do código (~1,4s; 300ms com reduced-motion) | `ConsultaValidarPage.vue` |
+| **Captcha não marcado no submit** | `captchaOk === false` | Hint "Confirme que você não é um robô." | `ConsultaValidarPage.vue` |
+| **Validando** | Submit ok (código + captcha) | Pill "VALIDANDO" (dot pulsa), card com anel girando + "Conferindo o documento" + eco do código (~1,4s; 300ms com reduced-motion) | `ConsultaValidarPage.vue` |
 | **Documento autêntico** | Código existe na base | Selo verde (check-decagram), badge "DOCUMENTO AUTÊNTICO", título com accent, bloco "Dados do documento" (tipo, código, razão social, CNPJ, **situação na emissão** com chip verde/âmbar, data da validação), nota "a situação pode ter mudado", CTAs: Consultar situação atual · Validar outro documento | `ConsultaValidarPage.vue` |
-| **Autêntico via QR** | Havia `?codigo=` na URL | Mesma tela, subtítulo muda: "Você chegou aqui pelo QR Code do documento. A autenticidade foi confirmada automaticamente." | `ConsultaValidarPage.vue` |
 | **Documento não localizado** | Código não existe | Selo cinza (file-question), badge neutro, eco do código digitado, bloco "O que isso pode significar" (erro de digitação / documento alterado / **não emitido pelo sistema: desconfie**), CTAs: Tentar outro código · Consultar por CNPJ | `ConsultaValidarPage.vue` |
-| **Auto-validação (QR)** | `onMounted` com `route.query.codigo` | Pula o form e roda a validação direto; "Validar outro documento" limpa a query da URL | `ConsultaValidarPage.vue` |
 
 ### 2.8 Chrome compartilhado (todas as telas)
 
@@ -275,9 +275,26 @@ Condicionais que o front precisa preservar quando substituir o mock por backend 
 | **Datas dinâmicas** | "Consulta realizada em", "Data de referência" e "Emitido em" usam `Intl.DateTimeFormat('pt-BR')` do momento da consulta — no real vêm do backend |
 | **Validades** | Tela de consulta não exibe validade (edição de design 07/2026); certidão A4 exibe "90 dias da emissão". Valor proposto, **pendente de validação jurídica** |
 
-### 4.5 Captcha
+### 4.5 Captcha e proteção anti-abuso (recomendação de UX + segurança)
 
-O captcha é **mock visual** (click → spinner 900ms → check). No produto real: provider (reCAPTCHA/hCaptcha/Turnstile) com verificação **server-side** no endpoint da consulta. O submit já bloqueia sem captcha — preservar.
+O captcha das duas telas públicas (`/consulta` e `/consulta/validar`) é **mock visual** (click → spinner 900ms → check verde), reaproveitado do componente `components/consulta/ConsultaCaptcha.vue`. O submit já bloqueia sem o captcha marcado — preservar esse gate.
+
+**O que recomendamos pro produto real (padrão de mercado pra formulários públicos sem login):**
+
+1. **Captcha de provedor** no lugar do mock, verificado **server-side** (nunca confiar só no cliente). Opções, da mais leve pra mais robusta:
+   - **Cloudflare Turnstile** — sem desafio visual na maioria dos casos, gratuito, boa UX (recomendado como default).
+   - **hCaptcha** — foco em privacidade, plano gratuito.
+   - **Google reCAPTCHA v3** — score invisível; exige tratar o score no backend.
+   O fluxo: o front gera um token, envia junto da requisição, e o endpoint valida o token com o provedor antes de responder.
+
+2. **Rate limiting** no backend, independente do captcha (o captcha barra robô casual; o rate limit barra abuso automatizado e enumeração de CNPJ/código):
+   - Limite por IP (ex.: 5–10 req/min por rota) com resposta `429 Too Many Requests`.
+   - Limite mais estrito na **validação de código** (é um endpoint de verificação: alguém poderia varrer códigos por força bruta). Considerar backoff progressivo após N tentativas inválidas.
+   - Opcional: cache curto por CNPJ pra não repetir consulta idêntica.
+
+3. **Aplicar nas DUAS rotas.** A validação de documento também recebe captcha: ao chegar pelo QR/certidão (`?codigo=`), o campo vem **preenchido**, mas a checagem só roda depois do captcha + clique em validar. Isso evita que um QR compartilhado vire um endpoint de verificação em massa.
+
+4. **Higiene extra**: honeypot invisível no form, e no endpoint de validação responder em tempo constante (não vazar, pelo tempo de resposta, se o código existe ou não).
 
 ### 4.6 Conteúdo legal (validar com jurídico/SEMAD antes de publicar)
 

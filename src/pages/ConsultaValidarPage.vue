@@ -4,8 +4,10 @@
  *
  * Dois caminhos de entrada:
  *   1. A pessoa digita o código de autenticação impresso no documento;
- *   2. O QR Code da certidão aponta pra cá com ?codigo=... e a
- *      validação roda sozinha (no protótipo, clicar no QR simula isso).
+ *   2. O QR Code / os botões da certidão apontam pra cá com ?codigo=...,
+ *      que PREENCHE o campo automaticamente. A validação em si só roda
+ *      depois que o usuário confirma o captcha ("Não sou um robô") e
+ *      clica em validar, por segurança (mesma barreira anti-robô da busca).
  *
  * Estados in-place: form → validando (spinner curto) → autêntico
  * (verde, com resumo do documento) | não localizado (neutro).
@@ -13,6 +15,7 @@
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import ConsultaShell from '@/components/consulta/ConsultaShell.vue';
+import ConsultaCaptcha from '@/components/consulta/ConsultaCaptcha.vue';
 import RgButton from '@/components/RgButton.vue';
 import {
   findCertidaoByCodigo,
@@ -27,24 +30,21 @@ const router = useRouter();
 
 const estado = ref<Estado>('form');
 const codigo = ref('');
+const captchaOk = ref(false);
 const certidao = ref<CertidaoInfo | null>(null);
 const hint = ref('');
-const viaQr = ref(false);
+/** Chegou pelo QR/certidão (campo pré-preenchido). Só muda a microcopy. */
+const veioDeQr = ref(false);
 const validadoEm = ref('');
 
-function validar(code: string) {
-  const normalized = normalizeCodigo(code);
-  if (normalized.length < 6) {
-    hint.value = 'Informe o código completo impresso no documento.';
-    return;
-  }
-  hint.value = '';
+/** Roda a checagem do código (spinner curto → resultado). */
+function runValidation(code: string) {
   estado.value = 'validando';
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   // ?instant=1 pula a espera do loading (QA, demonstração e captura de tela)
   const instant = route.query.instant === '1';
   window.setTimeout(() => {
-    certidao.value = findCertidaoByCodigo(normalized);
+    certidao.value = findCertidaoByCodigo(normalizeCodigo(code));
     validadoEm.value = new Intl.DateTimeFormat('pt-BR', {
       dateStyle: 'short',
       timeStyle: 'short',
@@ -55,11 +55,27 @@ function validar(code: string) {
   }, instant ? 0 : reduced ? 300 : 1400);
 }
 
+/** Submit do form: valida código + captcha antes de rodar a checagem. */
+function submit() {
+  if (normalizeCodigo(codigo.value).length < 6) {
+    hint.value = 'Informe o código completo impresso no documento.';
+    return;
+  }
+  if (!captchaOk.value) {
+    hint.value = 'Confirme que você não é um robô.';
+    return;
+  }
+  hint.value = '';
+  runValidation(codigo.value);
+}
+
 function novaValidacao() {
   estado.value = 'form';
   certidao.value = null;
   codigo.value = '';
-  viaQr.value = false;
+  captchaOk.value = false;
+  hint.value = '';
+  veioDeQr.value = false;
   // Limpa o ?codigo= da URL pra nova digitação
   if (route.query.codigo) router.replace({ query: {} });
 }
@@ -67,9 +83,14 @@ function novaValidacao() {
 onMounted(() => {
   const fromQr = route.query.codigo;
   if (typeof fromQr === 'string' && fromQr.length > 0) {
-    viaQr.value = true;
+    veioDeQr.value = true;
     codigo.value = normalizeCodigo(fromQr);
-    validar(fromQr);
+    // QA/captura (?instant=1): marca o captcha e valida direto. No fluxo
+    // real o usuário confirma o captcha e clica em validar.
+    if (route.query.instant === '1') {
+      captchaOk.value = true;
+      runValidation(codigo.value);
+    }
   }
 });
 </script>
@@ -92,7 +113,7 @@ onMounted(() => {
           foi mesmo emitido pelo sistema.
         </p>
 
-        <form class="cx-val__card" novalidate @submit.prevent="validar(codigo)">
+        <form class="cx-val__card" novalidate @submit.prevent="submit">
           <label class="cx-val__label" for="cx-codigo">Código de autenticação</label>
           <div class="cx-val__input">
             <v-icon icon="mdi-shield-search" size="20" aria-hidden="true" />
@@ -106,6 +127,14 @@ onMounted(() => {
               @input="codigo = codigo.toUpperCase()"
             />
           </div>
+
+          <p v-if="veioDeQr" class="cx-val__prefill">
+            <v-icon icon="mdi-qrcode-scan" size="16" aria-hidden="true" />
+            Código preenchido pelo documento. Confirme que você não é um robô e valide.
+          </p>
+
+          <ConsultaCaptcha v-model="captchaOk" />
+
           <p v-if="hint" class="cx-val__hint" role="alert">{{ hint }}</p>
           <RgButton type="submit" variant="primary" size="lg" block icon="mdi-shield-check-outline">
             Validar documento
@@ -162,12 +191,11 @@ onMounted(() => {
             <span class="cx-val__title-accent">Recicla Goiás</span>
           </h2>
 
-          <p class="cx-val__result-sub cx-in" style="--d: 200ms" v-if="viaQr">
-            Você chegou aqui pelo QR Code do documento. A autenticidade foi confirmada
-            automaticamente.
+          <p class="cx-val__result-sub cx-in" style="--d: 200ms" v-if="veioDeQr">
+            O código do documento confere com um registro emitido pelo Recicla Goiás.
           </p>
           <p class="cx-val__result-sub cx-in" style="--d: 200ms" v-else>
-            O código informado confere com um documento emitido pelo sistema.
+            O código informado confere com um documento emitido pelo Recicla Goiás.
           </p>
 
           <section class="cx-val__doc cx-in" style="--d: 280ms" aria-label="Dados do documento">
@@ -427,6 +455,23 @@ onMounted(() => {
   margin: 0;
   font-size: var(--rg-font-size-xs);
   color: var(--rg-primitive-red-600);
+}
+
+.cx-val__prefill {
+  display: flex;
+  align-items: center;
+  gap: var(--rg-space-2);
+  margin: 0;
+  padding: var(--rg-space-3);
+  border-radius: var(--rg-radius-lg);
+  background-color: var(--rg-color-surface-soft-tint);
+  font-size: var(--rg-font-size-xs);
+  color: var(--rg-color-text-secondary);
+}
+
+.cx-val__prefill .v-icon {
+  flex: none;
+  color: var(--rg-primitive-brand-600);
 }
 
 .cx-val__trust {
