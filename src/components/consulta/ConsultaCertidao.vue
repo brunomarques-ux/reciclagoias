@@ -4,7 +4,7 @@
  *
  * Documento oficial redesenhado (Figma "Certidão · A4 · Regular"):
  * cabeçalho institucional, título, badge de situação, identificação,
- * atesto (ou pendências, na variante âmbar), base legal, validade e
+ * atesto (ou pendências, na variante vermelha), base legal, validade e
  * rodapé de autenticação com código + QR.
  *
  * Duas ações distintas:
@@ -450,8 +450,8 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
 }
 
 .cx-cert__status.is-pendencia {
-  background-color: #fbf4e6;
-  border: 1px solid #f5e6c8;
+  background-color: #fdecec;
+  border: 1px solid #f8d4d4;
 }
 
 .cx-cert__status-selo {
@@ -468,7 +468,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
 }
 
 .cx-cert__status.is-pendencia .cx-cert__status-selo {
-  color: #b8791b;
+  color: #b91c1c;
 }
 
 .cx-cert__status p {
@@ -543,13 +543,13 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
 }
 
 .cx-cert__pend .v-icon {
-  color: #e0a63b;
+  color: #dc2626;
 }
 
 .cx-cert__pend-note {
   margin: var(--rg-space-3) 0 0;
   font-size: var(--rg-font-size-xs);
-  color: #7a5313;
+  color: #7a1212;
 }
 
 .cx-cert__legal {
