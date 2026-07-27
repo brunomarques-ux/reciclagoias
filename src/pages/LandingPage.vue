@@ -8,6 +8,7 @@ import LandingDisclaimer from '@/components/landing/LandingDisclaimer.vue';
 import LandingWhatIsLR from '@/components/landing/LandingWhatIsLR.vue';
 import LandingPerfis from '@/components/landing/LandingPerfis.vue';
 import LandingEnquadramento from '@/components/landing/LandingEnquadramento.vue';
+import LandingConsultaBanner from '@/components/landing/LandingConsultaBanner.vue';
 import LandingHowItWorks from '@/components/landing/LandingHowItWorks.vue';
 import LandingPremio from '@/components/landing/LandingPremio.vue';
 import LandingComite from '@/components/landing/LandingComite.vue';
@@ -53,6 +54,7 @@ const sections = ref([
     <LandingWhatIsLR />
     <LandingPerfis />
     <LandingEnquadramento />
+    <LandingConsultaBanner />
     <LandingHowItWorks />
     <LandingPremio />
     <LandingComite />

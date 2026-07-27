@@ -82,13 +82,13 @@ const year = new Date().getFullYear();
               <span class="rg-footer__contact-icon">
                 <v-icon icon="mdi-whatsapp" size="18" />
               </span>
-              <span>(62) 9 9699-8345 · WhatsApp institucional</span>
+              <span>(62) 9 9975-4853 · WhatsApp institucional</span>
             </li>
             <li>
               <span class="rg-footer__contact-icon">
                 <v-icon icon="mdi-map-marker-outline" size="18" />
               </span>
-              <span>Gerência de Resíduos Sólidos &amp; Drenagem</span>
+              <span>Gerência de Instrumentos e Apoio à Política de Resíduos Sólidos · GEARE</span>
             </li>
           </ul>
         </div>

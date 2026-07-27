@@ -1,10 +1,10 @@
 <script setup lang="ts">
 /**
- * Resultado · Com pendência — âmbar de atenção (nunca vermelho).
+ * Resultado · Com pendência — vermelho semântico de atenção.
  *
- * O âmbar aqui é o da tela aprovada no Figma (mais sóbrio que o
- * --rg-primitive-amber do DS, que é saturado demais pra essa página);
- * fica em vars locais --cx-amber-* no escopo do componente.
+ * Tons de vermelho próprios (--cx-red-* no escopo do componente),
+ * alinhados ao vermelho do resultado; não usa os --rg-primitive-red
+ * do DS pra manter o mesmo peso visual da tela aprovada.
  */
 import RgButton from '@/components/RgButton.vue';
 import type { ConsultaEmpresa } from '@/data/mocks/consulta';
@@ -140,12 +140,13 @@ const emit = defineEmits<{
 
 <style scoped>
 .cx-pend {
-  /* Âmbar sóbrio da tela (aprovado no Figma; difere do amber saturado do DS) */
-  --cx-amber-50: #fbf4e6;
-  --cx-amber-100: #f5e6c8;
-  --cx-amber-border: #f0e4cc;
-  --cx-amber-500: #e0a63b;
-  --cx-amber-600: #b8791b;
+  /* Vermelho semântico da pendência (feedback pedido em 07/2026: âmbar -> vermelho).
+     Tons próprios, alinhados ao vermelho do resultado, não os --rg-primitive-red do DS. */
+  --cx-red-50: #fdecec;
+  --cx-red-100: #f8d4d4;
+  --cx-red-border: #f3c9c9;
+  --cx-red-500: #dc2626;
+  --cx-red-600: #b91c1c;
 
   display: flex;
   flex-direction: column;
@@ -182,7 +183,7 @@ const emit = defineEmits<{
   margin-top: var(--rg-space-7);
   padding: var(--rg-space-8);
   border-radius: var(--rg-radius-3xl);
-  border: 1px solid var(--cx-amber-100);
+  border: 1px solid var(--cx-red-100);
   background-color: var(--rg-color-surface-base);
   box-shadow: var(--rg-elevation-3);
 }
@@ -194,7 +195,7 @@ const emit = defineEmits<{
   width: 96px;
   height: 96px;
   border-radius: var(--rg-radius-pill);
-  background-color: var(--cx-amber-50);
+  background-color: var(--cx-red-50);
   animation: cx-selo-pop 0.5s var(--rg-motion-ease-emphasized);
 }
 
@@ -204,7 +205,7 @@ const emit = defineEmits<{
   width: 72px;
   height: 72px;
   border-radius: var(--rg-radius-pill);
-  background-color: var(--cx-amber-500);
+  background-color: var(--cx-red-500);
   color: var(--rg-primitive-neutral-0);
 }
 
@@ -231,7 +232,7 @@ const emit = defineEmits<{
   margin-top: var(--rg-space-5);
   padding: var(--rg-space-2) var(--rg-space-3);
   border-radius: var(--rg-radius-pill);
-  background-color: var(--cx-amber-500);
+  background-color: var(--cx-red-500);
   font-size: var(--rg-font-size-2xs);
   font-weight: var(--rg-font-weight-bold);
   letter-spacing: var(--rg-letter-spacing-eyebrow);
@@ -349,10 +350,10 @@ const emit = defineEmits<{
 .cx-pend__count {
   padding: var(--rg-space-1) var(--rg-space-3);
   border-radius: var(--rg-radius-pill);
-  background-color: var(--cx-amber-50);
+  background-color: var(--cx-red-50);
   font-size: var(--rg-font-size-2xs);
   font-weight: var(--rg-font-weight-semibold);
-  color: var(--cx-amber-600);
+  color: var(--cx-red-600);
 }
 
 .cx-pend__list ul {
@@ -369,7 +370,7 @@ const emit = defineEmits<{
   align-items: flex-start;
   gap: var(--rg-space-4);
   padding: var(--rg-space-4);
-  border: 1px solid var(--cx-amber-border);
+  border: 1px solid var(--cx-red-border);
   border-radius: var(--rg-radius-xl);
   background-color: var(--rg-color-surface-base);
   /* Entrada em cascata quando o resultado aparece (após o header da lista) */
@@ -388,8 +389,8 @@ const emit = defineEmits<{
   width: 36px;
   height: 36px;
   border-radius: var(--rg-radius-md);
-  background-color: var(--cx-amber-50);
-  color: var(--cx-amber-500);
+  background-color: var(--cx-red-50);
+  color: var(--cx-red-500);
 }
 
 .cx-pend__item-body {

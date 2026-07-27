@@ -704,8 +704,8 @@ onMounted(() => {
 }
 
 .cx-val__situacao.is-pend {
-  background-color: #fbf4e6;
-  color: #b8791b;
+  background-color: #fdecec;
+  color: #b91c1c;
 }
 
 .cx-val__reasons {
