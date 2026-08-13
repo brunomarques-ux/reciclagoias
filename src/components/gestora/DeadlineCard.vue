@@ -1,0 +1,277 @@
+<script setup lang="ts">
+/**
+ * Card de prazo da coluna lateral (D-R001 · tira "Estados do card de prazo").
+ *
+ * Sem período restritivo: data, contador e a ação que o prazo habilita.
+ * Com período restritivo: chip vermelho + UM gatilho, e o card **não cresce** com o
+ * número de ações liberadas — `n` é só um número dentro de um rótulo.
+ *
+ *   n = 1  → a ação cabe na frase; o gatilho explica o conceito
+ *   n ≥ 2  → o gatilho conta ("Ver as 6 ações liberadas até 29/08") e o popover mostra
+ *
+ * Não existe `n = 0`: vigência restritiva sem ação liberada não é estado válido.
+ * O gatilho é `<button aria-expanded>`, nunca `<a href>`, porque abre uma camada na
+ * mesma página.
+ */
+import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
+
+import type { CardPrazo } from '@/data/mocks/gestora';
+import RestrictedPeriodPopover from './RestrictedPeriodPopover.vue';
+
+const props = defineProps<{ prazo: CardPrazo }>();
+
+const aberto = ref(false);
+const disclosure = ref<HTMLElement | null>(null);
+const gatilho = ref<HTMLButtonElement | null>(null);
+
+const idPopover = computed(() => `gx-popover-${props.prazo.id}`);
+const acoes = computed(() => props.prazo.restritivo?.acoes ?? []);
+const acaoUnica = computed(() => (acoes.value.length === 1 ? acoes.value[0] : null));
+
+const contador = computed(() => {
+  const dias = props.prazo.diasRestantes;
+  return dias === 1
+    ? 'Falta 1 dia para o fim do prazo'
+    : `Faltam ${dias} dias para o fim do prazo`;
+});
+
+const rotuloGatilho = computed(() => {
+  const restritivo = props.prazo.restritivo;
+  if (!restritivo) return '';
+  return acaoUnica.value
+    ? 'O que é período restritivo'
+    : `Ver as ${restritivo.acoes.length} ações liberadas até ${restritivo.ate}`;
+});
+
+function alternar() {
+  aberto.value = !aberto.value;
+}
+
+function fechar(devolverFoco = true) {
+  if (!aberto.value) return;
+  aberto.value = false;
+  if (devolverFoco) void nextTick(() => gatilho.value?.focus());
+}
+
+function aoClicarFora(evento: MouseEvent) {
+  if (!disclosure.value?.contains(evento.target as Node)) fechar(false);
+}
+
+function aoTeclar(evento: KeyboardEvent) {
+  if (evento.key === 'Escape') fechar();
+}
+
+watch(aberto, (estaAberto) => {
+  if (estaAberto) {
+    document.addEventListener('mousedown', aoClicarFora);
+    document.addEventListener('keydown', aoTeclar);
+  } else {
+    document.removeEventListener('mousedown', aoClicarFora);
+    document.removeEventListener('keydown', aoTeclar);
+  }
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener('mousedown', aoClicarFora);
+  document.removeEventListener('keydown', aoTeclar);
+});
+</script>
+
+<template>
+  <section class="gx-deadline">
+    <div class="gx-deadline__head">
+      <div class="gx-deadline__datas">
+        <h2 class="gx-deadline__eyebrow">{{ prazo.eyebrow }}</h2>
+        <p class="gx-deadline__data">{{ prazo.data }}</p>
+        <p class="gx-deadline__contador">{{ contador }}</p>
+      </div>
+
+      <span class="gx-deadline__icone" aria-hidden="true">
+        <v-icon icon="mdi-calendar" size="18" />
+      </span>
+    </div>
+
+    <!-- Sem período restritivo o card carrega a ação que o prazo habilita. -->
+    <button
+      v-if="!prazo.restritivo"
+      type="button"
+      class="gx-deadline__acao"
+      aria-disabled="true"
+      title="Em breve"
+    >
+      {{ prazo.acaoRotulo }}
+    </button>
+
+    <div v-else class="gx-deadline__bloco">
+      <p class="gx-deadline__chip">Período restritivo</p>
+
+      <p v-if="acaoUnica" class="gx-deadline__frase">{{ acaoUnica.frase }}</p>
+
+      <div ref="disclosure" class="gx-deadline__disclosure">
+        <button
+          ref="gatilho"
+          type="button"
+          class="gx-deadline__gatilho"
+          :aria-expanded="aberto"
+          :aria-controls="idPopover"
+          @click="alternar"
+        >
+          <v-icon icon="mdi-information-outline" size="15" aria-hidden="true" />
+          <span class="gx-deadline__gatilho-rotulo">{{ rotuloGatilho }}</span>
+        </button>
+
+        <RestrictedPeriodPopover
+          v-if="aberto"
+          :id="idPopover"
+          :acoes="acoes"
+          :ate="prazo.restritivo.ate"
+          @fechar="fechar()"
+        />
+      </div>
+    </div>
+  </section>
+</template>
+
+<style scoped>
+.gx-deadline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rg-space-4);
+  padding: var(--rg-space-5);
+  border: 1px solid var(--rg-color-border-subtle);
+  border-radius: var(--rg-radius-lg);
+  background-color: var(--rg-color-surface-raised);
+}
+
+.gx-deadline__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--rg-space-4);
+}
+
+.gx-deadline__datas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rg-space-1);
+  min-width: 0;
+}
+
+.gx-deadline__eyebrow {
+  margin: 0;
+  font-size: var(--rg-font-size-2xs);
+  line-height: 14px;
+  font-weight: var(--rg-font-weight-semibold);
+  letter-spacing: 0.06em;
+  color: var(--rg-color-text-muted);
+}
+
+.gx-deadline__data {
+  margin: 0;
+  font-size: var(--rg-font-size-xl);
+  line-height: 26px;
+  font-weight: var(--rg-font-weight-semibold);
+  color: var(--rg-color-text-brand);
+}
+
+.gx-deadline__contador {
+  margin: 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--rg-color-text-secondary);
+}
+
+.gx-deadline__icone {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--rg-radius-md);
+  background-color: var(--rg-color-surface-brand);
+  color: var(--rg-color-text-brand);
+}
+
+/* ============ Ação do prazo normal ============ */
+.gx-deadline__acao {
+  height: 48px;
+  padding: 0 var(--rg-space-7);
+  border: 1.5px solid var(--rg-color-border-brand);
+  border-radius: var(--rg-radius-md);
+  background-color: transparent;
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 20px;
+  font-weight: var(--rg-font-weight-semibold);
+  color: var(--rg-color-text-brand);
+  cursor: default;
+}
+
+.gx-deadline__acao:focus-visible {
+  outline: none;
+  box-shadow: var(--rg-ring-focus);
+}
+
+/* ============ Bloco do período restritivo ============ */
+.gx-deadline__bloco {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rg-space-3);
+  padding: var(--rg-space-3);
+  border: 1px solid var(--rg-color-border-subtle);
+  border-radius: var(--rg-radius-md);
+  background-color: var(--rg-color-surface-subtle);
+}
+
+/* O vermelho carrega o estado; o gatilho fica verde de link, para o bloco
+   não virar um alarme inteiro. */
+.gx-deadline__chip {
+  align-self: flex-start;
+  margin: 0;
+  padding: var(--rg-space-1) 10px;
+  border-radius: var(--rg-radius-pill);
+  background-color: var(--rg-color-feedback-danger-soft);
+  font-size: var(--rg-font-size-xs);
+  line-height: 16px;
+  font-weight: var(--rg-font-weight-semibold);
+  color: var(--rg-primitive-red-700);
+}
+
+.gx-deadline__frase {
+  margin: 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--rg-color-text-primary);
+}
+
+.gx-deadline__disclosure {
+  position: relative;
+}
+
+.gx-deadline__gatilho {
+  display: flex;
+  align-items: center;
+  gap: var(--rg-space-2);
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: var(--rg-font-weight-medium);
+  color: var(--rg-color-text-brand);
+  text-align: left;
+  cursor: pointer;
+}
+
+.gx-deadline__gatilho-rotulo {
+  text-decoration: underline;
+}
+
+.gx-deadline__gatilho:focus-visible {
+  outline: 2px solid var(--rg-color-action-primary);
+  outline-offset: 2px;
+  border-radius: var(--rg-radius-xs);
+}
+</style>

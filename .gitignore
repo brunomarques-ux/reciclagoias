@@ -55,3 +55,6 @@ docs/*
 !docs/HANDOFF-DESENVOLVIMENTO.md
 !docs/HANDOFF-CONSULTA-REGULARIDADE.md
 !docs/TEMPLATE_HANDOFF.md
+# Decisões e handoff do sistema (área logada) — texto, não fonte de design.
+# O CLAUDE.md aponta para cá, então precisa estar versionado.
+!docs/sistema/
