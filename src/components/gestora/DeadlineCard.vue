@@ -3,14 +3,14 @@
  * Card de prazo da coluna lateral (D-R001 · tira "Estados do card de prazo").
  *
  * Sem período restritivo: data, contador e a ação que o prazo habilita.
- * Com período restritivo: chip vermelho + UM gatilho, e o card **não cresce** com o
- * número de ações liberadas — `n` é só um número dentro de um rótulo.
+ * Com período restritivo: chip vermelho + UM gatilho que conta, e o card tem a mesma
+ * altura com 1, 6 ou 20 ações liberadas. O `n` é só um número dentro de um rótulo.
  *
- *   n = 1  → a ação cabe na frase; o gatilho explica o conceito
- *   n ≥ 2  → o gatilho conta ("Ver as 6 ações liberadas até 29/08") e o popover mostra
+ * O card nunca mostra QUAL ação está liberada, nem quando há uma só: quem precisa do
+ * detalhe abre o popover. Isso mantém a regra uniforme e a altura constante.
  *
  * Não existe `n = 0`: vigência restritiva sem ação liberada não é estado válido.
- * O gatilho é `<button aria-expanded>`, nunca `<a href>`, porque abre uma camada na
+ * O gatilho é `button aria-expanded`, nunca `a href`, porque abre uma camada na
  * mesma página.
  */
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
@@ -26,7 +26,6 @@ const gatilho = ref<HTMLButtonElement | null>(null);
 
 const idPopover = computed(() => `gx-popover-${props.prazo.id}`);
 const acoes = computed(() => props.prazo.restritivo?.acoes ?? []);
-const acaoUnica = computed(() => (acoes.value.length === 1 ? acoes.value[0] : null));
 
 const contador = computed(() => {
   const dias = props.prazo.diasRestantes;
@@ -35,12 +34,14 @@ const contador = computed(() => {
     : `Faltam ${dias} dias para o fim do prazo`;
 });
 
+/** Declara o assunto, o tamanho do conjunto e o prazo, para o clique valer a pena. */
 const rotuloGatilho = computed(() => {
   const restritivo = props.prazo.restritivo;
   if (!restritivo) return '';
-  return acaoUnica.value
-    ? 'O que é período restritivo'
-    : `Ver as ${restritivo.acoes.length} ações liberadas até ${restritivo.ate}`;
+  const total = restritivo.acoes.length;
+  return total === 1
+    ? `Ver a ação liberada até ${restritivo.ate}`
+    : `Ver as ${total} ações liberadas até ${restritivo.ate}`;
 });
 
 function alternar() {
@@ -104,8 +105,6 @@ onBeforeUnmount(() => {
 
     <div v-else class="gx-deadline__bloco">
       <p class="gx-deadline__chip">Período restritivo</p>
-
-      <p v-if="acaoUnica" class="gx-deadline__frase">{{ acaoUnica.frase }}</p>
 
       <div ref="disclosure" class="gx-deadline__disclosure">
         <button
@@ -235,13 +234,6 @@ onBeforeUnmount(() => {
   line-height: 16px;
   font-weight: var(--rg-font-weight-semibold);
   color: var(--rg-primitive-red-700);
-}
-
-.gx-deadline__frase {
-  margin: 0;
-  font-size: 13px;
-  line-height: 18px;
-  color: var(--rg-color-text-primary);
 }
 
 .gx-deadline__disclosure {
