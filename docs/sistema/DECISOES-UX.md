@@ -35,10 +35,16 @@ até quando — *"Ver as 6 ações liberadas até 29/08"*, com ícone `(i)` ao l
 
 | `n` de ações liberadas | O que o card faz |
 |---|---|
-| 1 | A ação cabe na frase: *"Até 02/09 só está liberada a exclusão de nota fiscal."* Sem clique |
-| ≥ 2 | Chip + gatilho com a contagem. A lista vive no popover |
+| 1 | Chip + gatilho no singular: *"Ver a ação liberada até 02/09"*. A ação não aparece no card |
+| ≥ 2 | Chip + gatilho no plural, com a contagem. A lista vive no popover |
 
-**O card tem a mesma altura com 2, 6 ou 20 ações.** O problema de escala deixa de existir:
+**O card nunca mostra qual ação está liberada, nem quando há uma só.** A versão anterior
+abria exceção para `n = 1` e trazia a ação para uma frase no card. Foi descartado: a exceção
+quebrava a altura constante, criava um segundo jeito de ler o mesmo bloco e obrigava a manter
+uma frase redigida para cada ação do catálogo. Contar é uma regra; contar às vezes e mostrar
+às vezes é duas.
+
+**O card tem a mesma altura com 1, 2, 6 ou 20 ações.** O problema de escala deixa de existir:
 `n` é só um número dentro de um rótulo.
 
 O `n` é **por card**. Planos e relatórios têm vigências, flags e listas independentes; a
@@ -101,7 +107,7 @@ Complementos que continuam valendo:
 
 | Ações | Comportamento |
 |---|---|
-| 1 | O item já está no card; o popover serve para o conceito |
+| 1 | O popover é o único lugar que diz qual é a ação, junto com o conceito |
 | até 11 | Lista inteira visível, sem rolagem |
 | ≥ 12 | Lista trava em **240px** e rola; cabeçalho, explicação e a linha "liberadas até DD/MM" ficam fixos |
 

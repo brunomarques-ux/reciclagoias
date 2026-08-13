@@ -39,12 +39,13 @@ export interface LinhaDocumentacao {
   linkRotulo: string;
 }
 
-export interface AcaoLiberada {
-  /** Item da lista do popover, no imperativo: "Incluir nota fiscal". */
-  rotulo: string;
-  /** Frase do card quando esta é a única ação liberada. */
-  frase: string;
-}
+/**
+ * Item da lista do popover, no imperativo: "Incluir nota fiscal".
+ *
+ * É só o rótulo porque o card nunca mostra qual ação está liberada, nem quando há uma
+ * só: ele conta e o popover mostra.
+ */
+export type AcaoLiberada = string;
 
 export interface PeriodoRestritivo {
   /** Fim da vigência no formato curto do gatilho: "29/08". */
@@ -189,77 +190,26 @@ export const LIMITE_SEM_ROLAGEM = 11;
  * (tira "Popover · dimensões"). Presets e explorador fatiam esta lista.
  */
 export const ACOES: AcaoLiberada[] = [
-  { rotulo: 'Incluir nota fiscal', frase: 'Só está liberada a inclusão de nota fiscal.' },
-  { rotulo: 'Excluir nota fiscal', frase: 'Só está liberada a exclusão de nota fiscal.' },
-  {
-    rotulo: 'Retificar relatório enviado',
-    frase: 'Só está liberada a retificação de relatório enviado.',
-  },
-  { rotulo: 'Ajustar massa recuperada', frase: 'Só está liberado o ajuste da massa recuperada.' },
-  {
-    rotulo: 'Incluir nota duplicada no relatório de não conformidades',
-    frase: 'Só está liberada a inclusão de nota duplicada no relatório de não conformidades.',
-  },
-  {
-    rotulo: 'Substituir certificado de massa',
-    frase: 'Só está liberada a substituição de certificado de massa.',
-  },
-  {
-    rotulo: 'Editar dados do plano de gerenciamento',
-    frase: 'Só está liberada a edição dos dados do plano de gerenciamento.',
-  },
-  {
-    rotulo: 'Reenviar relatório devolvido',
-    frase: 'Só está liberado o reenvio de relatório devolvido.',
-  },
-  {
-    rotulo: 'Anexar comprovante de destinação',
-    frase: 'Só está liberado o anexo de comprovante de destinação.',
-  },
-  {
-    rotulo: 'Corrigir CNPJ da empresa aderente',
-    frase: 'Só está liberada a correção do CNPJ da empresa aderente.',
-  },
-  {
-    rotulo: 'Transferir certificado entre entidades',
-    frase: 'Só está liberada a transferência de certificado entre entidades.',
-  },
-  {
-    rotulo: 'Cancelar certificado emitido',
-    frase: 'Só está liberado o cancelamento de certificado emitido.',
-  },
-  {
-    rotulo: 'Incluir operador logístico no plano',
-    frase: 'Só está liberada a inclusão de operador logístico no plano.',
-  },
-  {
-    rotulo: 'Remover operador logístico do plano',
-    frase: 'Só está liberada a remoção de operador logístico do plano.',
-  },
-  {
-    rotulo: 'Ajustar meta percentual por material',
-    frase: 'Só está liberado o ajuste da meta percentual por material.',
-  },
-  {
-    rotulo: 'Reabrir conciliação de massa',
-    frase: 'Só está liberada a reabertura de conciliação de massa.',
-  },
-  {
-    rotulo: 'Importar notas fiscais em lote',
-    frase: 'Só está liberada a importação de notas fiscais em lote.',
-  },
-  {
-    rotulo: 'Excluir relatório em preenchimento',
-    frase: 'Só está liberada a exclusão de relatório em preenchimento.',
-  },
-  {
-    rotulo: 'Alterar responsável técnico',
-    frase: 'Só está liberada a alteração do responsável técnico.',
-  },
-  {
-    rotulo: 'Solicitar revisão ao verificador',
-    frase: 'Só está liberada a solicitação de revisão ao verificador.',
-  },
+  'Incluir nota fiscal',
+  'Excluir nota fiscal',
+  'Retificar relatório enviado',
+  'Ajustar massa recuperada',
+  'Incluir nota duplicada no relatório de não conformidades',
+  'Substituir certificado de massa',
+  'Editar dados do plano de gerenciamento',
+  'Reenviar relatório devolvido',
+  'Anexar comprovante de destinação',
+  'Corrigir CNPJ da empresa aderente',
+  'Transferir certificado entre entidades',
+  'Cancelar certificado emitido',
+  'Incluir operador logístico no plano',
+  'Remover operador logístico do plano',
+  'Ajustar meta percentual por material',
+  'Reabrir conciliação de massa',
+  'Importar notas fiscais em lote',
+  'Excluir relatório em preenchimento',
+  'Alterar responsável técnico',
+  'Solicitar revisão ao verificador',
 ];
 
 // ============================================================

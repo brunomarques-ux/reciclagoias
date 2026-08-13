@@ -45,9 +45,9 @@ const eyebrow = computed(
     <p class="gx-popover__eyebrow">{{ eyebrow }}</p>
 
     <ul class="gx-popover__lista" :class="{ 'gx-popover__lista--rola': rola }">
-      <li v-for="acao in acoes" :key="acao.rotulo" class="gx-popover__acao">
+      <li v-for="acao in acoes" :key="acao" class="gx-popover__acao">
         <v-icon class="gx-popover__check" icon="mdi-check" size="14" aria-hidden="true" />
-        {{ acao.rotulo }}
+        {{ acao }}
       </li>
     </ul>
   </div>

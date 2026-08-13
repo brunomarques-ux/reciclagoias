@@ -39,7 +39,7 @@ const contagens = computed(() =>
 
 function explicacao(n: number) {
   if (n === 0) return 'Sem período restritivo: o card mostra a ação que o prazo habilita.';
-  if (n === 1) return 'n = 1 · a ação cabe na frase; o gatilho explica o conceito.';
+  if (n === 1) return 'n = 1 · o gatilho vai para o singular; a ação continua fora do card.';
   if (n > LIMITE_SEM_ROLAGEM) return `n = ${n} · o card não cresce e a lista do popover rola.`;
   return `n = ${n} · o gatilho conta e o popover mostra a lista.`;
 }
@@ -189,14 +189,14 @@ onBeforeUnmount(() => {
           <p class="gx-grupo__estado">{{ explicacao(contagens[prazo.id] ?? 0) }}</p>
 
           <div v-if="contagens[prazo.id] > 0" class="gx-acoes">
-            <label v-for="(acao, indice) in ACOES" :key="acao.rotulo" class="gx-linha">
+            <label v-for="(acao, indice) in ACOES" :key="acao" class="gx-linha">
               <input
                 type="checkbox"
                 class="gx-check"
                 :checked="explorador.prazos[prazo.id]?.liberadas[indice] ?? false"
                 @change="explorador.alternarAcao(prazo.id, indice)"
               />
-              <span class="gx-linha__rotulo">{{ acao.rotulo }}</span>
+              <span class="gx-linha__rotulo">{{ acao }}</span>
             </label>
           </div>
         </fieldset>
