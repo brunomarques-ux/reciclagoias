@@ -19,12 +19,11 @@ termina com a evidência que sustenta a escolha.
 | 1 | [O problema: uma lista que cresce dentro de um card que não pode crescer](#1-o-problema) |
 | 2 | [As três hipóteses e por que duas caíram](#2-as-três-hipóteses) |
 | 3 | [A decisão: o card avisa e conta, o popover mostra](#3-a-decisão) |
-| 4 | [O modelo em três camadas](#4-o-modelo-em-três-camadas) |
-| 5 | [O popover: por que não é modal nem tooltip](#5-o-popover) |
-| 6 | [O seletor de ano de execução](#6-o-seletor-de-ano-de-execução) |
-| 7 | [Status da Documentação](#7-status-da-documentação) |
-| 8 | [A evidência](#8-a-evidência) |
-| 9 | [Roteiro para navegar no protótipo](#9-roteiro-para-navegar-no-protótipo) |
+| 4 | [O popover: por que não é modal nem tooltip](#4-o-popover) |
+| 5 | [O seletor de ano de execução](#5-o-seletor-de-ano-de-execução) |
+| 6 | [Status da Documentação](#6-status-da-documentação) |
+| 7 | [A evidência](#7-a-evidência) |
+| 8 | [Roteiro para navegar no protótipo](#8-roteiro-para-navegar-no-protótipo) |
 
 ---
 
@@ -164,39 +163,7 @@ contador diz para que ela serve: *"Faltam 18 dias para o fim do prazo"*.
 
 ---
 
-## 4. O modelo em três camadas
-
-A decisão se sustenta dentro de um modelo maior. O card não é, e não deveria ser, a única
-fonte da verdade sobre o que está liberado.
-
-```mermaid
-flowchart LR
-    subgraph C1["Camada 1 · Dashboard"]
-        A["Card de prazo<br/><i>avisa que o estado mudou</i>"]
-    end
-    subgraph C2["Camada 2 · Consulta"]
-        B["Popover<br/><i>explica o conceito e lista o que está liberado</i>"]
-    end
-    subgraph C3["Camada 3 · Ponto de uso"]
-        D["Controle na tela da ação<br/><i>habilitado ou desabilitado, com a razão inline</i>"]
-    end
-    A -->|clique no gatilho| B
-    A -.->|"a pessoa navega até a tarefa"| D
-    B -.-> D
-```
-
-| Camada | Responde a |
-|---|---|
-| Card de prazo | "Mudou alguma coisa no meu prazo?" |
-| Popover | "O que é isso e o que está liberado?" |
-| Controle no ponto de uso | "**Posso excluir esta nota agora?**" |
-
-A terceira camada é o próximo passo do desenho e a que responde de verdade à pergunta que o
-usuário tem na cabeça. O card e o popover são o aviso; **o botão é o contrato**.
-
----
-
-## 5. O popover
+## 4. O popover
 
 O detalhe abre **por clique**, ancorado no gatilho, sem sair do dashboard e sem escurecer a
 tela.
@@ -260,7 +227,7 @@ seria. Ver no Figma:
 
 ---
 
-## 6. O seletor de ano de execução
+## 5. O seletor de ano de execução
 
 As três pílulas fixas do sistema atual não sobrevivem a 2039, porque cada exercício novo
 empurra o cabeçalho.
@@ -311,7 +278,7 @@ Ver no Figma:
 
 ---
 
-## 7. Status da Documentação
+## 6. Status da Documentação
 
 O título é requisição do cliente e ficou. O que mudou foi a representação.
 
@@ -375,7 +342,7 @@ Ver no Figma:
 
 ---
 
-## 8. A evidência
+## 7. A evidência
 
 A pesquisa levantou **72 achados de fonte primária**, com cada URL verificada uma a uma. Os
 que efetivamente decidiram alguma coisa são estes.
@@ -443,7 +410,7 @@ do card.
 
 ---
 
-## 9. Roteiro para navegar no protótipo
+## 8. Roteiro para navegar no protótipo
 
 O dashboard está publicado e navegável. Não há autenticação real: o login é provisório e
 serve para escolher o perfil.
