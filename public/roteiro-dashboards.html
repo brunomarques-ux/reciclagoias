@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8">
+  <meta name="doc-tipo" content="roteiro">
+  <meta name="doc-sistema" content="recicla-goias">
+  <meta name="doc-ciclo" content="2026-08">
+  <meta name="doc-atualizado" content="2026-08-17">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Roteiro de testes · Dashboards da área logada do Recicla Goiás</title>
+<style>
+  :root{
+    --verde:#279C50; --verde-600:#1F8344; --verde-700:#176935; --verde-800:#12522A; --verde-50:#E9F6EE;
+    --slate-900:#0F172A; --slate-700:#334155; --slate-500:#64748B; --slate-300:#CBD5E1; --slate-200:#E2E8F0; --slate-100:#F1F5F9; --slate-50:#F8FAFC;
+    --ambar-50:#FFFBEB; --ambar-700:#B45309; --azul-50:#EFF6FF; --azul-700:#1D4ED8; --verm-50:#FEF2F2; --verm-700:#B91C1C;
+    --font:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Consolas,'Liberation Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font:15px/1.6 var(--font);color:var(--slate-900);background:var(--slate-50);padding:0 0 80px}
+  .topo{background:var(--verde-700);color:#fff;padding:36px 24px}
+  .topo .mx{max-width:920px;margin:0 auto}
+  .topo .eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.78;font-weight:600}
+  .topo h1{font-size:28px;letter-spacing:-.02em;margin:6px 0 8px;font-weight:700}
+  .topo p{opacity:.9;max-width:700px}
+  .topo a{color:#fff}
+  main{max-width:920px;margin:0 auto;padding:32px 24px}
+  .prog{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:14px;background:rgba(248,250,252,.94);backdrop-filter:blur(8px);padding:14px 0;margin-bottom:8px;border-bottom:1px solid var(--slate-200)}
+  .prog__bar{flex:1;height:8px;border-radius:99px;background:var(--slate-200);overflow:hidden}
+  .prog__fill{height:100%;width:0;background:var(--verde);border-radius:99px;transition:width .3s cubic-bezier(.2,0,0,1)}
+  .prog__n{font:600 13px/1 var(--font);color:var(--slate-500);white-space:nowrap}
+  .bloco{background:#fff;border:1px solid var(--slate-200);border-radius:14px;padding:24px 26px;margin-bottom:22px}
+  .bloco h2{font-size:18px;letter-spacing:-.01em;margin-bottom:4px;display:flex;align-items:center;gap:10px;font-weight:700}
+  .num{flex:none;width:28px;height:28px;border-radius:999px;background:var(--verde-700);color:#fff;display:inline-grid;place-items:center;font-size:13px;font-weight:700}
+  .fala{background:var(--slate-50);border-left:3px solid var(--verde);border-radius:0 10px 10px 0;padding:12px 16px;margin:12px 0;color:var(--slate-700);font-size:14px}
+  .fala b{color:var(--slate-900)}
+  .nota{background:var(--ambar-50);border-radius:10px;padding:12px 16px;margin:12px 0;font-size:13.5px;color:var(--ambar-700)}
+  .nota>b{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px}
+  .duvida{background:var(--verm-50);border-radius:10px;padding:12px 16px;margin:12px 0;font-size:13.5px;color:var(--verm-700)}
+  .duvida>b{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px}
+  ul{padding-left:20px;margin:8px 0}
+  li{margin:4px 0}
+  .passos li{margin:7px 0;font-size:14px}
+  .teste{border:1px solid var(--slate-200);border-radius:10px;padding:14px 18px;margin:12px 0}
+  .teste h3{font-size:14.5px;display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;font-weight:600}
+  .teste h3 input{width:17px;height:17px;margin-top:2px;flex:none;accent-color:var(--verde)}
+  .esper{background:var(--verde-50);border-radius:8px;padding:10px 14px;margin-top:8px;font-size:13.5px}
+  .esper>b{color:var(--verde-700);display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+  .esper label b{color:var(--slate-900);font-weight:600}
+  .esper label{display:flex;gap:8px;align-items:flex-start;margin:5px 0;cursor:pointer}
+  .esper input{width:15px;height:15px;margin-top:3px;flex:none;accent-color:var(--verde)}
+  .check{background:var(--verde-50);border-radius:10px;padding:14px 18px;margin-top:10px}
+  .check b{color:var(--verde-700)}
+  code{background:var(--slate-100);border-radius:6px;padding:1px 7px;font:500 13px/1.5 var(--mono)}
+  kbd{display:inline-block;font:600 11.5px/1.4 var(--mono);color:var(--slate-700);background:#fff;border:1px solid var(--slate-300);border-bottom-width:2px;border-radius:5px;padding:1px 6px}
+  a{color:var(--verde-700)}
+  .mini{font-size:12.5px;color:var(--slate-500)}
+  @media (prefers-reduced-motion: reduce){*{transition:none !important}}
+  @media print{
+    body{background:#fff} .prog{display:none} .topo{background:#fff;color:var(--slate-900);border-bottom:3px solid var(--verde-700);padding:0 0 16px}
+    .topo a{color:var(--slate-900)} .bloco{break-inside:avoid;border:0;border-top:1px solid var(--slate-200);border-radius:0;padding:14px 0}
+    .esper,.check,.fala,.nota{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
+</style>
+</head>
+<body>
+<header class="topo"><div class="mx">
+  <div class="eyebrow">Recicla Goiás · Área logada · Agosto 2026</div>
+  <h1>Roteiro de testes: dashboards da área logada</h1>
+  <p>Login provisório e os três dashboards (Entidade Gestora, Administração e Verificador). Siga com a tela aberta ao lado. O pacote completo, com estados, tokens e regras, está no <a href="https://reciclagoias.vercel.app/handoff-dashboards.html">documento de entrega</a>.</p>
+</div></header>
+<main>
+
+<div class="prog">
+  <div class="prog__bar"><div class="prog__fill" id="pf"></div></div>
+  <span class="prog__n" id="pn">0 de 0</span>
+</div>
+
+<div class="bloco">
+  <h2><span class="num">0</span>Antes de começar</h2>
+  <div class="check">
+    <b>Preparação</b>
+    <ul>
+      <li>Abra <a href="https://reciclagoias.vercel.app/entrar" target="_blank" rel="noopener">reciclagoias.vercel.app/entrar</a>. Não há senha: escolher o perfil já entra.</li>
+      <li>Os dados vivem <b>em memória</b>. Recarregar (F5) devolve tudo ao estado inicial, então dá para repetir qualquer teste à vontade.</li>
+      <li>A sessão é <b>por aba</b> e some ao fechar. Dá para abrir dois perfis em duas abas e comparar lado a lado.</li>
+      <li>Estes testes assumem uma janela de <b>1440px ou mais</b>, exceto o bloco 8, que é sobre telas menores.</li>
+    </ul>
+  </div>
+  <div class="fala">O que está sendo testado é <b>comportamento</b>, não dado: os números são mockados. O que precisa bater é a regra por trás deles, principalmente as somas, as três variações da linha de documentação e a altura constante do card de prazo.</div>
+</div>
+
+<div class="bloco">
+  <h2><span class="num">1</span>Login e guard de rota</h2>
+  <div class="teste">
+    <h3><input type="checkbox"> 1.1 · Os quatro perfis</h3>
+    <ul class="passos"><li>Abra <code>/entrar</code>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Quatro cards: <b>Entidade Gestora</b>, <b>Verificador de Resultados</b>, <b>Administração (SIC)</b> e <b>Operador Logístico</b></label>
+      <label><input type="checkbox"> A Entidade Gestora já vem selecionada, e o botão diz <b>"Entrar como Entidade Gestora"</b></label>
+      <label><input type="checkbox"> O Operador Logístico está desabilitado, em cinza, com o chip <b>"Em breve"</b> (ele não tem tela)</label>
+      <label><input type="checkbox"> Trocar o perfil selecionado troca o texto do botão junto</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 1.2 · Teclado no radio group</h3>
+    <ul class="passos"><li>Dê <kbd>Tab</kbd> até o primeiro card e use <kbd>↓</kbd> e <kbd>↑</kbd>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> As setas trocam de perfil e o card inteiro mostra o anel de foco</label>
+      <label><input type="checkbox"> O Operador Logístico é pulado, porque está desabilitado</label>
+      <label><input type="checkbox"> <kbd>Enter</kbd> entra no perfil selecionado</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 1.3 · Deep link com destino</h3>
+    <ul class="passos">
+      <li>Saia (avatar no topo direito) e cole na barra de endereço: <code>/gestora?cenario=rec03</code></li>
+    </ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> A URL vira <code>/entrar?destino=/gestora%3Fcenario%3Drec03</code></label>
+      <label><input type="checkbox"> Entrando como Entidade Gestora, você cai <b>exatamente</b> no cenário REC-03, com o parâmetro preservado</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 1.4 · Cada dashboard só abre para o seu perfil</h3>
+    <ul class="passos"><li>Entre como <b>Verificador de Resultados</b> e digite <code>/admin</code> na barra de endereço.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Você volta para <code>/verificador</code>, o seu próprio dashboard</label>
+      <label><input type="checkbox"> <b>Não</b> desloga e <b>não</b> aparece mensagem de erro</label>
+    </div>
+    <div class="duvida"><b>Ponto em aberto</b> Não existe rota de 404: uma URL fora das conhecidas não monta nada. É lacuna do protótipo, e o sistema real precisa da tela.</div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 1.5 · Título de aba por rota</h3>
+    <ul class="passos"><li>Abra os três dashboards em abas diferentes e olhe o nome de cada aba.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> "Dashboard da Entidade Gestora · Recicla Goiás"</label>
+      <label><input type="checkbox"> "Dashboard da Administração (SIC) · Recicla Goiás"</label>
+      <label><input type="checkbox"> "Dashboard do Verificador de Resultados · Recicla Goiás"</label>
+    </div>
+  </div>
+</div>
+
+<div class="bloco">
+  <h2><span class="num">2</span>Casca: topo, menu e saída</h2>
+  <div class="fala">A casca é a <b>mesma</b> nas três telas. O que muda vem do perfil, não da página.</div>
+  <div class="teste">
+    <h3><input type="checkbox"> 2.1 · O menu vem do perfil</h3>
+    <ul class="passos"><li>Compare o menu lateral da gestora com o do verificador.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Gestora e admin: Dashboard · Minha Conta · <b>Planos</b> · Relatórios</label>
+      <label><input type="checkbox"> Verificador: Dashboard · Minha Conta · <b>Notas Fiscais</b> · Relatórios</label>
+      <label><input type="checkbox"> Só <b>Dashboard</b> é clicável e fica destacado em verde</label>
+      <label><input type="checkbox"> Os outros itens estão em cinza, não sublinham no hover e <b>não são links</b> (o cursor não vira mãozinha)</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 2.2 · Skip link</h3>
+    <ul class="passos"><li>Clique na barra de endereço e dê <kbd>Tab</kbd> uma vez.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Aparece o link <b>"Ir para o conteúdo"</b>, antes de qualquer outra coisa</label>
+      <label><input type="checkbox"> <kbd>Enter</kbd> leva o foco para o conteúdo, não só a rolagem</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 2.3 · Foco sobre a barra verde</h3>
+    <ul class="passos"><li>Continue com <kbd>Tab</kbd> até os botões do topo (hambúrguer, sino, avatar).</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> O anel de foco é <b>branco</b>, não verde (verde sumiria no fundo da barra)</label>
+      <label><input type="checkbox"> Hambúrguer e sino recebem foco mas não fazem nada: são inertes de propósito nesta rodada</label>
+      <label><input type="checkbox"> O avatar mostra as iniciais do perfil (TC, RN ou SI) e é o único ponto de saída</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 2.4 · Faixa de contexto</h3>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Dois blocos: <b>Ano de execução</b> com "recuperação das embalagens" e <b>Ano base</b> com "embalagens colocadas no mercado"</label>
+      <label><input type="checkbox"> Nenhum dos dois anos aparece sem a descrição ao lado</label>
+      <label><input type="checkbox"> O ano base é sempre o ano de execução menos 1</label>
+    </div>
+  </div>
+</div>
+
+<div class="bloco">
+  <h2><span class="num">3</span>Seletor de ano de execução</h2>
+  <div class="fala">Decisão <b>D-R002</b>. São 8 exercícios (2018 a 2025) e o controle mostra sempre 3 células, então a largura não cresce com a série.</div>
+  <div class="teste">
+    <h3><input type="checkbox"> 3.1 · A janela desliza, o selecionado não pula</h3>
+    <ul class="passos"><li>Na gestora, o padrão é 2024. Clique na seta <b>‹</b> algumas vezes.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Sempre 3 células visíveis, com o ano selecionado <b>no centro</b></label>
+      <label><input type="checkbox"> Clicando <b>‹</b> com 2024 selecionado, a janela vira 2022 | <b>2023</b> | 2024</label>
+      <label><input type="checkbox"> A largura do controle não muda em nenhum momento</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 3.2 · As travas dos extremos</h3>
+    <ul class="passos"><li>Vá até 2018 e depois até 2025.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Em 2018 a janela é 2018 | 2019 | 2020, o selecionado ocupa a <b>borda esquerda</b> e a seta <b>‹</b> fica desabilitada</label>
+      <label><input type="checkbox"> Em 2025 acontece o espelho, com a seta <b>›</b> desabilitada</label>
+      <label><input type="checkbox"> A seta desabilitada é pulada pelo <kbd>Tab</kbd> (usa o atributo <code>disabled</code>, não só cor)</label>
+      <label><input type="checkbox"> Não existe 2026 nem nada além de 2025</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 3.3 · Teclado</h3>
+    <ul class="passos"><li>Dê <kbd>Tab</kbd> até uma célula de ano e use as setas, depois <kbd>Home</kbd> e <kbd>End</kbd>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> <kbd>←</kbd> e <kbd>→</kbd> andam na série e a janela acompanha</label>
+      <label><input type="checkbox"> <kbd>Home</kbd> vai para 2018 e <kbd>End</kbd> vai para 2025</label>
+      <label><input type="checkbox"> Com leitor de tela, a seta anuncia o <b>ano de destino</b>: "Ano anterior, 2023"</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 3.4 · O que muda quando o ano muda</h3>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> A faixa de contexto muda os dois anos juntos</label>
+      <label><input type="checkbox"> O sufixo do título de cada linha da documentação muda ("Planos 2024" vira "Planos 2023")</label>
+      <label><input type="checkbox"> Na gestora, o eyebrow dos cards de prazo muda ("PRAZO · PLANOS 2024")</label>
+      <label><input type="checkbox"> No admin, o indicador "META DE RECICLAGEM 2025" muda o ano</label>
+      <label><input type="checkbox"> Datas, quantidades e massas <b>não</b> mudam</label>
+    </div>
+    <div class="nota"><b>Combinar antes de implementar</b> Nesta rodada o ano só muda texto derivado, porque o protótipo mostra a forma e não a série histórica. No sistema real ele provavelmente é o filtro de mais alto nível e recarrega tudo.</div>
+  </div>
+</div>
+
+<div class="bloco">
+  <h2><span class="num">4</span>Status da Documentação</h2>
+  <div class="fala">Decisão <b>D-R003</b>. A linha se adapta ao dado sozinha, e o total <b>nunca</b> é digitado: é a soma dos status.</div>
+  <div class="teste">
+    <h3><input type="checkbox"> 4.1 · As três variações na mesma tela</h3>
+    <ul class="passos"><li>Abra <a href="https://reciclagoias.vercel.app/gestora?cenario=variacoes" target="_blank" rel="noopener">/gestora?cenario=variacoes</a>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> <b>Planos 2024 · 0 no total</b>: só a frase "Nenhum plano enviado ainda.". Sem barra, sem contagem</label>
+      <label><input type="checkbox"> <b>Relatórios 2024 · 1 no total</b>: "1 enviado" com ponto verde. <b>Sem barra</b></label>
+      <label><input type="checkbox"> <b>Certificados de massa 2024 · 128 no total</b>: barra empilhada mais quatro contagens escritas</label>
+      <label><input type="checkbox"> As contagens somam o total: 96 + 18 + 9 + 5 = 128</label>
+      <label><input type="checkbox"> O singular aparece corretamente em "1 enviado"</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 4.2 · Status zerado não aparece</h3>
+    <ul class="passos"><li>Abra o <b>Explorador de cenários</b> no rodapé do menu e zere um status de uma linha que tenha três.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> O status some da barra e da contagem, e o total diminui junto</label>
+      <label><input type="checkbox"> Zerando até sobrar um status, a barra <b>desaparece</b> e fica só a contagem</label>
+      <label><input type="checkbox"> Zerando todos, a linha vira frase</label>
+      <label><input type="checkbox"> Em nenhum momento aparece algo como "0 retificados"</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 4.3 · A barra respeita a proporção sem sumir</h3>
+    <ul class="passos"><li>Ainda no explorador, deixe um status com valor muito alto (por exemplo 900) e outro com 1.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> A faixa minúscula continua visível, com pelo menos 2px</label>
+      <label><input type="checkbox"> A ordem das faixas não muda com a quantidade: é sempre a ordem do catálogo</label>
+      <label><input type="checkbox"> A ordem da barra é a mesma da lista de contagem abaixo</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 4.4 · Sem cor, ainda dá para ler</h3>
+    <ul class="passos"><li>Se conseguir, veja a tela em escala de cinza (ou apenas cubra a barra com a mão).</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> A informação continua completa, porque cada status está escrito ao lado do ponto</label>
+    </div>
+  </div>
+</div>
+
+<div class="bloco">
+  <h2><span class="num">5</span>Card de prazo e período restritivo</h2>
+  <div class="fala">Decisão <b>D-R001</b>, o coração desta entrega: <b>o card conta, o popover mostra</b>. Este é o bloco mais importante do roteiro.</div>
+  <div class="teste">
+    <h3><input type="checkbox"> 5.1 · Prazo normal</h3>
+    <ul class="passos"><li>Abra <a href="https://reciclagoias.vercel.app/gestora?cenario=rec01" target="_blank" rel="noopener">/gestora?cenario=rec01</a>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Os dois cards mostram data, contador e o botão da ação ("Novo plano", "Novo relatório")</label>
+      <label><input type="checkbox"> <b>Nenhuma menção a período restritivo</b> em lugar nenhum da tela</label>
+      <label><input type="checkbox"> O contador está no plural: "Faltam 18 dias para o fim do prazo"</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 5.2 · Uma ação e seis ações lado a lado</h3>
+    <ul class="passos"><li>Abra <a href="https://reciclagoias.vercel.app/gestora?cenario=rec03" target="_blank" rel="noopener">/gestora?cenario=rec03</a>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Card de planos: <b>"Ver as 6 ações liberadas até 29/08"</b></label>
+      <label><input type="checkbox"> Card de relatórios: <b>"Ver a ação liberada até 02/09"</b>, no singular</label>
+      <label><input type="checkbox"> Com uma ação só, o card <b>continua não dizendo qual é a ação</b></label>
+      <label><input type="checkbox"> Os dois cards têm <b>exatamente a mesma altura</b></label>
+      <label><input type="checkbox"> Cada card tem sua própria data e sua própria contagem: os estados são independentes</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 5.3 · A altura não muda com o n</h3>
+    <ul class="passos"><li>Alterne entre <code>?cenario=rec02</code> (2 ações), <code>?cenario=rec03</code> (6) e <code>?cenario=rec06</code> (20), olhando o card de planos.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> O card tem a mesma altura nas três, e a data nunca é empurrada</label>
+      <label><input type="checkbox"> Só o número dentro do rótulo muda</label>
+      <label><input type="checkbox"> O rótulo do gatilho cabe em uma linha nas três</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 5.4 · O popover</h3>
+    <ul class="passos"><li>Em <code>?cenario=rec03</code>, clique no gatilho do card de planos.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Abre uma camada ancorada abaixo do gatilho, <b>sem escurecer o resto da tela</b></label>
+      <label><input type="checkbox"> Título "Período restritivo" com o ícone (i) vermelho <b>ao lado do texto</b>, nunca sozinho</label>
+      <label><input type="checkbox"> A explicação aparece: "É uma extensão excepcional de um prazo que já terminou..."</label>
+      <label><input type="checkbox"> A linha "LIBERADAS ATÉ 29/08" e, no card de relatórios, "LIBERADO ATÉ 02/09" no singular</label>
+      <label><input type="checkbox"> A lista traz as 6 ações, começando por "Incluir nota fiscal"</label>
+      <label><input type="checkbox"> <b>Passar o mouse não abre nada.</b> Só o clique abre</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 5.5 · Fechar e o foco</h3>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> <kbd>Esc</kbd> fecha e <b>devolve o foco ao gatilho</b> (dê <kbd>Tab</kbd> para confirmar onde você está)</label>
+      <label><input type="checkbox"> O botão X fecha e também devolve o foco</label>
+      <label><input type="checkbox"> Clique fora fecha e <b>não</b> devolve o foco</label>
+      <label><input type="checkbox"> Abrir o popover de um card não fecha nem afeta o outro</label>
+      <label><input type="checkbox"> Com o foco no gatilho, <kbd>Enter</kbd> e <kbd>Espaço</kbd> abrem e fecham</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 5.6 · Vinte ações</h3>
+    <ul class="passos"><li>Abra <a href="https://reciclagoias.vercel.app/gestora?cenario=rec06" target="_blank" rel="noopener">/gestora?cenario=rec06</a> e abra o popover.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Só a <b>lista</b> rola. Título, explicação e a linha "liberadas até" ficam parados</label>
+      <label><input type="checkbox"> A lista trava em 240px de altura</label>
+      <label><input type="checkbox"> A largura do popover continua a mesma (324px)</label>
+      <label><input type="checkbox"> O card não cresceu nada</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 5.7 · Não existe período restritivo vazio</h3>
+    <ul class="passos"><li>No explorador, ligue o switch <b>Período restritivo</b> de um card e depois desmarque as ações uma a uma.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Ligar o switch já libera a primeira ação sozinho</label>
+      <label><input type="checkbox"> Desmarcar a <b>última</b> ação desliga o período junto: o card volta a ser normal</label>
+      <label><input type="checkbox"> Não existe nenhum caminho pela interface que produza "período restritivo com 0 ações"</label>
+    </div>
+  </div>
+</div>
+
+<div class="bloco">
+  <h2><span class="num">6</span>Dashboard da Administração (SIC)</h2>
+  <div class="teste">
+    <h3><input type="checkbox"> 6.1 · Fileira de indicadores</h3>
+    <ul class="passos"><li>Entre como <b>Administração (SIC)</b>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Quatro cartões da <b>mesma altura</b>, mesmo com o último tendo dois chips</label>
+      <label><input type="checkbox"> O valor fica em preto; a cor aparece só na caixinha de ícone verde-clara</label>
+      <label><input type="checkbox"> "META DE RECICLAGEM 2025 · 30%", "EMPRESAS ADERENTES · 44.063", "CERTIFICADOS DE MASSA · 12", "JUSTIFICATIVAS · 130"</label>
+    </div>
+    <div class="duvida"><b>Confirmar com o SIC</b> Em Justificativas, 99 pendentes + 5 aprovadas não somam 130. Os chips são recortes ou falta estado na decomposição?</div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 6.2 · Rosca de distribuição de usuários</h3>
+    <ul class="passos"><li>Passe o mouse sobre cada linha da legenda. Depois repita usando só o <kbd>Tab</kbd>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Em repouso o miolo mostra <b>54</b> e a palavra TOTAL</label>
+      <label><input type="checkbox"> Em destaque o miolo mostra a quantidade da fatia e a porcentagem (30 e 55,6%)</label>
+      <label><input type="checkbox"> A porcentagem também aparece na própria linha da legenda</label>
+      <label><input type="checkbox"> <b>Nada flutua sobre o gráfico</b>: o detalhe aparece dentro dele</label>
+      <label><input type="checkbox"> O <kbd>Tab</kbd> produz o mesmo destaque do mouse</label>
+      <label><input type="checkbox"> <kbd>Esc</kbd> limpa o destaque e o foco continua onde estava</label>
+      <label><input type="checkbox"> Clicar na legenda <b>não</b> trava nem desliga o destaque</label>
+      <label><input type="checkbox"> O layout não pula quando a porcentagem aparece</label>
+      <label><input type="checkbox"> 30 + 9 + 15 = 54, o total do miolo</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 6.3 · Massa produzida e recuperada</h3>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> <b>Papel</b>: anel cheio verde com <b>174,0%</b> escrito no centro, chip "Meta atingida", cartão com fundo verde-claro</label>
+      <label><input type="checkbox"> <b>Plástico</b> 81,4% e <b>Vidro</b> 53,1%: anel verde e "Meta atingida", porque passaram dos 30%</label>
+      <label><input type="checkbox"> <b>Metal</b> 25,0%: anel <b>âmbar</b>, chip "Abaixo da meta" e cartão em <b>cinza</b>, não em âmbar</label>
+      <label><input type="checkbox"> O número no centro do anel é preto nos quatro, nunca colorido</label>
+      <label><input type="checkbox"> Ordem dos números em todos: Produzida, Meta (30%), <b>Recuperada</b> destacada com uma linha em cima</label>
+      <label><input type="checkbox"> A meta em tonelada bate com 30% da produzida (Papel: 49.788,0 × 0,3 = 14.936,4 t)</label>
+      <label><input type="checkbox"> Toneladas sempre com uma casa decimal e sufixo " t"</label>
+      <label><input type="checkbox"> Os três números alinham pelo rodapé nos quatro cartões</label>
+    </div>
+    <div class="fala">A conta é <b>recuperada ÷ produzida</b>, e ela pode passar de 100% (é o caso do papel). "Meta atingida" é <b>recuperada ≥ 30% da produzida</b>, que é outra coisa. Só o desenho do anel trava em 100%.</div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 6.4 · Relatório de Massas Disponível</h3>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Quatro materiais, cada um com um fio colorido e o nome escrito</label>
+      <label><input type="checkbox"> Papel, Plástico e Metal mostram <b>um traço</b> no lugar do número, e mantêm a palavra "toneladas"</label>
+      <label><input type="checkbox"> Nenhum deles vira 0 nem some da lista</label>
+      <label><input type="checkbox"> Cabeçalho com "Total disponível: 74,2 t"</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 6.5 · Prazo sem data</h3>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> "PRAZO FINAL PLANOS" mostra um traço no lugar da data e o texto "Prazo ainda não definido"</label>
+      <label><input type="checkbox"> Esse card não tem botão nenhum no rodapé, e isso é o correto</label>
+      <label><input type="checkbox"> "PRAZO FINAL RELATÓRIO" mostra "Finaliza hoje", não "Faltam 0 dias"</label>
+    </div>
+  </div>
+</div>
+
+<div class="bloco">
+  <h2><span class="num">7</span>Dashboard do Verificador</h2>
+  <div class="teste">
+    <h3><input type="checkbox"> 7.1 · Duas variações da linha na mesma tela</h3>
+    <ul class="passos"><li>Entre como <b>Verificador de Resultados</b>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> <b>Notas Fiscais 2025 · 27 no total</b> com uma contagem só: "27 aprovadas/enviadas". <b>Sem barra</b></label>
+      <label><input type="checkbox"> <b>Relatórios 2025 · 0 no total</b> com a frase "Nenhum relatório enviado ainda."</label>
+      <label><input type="checkbox"> A linha de notas tem outros dois status no catálogo, ambos zerados, e nenhum deles aparece</label>
+      <label><input type="checkbox"> O cabeçalho mostra 27, o mesmo número da contagem (no sistema atual esse cabeçalho mostra 18)</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 7.2 · Prazo e acesso rápido</h3>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> "PRAZO DE VERIFICAÇÃO · 13/08/2026 · Finaliza hoje", em período restritivo com 2 ações</label>
+      <label><input type="checkbox"> Acesso Rápido com dois botões, o último preenchido</label>
+      <label><input type="checkbox"> O explorador de cenários <b>não</b> aparece nesta tela (nem no admin)</label>
+    </div>
+  </div>
+</div>
+
+<div class="bloco">
+  <h2><span class="num">8</span>Responsividade e movimento</h2>
+  <div class="fala">O Figma só tem o desktop de 1440. O que existe abaixo disso foi decidido em código e é o mínimo para o protótipo não quebrar. Layout de celular <b>não</b> está desenhado.</div>
+  <div class="teste">
+    <h3><input type="checkbox"> 8.1 · Tela grande</h3>
+    <ul class="passos"><li>Maximize numa tela de 1920 ou mais.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> O conteúdo ocupa a largura toda: começa no recuo depois do menu e termina no recuo da direita</label>
+      <label><input type="checkbox"> Não existe faixa vazia gigante dos dois lados</label>
+      <label><input type="checkbox"> O recuo lateral, a coluna da direita e a barra empilhada crescem, mas nunca ficam menores que no frame de 1440</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 8.2 · Estreitando a janela</h3>
+    <ul class="passos"><li>Arraste a borda da janela e observe as viradas.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Por volta de <b>1120px</b>: a coluna da direita desce e seus cards dividem a linha</label>
+      <label><input type="checkbox"> Por volta de <b>1023px</b>: o menu vira uma trilha de ícones estreita, e o rótulo aparece no tooltip do navegador</label>
+      <label><input type="checkbox"> Por volta de <b>940px</b>: a faixa de contexto quebra em duas linhas e o divisor vertical some</label>
+      <label><input type="checkbox"> Por volta de <b>720px</b>: o cabeçalho empilha e o seletor de ano ocupa a largura toda</label>
+      <label><input type="checkbox"> Em nenhuma largura aparece rolagem horizontal na página</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 8.3 · Movimento</h3>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Hover de menu, de célula de ano e de legenda tem uma transição curta e igual em todos</label>
+      <label><input type="checkbox"> O popover e o painel abrem <b>na hora</b>, sem fade</label>
+      <label><input type="checkbox"> Ligando "reduzir movimento" no sistema, nenhuma transição acontece e nada quebra</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 8.4 · Toque</h3>
+    <ul class="passos"><li>Se puder, abra num tablet ou ative a emulação de toque no navegador.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> O detalhe da rosca aparece ao tocar na linha da legenda, e continua visível</label>
+      <label><input type="checkbox"> O popover abre no toque do gatilho e fecha tocando fora</label>
+      <label><input type="checkbox"> Nada depende de hover para ser alcançável</label>
+    </div>
+  </div>
+</div>
+
+<p class="mini" style="text-align:center;margin-top:30px">Roteiro de testes · Dashboards da área logada · Recicla Goiás · atualizado em 17 de agosto de 2026.<br>Pacote completo em <a href="https://reciclagoias.vercel.app/handoff-dashboards.html">handoff-dashboards.html</a>.</p>
+
+</main>
+<script>
+(function () {
+  var caixas = [].slice.call(document.querySelectorAll('input[type=checkbox]'));
+  var fill = document.getElementById('pf');
+  var num = document.getElementById('pn');
+  function atualizar() {
+    var feitos = caixas.filter(function (c) { return c.checked; }).length;
+    fill.style.width = (feitos / caixas.length * 100) + '%';
+    num.textContent = feitos + ' de ' + caixas.length;
+  }
+  caixas.forEach(function (c) { c.addEventListener('change', atualizar); });
+  atualizar();
+})();
+</script>
+</body>
+</html>
