@@ -110,8 +110,8 @@ src/data/mocks/
 
 ### Regras que os componentes têm que respeitar
 
-- `DeadlineCard` recebe `n` ações e **não muda de altura** com o valor. Só `n === 1` mostra a
-  ação na frase; de 2 em diante o gatilho conta e o popover mostra.
+- `DeadlineCard` recebe `n` ações e **não muda de altura** com o valor. Nunca mostra qual ação
+  está liberada: com `n === 1` o gatilho vai para o singular, e a lista fica sempre no popover.
 - O gatilho do popover é `<button>` com `aria-expanded`, **nunca** `<a href>`.
 - O popover abre por **clique**, nunca por hover, e não usa scrim.
 - A lista de ações é `<ul><li>`, não `<div>` com bullet desenhado.

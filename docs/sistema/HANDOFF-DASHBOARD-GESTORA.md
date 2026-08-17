@@ -123,7 +123,7 @@ e não consegue produzir um estado inválido por descuido.
 
 | Componente | O que resolve | Regra que ele já carrega |
 |---|---|---|
-| `DeadlineCard` | Card de prazo com e sem período restritivo | Não muda de altura com `n`; `n = 1` mostra a ação na frase; `n = 0` não existe |
+| `DeadlineCard` | Card de prazo com e sem período restritivo | Não muda de altura com `n`; nunca mostra qual ação está liberada, nem com `n = 1`; `n = 0` não existe |
 | `RestrictedPeriodPopover` | Camada de consulta ancorada | Clique (nunca hover), sem scrim, lista trava em 240px acima de 11 itens |
 | `DocumentationRow` + `StackedBar` | Linha de status de documento | 0 → frase · 1 → sem barra · 2+ → barra; status zerado some; total é a soma |
 | `YearSegmented` | Filtro de exercício que escala | Selecionado sempre no centro; janela trava e seta desabilita nos extremos |
