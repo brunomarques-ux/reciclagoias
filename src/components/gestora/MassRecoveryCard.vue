@@ -64,9 +64,11 @@ const cartoes = computed(() =>
         <h3 class="gx-mass__material">{{ material.nome }}</h3>
 
         <RingChart :percentual="material.taxa" />
-        <p class="gx-mass__legenda">recuperação</p>
 
+        <!-- Um slot só: quem fechou mostra o estado, quem não fechou completa a
+             frase que o anel começou ("81,4% da massa produzida"). -->
         <p v-if="material.completo" class="gx-mass__chip">Meta atingida</p>
+        <p v-else class="gx-mass__legenda">taxa de recuperação</p>
 
         <dl class="gx-mass__numeros">
           <div class="gx-mass__linha">
@@ -153,12 +155,14 @@ const cartoes = computed(() =>
   color: var(--rg-color-text-primary);
 }
 
-/* O que o percentual do anel significa, escrito fora do anel. */
+/* Completa a frase que o anel começou: "81,4% da massa produzida". Fora do anel
+   porque o miolo tem ~69px e não comporta palavra. */
 .gx-mass__legenda {
   margin: calc(var(--rg-space-3) * -1 + 4px) 0 0;
   font-size: var(--rg-font-size-xs);
   line-height: 16px;
   color: var(--rg-color-text-secondary);
+  text-align: center;
 }
 
 /* O chip só existe no cartão que fechou: no verde ele ganha superfície branca para
