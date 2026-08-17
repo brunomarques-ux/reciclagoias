@@ -1,17 +1,24 @@
 <script setup lang="ts">
 /**
- * Anel de percentual — a taxa de recuperação de um material.
+ * Anel da taxa de recuperação de um material: quanto voltou do que foi colocado no
+ * mercado.
  *
- * Anel único, sempre no verde de sucesso do design system: a diferenciação de quem
- * fechou a meta acontece no cartão (fundo e contorno), não no gráfico. O número no
- * centro é o que dispensa a leitura do ângulo; o que ele significa fica escrito
- * logo abaixo do anel, fora do miolo — que tem ~69px e não comporta palavra.
+ * A taxa **pode passar de 100%** — recuperar mais massa do que se produziu no
+ * exercício é resultado possível, e é o caso do papel. O arco trava em 100% porque
+ * um anel cheio é cheio; o número no centro continua o valor real.
+ *
+ * A cor diz uma coisa só: bateu ou não bateu a meta do exercício. Verde de sucesso
+ * quando bateu, âmbar de atenção quando ficou abaixo — os dois da paleta de
+ * semântica, sem tom intermediário inventado.
  */
 import { computed } from 'vue';
 
-const props = withDefaults(defineProps<{ percentual: number; tamanho?: number }>(), {
-  tamanho: 112,
-});
+export type TomAnel = 'success' | 'atencao';
+
+const props = withDefaults(
+  defineProps<{ percentual: number; tom?: TomAnel; tamanho?: number }>(),
+  { tamanho: 112, tom: 'success' },
+);
 
 const RAIO = 15.9155;
 const ESPESSURA = 6;
@@ -30,6 +37,7 @@ const texto = computed(
       <circle class="gx-ring__trilho" cx="21" cy="21" :r="RAIO" fill="transparent" :stroke-width="ESPESSURA" />
       <circle
         class="gx-ring__arco"
+        :class="`gx-ring__arco--${tom}`"
         cx="21"
         cy="21"
         :r="RAIO"
@@ -63,8 +71,12 @@ const texto = computed(
   stroke: var(--rg-color-surface-raised);
 }
 
-.gx-ring__arco {
+.gx-ring__arco--success {
   stroke: var(--rg-color-feedback-success);
+}
+
+.gx-ring__arco--atencao {
+  stroke: var(--rg-color-feedback-warning);
 }
 
 .gx-ring__centro {
@@ -75,6 +87,7 @@ const texto = computed(
   justify-content: center;
 }
 
+/* O número fica neutro: quem carrega o estado é a cor do arco e o chip do cartão. */
 .gx-ring__valor {
   font-size: var(--rg-font-size-lg);
   line-height: 24px;

@@ -123,10 +123,14 @@ export interface MaterialRecuperado {
 /** Meta legal do exercício: percentual da massa produzida que precisa voltar. */
 export const META_PERCENTUAL = 30;
 
+/**
+ * O metal está **abaixo da meta** de propósito: sem um material fora do alvo, a
+ * fileira inteira fica verde e o estado negativo não chega a ser validado.
+ */
 export const MATERIAIS_ADMIN: MaterialRecuperado[] = [
   { nome: 'Papel', produzida: 49788, recuperada: 86632 },
   { nome: 'Plástico', produzida: 12692, recuperada: 10335 },
-  { nome: 'Metal', produzida: 8846, recuperada: 6263.96 },
+  { nome: 'Metal', produzida: 8846, recuperada: 2210 },
   { nome: 'Vidro', produzida: 7746, recuperada: 4116 },
 ];
 

@@ -2,22 +2,22 @@
 /**
  * Card "Massa Produzida e Recuperada": um cartão por material.
  *
- * A conta que o cartão precisa deixar óbvia é esta:
- *   produzida × meta% = meta em tonelada · recuperada ÷ produzida = taxa do anel
+ * A conta que o cartão precisa deixar óbvia:
+ *   produzida × 30% = meta em tonelada  ·  recuperada ÷ produzida = taxa do anel
  *
- * Por isso os três números aparecem na ordem da narrativa — base, limiar, resultado —
- * e a meta carrega o percentual ao lado do valor, que é o que liga os 30% do
- * indicador do topo à tonelada escrita aqui embaixo. Nada é digitado duas vezes:
- * meta, taxa e cumprimento saem das duas massas.
+ * **Bateu a meta é recuperada ≥ meta**, não "chegou a 100%": a taxa é livre e pode
+ * passar de 100% (o papel recuperou 86.632 t de uma meta de 14.936,4 t). Por isso os
+ * três números aparecem na ordem da narrativa — base, limiar, resultado — e a meta
+ * carrega o percentual ao lado da tonelada, ligando os 30% do indicador do topo ao
+ * número escrito aqui embaixo.
  *
- * Cor: o cartão só ganha fundo verde quando a taxa fecha 100% — é o que deixa a
- * fileira legível de longe. Quem não fechou fica em cinza, sem cor de semáforo no
- * fundo; a atenção, quando existe, aparece no número.
+ * Um estado, três canais coerentes: cor do anel, chip e fundo do cartão. Nada é
+ * digitado duas vezes — meta, taxa e cumprimento saem das duas massas.
  */
 import { computed } from 'vue';
 
 import { META_PERCENTUAL, type MaterialRecuperado } from '@/data/mocks/perfis';
-import RingChart from './RingChart.vue';
+import RingChart, { type TomAnel } from './RingChart.vue';
 
 const props = defineProps<{ anoExecucao: number; materiais: MaterialRecuperado[] }>();
 
@@ -27,15 +27,15 @@ const toneladas = (valor: number) =>
 const cartoes = computed(() =>
   props.materiais.map((material) => {
     const meta = (material.produzida * META_PERCENTUAL) / 100;
-    const bruta = material.produzida > 0 ? (material.recuperada / material.produzida) * 100 : 0;
-    /* O indicador tem teto de 100% — decisão de produto. Quem recuperou mais do que
-       colocou no mercado aparece como cheio, não como 174%. */
-    const taxa = Math.min(bruta, 100);
+    const taxa = material.produzida > 0 ? (material.recuperada / material.produzida) * 100 : 0;
+    const atingiu = material.recuperada >= meta;
+    const tom: TomAnel = atingiu ? 'success' : 'atencao';
 
     return {
       nome: material.nome,
       taxa,
-      completo: taxa >= 100,
+      atingiu,
+      tom,
       produzida: toneladas(material.produzida),
       recuperada: toneladas(material.recuperada),
       meta: toneladas(meta),
@@ -49,8 +49,8 @@ const cartoes = computed(() =>
     <header class="gx-mass__head">
       <h2 id="gx-mass-titulo" class="gx-mass__titulo">Massa Produzida e Recuperada</h2>
       <p class="gx-mass__descricao">
-        Quanto voltou da massa colocada no mercado em {{ anoExecucao }}. A meta do exercício é
-        recuperar {{ META_PERCENTUAL }}% do que cada material produziu.
+        Taxa de recuperação por material — quanto voltou do que foi colocado no mercado em
+        {{ anoExecucao }}. A meta do exercício é recuperar {{ META_PERCENTUAL }}% do produzido.
       </p>
     </header>
 
@@ -59,16 +59,16 @@ const cartoes = computed(() =>
         v-for="material in cartoes"
         :key="material.nome"
         class="gx-mass__item"
-        :class="{ 'gx-mass__item--completo': material.completo }"
+        :class="{ 'gx-mass__item--atingiu': material.atingiu }"
       >
         <h3 class="gx-mass__material">{{ material.nome }}</h3>
 
-        <RingChart :percentual="material.taxa" />
+        <RingChart :percentual="material.taxa" :tom="material.tom" />
 
-        <!-- Um slot só: quem fechou mostra o estado, quem não fechou completa a
-             frase que o anel começou ("81,4% da massa produzida"). -->
-        <p v-if="material.completo" class="gx-mass__chip">Meta atingida</p>
-        <p v-else class="gx-mass__legenda">taxa de recuperação</p>
+        <!-- Um slot só: o estado da meta, nos dois sentidos. -->
+        <p class="gx-mass__chip" :class="material.atingiu ? 'gx-mass__chip--ok' : 'gx-mass__chip--abaixo'">
+          {{ material.atingiu ? 'Meta atingida' : 'Abaixo da meta' }}
+        </p>
 
         <dl class="gx-mass__numeros">
           <div class="gx-mass__linha">
@@ -141,8 +141,9 @@ const cartoes = computed(() =>
   background-color: var(--rg-color-surface-subtle);
 }
 
-/* Fundo verde só quando a taxa fecha 100%: é o que se lê de longe na fileira. */
-.gx-mass__item--completo {
+/* Fundo verde só em quem bateu a meta: é o que se lê de longe na fileira. Quem não
+   bateu fica no cinza — a atenção aparece no anel e no chip, não no fundo. */
+.gx-mass__item--atingiu {
   border-color: var(--rg-primitive-brand-200);
   background-color: var(--rg-color-surface-brand);
 }
@@ -155,31 +156,27 @@ const cartoes = computed(() =>
   color: var(--rg-color-text-primary);
 }
 
-/* Completa a frase que o anel começou: "81,4% da massa produzida". Fora do anel
-   porque o miolo tem ~69px e não comporta palavra. */
-.gx-mass__legenda {
-  margin: calc(var(--rg-space-3) * -1 + 4px) 0 0;
-  font-size: var(--rg-font-size-xs);
-  line-height: 16px;
-  color: var(--rg-color-text-secondary);
-  text-align: center;
-}
-
-/* O chip só existe no cartão que fechou: no verde ele ganha superfície branca para
-   não sumir no fundo. */
 .gx-mass__chip {
   margin: 0;
   padding: var(--rg-space-1) 10px;
   border-radius: var(--rg-radius-pill);
-  background-color: var(--rg-color-surface-raised);
   font-size: var(--rg-font-size-xs);
   line-height: 16px;
   font-weight: var(--rg-font-weight-semibold);
+}
+
+/* No cartão verde o chip ganha superfície branca para não sumir no fundo. */
+.gx-mass__chip--ok {
+  background-color: var(--rg-color-surface-raised);
   color: var(--rg-color-text-brand);
 }
 
-/* `margin-top: auto` alinha os três números pelo rodapé nos quatro cartões, mesmo
-   com o chip existindo só em um deles. */
+.gx-mass__chip--abaixo {
+  background-color: var(--rg-color-feedback-warning-soft);
+  color: var(--rg-primitive-amber-700);
+}
+
+/* `margin-top: auto` alinha os três números pelo rodapé nos quatro cartões. */
 .gx-mass__numeros {
   display: flex;
   flex-direction: column;
