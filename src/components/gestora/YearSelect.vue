@@ -60,7 +60,7 @@ function aoTeclar(evento: KeyboardEvent) {
       <button
         type="button"
         class="gx-year__seta"
-        aria-label="Anos anteriores"
+        :aria-label="podeVoltar ? `Ano anterior, ${serie[indice - 1]}` : 'Ano anterior'"
         :disabled="!podeVoltar"
         @click="irPara(indice - 1)"
       >
@@ -82,7 +82,7 @@ function aoTeclar(evento: KeyboardEvent) {
       <button
         type="button"
         class="gx-year__seta"
-        aria-label="Anos seguintes"
+        :aria-label="podeAvancar ? `Próximo ano, ${serie[indice + 1]}` : 'Próximo ano'"
         :disabled="!podeAvancar"
         @click="irPara(indice + 1)"
       >

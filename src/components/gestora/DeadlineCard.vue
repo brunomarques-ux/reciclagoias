@@ -120,14 +120,9 @@ onBeforeUnmount(() => {
     </div>
 
     <!-- Sem período restritivo o card carrega a ação que o prazo habilita. -->
-    <button
-      v-else-if="prazo.acaoRotulo"
-      type="button"
-      class="gx-deadline__acao"
-      aria-disabled="true"
-      title="Em breve"
-    >
+    <button v-else-if="prazo.acaoRotulo" type="button" class="gx-deadline__acao" aria-disabled="true">
       {{ prazo.acaoRotulo }}
+      <span class="gx-deadline__breve">em breve</span>
     </button>
   </section>
 </template>
@@ -194,6 +189,10 @@ onBeforeUnmount(() => {
 
 /* ============ Ação do prazo normal ============ */
 .gx-deadline__acao {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--rg-space-2);
   height: 48px;
   padding: 0 var(--rg-space-7);
   border: 1.5px solid var(--rg-color-border-brand);
@@ -207,8 +206,21 @@ onBeforeUnmount(() => {
   cursor: default;
 }
 
+/* Mesmo selo do Acesso Rápido: o estado fica escrito, não só no cursor. */
+.gx-deadline__breve {
+  font-size: var(--rg-font-size-2xs);
+  line-height: 14px;
+  font-weight: var(--rg-font-weight-semibold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.72;
+}
+
+/* `outline` transparente em vez de `none`: em alto contraste do Windows o
+   box-shadow é descartado e o foco sumiria. */
 .gx-deadline__acao:focus-visible {
-  outline: none;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
   box-shadow: var(--rg-ring-focus);
 }
 

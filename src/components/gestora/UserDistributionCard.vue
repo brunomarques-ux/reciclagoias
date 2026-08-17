@@ -12,6 +12,10 @@
  *
  * A legenda é feita de `<button>` porque ela é o que recebe o foco — o SVG fica
  * `aria-hidden`. Assim o detalhe existe no teclado e no toque, não só no mouse.
+ *
+ * Sem `@click` de propósito: no toque o navegador dispara `mouseenter` e `focus`
+ * antes do clique, então um alternador aqui desligaria o destaque que os dois
+ * acabaram de acender.
  */
 import { computed, ref } from 'vue';
 
@@ -54,7 +58,6 @@ function aoTeclar(evento: KeyboardEvent) {
             @mouseleave="destaque = null"
             @focus="destaque = indice"
             @blur="destaque = null"
-            @click="destaque = destaque === indice ? null : indice"
           >
             <span
               class="gx-users__ponto"

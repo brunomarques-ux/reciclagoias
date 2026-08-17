@@ -174,7 +174,7 @@ export const DOCUMENTACAO_VERIFICADOR: LinhaDocumentacao[] = [
     titulo: 'Notas Fiscais 2025',
     total: 27,
     statuses: [
-      { singular: 'aprovada/enviada', plural: 'aprovadas/enviados', quantidade: 27, tone: 'success' },
+      { singular: 'aprovada/enviada', plural: 'aprovadas/enviadas', quantidade: 27, tone: 'success' },
       { singular: 'bloqueada', plural: 'bloqueadas', quantidade: 0, tone: 'danger' },
       { singular: 'vinculada/pendente', plural: 'vinculadas/pendentes', quantidade: 0, tone: 'warning' },
     ],
