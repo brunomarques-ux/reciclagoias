@@ -17,12 +17,9 @@
 import { computed } from 'vue';
 
 import { META_PERCENTUAL, type MaterialRecuperado } from '@/data/mocks/perfis';
-import RingChart, { type TomAnel } from './RingChart.vue';
+import RingChart from './RingChart.vue';
 
 const props = defineProps<{ anoExecucao: number; materiais: MaterialRecuperado[] }>();
-
-/** Abaixo disso a taxa aparece em âmbar, mesmo com a meta legal cumprida. */
-const LIMIAR_ATENCAO = 60;
 
 const toneladas = (valor: number) =>
   `${valor.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} t`;
@@ -30,15 +27,15 @@ const toneladas = (valor: number) =>
 const cartoes = computed(() =>
   props.materiais.map((material) => {
     const meta = (material.produzida * META_PERCENTUAL) / 100;
-    const taxa = material.produzida > 0 ? (material.recuperada / material.produzida) * 100 : 0;
-    const tom: TomAnel = taxa >= 100 ? 'success' : taxa < LIMIAR_ATENCAO ? 'atencao' : 'neutro';
+    const bruta = material.produzida > 0 ? (material.recuperada / material.produzida) * 100 : 0;
+    /* O indicador tem teto de 100% — decisão de produto. Quem recuperou mais do que
+       colocou no mercado aparece como cheio, não como 174%. */
+    const taxa = Math.min(bruta, 100);
 
     return {
       nome: material.nome,
       taxa,
-      tom,
       completo: taxa >= 100,
-      metaAtingida: material.recuperada >= meta,
       produzida: toneladas(material.produzida),
       recuperada: toneladas(material.recuperada),
       meta: toneladas(meta),
@@ -66,15 +63,10 @@ const cartoes = computed(() =>
       >
         <h3 class="gx-mass__material">{{ material.nome }}</h3>
 
-        <RingChart :percentual="material.taxa" :marca="META_PERCENTUAL" :tom="material.tom" />
-        <p class="gx-mass__legenda">recuperado do que produziu</p>
+        <RingChart :percentual="material.taxa" />
+        <p class="gx-mass__legenda">recuperação</p>
 
-        <p
-          class="gx-mass__chip"
-          :class="material.metaAtingida ? 'gx-mass__chip--ok' : 'gx-mass__chip--abaixo'"
-        >
-          {{ material.metaAtingida ? 'Meta atingida' : 'Abaixo da meta' }}
-        </p>
+        <p v-if="material.completo" class="gx-mass__chip">Meta atingida</p>
 
         <dl class="gx-mass__numeros">
           <div class="gx-mass__linha">
@@ -169,36 +161,27 @@ const cartoes = computed(() =>
   color: var(--rg-color-text-secondary);
 }
 
+/* O chip só existe no cartão que fechou: no verde ele ganha superfície branca para
+   não sumir no fundo. */
 .gx-mass__chip {
   margin: 0;
   padding: var(--rg-space-1) 10px;
   border-radius: var(--rg-radius-pill);
+  background-color: var(--rg-color-surface-raised);
   font-size: var(--rg-font-size-xs);
   line-height: 16px;
   font-weight: var(--rg-font-weight-semibold);
-}
-
-.gx-mass__chip--ok {
-  background-color: var(--rg-color-feedback-success-soft);
   color: var(--rg-color-text-brand);
 }
 
-.gx-mass__chip--abaixo {
-  background-color: var(--rg-color-feedback-warning-soft);
-  color: var(--rg-primitive-amber-700);
-}
-
-/* No cartão verde o chip precisa de superfície própria para não sumir no fundo. */
-.gx-mass__item--completo .gx-mass__chip--ok {
-  background-color: var(--rg-color-surface-raised);
-}
-
+/* `margin-top: auto` alinha os três números pelo rodapé nos quatro cartões, mesmo
+   com o chip existindo só em um deles. */
 .gx-mass__numeros {
   display: flex;
   flex-direction: column;
   gap: var(--rg-space-1);
   width: 100%;
-  margin: 0;
+  margin: auto 0 0;
 }
 
 .gx-mass__linha {
