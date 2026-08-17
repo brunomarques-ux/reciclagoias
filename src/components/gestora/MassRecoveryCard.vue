@@ -26,17 +26,18 @@ defineProps<{ anoExecucao: number; materiais: MaterialRecuperado[] }>();
         <h3 class="gx-mass__material">{{ material.nome }}</h3>
 
         <RingChart :percentual="material.percentual" />
+        <p class="gx-mass__legenda">de recuperação</p>
 
         <p v-if="material.metaAtingida" class="gx-mass__chip">Meta atingida</p>
 
         <dl class="gx-mass__numeros">
+          <div class="gx-mass__linha gx-mass__linha--destaque">
+            <dt>Recuperada</dt>
+            <dd>{{ material.recuperada }}</dd>
+          </div>
           <div class="gx-mass__linha">
             <dt>Produzida</dt>
             <dd>{{ material.produzida }}</dd>
-          </div>
-          <div class="gx-mass__linha">
-            <dt>Recuperada</dt>
-            <dd>{{ material.recuperada }}</dd>
           </div>
           <div class="gx-mass__linha">
             <dt>Meta ≥</dt>
@@ -99,6 +100,14 @@ defineProps<{ anoExecucao: number; materiais: MaterialRecuperado[] }>();
   background-color: var(--rg-color-surface-subtle);
 }
 
+/* O que o percentual do anel significa, escrito fora do anel. */
+.gx-mass__legenda {
+  margin: calc(var(--rg-space-3) * -1 + 4px) 0 0;
+  font-size: var(--rg-font-size-xs);
+  line-height: 16px;
+  color: var(--rg-color-text-muted);
+}
+
 .gx-mass__material {
   margin: 0;
   font-size: var(--rg-font-size-sm);
@@ -128,7 +137,7 @@ defineProps<{ anoExecucao: number; materiais: MaterialRecuperado[] }>();
 
 .gx-mass__linha {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
   gap: var(--rg-space-2);
   font-size: var(--rg-font-size-xs);
@@ -143,6 +152,27 @@ defineProps<{ anoExecucao: number; materiais: MaterialRecuperado[] }>();
   margin: 0;
   font-weight: var(--rg-font-weight-medium);
   color: var(--rg-color-text-secondary);
+}
+
+/* Três pesos no bloco de números: a massa recuperada é o resultado, as outras duas
+   são a base e o limiar que explicam o resultado. Sem isso o olho não sabe por onde
+   começar — os três números pesavam igual. */
+.gx-mass__linha--destaque {
+  padding-bottom: var(--rg-space-1);
+  margin-bottom: var(--rg-space-1);
+  border-bottom: 1px solid var(--rg-color-border-subtle);
+}
+
+.gx-mass__linha--destaque dt {
+  font-weight: var(--rg-font-weight-medium);
+  color: var(--rg-color-text-secondary);
+}
+
+.gx-mass__linha--destaque dd {
+  font-size: var(--rg-font-size-sm);
+  line-height: 20px;
+  font-weight: var(--rg-font-weight-semibold);
+  color: var(--rg-color-text-primary);
 }
 
 @media (max-width: 1120px) {

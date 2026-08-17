@@ -8,10 +8,9 @@
  */
 import { computed } from 'vue';
 
-const props = withDefaults(
-  defineProps<{ percentual: number; rotulo?: string; tamanho?: number }>(),
-  { rotulo: 'recuperação', tamanho: 112 },
-);
+const props = withDefaults(defineProps<{ percentual: number; tamanho?: number }>(), {
+  tamanho: 112,
+});
 
 const RAIO = 15.9155;
 const ESPESSURA = 6;
@@ -42,7 +41,6 @@ const texto = computed(
 
     <div class="gx-ring__centro">
       <span class="gx-ring__valor">{{ texto }}</span>
-      <span class="gx-ring__rotulo">{{ rotulo }}</span>
     </div>
   </div>
 </template>
@@ -76,16 +74,12 @@ const texto = computed(
   justify-content: center;
 }
 
+/* Só o número dentro do anel: o miolo tem ~69px de diâmetro e qualquer palavra ali
+   encosta no traço. O que o número significa fica escrito logo abaixo do anel. */
 .gx-ring__valor {
-  font-size: var(--rg-font-size-md);
-  line-height: 22px;
+  font-size: var(--rg-font-size-lg);
+  line-height: 24px;
   font-weight: var(--rg-font-weight-semibold);
   color: var(--rg-color-text-primary);
-}
-
-.gx-ring__rotulo {
-  font-size: var(--rg-font-size-2xs);
-  line-height: 14px;
-  color: var(--rg-color-text-muted);
 }
 </style>
