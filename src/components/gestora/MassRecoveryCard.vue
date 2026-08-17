@@ -49,7 +49,7 @@ const cartoes = computed(() =>
     <header class="gx-mass__head">
       <h2 id="gx-mass-titulo" class="gx-mass__titulo">Massa Produzida e Recuperada</h2>
       <p class="gx-mass__descricao">
-        Taxa de recuperação por material — quanto voltou do que foi colocado no mercado em
+        Taxa de recuperação por material: quanto voltou do que foi colocado no mercado em
         {{ anoExecucao }}. A meta do exercício é recuperar {{ META_PERCENTUAL }}% do produzido.
       </p>
     </header>

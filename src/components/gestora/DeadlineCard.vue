@@ -122,7 +122,6 @@ onBeforeUnmount(() => {
     <!-- Sem período restritivo o card carrega a ação que o prazo habilita. -->
     <button v-else-if="prazo.acaoRotulo" type="button" class="gx-deadline__acao" aria-disabled="true">
       {{ prazo.acaoRotulo }}
-      <span class="gx-deadline__breve">em breve</span>
     </button>
   </section>
 </template>
@@ -204,16 +203,6 @@ onBeforeUnmount(() => {
   font-weight: var(--rg-font-weight-semibold);
   color: var(--rg-color-text-brand);
   cursor: default;
-}
-
-/* Mesmo selo do Acesso Rápido: o estado fica escrito, não só no cursor. */
-.gx-deadline__breve {
-  font-size: var(--rg-font-size-2xs);
-  line-height: 14px;
-  font-weight: var(--rg-font-weight-semibold);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  opacity: 0.72;
 }
 
 /* `outline` transparente em vez de `none`: em alto contraste do Windows o
