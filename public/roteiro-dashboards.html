@@ -142,19 +142,9 @@
 
 <div class="bloco">
   <h2><span class="num">2</span>Casca: topo, menu e saída</h2>
-  <div class="fala">A casca é a <b>mesma</b> nas três telas. O que muda vem do perfil, não da página.</div>
+  <div class="fala">A casca é a <b>mesma</b> nas três telas, e o menu lateral está aqui ocupando o espaço que ele vai ocupar. As telas de destino não fazem parte desta entrega, então não há nada para testar nos itens do menu.</div>
   <div class="teste">
-    <h3><input type="checkbox"> 2.1 · O menu vem do perfil</h3>
-    <ul class="passos"><li>Compare o menu lateral da gestora com o do verificador.</li></ul>
-    <div class="esper"><b>Esperado</b>
-      <label><input type="checkbox"> Gestora e admin: Dashboard · Minha Conta · <b>Planos</b> · Relatórios</label>
-      <label><input type="checkbox"> Verificador: Dashboard · Minha Conta · <b>Notas Fiscais</b> · Relatórios</label>
-      <label><input type="checkbox"> Só <b>Dashboard</b> é clicável e fica destacado em verde</label>
-      <label><input type="checkbox"> Os outros itens estão em cinza, não sublinham no hover e <b>não são links</b> (o cursor não vira mãozinha)</label>
-    </div>
-  </div>
-  <div class="teste">
-    <h3><input type="checkbox"> 2.2 · Skip link</h3>
+    <h3><input type="checkbox"> 2.1 · Skip link</h3>
     <ul class="passos"><li>Clique na barra de endereço e dê <kbd>Tab</kbd> uma vez.</li></ul>
     <div class="esper"><b>Esperado</b>
       <label><input type="checkbox"> Aparece o link <b>"Ir para o conteúdo"</b>, antes de qualquer outra coisa</label>
@@ -162,7 +152,7 @@
     </div>
   </div>
   <div class="teste">
-    <h3><input type="checkbox"> 2.3 · Foco sobre a barra verde</h3>
+    <h3><input type="checkbox"> 2.2 · Foco sobre a barra verde</h3>
     <ul class="passos"><li>Continue com <kbd>Tab</kbd> até os botões do topo (hambúrguer, sino, avatar).</li></ul>
     <div class="esper"><b>Esperado</b>
       <label><input type="checkbox"> O anel de foco é <b>branco</b>, não verde (verde sumiria no fundo da barra)</label>
@@ -171,7 +161,7 @@
     </div>
   </div>
   <div class="teste">
-    <h3><input type="checkbox"> 2.4 · Faixa de contexto</h3>
+    <h3><input type="checkbox"> 2.3 · Faixa de contexto</h3>
     <div class="esper"><b>Esperado</b>
       <label><input type="checkbox"> Dois blocos: <b>Ano de execução</b> com "recuperação das embalagens" e <b>Ano base</b> com "embalagens colocadas no mercado"</label>
       <label><input type="checkbox"> Nenhum dos dois anos aparece sem a descrição ao lado</label>
@@ -182,7 +172,7 @@
 
 <div class="bloco">
   <h2><span class="num">3</span>Seletor de ano de execução</h2>
-  <div class="fala">Decisão <b>D-R002</b>. São 8 exercícios (2018 a 2025) e o controle mostra sempre 3 células, então a largura não cresce com a série.</div>
+  <div class="fala">São 8 exercícios (2018 a 2025) e o controle mostra sempre 3 células, então a largura não cresce com a série.</div>
   <div class="teste">
     <h3><input type="checkbox"> 3.1 · A janela desliza, o selecionado não pula</h3>
     <ul class="passos"><li>Na gestora, o padrão é 2024. Clique na seta <b>‹</b> algumas vezes.</li></ul>
@@ -226,7 +216,7 @@
 
 <div class="bloco">
   <h2><span class="num">4</span>Status da Documentação</h2>
-  <div class="fala">Decisão <b>D-R003</b>. A linha se adapta ao dado sozinha, e o total <b>nunca</b> é digitado: é a soma dos status.</div>
+  <div class="fala">A linha se adapta ao dado sozinha, e o total <b>nunca</b> é digitado: é a soma dos status.</div>
   <div class="teste">
     <h3><input type="checkbox"> 4.1 · As três variações na mesma tela</h3>
     <ul class="passos"><li>Abra <a href="https://reciclagoias.vercel.app/gestora?cenario=variacoes" target="_blank" rel="noopener">/gestora?cenario=variacoes</a>.</li></ul>
@@ -268,7 +258,7 @@
 
 <div class="bloco">
   <h2><span class="num">5</span>Card de prazo e período restritivo</h2>
-  <div class="fala">Decisão <b>D-R001</b>, o coração desta entrega: <b>o card conta, o popover mostra</b>. Este é o bloco mais importante do roteiro.</div>
+  <div class="fala">O coração desta entrega: <b>o card conta, o popover mostra</b>. Este é o bloco mais importante do roteiro.</div>
   <div class="teste">
     <h3><input type="checkbox"> 5.1 · Prazo normal</h3>
     <ul class="passos"><li>Abra <a href="https://reciclagoias.vercel.app/gestora?cenario=rec01" target="_blank" rel="noopener">/gestora?cenario=rec01</a>.</li></ul>
@@ -350,8 +340,8 @@
       <label><input type="checkbox"> Quatro cartões da <b>mesma altura</b>, mesmo com o último tendo dois chips</label>
       <label><input type="checkbox"> O valor fica em preto; a cor aparece só na caixinha de ícone verde-clara</label>
       <label><input type="checkbox"> "META DE RECICLAGEM 2025 · 30%", "EMPRESAS ADERENTES · 44.063", "CERTIFICADOS DE MASSA · 12", "JUSTIFICATIVAS · 130"</label>
+      <label><input type="checkbox"> Só o cartão de Justificativas tem chips, e eles ficam abaixo do valor sem empurrar a altura do cartão</label>
     </div>
-    <div class="duvida"><b>Confirmar com o SIC</b> Em Justificativas, 99 pendentes + 5 aprovadas não somam 130. Os chips são recortes ou falta estado na decomposição?</div>
   </div>
   <div class="teste">
     <h3><input type="checkbox"> 6.2 · Rosca de distribuição de usuários</h3>
@@ -376,11 +366,11 @@
       <label><input type="checkbox"> <b>Metal</b> 25,0%: anel <b>âmbar</b>, chip "Abaixo da meta" e cartão em <b>cinza</b>, não em âmbar</label>
       <label><input type="checkbox"> O número no centro do anel é preto nos quatro, nunca colorido</label>
       <label><input type="checkbox"> Ordem dos números em todos: Produzida, Meta (30%), <b>Recuperada</b> destacada com uma linha em cima</label>
-      <label><input type="checkbox"> A meta em tonelada bate com 30% da produzida (Papel: 49.788,0 × 0,3 = 14.936,4 t)</label>
       <label><input type="checkbox"> Toneladas sempre com uma casa decimal e sufixo " t"</label>
       <label><input type="checkbox"> Os três números alinham pelo rodapé nos quatro cartões</label>
+      <label><input type="checkbox"> Uma taxa acima de 100% mostra o número real com o arco cheio, sem estourar o desenho</label>
     </div>
-    <div class="fala">A conta é <b>recuperada ÷ produzida</b>, e ela pode passar de 100% (é o caso do papel). "Meta atingida" é <b>recuperada ≥ 30% da produzida</b>, que é outra coisa. Só o desenho do anel trava em 100%.</div>
+    <div class="fala">O que precisa ser testado aqui é o <b>visual dos dois estados</b>: o cartão que atingiu a meta e o que ficou abaixo. Os números vieram do print recebido como base e servem de referência; de onde sai a taxa e como o gráfico é preenchido fica a cargo de quem implementar os endpoints.</div>
   </div>
   <div class="teste">
     <h3><input type="checkbox"> 6.4 · Relatório de Massas Disponível</h3>
@@ -410,7 +400,7 @@
       <label><input type="checkbox"> <b>Notas Fiscais 2025 · 27 no total</b> com uma contagem só: "27 aprovadas/enviadas". <b>Sem barra</b></label>
       <label><input type="checkbox"> <b>Relatórios 2025 · 0 no total</b> com a frase "Nenhum relatório enviado ainda."</label>
       <label><input type="checkbox"> A linha de notas tem outros dois status no catálogo, ambos zerados, e nenhum deles aparece</label>
-      <label><input type="checkbox"> O cabeçalho mostra 27, o mesmo número da contagem (no sistema atual esse cabeçalho mostra 18)</label>
+      <label><input type="checkbox"> O número do cabeçalho é o mesmo da contagem escrita: 27 nos dois lugares</label>
     </div>
   </div>
   <div class="teste">

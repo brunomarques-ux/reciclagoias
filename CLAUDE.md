@@ -37,6 +37,7 @@ Leia antes de mexer em cada frente:
 | [`docs/sistema/PLANO-AREA-GESTORA.md`](docs/sistema/PLANO-AREA-GESTORA.md) | Rotas, componentes e ordem de trabalho da área logada; mapa de tokens Figma → código |
 | [`docs/sistema/DECISOES-UX.md`](docs/sistema/DECISOES-UX.md) | Decisões de UX que governam as telas do sistema (D-R001 período restritivo, D-R002 seletor de ano, D-R003 barra empilhada) — **fonte da verdade quando houver dúvida de direção** |
 | [`docs/sistema/HANDOFF-DASHBOARD-GESTORA.md`](docs/sistema/HANDOFF-DASHBOARD-GESTORA.md) | Documento para encaminhar: o que foi entregue, o porquê de cada decisão e o que vai para a biblioteca de componentes |
+| [`docs/sistema/PACOTE-ENTREGA-DASHBOARDS.md`](docs/sistema/PACOTE-ENTREGA-DASHBOARDS.md) | **O que vai para o time de desenvolvimento**: as três peças da entrega, as regras dos documentos (sem sigla nossa, sem diminuir o que já existia) e como refazer o recorte de código |
 | [`docs/HANDOFF-DESENVOLVIMENTO.md`](docs/HANDOFF-DESENVOLVIMENTO.md) | Landing page |
 | [`docs/HANDOFF-CONSULTA-REGULARIDADE.md`](docs/HANDOFF-CONSULTA-REGULARIDADE.md) | Consulta pública de regularidade |
 | [`README.md`](README.md) | Stack e filosofia geral |
@@ -106,8 +107,22 @@ Mapa Figma → código usado na área gestora:
 ## Área da Entidade Gestora
 
 ```
-/entrar    login provisório, sem autenticação real — escolhe o perfil e grava na store
-/gestora   dashboard da entidade gestora (guard: sem perfil na store, volta para /entrar)
+/entrar        login provisório, sem autenticação real — escolhe o perfil e grava na store
+/gestora       dashboard da entidade gestora
+/admin         dashboard da Administração (SIC)
+/verificador   dashboard do Verificador de Resultados
+```
+
+O guard é **por perfil**: sem perfil na store volta para `/entrar` com `?destino=`, e perfil
+logado tentando a rota de outro perfil volta para o próprio dashboard, sem deslogar.
+
+Os dois documentos publicados junto com o protótipo saem daqui e são o que se envia para
+fora (ver [`docs/sistema/PACOTE-ENTREGA-DASHBOARDS.md`](docs/sistema/PACOTE-ENTREGA-DASHBOARDS.md)):
+
+```
+public/handoff-dashboards.html    pacote de entrega, com réplicas ao vivo das interações
+public/roteiro-dashboards.html    roteiro de testes passo a passo
+public/img/handoff/               capturas do protótipo em 1440, usadas pelos dois
 ```
 
 ```
@@ -116,7 +131,11 @@ src/stores/explorador.ts          estado editável do dashboard (regras de UX mo
 src/components/gestora/           shell, cards, popover, explorador de cenários
 src/pages/EntrarPage.vue          nasceu em código (não tem frame)
 src/pages/GestoraDashboardPage.vue
+src/pages/AdminDashboardPage.vue
+src/pages/VerificadorDashboardPage.vue
 src/data/mocks/gestora.ts         catálogo (linhas, status, ações) + presets dos frames
+src/data/mocks/perfis.ts          indicadores, massas e materiais do admin e do verificador
+src/data/mocks/sessao.ts          perfis, usuários, menus por perfil e entidade
 ```
 
 ### Catálogo, presets e o explorador
@@ -153,9 +172,9 @@ Até ~1900px de viewport tudo isso fica exatamente no valor do Figma.
 
 ### Regras inegociáveis destas telas
 
-- O card de prazo **não muda de altura** com o número de ações liberadas. Só `n = 1` mostra a
-  ação na frase; de 2 em diante o gatilho conta (`Ver as 6 ações liberadas até 29/08`) e o
-  popover mostra.
+- O card de prazo **não muda de altura** com o número de ações liberadas, e **nunca mostra
+  qual ação está liberada**, nem quando há uma só: com `n = 1` o gatilho apenas vai para o
+  singular (`Ver a ação liberada até 02/09`). O card conta, o popover mostra.
 - O `n` é **por card**: planos e relatórios têm vigências, flags e listas independentes.
 - **Não existe vigência restritiva com zero ações liberadas.**
 - `DocumentationRow` só desenha a barra empilhada com **2 ou mais** status. Status zerado não
