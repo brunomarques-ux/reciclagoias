@@ -15,7 +15,9 @@ import { useSessaoStore } from '@/stores/sessao';
 import SideMenuRecicla from './SideMenuRecicla.vue';
 import TopBarRecicla from './TopBarRecicla.vue';
 
-defineProps<{ secaoAtiva: string }>();
+/* `withDefaults` porque prop booleana ausente vira `false` no Vue — sem isso o
+   explorador sumiria justamente na tela que o usa. */
+withDefaults(defineProps<{ secaoAtiva: string; explorador?: boolean }>(), { explorador: true });
 
 const router = useRouter();
 const sessao = useSessaoStore();
@@ -28,10 +30,10 @@ function sair() {
 
 <template>
   <div class="gx-shell">
-    <TopBarRecicla :iniciais="sessao.entidade?.iniciais ?? ''" @sair="sair" />
+    <TopBarRecicla :iniciais="sessao.usuario?.iniciais ?? ''" @sair="sair" />
 
     <div class="gx-shell__body">
-      <SideMenuRecicla :ativo="secaoAtiva" />
+      <SideMenuRecicla :ativo="secaoAtiva" :explorador="explorador" />
 
       <main class="gx-shell__area">
         <div class="gx-shell__content">

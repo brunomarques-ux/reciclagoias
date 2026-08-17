@@ -28,6 +28,7 @@ const idPopover = computed(() => `gx-popover-${props.prazo.id}`);
 const acoes = computed(() => props.prazo.restritivo?.acoes ?? []);
 
 const contador = computed(() => {
+  if (props.prazo.contador) return props.prazo.contador;
   const dias = props.prazo.diasRestantes;
   return dias === 1
     ? 'Falta 1 dia para o fim do prazo'
@@ -92,18 +93,7 @@ onBeforeUnmount(() => {
       </span>
     </div>
 
-    <!-- Sem período restritivo o card carrega a ação que o prazo habilita. -->
-    <button
-      v-if="!prazo.restritivo"
-      type="button"
-      class="gx-deadline__acao"
-      aria-disabled="true"
-      title="Em breve"
-    >
-      {{ prazo.acaoRotulo }}
-    </button>
-
-    <div v-else class="gx-deadline__bloco">
+    <div v-if="prazo.restritivo" class="gx-deadline__bloco">
       <p class="gx-deadline__chip">Período restritivo</p>
 
       <div ref="disclosure" class="gx-deadline__disclosure">
@@ -128,6 +118,17 @@ onBeforeUnmount(() => {
         />
       </div>
     </div>
+
+    <!-- Sem período restritivo o card carrega a ação que o prazo habilita. -->
+    <button
+      v-else-if="prazo.acaoRotulo"
+      type="button"
+      class="gx-deadline__acao"
+      aria-disabled="true"
+      title="Em breve"
+    >
+      {{ prazo.acaoRotulo }}
+    </button>
   </section>
 </template>
 
