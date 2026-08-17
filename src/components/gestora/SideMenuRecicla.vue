@@ -121,8 +121,11 @@ a.gx-menu__item:hover:not(.gx-menu__item--ativo) {
   background-color: var(--rg-color-surface-muted);
 }
 
+/* O item sem tela precisa se declarar em algum canal além do cursor. Muted dá
+   4,8:1 sobre o menu — passa AA como texto estático. */
 .gx-menu__item--indisponivel {
   cursor: default;
+  color: var(--rg-color-text-muted);
 }
 
 .gx-menu__rodape {

@@ -91,8 +91,11 @@ defineProps<{ acoes: { rotulo: string; primario?: boolean }[] }>();
   opacity: 0.72;
 }
 
+/* `outline` transparente em vez de `none`: em alto contraste do Windows o
+   box-shadow é descartado e o foco sumiria. */
 .gx-quick__botao:focus-visible {
-  outline: none;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
   box-shadow: var(--rg-ring-focus);
 }
 </style>

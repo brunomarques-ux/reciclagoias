@@ -30,12 +30,14 @@ function sair() {
 
 <template>
   <div class="gx-shell">
+    <a class="gx-shell__pular" href="#gx-conteudo">Ir para o conteúdo</a>
+
     <TopBarRecicla :iniciais="sessao.usuario?.iniciais ?? ''" @sair="sair" />
 
     <div class="gx-shell__body">
       <SideMenuRecicla :ativo="secaoAtiva" :explorador="explorador" />
 
-      <main class="gx-shell__area">
+      <main id="gx-conteudo" class="gx-shell__area" tabindex="-1">
         <div class="gx-shell__content">
           <slot />
         </div>
@@ -50,6 +52,34 @@ function sair() {
   flex-direction: column;
   min-height: 100vh;
   background-color: var(--rg-color-surface-muted);
+}
+
+/* WCAG 2.4.1: hoje o menu tem um item clicável só, mas este shell é o molde das
+   três telas e vai para o sistema real. */
+.gx-shell__pular {
+  position: absolute;
+  left: var(--rg-space-3);
+  top: var(--rg-space-3);
+  z-index: 60;
+  padding: var(--rg-space-2) var(--rg-space-4);
+  border-radius: var(--rg-radius-md);
+  background-color: var(--rg-color-surface-raised);
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: var(--rg-font-weight-semibold);
+  color: var(--rg-color-text-brand);
+  box-shadow: var(--rg-elevation-3);
+  transform: translateY(-200%);
+}
+
+.gx-shell__pular:focus-visible {
+  outline: 2px solid var(--rg-color-action-primary);
+  outline-offset: 2px;
+  transform: translateY(0);
+}
+
+.gx-shell__area:focus-visible {
+  outline: none;
 }
 
 .gx-shell__body {

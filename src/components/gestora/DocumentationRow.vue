@@ -55,13 +55,9 @@ function rotulo(quantidade: number, singular: string, plural: string) {
       </template>
     </div>
 
-    <button
-      type="button"
-      class="gx-doc-row__link"
-      aria-disabled="true"
-      title="Em breve"
-    >
+    <button type="button" class="gx-doc-row__link" aria-disabled="true">
       {{ linha.linkRotulo }}
+      <span class="gx-doc-row__breve">em breve</span>
       <v-icon icon="mdi-chevron-right" size="14" aria-hidden="true" />
     </button>
   </li>
@@ -164,6 +160,17 @@ function rotulo(quantidade: number, singular: string, plural: string) {
   font-weight: var(--rg-font-weight-medium);
   color: var(--rg-color-text-brand);
   cursor: default;
+}
+
+/* O estado precisa estar escrito: `title` não chega ao teclado nem ao toque, e sem
+   ele este link fica idêntico ao gatilho vivo do popover. */
+.gx-doc-row__breve {
+  font-size: var(--rg-font-size-2xs);
+  line-height: 14px;
+  font-weight: var(--rg-font-weight-semibold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--rg-color-text-muted);
 }
 
 .gx-doc-row__link:focus-visible {
