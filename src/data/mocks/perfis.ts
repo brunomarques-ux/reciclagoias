@@ -107,20 +107,27 @@ export const DISTRIBUICAO_USUARIOS: FatiaUsuarios[] = [
   { rotulo: 'verificadores', quantidade: 15, tone: 'neutral' },
 ];
 
+/**
+ * Só as massas em tonelada e o percentual da meta ficam guardados. A meta em
+ * tonelada, a taxa de recuperação e o "bateu ou não bateu" são **derivados** — foi
+ * assim que a contradição do Papel apareceu (anel dizia 100% com 86.632 t
+ * recuperadas sobre 49.788 t produzidas) e é assim que ela não volta.
+ */
 export interface MaterialRecuperado {
   nome: string;
-  percentual: number;
-  produzida: string;
-  recuperada: string;
-  meta: string;
-  metaAtingida: boolean;
+  /** Massa colocada no mercado, em toneladas. É a base da conta. */
+  produzida: number;
+  recuperada: number;
 }
 
+/** Meta legal do exercício: percentual da massa produzida que precisa voltar. */
+export const META_PERCENTUAL = 30;
+
 export const MATERIAIS_ADMIN: MaterialRecuperado[] = [
-  { nome: 'Papel', percentual: 100, produzida: '49.788,0 t', recuperada: '86.632,0 t', meta: '14.936,4 t', metaAtingida: true },
-  { nome: 'Plástico', percentual: 81.4, produzida: '12.692,0 t', recuperada: '10.335,0 t', meta: '3.807,6 t', metaAtingida: true },
-  { nome: 'Metal', percentual: 70.8, produzida: '8.846,0 t', recuperada: '6.263,96 t', meta: '2.653,8 t', metaAtingida: true },
-  { nome: 'Vidro', percentual: 53.1, produzida: '7.746,0 t', recuperada: '4.116,0 t', meta: '2.323,8 t', metaAtingida: true },
+  { nome: 'Papel', produzida: 49788, recuperada: 86632 },
+  { nome: 'Plástico', produzida: 12692, recuperada: 10335 },
+  { nome: 'Metal', produzida: 8846, recuperada: 6263.96 },
+  { nome: 'Vidro', produzida: 7746, recuperada: 4116 },
 ];
 
 export interface MassaDisponivel {
