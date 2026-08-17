@@ -169,7 +169,7 @@ onBeforeUnmount(() => {
         <h3 class="gx-painel__secao">Período restritivo</h3>
         <p class="gx-painel__dica">
           O estado é por card. Ligar libera a primeira ação; desmarcar a última desliga o
-          período — não existe vigência restritiva com zero ações.
+          período, porque não existe vigência restritiva com zero ações.
         </p>
 
         <fieldset v-for="prazo in CATALOGO_PRAZOS" :key="prazo.id" class="gx-grupo">

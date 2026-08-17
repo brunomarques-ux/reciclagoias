@@ -1,10 +1,10 @@
 <script setup lang="ts">
 /**
- * Card "Acesso Rápido" da coluna lateral — atalhos para as listagens do perfil.
+ * Card "Acesso Rápido" da coluna lateral: atalhos para as listagens do perfil.
  *
- * O último botão é o preenchido: é o destino mais provável do perfil. Enquanto as
- * telas de destino não existem, os botões ficam inertes **com o estado escrito**
- * ("em breve" visível), e não só no `title` — atributo que teclado e toque não leem.
+ * O último botão é o preenchido, porque é o destino mais provável. As telas de
+ * destino ainda não existem, então os botões ficam inertes com `aria-disabled`, sem
+ * nenhum rótulo de estado: nesta rodada o protótipo mostra a forma, não o fluxo.
  */
 defineProps<{ acoes: { rotulo: string; primario?: boolean }[] }>();
 </script>
@@ -22,7 +22,6 @@ defineProps<{ acoes: { rotulo: string; primario?: boolean }[] }>();
           aria-disabled="true"
         >
           {{ acao.rotulo }}
-          <span class="gx-quick__breve">em breve</span>
         </button>
       </li>
     </ul>
@@ -80,15 +79,6 @@ defineProps<{ acoes: { rotulo: string; primario?: boolean }[] }>();
   border-color: var(--rg-color-action-primary);
   background-color: var(--rg-color-action-primary);
   color: var(--rg-color-text-on-brand);
-}
-
-.gx-quick__breve {
-  font-size: var(--rg-font-size-2xs);
-  line-height: 14px;
-  font-weight: var(--rg-font-weight-semibold);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  opacity: 0.72;
 }
 
 /* `outline` transparente em vez de `none`: em alto contraste do Windows o

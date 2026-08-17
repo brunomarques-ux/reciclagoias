@@ -49,7 +49,7 @@ const mostraExplorador = computed(() => props.explorador);
           <span
             v-else
             class="gx-menu__item gx-menu__item--indisponivel"
-            :title="`${item.rotulo} — em breve`"
+            :title="item.rotulo"
           >
             <v-icon :icon="item.icone" size="18" aria-hidden="true" />
             <span class="gx-menu__rotulo">{{ item.rotulo }}</span>
