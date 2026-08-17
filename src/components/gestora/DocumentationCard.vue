@@ -7,16 +7,17 @@
 import type { LinhaDocumentacao } from '@/data/mocks/gestora';
 import DocumentationRow from './DocumentationRow.vue';
 
-defineProps<{ anoExecucao: number; linhas: LinhaDocumentacao[] }>();
+withDefaults(
+  defineProps<{ anoExecucao: number; linhas: LinhaDocumentacao[]; descricao?: string }>(),
+  { descricao: 'Planos, relatórios e certificados de massa do ano de execução' },
+);
 </script>
 
 <template>
   <section class="gx-doc-card" aria-labelledby="gx-doc-card-titulo">
     <header class="gx-doc-card__head">
       <h2 id="gx-doc-card-titulo" class="gx-doc-card__titulo">Status da Documentação</h2>
-      <p class="gx-doc-card__descricao">
-        Planos, relatórios e certificados de massa do ano de execução {{ anoExecucao }}.
-      </p>
+      <p class="gx-doc-card__descricao">{{ descricao }} {{ anoExecucao }}.</p>
     </header>
 
     <ul class="gx-doc-card__lista">

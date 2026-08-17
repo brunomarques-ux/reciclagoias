@@ -12,4 +12,6 @@ export const COR_TONE: Record<StatusTone, string> = {
   info: 'var(--rg-color-feedback-info)',
   warning: 'var(--rg-color-feedback-warning)',
   neutral: 'var(--rg-color-text-muted)',
+  /** Estado que trava o fluxo — "bloqueadas", no dashboard do verificador. */
+  danger: 'var(--rg-color-feedback-danger)',
 };

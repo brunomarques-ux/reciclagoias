@@ -13,22 +13,20 @@
  *
  * No rodapé mora o explorador de cenários, que é ferramenta de protótipo.
  */
+import { computed } from 'vue';
+
+import { useSessaoStore } from '@/stores/sessao';
 import ExploradorCenarios from './ExploradorCenarios.vue';
 
-interface ItemMenu {
-  rotulo: string;
-  icone: string;
-  rota: string | null;
-}
+const props = withDefaults(defineProps<{ ativo: string; explorador?: boolean }>(), {
+  explorador: true,
+});
 
-const ITENS: ItemMenu[] = [
-  { rotulo: 'Dashboard', icone: 'mdi-view-dashboard', rota: '/gestora' },
-  { rotulo: 'Minha Conta', icone: 'mdi-account', rota: null },
-  { rotulo: 'Planos', icone: 'mdi-clipboard-text', rota: null },
-  { rotulo: 'Relatórios', icone: 'mdi-file-document', rota: null },
-];
+const sessao = useSessaoStore();
 
-defineProps<{ ativo: string }>();
+/** Os itens vêm do perfil: o verificador tem Notas Fiscais onde a gestora tem Planos. */
+const ITENS = computed(() => sessao.menu);
+const mostraExplorador = computed(() => props.explorador);
 </script>
 
 <template>
@@ -60,7 +58,7 @@ defineProps<{ ativo: string }>();
       </ul>
     </nav>
 
-    <footer class="gx-menu__rodape">
+    <footer v-if="mostraExplorador" class="gx-menu__rodape">
       <ExploradorCenarios />
     </footer>
   </div>

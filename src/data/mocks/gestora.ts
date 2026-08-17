@@ -14,7 +14,7 @@
  *  - o período restritivo é por card — planos e relatórios são independentes.
  */
 
-export type StatusTone = 'success' | 'info' | 'warning' | 'neutral';
+export type StatusTone = 'success' | 'info' | 'warning' | 'neutral' | 'danger';
 
 // ============================================================
 // Formato consumido pelos componentes da tela
@@ -59,7 +59,9 @@ export interface CardPrazo {
   data: string;
   diasRestantes: number;
   /** Ação que o prazo habilita — só aparece quando não há período restritivo. */
-  acaoRotulo: string;
+  acaoRotulo?: string;
+  /** Substitui o contador calculado quando o prazo não é uma contagem de dias. */
+  contador?: string;
   restritivo: PeriodoRestritivo | null;
 }
 
