@@ -1,15 +1,50 @@
 <script setup lang="ts">
 /**
- * Card "Massa Produzida e Recuperada": um anel por material, com a meta escrita.
+ * Card "Massa Produzida e Recuperada": um cartão por material.
  *
- * O anel é progresso contra meta — pergunta de relance. Os três números embaixo são
- * a resposta exata, e é a leitura que sustenta a decisão: sem eles o anel viraria
- * enfeite.
+ * A conta que o cartão precisa deixar óbvia é esta:
+ *   produzida × meta% = meta em tonelada · recuperada ÷ produzida = taxa do anel
+ *
+ * Por isso os três números aparecem na ordem da narrativa — base, limiar, resultado —
+ * e a meta carrega o percentual ao lado do valor, que é o que liga os 30% do
+ * indicador do topo à tonelada escrita aqui embaixo. Nada é digitado duas vezes:
+ * meta, taxa e cumprimento saem das duas massas.
+ *
+ * Cor: o cartão só ganha fundo verde quando a taxa fecha 100% — é o que deixa a
+ * fileira legível de longe. Quem não fechou fica em cinza, sem cor de semáforo no
+ * fundo; a atenção, quando existe, aparece no número.
  */
-import type { MaterialRecuperado } from '@/data/mocks/perfis';
-import RingChart from './RingChart.vue';
+import { computed } from 'vue';
 
-defineProps<{ anoExecucao: number; materiais: MaterialRecuperado[] }>();
+import { META_PERCENTUAL, type MaterialRecuperado } from '@/data/mocks/perfis';
+import RingChart, { type TomAnel } from './RingChart.vue';
+
+const props = defineProps<{ anoExecucao: number; materiais: MaterialRecuperado[] }>();
+
+/** Abaixo disso a taxa aparece em âmbar, mesmo com a meta legal cumprida. */
+const LIMIAR_ATENCAO = 60;
+
+const toneladas = (valor: number) =>
+  `${valor.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} t`;
+
+const cartoes = computed(() =>
+  props.materiais.map((material) => {
+    const meta = (material.produzida * META_PERCENTUAL) / 100;
+    const taxa = material.produzida > 0 ? (material.recuperada / material.produzida) * 100 : 0;
+    const tom: TomAnel = taxa >= 100 ? 'success' : taxa < LIMIAR_ATENCAO ? 'atencao' : 'neutro';
+
+    return {
+      nome: material.nome,
+      taxa,
+      tom,
+      completo: taxa >= 100,
+      metaAtingida: material.recuperada >= meta,
+      produzida: toneladas(material.produzida),
+      recuperada: toneladas(material.recuperada),
+      meta: toneladas(meta),
+    };
+  }),
+);
 </script>
 
 <template>
@@ -17,31 +52,42 @@ defineProps<{ anoExecucao: number; materiais: MaterialRecuperado[] }>();
     <header class="gx-mass__head">
       <h2 id="gx-mass-titulo" class="gx-mass__titulo">Massa Produzida e Recuperada</h2>
       <p class="gx-mass__descricao">
-        Percentual de recuperação por material no ano de execução {{ anoExecucao }}.
+        Quanto voltou da massa colocada no mercado em {{ anoExecucao }}. A meta do exercício é
+        recuperar {{ META_PERCENTUAL }}% do que cada material produziu.
       </p>
     </header>
 
     <ul class="gx-mass__lista">
-      <li v-for="material in materiais" :key="material.nome" class="gx-mass__item">
+      <li
+        v-for="material in cartoes"
+        :key="material.nome"
+        class="gx-mass__item"
+        :class="{ 'gx-mass__item--completo': material.completo }"
+      >
         <h3 class="gx-mass__material">{{ material.nome }}</h3>
 
-        <RingChart :percentual="material.percentual" />
-        <p class="gx-mass__legenda">de recuperação</p>
+        <RingChart :percentual="material.taxa" :marca="META_PERCENTUAL" :tom="material.tom" />
+        <p class="gx-mass__legenda">recuperado do que produziu</p>
 
-        <p v-if="material.metaAtingida" class="gx-mass__chip">Meta atingida</p>
+        <p
+          class="gx-mass__chip"
+          :class="material.metaAtingida ? 'gx-mass__chip--ok' : 'gx-mass__chip--abaixo'"
+        >
+          {{ material.metaAtingida ? 'Meta atingida' : 'Abaixo da meta' }}
+        </p>
 
         <dl class="gx-mass__numeros">
-          <div class="gx-mass__linha gx-mass__linha--destaque">
-            <dt>Recuperada</dt>
-            <dd>{{ material.recuperada }}</dd>
-          </div>
           <div class="gx-mass__linha">
             <dt>Produzida</dt>
             <dd>{{ material.produzida }}</dd>
           </div>
           <div class="gx-mass__linha">
-            <dt>Meta ≥</dt>
+            <dt>Meta ({{ META_PERCENTUAL }}%)</dt>
             <dd>{{ material.meta }}</dd>
+          </div>
+          <div class="gx-mass__linha gx-mass__linha--destaque">
+            <dt>Recuperada</dt>
+            <dd>{{ material.recuperada }}</dd>
           </div>
         </dl>
       </li>
@@ -96,16 +142,15 @@ defineProps<{ anoExecucao: number; materiais: MaterialRecuperado[] }>();
   align-items: center;
   gap: var(--rg-space-3);
   padding: var(--rg-space-5);
+  border: 1px solid transparent;
   border-radius: var(--rg-radius-md);
   background-color: var(--rg-color-surface-subtle);
 }
 
-/* O que o percentual do anel significa, escrito fora do anel. */
-.gx-mass__legenda {
-  margin: calc(var(--rg-space-3) * -1 + 4px) 0 0;
-  font-size: var(--rg-font-size-xs);
-  line-height: 16px;
-  color: var(--rg-color-text-muted);
+/* Fundo verde só quando a taxa fecha 100%: é o que se lê de longe na fileira. */
+.gx-mass__item--completo {
+  border-color: var(--rg-primitive-brand-200);
+  background-color: var(--rg-color-surface-brand);
 }
 
 .gx-mass__material {
@@ -116,15 +161,36 @@ defineProps<{ anoExecucao: number; materiais: MaterialRecuperado[] }>();
   color: var(--rg-color-text-primary);
 }
 
+/* O que o percentual do anel significa, escrito fora do anel. */
+.gx-mass__legenda {
+  margin: calc(var(--rg-space-3) * -1 + 4px) 0 0;
+  font-size: var(--rg-font-size-xs);
+  line-height: 16px;
+  color: var(--rg-color-text-secondary);
+}
+
 .gx-mass__chip {
   margin: 0;
   padding: var(--rg-space-1) 10px;
   border-radius: var(--rg-radius-pill);
-  background-color: var(--rg-color-feedback-success-soft);
   font-size: var(--rg-font-size-xs);
   line-height: 16px;
   font-weight: var(--rg-font-weight-semibold);
+}
+
+.gx-mass__chip--ok {
+  background-color: var(--rg-color-feedback-success-soft);
   color: var(--rg-color-text-brand);
+}
+
+.gx-mass__chip--abaixo {
+  background-color: var(--rg-color-feedback-warning-soft);
+  color: var(--rg-primitive-amber-700);
+}
+
+/* No cartão verde o chip precisa de superfície própria para não sumir no fundo. */
+.gx-mass__item--completo .gx-mass__chip--ok {
+  background-color: var(--rg-color-surface-raised);
 }
 
 .gx-mass__numeros {
@@ -145,7 +211,7 @@ defineProps<{ anoExecucao: number; materiais: MaterialRecuperado[] }>();
 }
 
 .gx-mass__linha dt {
-  color: var(--rg-color-text-muted);
+  color: var(--rg-color-text-secondary);
 }
 
 .gx-mass__linha dd {
@@ -154,18 +220,17 @@ defineProps<{ anoExecucao: number; materiais: MaterialRecuperado[] }>();
   color: var(--rg-color-text-secondary);
 }
 
-/* Três pesos no bloco de números: a massa recuperada é o resultado, as outras duas
-   são a base e o limiar que explicam o resultado. Sem isso o olho não sabe por onde
-   começar — os três números pesavam igual. */
+/* A massa recuperada é o resultado da conta; produzida e meta são a base e o
+   limiar que a explicam. */
 .gx-mass__linha--destaque {
-  padding-bottom: var(--rg-space-1);
-  margin-bottom: var(--rg-space-1);
-  border-bottom: 1px solid var(--rg-color-border-subtle);
+  padding-top: var(--rg-space-1);
+  margin-top: var(--rg-space-1);
+  border-top: 1px solid var(--rg-color-border-subtle);
 }
 
 .gx-mass__linha--destaque dt {
   font-weight: var(--rg-font-weight-medium);
-  color: var(--rg-color-text-secondary);
+  color: var(--rg-color-text-primary);
 }
 
 .gx-mass__linha--destaque dd {
