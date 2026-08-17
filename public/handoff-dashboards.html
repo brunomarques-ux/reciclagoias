@@ -101,7 +101,9 @@ kbd{display:inline-block;font:600 11.5px/1.4 var(--mono);color:var(--slate-700);
 .aviso--warn{background:var(--amber-50);color:var(--amber-700)} .aviso--warn .aviso__i{background:var(--amber-600)}
 .aviso--danger{background:var(--red-50);color:var(--red-700)} .aviso--danger .aviso__i{background:var(--red-600)}
 .aviso--ok{background:var(--brand-50);color:var(--brand-700)} .aviso--ok .aviso__i{background:var(--brand-600)}
-.aviso b{color:inherit;display:block;margin-bottom:2px}
+/* Só o primeiro b do aviso é o rótulo em bloco; os demais são ênfase no meio da frase. */
+.aviso div > b:first-child{color:inherit;display:block;margin-bottom:2px}
+.aviso b{color:inherit}
 
 /* ---------- chips ---------- */
 .chip{display:inline-block;border-radius:999px;padding:3px 11px;font:600 11.5px/1.6 var(--font);white-space:nowrap;vertical-align:middle}
@@ -124,11 +126,12 @@ kbd{display:inline-block;font:600 11.5px/1.4 var(--mono);color:var(--slate-700);
 .duo__c li{margin:5px 0}
 
 /* ---------- cards de tela ---------- */
-.telas{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:22px;margin-top:26px}
+.telas{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:22px;margin-top:26px;align-items:start}
 .tela{display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:15px;overflow:hidden;transition:transform .18s cubic-bezier(.2,0,0,1),box-shadow .18s,border-color .18s}
 .tela:hover{transform:translateY(-3px);box-shadow:var(--shadow-2);border-color:var(--brand-200)}
-.tela__shot{position:relative;display:block;aspect-ratio:16/10;overflow:hidden;background:var(--slate-100);border-bottom:1px solid var(--line);cursor:zoom-in;border:0}
-.tela__shot img{width:100%;height:100%;object-fit:cover;object-position:top left;display:block}
+/* Sem recorte: a miniatura mantém a proporção da captura, a mesma que se vê ampliada. */
+.tela__shot{position:relative;display:block;width:100%;padding:0;background:var(--slate-100);border:0;border-bottom:1px solid var(--line);cursor:zoom-in;line-height:0}
+.tela__shot img{width:100%;height:auto;display:block}
 .tela__lupa{position:absolute;right:10px;bottom:10px;background:rgba(15,23,42,.78);color:#fff;border-radius:8px;font:600 10.5px/1 var(--font);padding:6px 9px;opacity:0;transition:opacity .18s}
 .tela__shot:hover .tela__lupa{opacity:1}
 .tela__b{padding:18px 20px 20px;display:flex;flex-direction:column;gap:7px;flex:1}
@@ -286,7 +289,7 @@ tbody tr:hover{background:#FCFDFE}
 .ry__g button:last-child{border-right:0}
 .ry__g button:hover:not(:disabled){background:var(--slate-50)}
 .ry__g button:focus-visible{outline:2px solid var(--brand-600);outline-offset:-2px}
-.ry__g button[disabled]{color:var(--slate-300);cursor:default}
+.ry__g button[disabled],.ry__g .ry__seta[disabled]{color:var(--slate-300) !important;cursor:default}
 .ry__g .is-ativo{background:var(--brand-50);color:var(--brand-700);font-weight:600}
 .ry__seta{padding:0 14px !important;color:var(--slate-500) !important}
 .ry__saida{margin-top:12px;font:500 12.5px/1.5 var(--mono);color:var(--slate-500)}
@@ -379,9 +382,9 @@ tbody tr:hover{background:#FCFDFE}
       <span>4 rotas</span>
       <span>18 componentes</span>
       <span>26 estados</span>
-      <span>24 regras</span>
+      <span>22 regras</span>
       <span>5 réplicas ao vivo</span>
-      <span>D-R001 · D-R002 · D-R003</span>
+      <span>69 itens de checklist</span>
     </div>
     <div class="hero__acoes">
       <a class="btn btn--claro" href="https://reciclagoias.vercel.app/entrar" target="_blank" rel="noopener">Abrir protótipo interativo</a>
@@ -423,28 +426,28 @@ tbody tr:hover{background:#FCFDFE}
 </div>
 
 <section class="bloco" id="contexto">
-  <h2><span class="n">1</span>Por que estas telas existem</h2>
-  <p class="intro">O dashboard é a porta de entrada: é a primeira coisa que a pessoa vê depois de entrar e é onde ela decide o que fazer. O redesenho começou pelo dashboard da Entidade Gestora, a pedido do cliente, e quando ele ficou de pé os outros dois passaram a destoar: mesma base de dados, mesmo usuário, duas linguagens visuais diferentes. Por isso os três estão neste pacote.</p>
+  <h2><span class="n">1</span>Como esta entrega chegou aqui</h2>
+  <p class="intro">O ponto de partida foi o <b>card de período restritivo</b>: era o desenho que precisava sair. Aproveitando que aquela área ia ser mexida de qualquer jeito, o <b>dashboard da Entidade Gestora</b> veio junto. Com ele aprovado, os outros dois dashboards passaram a ficar um passo atrás do visual novo, e ajustá-los é a continuação natural do mesmo movimento: o dashboard já tinha evoluído antes, do primeiro desenho para o que serviu de base aqui, e agora dá mais um passo.</p>
+  <p>É a porta de entrada do sistema, a primeira coisa que a pessoa vê depois de entrar e onde ela decide o que fazer. Por isso o esforço se concentrou em hierarquia da informação, leitura rápida e comportamento previsível.</p>
 
   <div class="duo">
-    <div class="duo__c duo__c--mal">
-      <div class="duo__t">No sistema atual</div>
-      <p>A informação existe, mas o dashboard não ajuda a ler: números soltos, gráfico que se contradiz e regra administrativa ocupando o espaço do dado.</p>
+    <div class="duo__c duo__c--bem">
+      <div class="duo__t">O que esta entrega traz</div>
       <ul>
-        <li>Cabeçalho de linha com um total que não bate com a soma dentro da própria barra</li>
-        <li>Anel de recuperação marcando 100% com 86.632 t recuperadas sobre 49.788 t produzidas</li>
-        <li>Lista de ações do período restritivo dentro do card, empurrando a data para baixo</li>
-        <li>Pílulas fixas de ano no cabeçalho, uma por exercício, que crescem para sempre</li>
+        <li>Card de prazo que <b>conta</b> as ações liberadas, com a lista dentro de um popover, e altura que não muda com o número</li>
+        <li>Status da documentação em barra empilhada, com a contagem de cada status escrita ao lado</li>
+        <li>Seletor de exercício com janela deslizante de três células, que não cresce conforme os anos passam</li>
+        <li>Distribuição de usuários em rosca, com o detalhe aparecendo dentro do próprio gráfico</li>
+        <li>Recuperação por material com dois estados visuais claros, meta atingida e abaixo da meta</li>
       </ul>
     </div>
-    <div class="duo__c duo__c--bem">
-      <div class="duo__t">Nesta entrega</div>
-      <p>Mesma informação, com hierarquia declarada e cada número derivado de uma fonte só.</p>
+    <div class="duo__c duo__c--mal">
+      <div class="duo__t">O que se manteve</div>
       <ul>
-        <li>Total é sempre a soma dos status, e status zerado não é desenhado</li>
-        <li>Taxa, meta em tonelada e o "bateu ou não bateu" derivam das duas massas</li>
-        <li>O card de prazo conta as ações e o popover mostra a lista, com altura constante</li>
-        <li>Seletor de ano com janela deslizante de três células, que não cresce com a série</li>
+        <li>Todos os campos e todos os textos das telas de origem</li>
+        <li>A mesma leitura: os mesmos números, nos mesmos agrupamentos</li>
+        <li>O título <span class="copy">Status da Documentação</span>, que é requisição do cliente</li>
+        <li>O vermelho do período restritivo, também requisição do cliente</li>
       </ul>
     </div>
   </div>
@@ -525,25 +528,6 @@ tbody tr:hover{background:#FCFDFE}
       </div>
     </article>
 
-    <article class="tela">
-      <button class="tela__shot" data-lb="img/handoff/doc-variacoes.png"><img src="img/handoff/doc-variacoes.png" width="1013" height="452" alt="As três variações da linha de documentação na mesma tela" loading="lazy"><span class="tela__lupa">ampliar</span></button>
-      <div class="tela__b">
-        <span class="tela__t">Variações da linha</span>
-        <span class="tela__rota">/gestora?cenario=variacoes</span>
-        <span class="tela__d">Zero, um e quatro status na mesma tela. É a tira B do Figma reproduzida em dado real, e o jeito mais rápido de conferir a regra da barra empilhada.</span>
-        <a class="tela__link" href="https://reciclagoias.vercel.app/gestora?cenario=variacoes" target="_blank" rel="noopener">Abrir tela →</a>
-      </div>
-    </article>
-
-    <article class="tela">
-      <button class="tela__shot" data-lb="img/handoff/popover-20.png"><img src="img/handoff/popover-20.png" width="458" height="732" alt="Popover do período restritivo com vinte ações e lista rolando" loading="lazy"><span class="tela__lupa">ampliar</span></button>
-      <div class="tela__b">
-        <span class="tela__t">Vinte ações liberadas</span>
-        <span class="tela__rota">/gestora?cenario=rec06</span>
-        <span class="tela__d">O caso extremo da D-R001: o card tem exatamente a mesma altura de quando há uma ação só, e quem rola é a lista dentro do popover.</span>
-        <a class="tela__link" href="https://reciclagoias.vercel.app/gestora?cenario=rec06" target="_blank" rel="noopener">Abrir tela →</a>
-      </div>
-    </article>
   </div>
 
   <p class="apoio-linha">
@@ -596,88 +580,81 @@ tbody tr:hover{background:#FCFDFE}
   </table></div>
 
   <h3 class="sub">A grade</h3>
-  <p style="font-size:14px;color:var(--slate-500);margin-top:8px">Nas três telas: coluna principal fluida mais coluna lateral de largura <code>clamp(360px, 22%, 520px)</code>, com <code>gap</code> de 20px. Os 360px são a medida do frame de 1440 e são o piso. O conteúdo ocupa a largura toda, do recuo depois do menu até o recuo da direita, com <code>padding-inline: max(40px, min(2.5vw, 80px))</code>. Nada de largura fixa centralizada: com margem grande dos dois lados a tela parece que não foi feita sob medida, e num monitor 4K seria pior.</p>
-
-  <h3 class="sub">Os dois blocos de uma tela só</h3>
-  <div class="demo__grade" style="margin-top:18px">
-    <div style="max-width:300px">
-      <button class="spec__shot" style="margin-top:0" data-lb="img/handoff/acesso-rapido.png"><img src="img/handoff/acesso-rapido.png" width="458" height="335" alt="Card de Acesso Rápido com três botões" loading="lazy"></button>
-      <p style="font-size:13.2px;color:var(--slate-500);margin-top:10px"><b>Acesso Rápido</b> existe na gestora e no verificador, com conjuntos diferentes. O último botão é o preenchido, porque é o destino mais provável. Nesta rodada todos são inertes: as listagens de destino ainda não existem.</p>
-    </div>
-    <div style="max-width:300px">
-      <button class="spec__shot" style="margin-top:0" data-lb="img/handoff/explorador.png"><img src="img/handoff/explorador.png" width="423" height="1378" alt="Painel do explorador de cenários aberto" loading="lazy"></button>
-      <p style="font-size:13.2px;color:var(--slate-500);margin-top:10px"><b>Explorador de cenários</b>, no rodapé do menu da gestora. É ferramenta de protótipo e <b>não vai para o sistema real</b>: serve para inspecionar as variações sem precisar de dado novo. Os controles nascem do catálogo, e as regras que ele respeita são as da seção 8.</p>
-    </div>
+  <div class="aviso aviso--info" style="margin-top:14px">
+    <span class="aviso__i">i</span>
+    <div><b>As medidas abaixo são sugestão, não regra</b>
+      Elas descrevem o que o protótipo faz hoje e servem de ponto de partida. O desenho existe só para o desktop de 1440, e a responsividade ainda não foi tratada como rodada própria, então travar pixel aqui seria travar uma decisão que ainda não foi tomada. Ajuste conforme a grade e os componentes de vocês. O que precisa sobreviver é a <b>intenção</b>: coluna principal fluida, coluna lateral estreita ao lado, e conteúdo em largura total.</div>
   </div>
+  <p style="font-size:14px;color:var(--slate-500);margin-top:12px">Nas três telas: coluna principal fluida mais coluna lateral de largura <code>clamp(360px, 22%, 520px)</code>, com <code>gap</code> de 20px. Os 360px são a medida do frame de 1440 e funcionam como piso. O conteúdo ocupa a largura toda, do recuo depois do menu até o recuo da direita, com <code>padding-inline: max(40px, min(2.5vw, 80px))</code>. A intenção por trás disso é não travar numa largura fixa centralizada: com margem grande dos dois lados a tela parece que não foi feita sob medida, e num monitor 4K fica pior.</p>
 
-  <h3 class="sub">Como se chega em cada tela</h3>
-  <div class="passos">
-    <div class="passo"><span class="passo__n">1</span><div><strong>Login</strong><code>/entrar</code><span>Escolhe o perfil. Grava a string em <code>sessionStorage</code> na chave <code>rg:sessao:perfil</code>.</span></div></div>
-    <div class="passo passo--seta">→</div>
-    <div class="passo"><span class="passo__n">2</span><div><strong>Rota inicial do perfil</strong><code>/gestora · /admin · /verificador</code><span>Vem do próprio perfil. Se havia <code>?destino=</code>, ele vence.</span></div></div>
-    <div class="passo passo--seta">→</div>
-    <div class="passo"><span class="passo__n">3</span><div><strong>Dashboard</strong><code>GestoraShell</code><span>Mesma casca nos três, com o menu do perfil. Sair é pelo avatar da TopBar.</span></div></div>
-  </div>
 </section>
 
 <section class="bloco" id="prazo">
   <h2><span class="n">4</span>Card de prazo, estado por estado</h2>
-  <p class="intro">É o componente com mais regra do pacote, e o que a decisão <b>D-R001</b> governa. A ideia inteira cabe numa frase: <b>o card conta, o popover mostra</b>. Fazer diferente é o que quebrava a tela no sistema atual, onde a lista de ações morava dentro do card e empurrava a data para baixo a cada ação nova.</p>
+  <p class="intro">É o componente com mais regra do pacote, e foi por ele que esta rodada começou. A ideia inteira cabe numa frase: <b>o card conta, o popover mostra</b>. O ganho disso é que o número de ações liberadas deixa de mexer no layout: seja uma ou vinte, a data continua no mesmo lugar e a coluna não salta de tamanho.</p>
 
   <div class="diagrama">
-  <svg viewBox="0 0 1000 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama de estados do card de prazo, com as transições entre vigência normal, período restritivo e popover aberto">
+  <svg viewBox="0 0 1000 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama de estados do card de prazo: prazo normal, período restritivo e popover aberto, com as transições entre eles">
     <defs>
-      <marker id="st1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#475569"/></marker>
+      <marker id="st1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#475569"/></marker>
     </defs>
     <style>
       .st{font:600 15px 'Inter',sans-serif;fill:#0F172A}
-      .sd{font:400 11px 'Inter',sans-serif;fill:#64748B}
+      .sd{font:400 11.5px 'Inter',sans-serif;fill:#64748B}
+      .sa{font:600 11.5px 'Inter',sans-serif;fill:#B91C1C}
       .tr{font:600 11.5px 'Inter',sans-serif;fill:#334155}
-      .gu{font:400 11.5px 'Inter',sans-serif;fill:#64748B}
-      .no{font:600 12px 'Inter',sans-serif;fill:#B91C1C}
+      .gu{font:400 11px 'Inter',sans-serif;fill:#94A3B8}
     </style>
 
-    <circle cx="40" cy="120" r="11" fill="#0F172A"/>
-    <path d="M51 120 H 140" stroke="#475569" stroke-width="1.6" marker-end="url(#st1)"/>
-    <text x="52" y="110" class="gu">vigência do admin</text>
+    <!-- entrada -->
+    <circle cx="26" cy="108" r="9" fill="#0F172A"/>
+    <path d="M38 108 H 112" stroke="#475569" stroke-width="1.5" marker-end="url(#st1)"/>
 
-    <rect x="146" y="76" width="200" height="90" rx="14" fill="#F1F5F9" stroke="#64748B" stroke-width="2"/>
-    <text x="246" y="112" text-anchor="middle" class="st">Prazo normal</text>
-    <text x="246" y="132" text-anchor="middle" class="sd">data, contador e a ação</text>
-    <text x="246" y="147" text-anchor="middle" class="sd">que o prazo habilita</text>
+    <!-- rótulos das transições, numa faixa acima das caixas -->
+    <text x="392" y="26" text-anchor="middle" class="tr">a diretoria autoriza a extensão</text>
+    <text x="392" y="42" text-anchor="middle" class="gu">e libera ao menos uma ação</text>
+    <text x="748" y="26" text-anchor="middle" class="tr">clique no gatilho</text>
+    <text x="748" y="42" text-anchor="middle" class="gu">nunca por hover</text>
 
-    <path d="M346 121 H 470" stroke="#475569" stroke-width="1.6" marker-end="url(#st1)"/>
-    <text x="352" y="110" class="tr">diretoria autoriza</text>
-    <text x="352" y="140" class="gu">[libera ao menos 1 ação]</text>
+    <!-- A · prazo normal -->
+    <rect x="118" y="66" width="192" height="84" rx="14" fill="#F8FAFC" stroke="#94A3B8" stroke-width="1.5"/>
+    <text x="214" y="100" text-anchor="middle" class="st">Prazo normal</text>
+    <text x="214" y="122" text-anchor="middle" class="sd">data, contador e a ação</text>
+    <text x="214" y="138" text-anchor="middle" class="sd">que o prazo habilita</text>
 
-    <rect x="476" y="60" width="230" height="122" rx="14" fill="#FEF2F2" stroke="#DC2626" stroke-width="2"/>
-    <text x="591" y="94" text-anchor="middle" class="st">Período restritivo</text>
-    <text x="591" y="115" text-anchor="middle" class="sd">chip vermelho + gatilho que conta</text>
-    <text x="591" y="132" text-anchor="middle" class="sd">n = 1  ·  “Ver a ação liberada até …”</text>
-    <text x="591" y="149" text-anchor="middle" class="sd">n ≥ 2  ·  “Ver as n ações liberadas até …”</text>
-    <text x="591" y="169" text-anchor="middle" class="no">altura do card não muda com n</text>
+    <path d="M310 108 H 468" stroke="#475569" stroke-width="1.5" marker-end="url(#st1)"/>
 
-    <path d="M706 121 H 820" stroke="#475569" stroke-width="1.6" marker-end="url(#st1)"/>
-    <text x="712" y="110" class="tr">clique no gatilho</text>
-    <text x="712" y="140" class="gu">[nunca hover]</text>
+    <!-- B · período restritivo -->
+    <rect x="474" y="52" width="248" height="112" rx="14" fill="#FEF2F2" stroke="#DC2626" stroke-width="1.5"/>
+    <text x="598" y="82" text-anchor="middle" class="st">Período restritivo</text>
+    <text x="598" y="104" text-anchor="middle" class="sd">chip vermelho e um gatilho que conta</text>
+    <text x="598" y="122" text-anchor="middle" class="sd">n = 1 no singular, n ≥ 2 no plural</text>
+    <text x="598" y="146" text-anchor="middle" class="sa">a altura do card não muda com o n</text>
 
-    <rect x="826" y="76" width="150" height="90" rx="14" fill="#E9F6EE" stroke="#1F8344" stroke-width="2"/>
-    <text x="901" y="112" text-anchor="middle" class="st">Popover</text>
-    <text x="901" y="132" text-anchor="middle" class="sd">conceito, prazo</text>
-    <text x="901" y="147" text-anchor="middle" class="sd">e a lista de ações</text>
+    <path d="M722 108 H 794" stroke="#475569" stroke-width="1.5" marker-end="url(#st1)"/>
 
-    <path d="M901 166 V 232 H 591 V 186" stroke="#475569" stroke-width="1.6" fill="none" marker-end="url(#st1)"/>
-    <text x="700" y="252" text-anchor="middle" class="tr">Esc · botão X · clique fora</text>
-    <text x="700" y="270" text-anchor="middle" class="gu">Esc e X devolvem o foco ao gatilho; clique fora não</text>
+    <!-- C · popover -->
+    <rect x="800" y="66" width="176" height="84" rx="14" fill="#E9F6EE" stroke="#1F8344" stroke-width="1.5"/>
+    <text x="888" y="100" text-anchor="middle" class="st">Popover</text>
+    <text x="888" y="122" text-anchor="middle" class="sd">conceito, prazo</text>
+    <text x="888" y="138" text-anchor="middle" class="sd">e a lista de ações</text>
 
-    <path d="M540 186 V 300 H 246 V 172" stroke="#475569" stroke-width="1.6" fill="none" marker-end="url(#st1)"/>
-    <text x="392" y="320" text-anchor="middle" class="tr">desmarcar a última ação</text>
-    <text x="392" y="338" text-anchor="middle" class="gu">[n chega a 0 → o período desliga junto]</text>
+    <!-- volta C → B -->
+    <path d="M888 150 V 196 H 604 V 168" stroke="#475569" stroke-width="1.5" fill="none" marker-end="url(#st1)"/>
+    <text x="746" y="218" text-anchor="middle" class="tr">Esc, botão X ou clique fora</text>
+    <text x="746" y="234" text-anchor="middle" class="gu">Esc e o X devolvem o foco ao gatilho; o clique fora não devolve</text>
 
-    <rect x="146" y="352" width="830" height="52" rx="12" fill="#FFFBEB" stroke="#FDE68A"/>
-    <text x="166" y="374" class="tr" style="fill:#B45309">Estado inexistente</text>
-    <text x="166" y="392" class="gu" style="fill:#B45309">Período restritivo com n = 0 não é estado válido do domínio: seria um prazo fechado com aparência de aberto. O backend precisa garantir a mesma invariante.</text>
+    <!-- volta B → A -->
+    <path d="M524 164 V 266 H 208 V 154" stroke="#475569" stroke-width="1.5" fill="none" marker-end="url(#st1)"/>
+    <text x="366" y="288" text-anchor="middle" class="tr">desmarcar a última ação liberada</text>
+    <text x="366" y="304" text-anchor="middle" class="gu">quando o n chegaria a zero, o período desliga junto</text>
   </svg>
+  </div>
+
+  <div class="aviso aviso--warn">
+    <span class="aviso__i">!</span>
+    <div><b>O estado que não existe</b>
+      Período restritivo com <b>zero</b> ação liberada não é estado válido: seria um prazo fechado com aparência de aberto. Pela interface ele é inalcançável, porque ligar o período já libera a primeira ação e desmarcar a última desliga o período. Vale garantir a mesma invariante do lado do servidor.</div>
   </div>
 
   <div class="specs">
@@ -689,7 +666,7 @@ tbody tr:hover{background:#FCFDFE}
       <div class="spec__v">
         Eyebrow em caixa alta com o escopo da vigência, data de fim em 20px verde de marca, contador e, no rodapé, o botão da ação que o prazo habilita. <b>O card normal não menciona período restritivo em lugar nenhum</b>: só se fala do conceito quando a flag está ativa, senão ele vira ruído permanente.
         <ul>
-          <li>Contador padrão: <span class="copy">Faltam 18 dias para o fim do prazo</span>, com singular em 1 dia (<span class="copy">Falta 1 dia para o fim do prazo</span>).</li>
+          <li>Contador padrão: <span class="copy">Faltam 17 dias para o fim do prazo</span>, com singular em 1 dia (<span class="copy">Falta 1 dia para o fim do prazo</span>).</li>
           <li>Se o dado trouxer o campo <code>contador</code>, ele <b>vence</b> o cálculo. É como saem <span class="copy">Finaliza hoje</span> e <span class="copy">Prazo ainda não definido</span>. Sem isso, um prazo com zero dias mostraria "Faltam 0 dias".</li>
           <li>Sem <code>acaoRotulo</code> o card fica só com o cabeçalho. É o caso de <span class="copy">PRAZO FINAL PLANOS</span> no admin, com data <span class="copy">—</span>.</li>
         </ul>
@@ -777,7 +754,7 @@ tbody tr:hover{background:#FCFDFE}
 
 <section class="bloco" id="documentacao">
   <h2><span class="n">5</span>Status da Documentação, linha por linha</h2>
-  <p class="intro">Um card, uma linha por tipo de documento, e a linha se adapta sozinha ao dado. É a decisão <b>D-R003</b>. O título <span class="copy">Status da Documentação</span> é requisição do cliente e não muda.</p>
+  <p class="intro">Um card, uma linha por tipo de documento, e a linha se adapta sozinha ao dado. O título <span class="copy">Status da Documentação</span> é requisição do cliente e não muda.</p>
 
   <button class="spec__shot" style="max-width:100%;margin-top:24px" data-lb="img/handoff/doc-variacoes.png"><img src="img/handoff/doc-variacoes.png" width="1013" height="452" alt="As três variações da linha na mesma tela"></button>
 
@@ -792,7 +769,7 @@ tbody tr:hover{background:#FCFDFE}
 
   <h3 class="sub">As quatro regras que sustentam a linha</h3>
   <ul class="lista">
-    <li><b>O total nunca é digitado.</b> É a soma dos status já filtrados. Isso elimina a classe inteira de bug em que o número do cabeçalho discorda da lista, que é exatamente o que o sistema atual faz na tela do verificador: <b>18</b> no cabeçalho e <b>27</b> dentro da barra da mesma linha.</li>
+    <li><b>O total nunca é digitado.</b> É a soma dos status já filtrados. Isso elimina a classe inteira de bug em que o número do cabeçalho discorda da lista.</li>
     <li><b>Status zerado não aparece</b>, nem na barra, nem na contagem, nem no total. Mostrar "0 retificados" gasta uma linha para não dizer nada. O filtro está em dois lugares de propósito: mesmo que a API mande zerado, o componente não desenha.</li>
     <li><b>A ordem é a do catálogo</b>, nunca por quantidade. Ordenar por quantidade faria a barra trocar de arranjo a cada atualização de dado, e a lista de contagem deixaria de ler na mesma sequência da barra.</li>
     <li><b>A contagem fica escrita</b>, com o rótulo ao lado do ponto colorido. É por isso que a barra pode ser <code>aria-hidden</code>: a informação já está em texto. Se alguém remover a contagem escrita, o <code>aria-hidden</code> vira perda de informação.</li>
@@ -822,13 +799,13 @@ tbody tr:hover{background:#FCFDFE}
   <div class="aviso aviso--info">
     <span class="aviso__i">i</span>
     <div><b>Singular e plural vêm no dado, sempre os dois</b>
-      Não há pluralização automática: cada status carrega o próprio par. Alguns pares são <b>iguais de propósito</b> (<span class="copy">em preenchimento</span>, <span class="copy">retificando</span>, <span class="copy">em conciliação</span>) e outros são compostos por refletirem dois status do sistema atual num número só (<span class="copy">aprovadas/enviadas</span>, <span class="copy">em preenchimento/retificando</span>). O backend precisa entregar os dois campos mesmo quando forem idênticos.</div>
+      Não há pluralização automática: cada status carrega o próprio par. Alguns pares são <b>iguais de propósito</b> (<span class="copy">em preenchimento</span>, <span class="copy">retificando</span>, <span class="copy">em conciliação</span>) e outros são compostos porque reúnem dois status num número só (<span class="copy">aprovadas/enviadas</span>, <span class="copy">em preenchimento/retificando</span>). O backend precisa entregar os dois campos mesmo quando forem idênticos.</div>
   </div>
 
   <div class="aviso aviso--warn">
     <span class="aviso__i">!</span>
     <div><b>Esta linha muda de altura, e tudo bem</b>
-      A regra de altura constante é do <b>card de prazo</b> (D-R001), não daqui. Na linha de documentação a adaptação de altura entre as três variações é o comportamento esperado.</div>
+      A regra de altura constante é do <b>card de prazo</b>, não daqui. Na linha de documentação a adaptação de altura entre as três variações é o comportamento esperado.</div>
   </div>
 </section>
 
@@ -845,12 +822,6 @@ tbody tr:hover{background:#FCFDFE}
     <li>Só o quarto cartão tem chips: <span class="copy">99 pendentes</span> (warning) e <span class="copy">5 aprovadas</span> (success).</li>
     <li>O ano do primeiro eyebrow é reescrito pelo seletor: <span class="copy">META DE RECICLAGEM 2025</span> vira o ano selecionado. Os outros três não terminam em quatro dígitos, então não mudam.</li>
   </ul>
-
-  <div class="aviso aviso--warn">
-    <span class="aviso__i">!</span>
-    <div><b>Os chips de Justificativas não somam o valor</b>
-      O cartão mostra <b>130</b>, e 99 + 5 = 104. Aqui os chips são recortes de dois estados, não a decomposição do total, ao contrário da regra do Status da Documentação. Vale confirmar com o SIC se o número certo é esse ou se faltam estados na decomposição: está na seção 16.</div>
-  </div>
 
   <h3 class="sub">Relatório de Massas Disponível</h3>
   <button class="spec__shot" style="max-width:100%" data-lb="img/handoff/massas-disponiveis.png"><img src="img/handoff/massas-disponiveis.png" width="1013" height="256" alt="Card de massas disponíveis com três materiais sem dado"></button>
@@ -875,24 +846,17 @@ tbody tr:hover{background:#FCFDFE}
   <h3 class="sub">Massa Produzida e Recuperada</h3>
   <button class="spec__shot" style="max-width:100%" data-lb="img/handoff/massa.png"><img src="img/handoff/massa.png" width="1431" height="519" alt="Os quatro cartões de material com anel de recuperação"></button>
 
-  <p style="margin-top:18px">Este é o card em que o sistema atual se contradiz, e a correção é conceitual, não visual. <b>Só duas grandezas são guardadas por material: massa produzida e massa recuperada, em tonelada.</b> Todo o resto é derivado:</p>
-
-  <div class="codigo"><pre><span class="c">// por material, em tonelada</span>
-meta   = produzida * <span class="k">META_PERCENTUAL</span> / 100     <span class="c">// META_PERCENTUAL = 30</span>
-taxa   = produzida &gt; 0 ? recuperada / produzida * 100 : 0
-atingiu = recuperada &gt;= meta                    <span class="c">// NÃO é taxa &gt;= 100</span>
-
-<span class="c">// Papel:   49.788,0 t produzidas · meta 14.936,4 t · 86.632,0 t recuperadas → 174,0% · atingiu</span>
-<span class="c">// Plástico: 12.692,0 t · meta 3.807,6 t · 10.335,0 t → 81,4% · atingiu</span>
-<span class="c">// Metal:     8.846,0 t · meta 2.653,8 t ·  2.210,0 t → 25,0% · ABAIXO da meta</span>
-<span class="c">// Vidro:     7.746,0 t · meta 2.323,8 t ·  4.116,0 t → 53,1% · atingiu</span></pre></div>
+  <div class="aviso aviso--info" style="margin-top:22px">
+    <span class="aviso__i">i</span>
+    <div><b>Sobre os números deste card</b>
+      Trabalhamos a partir do print que recebemos como base. Refazendo as contas com os próprios dados que aparecem nele, o resultado fecha, então o card foi montado assim. Ainda assim, <b>isto aqui é referência visual</b>: de onde sai a taxa e como o gráfico é preenchido fica a cargo de quem for implementar os endpoints. O que este documento pede que seja mantido é o <b>desenho dos dois estados</b> descritos abaixo.</div>
+  </div>
 
   <ul class="lista">
-    <li><b>A taxa pode passar de 100%.</b> Recuperar mais massa do que se colocou no mercado no exercício é resultado possível, e é o caso do papel. <b>O arco trava em 100%</b>, porque um anel cheio é cheio, mas o número no centro continua o valor real: <span class="copy">174,0%</span>.</li>
-    <li><b>Bateu a meta é <code>recuperada &gt;= meta</code></b>, comparação em tonelada. Usar "taxa &gt;= 100%" faria o Plástico e o Vidro aparecerem como reprovados, quando os dois bateram a meta com folga.</li>
-    <li><b>Um estado, três canais coerentes:</b> cor do arco, texto do chip e fundo do cartão. Quem bateu fica com arco verde, chip <span class="copy">Meta atingida</span> e fundo verde-claro com borda de marca. Quem não bateu fica com arco âmbar, chip <span class="copy">Abaixo da meta</span> e <b>fundo cinza padrão</b>: pintar o cartão reprovado de âmbar transformaria a fileira num semáforo gritante. O âmbar foi escolhido por ser aviso, não erro; se o SIC preferir vermelho, é troca de token.</li>
+    <li><b>Um estado, três canais coerentes:</b> cor do arco, texto do chip e fundo do cartão. Quem atingiu a meta fica com arco verde, chip <span class="copy">Meta atingida</span> e fundo verde-claro com borda de marca. Quem ficou abaixo fica com arco âmbar, chip <span class="copy">Abaixo da meta</span> e <b>fundo cinza padrão</b>: pintar o cartão de âmbar transformaria a fileira num semáforo gritante. O âmbar foi escolhido por ser aviso, não erro; se preferirem vermelho, é troca de token.</li>
+    <li><b>A taxa pode passar de 100% sem quebrar o desenho.</b> O arco trava em 100%, porque um anel cheio é cheio, e o número no centro continua mostrando o valor real: <span class="copy">174,0%</span>.</li>
     <li><b>O número no centro do anel fica sempre neutro</b>, nos dois estados. Quem carrega o estado é a cor do arco e o chip; colorir o número seria um quarto canal repetindo a mesma coisa.</li>
-    <li><b>A ordem dos três números é narrativa e não pode ser reordenada:</b> Produzida (base) → Meta (30%) (limiar) → Recuperada (resultado, destacada com linha em cima). O rótulo <span class="copy">Meta (30%)</span> carrega o percentual entre parênteses para amarrar o indicador <span class="copy">META DE RECICLAGEM</span> do topo da tela ao número em tonelada aqui embaixo.</li>
+    <li><b>A ordem dos três números é narrativa:</b> Produzida (base) → Meta (30%) (limiar) → Recuperada (resultado, destacada com linha em cima). O rótulo <span class="copy">Meta (30%)</span> carrega o percentual entre parênteses para amarrar o indicador <span class="copy">META DE RECICLAGEM</span> do topo da tela ao número em tonelada aqui embaixo.</li>
     <li>Os três números alinham pelo rodapé nos quatro cartões (<code>margin-top: auto</code>), senão um nome de material em duas linhas desalinha a fileira.</li>
   </ul>
 
@@ -901,7 +865,7 @@ atingiu = recuperada &gt;= meta                    <span class="c">// NÃO é ta
     <thead><tr><th style="width:220px">Onde</th><th style="width:230px">Formato</th><th>Motivo</th></tr></thead>
     <tbody>
       <tr><td>Tonelada, nos três números</td><td>pt-BR, <b>exatamente 1 casa</b>, sufixo <code> t</code><br><span class="chip chip--neutral">49.788,0 t</span></td><td>Base, limiar e resultado precisam ter a mesma forma para serem comparados de relance</td></tr>
-      <tr><td>Percentual do anel</td><td>pt-BR, <b>exatamente 1 casa</b>, sufixo <code>%</code><br><span class="chip chip--neutral">25,0%</span></td><td>Medida contínua comparada a uma meta: a casa decimal sempre aparece</td></tr>
+      <tr><td>Percentual do anel</td><td>pt-BR, <b>exatamente 1 casa</b>, sufixo <code>%</code><br><span class="chip chip--neutral">25,0%</span></td><td>É uma medida contínua comparada a um limiar: a casa decimal sempre aparece</td></tr>
       <tr><td>Percentual da rosca e da legenda</td><td>pt-BR, <b>no máximo 1 casa</b><br><span class="chip chip--neutral">55,6%</span> · <span class="chip chip--neutral">50%</span></td><td>Ali a porcentagem é detalhe de apoio à contagem escrita, então "50%" é melhor que "50,0%"</td></tr>
     </tbody>
   </table></div>
@@ -984,11 +948,7 @@ atingiu = recuperada &gt;= meta                    <span class="c">// NÃO é ta
         <div class="ry__g" role="group" aria-labelledby="d-ano-rot" id="d-ano"></div>
         <p class="ry__saida" id="d-ano-saida"></p>
       </div>
-      <p class="demo__nota" style="max-width:38ch;margin-top:0">Série de 2018 a 2025, janela de <b>três células sempre</b>. O selecionado fica no centro e as setas deslocam a janela inteira, então <b>ele não pula de posição</b>. Nos extremos a janela trava, o selecionado passa para a borda e a seta desabilita com o atributo <code>disabled</code>, não só com cor.<br><br>Com o foco dentro do grupo: <kbd>←</kbd> <kbd>→</kbd> andam na série, <kbd>Home</kbd> e <kbd>End</kbd> vão para os extremos. As setas anunciam o destino: <span class="copy">Ano anterior, 2023</span>.</p>
-    </div>
-    <div class="demo__grade" style="margin-top:8px;gap:18px">
-      <div><button class="spec__shot" style="margin-top:0;max-width:300px" data-lb="img/handoff/ano-meio.png"><img src="img/handoff/ano-meio.png" width="370" height="122" alt="Seletor de ano no meio da série" loading="lazy"></button><p style="font-size:12.8px;color:var(--slate-500);margin-top:8px">Meio da série: as duas setas ativas.</p></div>
-      <div><button class="spec__shot" style="margin-top:0;max-width:300px" data-lb="img/handoff/ano-fim.png"><img src="img/handoff/ano-fim.png" width="373" height="122" alt="Seletor de ano no fim da série, com a seta direita desabilitada" loading="lazy"></button><p style="font-size:12.8px;color:var(--slate-500);margin-top:8px">Fim da série: o selecionado ocupa a borda e a seta direita desabilita.</p></div>
+      <p class="demo__nota" style="max-width:38ch;margin-top:0">Série de 2018 a 2025, janela de <b>três células sempre</b>. O selecionado fica no centro e as setas deslocam a janela inteira, então <b>ele não pula de posição</b>.<br><br>Vá até <b>2025</b> ou até <b>2018</b> para ver a trava: o selecionado passa a ocupar a borda e a seta daquele lado desabilita com o atributo <code>disabled</code>, não só com cor, saindo também da ordem de tabulação.<br><br>Com o foco dentro do grupo: <kbd>←</kbd> <kbd>→</kbd> andam na série, <kbd>Home</kbd> e <kbd>End</kbd> vão para os extremos. As setas anunciam o destino: <span class="copy">Ano anterior, 2023</span>.</p>
     </div>
   </div>
 
@@ -1045,26 +1005,26 @@ atingiu = recuperada &gt;= meta                    <span class="c">// NÃO é ta
 
 <section class="bloco" id="regras">
   <h2><span class="n">8</span>Regras</h2>
-  <p class="intro">O que precisa continuar verdadeiro depois que o mock der lugar ao backend. À direita, onde a regra nasceu. As que dizem <b>modelo</b> não são de tela: se o backend permitir o contrário, a tela volta a se contradizer.</p>
+  <p class="intro">O que precisa continuar verdadeiro depois que o mock der lugar aos dados reais. À direita, o alcance de cada uma: as marcadas como <b>modelo</b> não se resolvem no CSS, dependem de o dado chegar na forma certa.</p>
 
-  <div class="regra"><span class="regra__n">1</span><span class="regra__t">O <b>total de uma linha é sempre a soma dos status</b>, nunca um campo independente. É o que impede o cabeçalho de discordar da barra, como acontece hoje no verificador (18 contra 27).</span><span class="regra__o">modelo<br>D-R003</span></div>
-  <div class="regra"><span class="regra__n">2</span><span class="regra__t"><b>Status com quantidade zero não é desenhado</b>, nem na barra, nem na contagem. Mesmo que a API mande zerado, a tela filtra.</span><span class="regra__o">tela<br>D-R003</span></div>
-  <div class="regra"><span class="regra__n">3</span><span class="regra__t">A <b>barra empilhada só existe com dois status ou mais</b>. Com um, contagem e ponto colorido. Com zero documentos, frase.</span><span class="regra__o">tela<br>D-R003</span></div>
-  <div class="regra"><span class="regra__n">4</span><span class="regra__t">A <b>contagem por status fica escrita</b>, ao lado do ponto colorido. Cor nunca é canal único.</span><span class="regra__o">tela · WCAG 1.4.1<br>D-R003</span></div>
+  <div class="regra"><span class="regra__n">1</span><span class="regra__t">O <b>total de uma linha é sempre a soma dos status</b>, nunca um campo independente. É o que garante que o número do cabeçalho e a contagem escrita nunca discordem.</span><span class="regra__o">modelo</span></div>
+  <div class="regra"><span class="regra__n">2</span><span class="regra__t"><b>Status com quantidade zero não é desenhado</b>, nem na barra, nem na contagem. Mesmo que a API mande zerado, a tela filtra.</span><span class="regra__o">tela</span></div>
+  <div class="regra"><span class="regra__n">3</span><span class="regra__t">A <b>barra empilhada só existe com dois status ou mais</b>. Com um, contagem e ponto colorido. Com zero documentos, frase.</span><span class="regra__o">tela</span></div>
+  <div class="regra"><span class="regra__n">4</span><span class="regra__t">A <b>contagem por status fica escrita</b>, ao lado do ponto colorido. Cor nunca é canal único.</span><span class="regra__o">tela · WCAG 1.4.1</span></div>
   <div class="regra"><span class="regra__n">5</span><span class="regra__t">A ordem dos status é a <b>ordem do catálogo</b>, nunca por quantidade: barra e lista precisam ler na mesma sequência.</span><span class="regra__o">modelo</span></div>
-  <div class="regra"><span class="regra__n">6</span><span class="regra__t"><b>Período restritivo implica ao menos uma ação liberada.</b> Vigência restritiva com n = 0 não é estado válido: seria um prazo fechado com aparência de aberto. O backend precisa garantir a invariante; a validação vive na tela de parâmetros do admin, não no dashboard.</span><span class="regra__o">modelo<br>D-R001</span></div>
-  <div class="regra"><span class="regra__n">7</span><span class="regra__t">O <b>n é por card</b>: planos e relatórios têm vigência, flag e lista de ações independentes. A janela pode estar restritiva num documento e normal no outro.</span><span class="regra__o">modelo<br>D-R001</span></div>
-  <div class="regra"><span class="regra__n">8</span><span class="regra__t">O <b>card de prazo não muda de altura</b> com o número de ações liberadas, e <b>nunca mostra qual ação está liberada</b>, nem quando há uma só.</span><span class="regra__o">tela<br>D-R001</span></div>
-  <div class="regra"><span class="regra__n">9</span><span class="regra__t"><b>Uma data só.</b> O card mostra a data de fim da vigência e o contador diz para que ela serve. Não são duas janelas encadeadas: é a mesma vigência, eventualmente prorrogada.</span><span class="regra__o">modelo<br>D-R001</span></div>
+  <div class="regra"><span class="regra__n">6</span><span class="regra__t"><b>Período restritivo implica ao menos uma ação liberada.</b> Vigência restritiva com n = 0 não é estado válido: seria um prazo fechado com aparência de aberto. O backend precisa garantir a invariante; a validação vive na tela de parâmetros do admin, não no dashboard.</span><span class="regra__o">modelo</span></div>
+  <div class="regra"><span class="regra__n">7</span><span class="regra__t">O <b>n é por card</b>: planos e relatórios têm vigência, flag e lista de ações independentes. A janela pode estar restritiva num documento e normal no outro.</span><span class="regra__o">modelo</span></div>
+  <div class="regra"><span class="regra__n">8</span><span class="regra__t">O <b>card de prazo não muda de altura</b> com o número de ações liberadas, e <b>nunca mostra qual ação está liberada</b>, nem quando há uma só.</span><span class="regra__o">tela</span></div>
+  <div class="regra"><span class="regra__n">9</span><span class="regra__t"><b>Uma data só.</b> O card mostra a data de fim da vigência e o contador diz para que ela serve. Não são duas janelas encadeadas: é a mesma vigência, eventualmente prorrogada.</span><span class="regra__o">modelo</span></div>
   <div class="regra"><span class="regra__n">10</span><span class="regra__t">O campo de contador, quando existe, <b>vence o cálculo de dias</b>. É como saem <span class="copy">Finaliza hoje</span> e <span class="copy">Prazo ainda não definido</span>.</span><span class="regra__o">modelo</span></div>
   <div class="regra"><span class="regra__n">11</span><span class="regra__t">Camada que abre na mesma página é <b><code>&lt;button aria-expanded&gt;</code>, nunca <code>&lt;a href&gt;</code></b>, e abre por <b>clique, nunca por hover</b>.</span><span class="regra__o">tela · ARIA APG<br>WCAG 1.4.13</span></div>
-  <div class="regra"><span class="regra__n">12</span><span class="regra__t">O popover <b>não é modal</b>: sem scrim, sem <code>role="dialog"</code>, sem trap de foco. É consulta, não decisão, e não bloqueia a tela.</span><span class="regra__o">tela<br>D-R001</span></div>
-  <div class="regra"><span class="regra__n">13</span><span class="regra__t"><b>Meta, taxa de recuperação e cumprimento são derivados</b> da massa produzida e da massa recuperada. Nunca guardados, nunca digitados em campo separado.</span><span class="regra__o">modelo</span></div>
-  <div class="regra"><span class="regra__n">14</span><span class="regra__t"><b>Bateu a meta é <code>recuperada &gt;= produzida × 30%</code></b>, não "o anel chegou a 100%". A taxa é livre e pode passar de 100%; só o arco trava.</span><span class="regra__o">modelo</span></div>
+  <div class="regra"><span class="regra__n">12</span><span class="regra__t">O popover <b>não é modal</b>: sem scrim, sem <code>role="dialog"</code>, sem trap de foco. É consulta, não decisão, e não bloqueia a tela.</span><span class="regra__o">tela</span></div>
+  <div class="regra"><span class="regra__n">13</span><span class="regra__t">O cartão de material tem <b>dois estados visuais</b>, meta atingida e abaixo da meta, e os três canais (arco, chip e fundo) precisam contar sempre a mesma coisa.</span><span class="regra__o">tela</span></div>
+  <div class="regra"><span class="regra__n">14</span><span class="regra__t">Uma taxa <b>acima de 100%</b> não pode quebrar o desenho: o arco fecha e o número no centro continua mostrando o valor real.</span><span class="regra__o">tela</span></div>
   <div class="regra"><span class="regra__n">15</span><span class="regra__t">O <b>total da distribuição de usuários é a soma das fatias</b>, e fatia com quantidade zero não é desenhada.</span><span class="regra__o">modelo</span></div>
-  <div class="regra"><span class="regra__n">16</span><span class="regra__t"><b>O ano base é sempre o ano de execução menos 1.</b> O usuário escolhe um; o outro é derivado e nunca é digitado duas vezes.</span><span class="regra__o">modelo<br>D-R002</span></div>
-  <div class="regra"><span class="regra__n">17</span><span class="regra__t">O <b>seletor de ano é um grupo de botões</b> com janela de três células, não um <code>&lt;select&gt;</code>. Filtro de contexto não é campo de dado.</span><span class="regra__o">tela<br>D-R002</span></div>
-  <div class="regra"><span class="regra__n">18</span><span class="regra__t">Nos extremos da série a <b>seta desabilita com o atributo <code>disabled</code></b>, não só com cor, e sai da ordem de foco.</span><span class="regra__o">tela<br>D-R002</span></div>
+  <div class="regra"><span class="regra__n">16</span><span class="regra__t"><b>O ano base é sempre o ano de execução menos 1.</b> O usuário escolhe um; o outro é derivado e nunca é digitado duas vezes.</span><span class="regra__o">modelo</span></div>
+  <div class="regra"><span class="regra__n">17</span><span class="regra__t">O <b>seletor de ano é um grupo de botões</b> com janela de três células, não um <code>&lt;select&gt;</code>. Filtro de contexto não é campo de dado.</span><span class="regra__o">tela</span></div>
+  <div class="regra"><span class="regra__n">18</span><span class="regra__t">Nos extremos da série a <b>seta desabilita com o atributo <code>disabled</code></b>, não só com cor, e sai da ordem de foco.</span><span class="regra__o">tela</span></div>
   <div class="regra"><span class="regra__n">19</span><span class="regra__t">O <b>menu lateral vem do perfil</b>, não da tela. Trocar de perfil troca os itens.</span><span class="regra__o">modelo</span></div>
   <div class="regra"><span class="regra__n">20</span><span class="regra__t"><b>Item de menu sem tela é <code>&lt;span&gt;</code> inerte, nunca <code>&lt;a&gt;</code>.</b> Linkar para rota que não existe é pior do que não linkar. Quando a tela existir, o item ganha rota e vira link: o componente já trata os dois casos.</span><span class="regra__o">tela</span></div>
   <div class="regra"><span class="regra__n">21</span><span class="regra__t">Cada dashboard <b>só abre para o seu perfil</b>. Perfil errado volta ao próprio dashboard, não ao login. Sem perfil, vai ao login com <code>?destino=</code> e volta para a URL pedida depois de entrar.</span><span class="regra__o">tela</span></div>
@@ -1084,7 +1044,12 @@ atingiu = recuperada &gt;= meta                    <span class="c">// NÃO é ta
 
 <section class="bloco" id="dados">
   <h2><span class="n">9</span>Dados que as telas consomem</h2>
-  <p class="intro">Os tipos abaixo são o contrato que o protótipo assume. Não é proposta de esquema de banco: é a menor forma que sustenta as regras da seção 8. O ponto crítico está no que <b>não</b> aparece aqui: total de linha, meta em tonelada, taxa de recuperação e "bateu ou não bateu" não são campos, são contas.</p>
+
+  <div class="aviso aviso--warn" style="margin-top:20px">
+    <span class="aviso__i">!</span>
+    <div><b>Isto não é proposta de esquema de banco, nem contrato de API</b>
+      São as variáveis que existem no <b>código do protótipo</b>, ao qual vocês vão ter acesso. Está aqui só para dar noção do que cada tela precisa receber para desenhar o que desenha. A modelagem de verdade é de vocês.</div>
+  </div>
 
   <div class="codigo"><pre><span class="c">// uma linha do card Status da Documentação</span>
 <span class="k">interface</span> <span class="t">LinhaDocumentacao</span> {
@@ -1123,7 +1088,7 @@ atingiu = recuperada &gt;= meta                    <span class="c">// NÃO é ta
   nome: <span class="t">string</span>
   produzida: <span class="t">number</span>            <span class="c">// tonelada</span>
   recuperada: <span class="t">number</span>           <span class="c">// tonelada</span>
-}                                <span class="c">// meta, taxa e cumprimento são derivados</span></pre></div>
+}</pre></div>
 
   <h3 class="sub">Onde o ano de execução repercute</h3>
   <p style="font-size:14px;color:var(--slate-500);margin-top:8px">Hoje o seletor muda apenas texto derivado. Datas de prazo, massas, materiais e distribuição de usuários <b>não</b> reagem ao ano, porque nesta rodada o protótipo mostra a forma, não a série histórica.</p>
@@ -1146,11 +1111,6 @@ atingiu = recuperada &gt;= meta                    <span class="c">// NÃO é ta
   <h3 class="sub">Um detalhe do protótipo que não deve ser copiado</h3>
   <p style="font-size:14px">Na gestora o ano é <b>concatenado</b> ao título (<code>'Planos' + ' ' + ano</code>); no admin e no verificador o ano é <b>substituído por regex</b> nos quatro dígitos finais de uma string que já vem com ano (<code>'Planos 2025'</code>). São dois modelos para o mesmo efeito visual, resquício de terem nascido em momentos diferentes. No sistema real, guarde o título sem ano e concatene.</p>
 
-  <h3 class="sub">O que precisamos saber de vocês</h3>
-  <div class="perg"><span class="perg__n">1</span><span>As <b>quantidades por status</b> chegam decompostas pela API, ou a tela vai precisar agrupar? A regra do total como soma depende de receber a decomposição.</span></div>
-  <div class="perg"><span class="perg__n">2</span><span>Existe endpoint que devolva <b>massa produzida e massa recuperada por material</b>, ou hoje só existe a taxa já calculada? Se só existir a taxa, a contradição do papel volta.</span></div>
-  <div class="perg"><span class="perg__n">3</span><span>A <b>vigência restritiva</b> e a lista de ações liberadas vêm da tela de parâmetros do admin? Quem garante a invariante de nunca haver vigência restritiva sem ação liberada?</span></div>
-  <div class="perg"><span class="perg__n">4</span><span>Os rótulos compostos (<span class="copy">aprovadas/enviadas</span>, <span class="copy">em preenchimento/retificando</span>) são dois status distintos somados numa contagem só? Se forem, dá para separar, ou o agrupamento é a leitura correta do negócio?</span></div>
 </section>
 
 <section class="bloco" id="tokens">
@@ -1419,9 +1379,9 @@ atingiu = recuperada &gt;= meta                    <span class="c">// NÃO é ta
     <label><input type="checkbox"><span>Legenda não tem clique que alterne o destaque (quebraria o toque)</span></label>
     <label><input type="checkbox"><span>Esc limpa o destaque sem tirar o foco do botão</span></label>
     <label><input type="checkbox"><span>Porcentagem da legenda é revelada por opacidade, sem pular o layout</span></label>
-    <label><input type="checkbox"><span>Meta, taxa e cumprimento são derivados das duas massas</span></label>
-    <label><input type="checkbox"><span>Taxa acima de 100% mostra o número real com o arco cheio</span></label>
-    <label><input type="checkbox"><span>Meta atingida é recuperada maior ou igual a 30% da produzida</span></label>
+    <label><input type="checkbox"><span>O cartão tem dois estados visuais distintos, meta atingida e abaixo da meta</span></label>
+    <label><input type="checkbox"><span>Taxa acima de 100% mostra o número real com o arco cheio, sem quebrar o desenho</span></label>
+    <label><input type="checkbox"><span>Arco, chip e fundo do cartão contam sempre a mesma coisa</span></label>
     <label><input type="checkbox"><span>Abaixo da meta muda arco e chip, e o fundo do cartão continua cinza</span></label>
     <label><input type="checkbox"><span>Número no centro do anel fica neutro nos dois estados</span></label>
     <label><input type="checkbox"><span>Ordem dos três números: produzida, meta com o percentual, recuperada em destaque</span></label>
@@ -1469,20 +1429,19 @@ atingiu = recuperada &gt;= meta                    <span class="c">// NÃO é ta
   <h2><span class="n">16</span>Em aberto</h2>
   <p class="intro">Nada aqui deve ser resolvido por dedução durante a implementação. São decisões que ainda dependem de gente, ou lacunas conhecidas do protótipo.</p>
 
-  <h4 class="rot">Com o SIC e com o negócio</h4>
-  <div class="perg"><span class="perg__n">1</span><span>O indicador <b>Justificativas</b> mostra 130 com chips de 99 pendentes e 5 aprovadas. Os chips são recortes ou faltam estados na decomposição?</span></div>
-  <div class="perg"><span class="perg__n">2</span><span>Em <b>Massas Disponíveis</b>, três materiais estão sem dado. O traço significa "não medido" ou "ainda não apurado no exercício"? A diferença muda a frase de apoio.</span></div>
-  <div class="perg"><span class="perg__n">3</span><span>Existe estado de <b>prazo encerrado</b>? Hoje o contador só conta para baixo e o protótipo nunca produz "o prazo acabou". Se existir, precisa ser desenhado.</span></div>
-  <div class="perg"><span class="perg__n">4</span><span>O <b>ano de execução</b> deve recarregar todos os dados da tela? Hoje ele só muda texto derivado.</span></div>
-  <div class="perg"><span class="perg__n">5</span><span>Os rótulos compostos (<span class="copy">aprovadas/enviadas</span>) vieram do sistema atual. Vale separar em dois status, ou o agrupamento é a leitura correta?</span></div>
+  <h4 class="rot">Com o negócio</h4>
+  <div class="perg"><span class="perg__n">1</span><span>Em <b>Massas Disponíveis</b>, três materiais estão sem dado. O traço significa "não medido" ou "ainda não apurado no exercício"? A diferença muda a frase de apoio.</span></div>
+  <div class="perg"><span class="perg__n">2</span><span>Existe estado de <b>prazo encerrado</b>? Hoje o contador só conta para baixo e o protótipo nunca produz "o prazo acabou". Se existir, precisa ser desenhado.</span></div>
+  <div class="perg"><span class="perg__n">3</span><span>O <b>ano de execução</b> deve recarregar todos os dados da tela? Hoje ele só muda texto derivado.</span></div>
+  <div class="perg"><span class="perg__n">4</span><span>Os rótulos compostos (<span class="copy">aprovadas/enviadas</span>) foram mantidos como estavam. Vale confirmar se o agrupamento é a leitura correta ou se dá para separar em dois status.</span></div>
 
   <h4 class="rot">Com o time de desenvolvimento</h4>
-  <div class="perg"><span class="perg__n">6</span><span>Estados de <b>carregamento, erro e vazio por falha</b> não existem no protótipo, porque não há chamada assíncrona. Precisam ser projetados antes da implementação, não inferidos daqui.</span></div>
-  <div class="perg"><span class="perg__n">7</span><span>Não existe <b>rota de 404</b>. URL fora das conhecidas não monta nada. É lacuna, não decisão.</span></div>
-  <div class="perg"><span class="perg__n">8</span><span>O popover <b>não tem lógica de colisão</b>: se o card puder ficar colado na borda da viewport, o reposicionamento precisa ser resolvido no sistema real.</span></div>
-  <div class="perg"><span class="perg__n">9</span><span>O <code>?destino=</code> do login <b>não é validado</b>. No sistema real, aceitar só caminhos internos e checar compatibilidade com o perfil.</span></div>
-  <div class="perg"><span class="perg__n">10</span><span>O item ativo do menu é casado por <b>comparação de texto</b> com o rótulo. Migrar para a rota ativa: hoje, renomear um item quebraria o destaque.</span></div>
-  <div class="perg"><span class="perg__n">11</span><span>Contraste de texto muted sobre superfície colorida ainda depende de token novo em alguns pontos, e a página de login tem um <code>outline: none</code> fora do padrão do foco.</span></div>
+  <div class="perg"><span class="perg__n">5</span><span>Estados de <b>carregamento, erro e vazio por falha</b> não existem no protótipo, porque não há chamada assíncrona. Precisam ser projetados antes da implementação, não inferidos daqui.</span></div>
+  <div class="perg"><span class="perg__n">6</span><span>Não existe <b>rota de 404</b>. URL fora das conhecidas não monta nada. É lacuna, não decisão.</span></div>
+  <div class="perg"><span class="perg__n">7</span><span>O popover <b>não tem lógica de colisão</b>: se o card puder ficar colado na borda da viewport, o reposicionamento precisa ser resolvido no sistema real.</span></div>
+  <div class="perg"><span class="perg__n">8</span><span>O <code>?destino=</code> do login <b>não é validado</b>. No sistema real, aceitar só caminhos internos e checar compatibilidade com o perfil.</span></div>
+  <div class="perg"><span class="perg__n">9</span><span>O item ativo do menu é casado por <b>comparação de texto</b> com o rótulo. Migrar para a rota ativa: hoje, renomear um item quebraria o destaque.</span></div>
+  <div class="perg"><span class="perg__n">10</span><span>Contraste de texto muted sobre superfície colorida ainda depende de token novo em alguns pontos, e a página de login tem um <code>outline: none</code> fora do padrão do foco.</span></div>
 
   <h4 class="rot">Fora deste pacote, de propósito</h4>
   <div class="trol"><table>
@@ -1501,33 +1460,32 @@ atingiu = recuperada &gt;= meta                    <span class="c">// NÃO é ta
 
 <section class="bloco" id="decisoes">
   <h2><span class="n">17</span>Decisões</h2>
-  <p class="intro">Regra do projeto: decisão superada não volta. Se uma proposta nova parece igual a algo que já foi descartado, é sinal de que falta contexto. As três decisões numeradas estão registradas em <code>docs/sistema/DECISOES-UX.md</code>, que é a fonte da verdade quando houver dúvida de direção.</p>
+  <p class="intro">O que foi decidido e por quê, incluindo o que chegou a ser desenhado e foi descartado. As linhas em cinza são caminhos que já foram tentados: se uma proposta nova parecer igual a uma delas, provavelmente falta um pedaço do contexto.</p>
 
   <div class="tl">
-    <div class="tl__i"><div class="tl__d">D-R001</div><div class="tl__t">O card de prazo <b>conta as ações liberadas</b>; a lista mora no popover.</div><div class="tl__m">Com a lista dentro do card, cada ação nova empurrava o layout e a data, que é o dado pelo qual o card existe, perdia espaço para regra administrativa. Com a contagem, o n vira um número dentro de um rótulo e o problema de escala deixa de existir.</div></div>
+    <div class="tl__i"><div class="tl__d">Card de prazo</div><div class="tl__t">O card <b>conta as ações liberadas</b>; a lista mora no popover.</div><div class="tl__m">Assim o número de ações deixa de mexer no layout: a data, que é o dado pelo qual o card existe, mantém o espaço dela em qualquer cenário. O n vira só um número dentro de um rótulo e o problema de escala deixa de existir.</div></div>
     <div class="tl__i tl__i--sup"><div class="tl__d">superada</div><div class="tl__t">A exceção que mostrava a ação na frase quando havia <b>uma só</b> foi descartada.</div><div class="tl__m">Quebrava a altura constante, criava um segundo jeito de ler o mesmo bloco e obrigava a redigir uma frase por ação do catálogo. Contar é uma regra; contar às vezes e mostrar às vezes são duas. Não reintroduzir.</div></div>
-    <div class="tl__i"><div class="tl__d">D-R001</div><div class="tl__t">O rótulo do gatilho declara <b>assunto, tamanho e prazo</b>: "Ver as 6 ações liberadas até 29/08".</div><div class="tl__m">Um link escrito só "Período restritivo" é jargão administrativo e não diz o que acontece no clique. A formulação atual também deixa claro que o resultado é uma camada ancorada, não uma navegação.</div></div>
-    <div class="tl__i"><div class="tl__d">D-R001</div><div class="tl__t">O vermelho fica <b>confinado ao chip</b> e ao ícone; o gatilho fica verde de link.</div><div class="tl__m">Requisição do cliente manter o vermelho. Se o gatilho também fosse vermelho, o bloco inteiro viraria um alarme.</div></div>
-    <div class="tl__i"><div class="tl__d">D-R002</div><div class="tl__t">As pílulas fixas de ano viraram um <b>segmentado com janela deslizante</b> de três células.</div><div class="tl__m">Uma pílula por exercício não sobrevive a 2039: cada ano novo empurra o cabeçalho. A janela resolve a escala sem mudar a largura do controle, e o menu passou a ir do topo ao rodapé.</div></div>
+    <div class="tl__i"><div class="tl__d">Card de prazo</div><div class="tl__t">O rótulo do gatilho declara <b>assunto, tamanho e prazo</b>: "Ver as 6 ações liberadas até 29/08".</div><div class="tl__m">Um link escrito só "Período restritivo" é jargão administrativo e não diz o que acontece no clique. A formulação atual também deixa claro que o resultado é uma camada ancorada, não uma navegação.</div></div>
+    <div class="tl__i"><div class="tl__d">Card de prazo</div><div class="tl__t">O vermelho fica <b>confinado ao chip</b> e ao ícone; o gatilho fica verde de link.</div><div class="tl__m">Requisição do cliente manter o vermelho. Se o gatilho também fosse vermelho, o bloco inteiro viraria um alarme.</div></div>
+    <div class="tl__i"><div class="tl__d">Seletor de ano</div><div class="tl__t">As pílulas fixas de ano viraram um <b>segmentado com janela deslizante</b> de três células.</div><div class="tl__m">Uma pílula por exercício não sobrevive a 2039: cada ano novo empurra o cabeçalho. A janela resolve a escala sem mudar a largura do controle, e o menu passou a ir do topo ao rodapé.</div></div>
     <div class="tl__i tl__i--sup"><div class="tl__d">superada</div><div class="tl__t">O <b>dropdown de ano</b> foi descartado.</div><div class="tl__m">Resolve a escala, mas cobra um clique para tudo e esconde os anos vizinhos, que é justamente o movimento mais comum: comparar o exercício atual com o anterior. Filtro de contexto também não é campo de dado.</div></div>
-    <div class="tl__i"><div class="tl__d">D-R002</div><div class="tl__t">Custo aceito, com saída já decidida: saltar muitos anos exige vários cliques.</div><div class="tl__m">É movimento raro. Se aparecer demanda, o rótulo do ano central vira gatilho de uma lista completa, sem mudar o resto. Registrado para que ninguém invente um dropdown por conta própria.</div></div>
-    <div class="tl__i"><div class="tl__d">D-R003</div><div class="tl__t">O gráfico da documentação virou <b>barra empilhada com a contagem escrita ao lado</b>.</div><div class="tl__m">A legenda separada obrigava o vaivém entre gráfico e legenda. Com a contagem escrita, quem lê em preto e branco continua entendendo, e a barra pode ser invisível para tecnologia assistiva.</div></div>
-    <div class="tl__i"><div class="tl__d">D-R003</div><div class="tl__t">As cores dos status seguem o <b>semáforo do design system</b>, não uma escala de verdes.</div><div class="tl__m">Três tons próximos do mesmo verde são difíceis de separar mesmo para quem enxerga cor normalmente, e ficam idênticos para boa parte das pessoas com daltonismo. No Recicla o verde de sucesso e o verde de marca são o mesmo token, de propósito.</div></div>
+    <div class="tl__i"><div class="tl__d">Seletor de ano</div><div class="tl__t">Custo aceito, com saída já decidida: saltar muitos anos exige vários cliques.</div><div class="tl__m">É movimento raro. Se aparecer demanda, o rótulo do ano central vira gatilho de uma lista completa, sem mudar o resto. Registrado para que ninguém invente um dropdown por conta própria.</div></div>
+    <div class="tl__i"><div class="tl__d">Documentação</div><div class="tl__t">O status virou <b>barra empilhada com a contagem escrita ao lado</b>.</div><div class="tl__m">Com o número junto da cor, a leitura acontece num lugar só, sem vaivém até uma legenda. Quem lê em preto e branco continua entendendo, e por isso a barra pode ser invisível para tecnologia assistiva.</div></div>
+    <div class="tl__i"><div class="tl__d">Documentação</div><div class="tl__t">As cores dos status seguem o <b>semáforo do design system</b>, não uma escala de verdes.</div><div class="tl__m">Três tons próximos do mesmo verde são difíceis de separar mesmo para quem enxerga cor normalmente, e ficam idênticos para boa parte das pessoas com daltonismo. No Recicla o verde de sucesso e o verde de marca são o mesmo token, de propósito.</div></div>
     <div class="tl__i"><div class="tl__d">agosto/2026</div><div class="tl__t">O conteúdo passou a ocupar a <b>largura toda</b>, do recuo depois do menu ao recuo da direita.</div><div class="tl__m">Travar numa largura fixa e centralizar fazia a tela cheia parecer que não foi feita sob medida, e num 4K ficaria pior. O que cresce é o recuo, a coluna lateral e a barra, sempre com a medida do frame de 1440 como piso.</div></div>
     <div class="tl__i"><div class="tl__d">agosto/2026</div><div class="tl__t">O detalhe da rosca aparece <b>dentro do gráfico</b>, não em camada flutuante.</div><div class="tl__m">Em toque não existe hover, camada sobre o próprio elemento dispara as obrigações da WCAG 1.4.13, e o miolo já era espaço morto. Um clique que alternasse o destaque foi removido depois de quebrar o comportamento em toque.</div></div>
-    <div class="tl__i"><div class="tl__d">agosto/2026</div><div class="tl__t">"Bateu a meta" deixou de ser <b>"o anel chegou a 100%"</b>.</div><div class="tl__m">A meta do exercício é recuperar 30% do produzido. A taxa exibida é recuperada sobre produzida e não tem teto; só o arco trava em 100%. Foi assim que a contradição do papel apareceu, e é assim que ela não volta.</div></div>
+    <div class="tl__i"><div class="tl__d">Massa por material</div><div class="tl__t">O cartão passou a ter <b>dois estados visuais explícitos</b>, meta atingida e abaixo da meta.</div><div class="tl__m">Refizemos os cálculos com os dados do próprio print recebido e o resultado fecha, então o card foi montado assim. Uma taxa acima de 100% é resultado possível: o arco fecha e o número no centro continua mostrando o valor real, sem quebrar o desenho.</div></div>
     <div class="tl__i tl__i--sup"><div class="tl__d">superada</div><div class="tl__t">Faixas de cor por limiar no anel foram descartadas.</div><div class="tl__m">Introduziam tons fora da paleta semântica do projeto. O estado passou a ser comunicado por três canais que já existem: cor do arco, chip escrito e fundo do cartão.</div></div>
     <div class="tl__i"><div class="tl__d">agosto/2026</div><div class="tl__t">Os rótulos "em breve" saíram dos botões inertes.</div><div class="tl__m">Nesta rodada o protótipo mostra a forma, não o fluxo. O botão fica visível e inerte, sem prometer data. O chip continua só no perfil do login que ainda não tem tela.</div></div>
   </div>
 
-  <h3 class="sub">Referência visual</h3>
-  <p style="font-size:14px;color:var(--slate-500);margin-top:8px">Figma <b>Incentiva Goiás</b>, página <code>Telas 2026</code>, seção <code>Agosto 2026 · Recicla Goiás · Dashboard da Entidade Gestora</code>. Os frames REC-01 a REC-06 são a gestora; REC-ADM e REC-VER são as duas telas novas, na linha de baixo. A tira <code>Estados do card de prazo</code> é a referência correta das medidas do card, e não os frames REC-03 e REC-04, onde o bloco de período restritivo com uma ação ficou com a altura antiga e duas linhas se sobrepõem. <b>Medidas se leem nos nós, nunca da imagem.</b></p>
+  <h3 class="sub">Referência</h3>
+  <p style="font-size:14px;color:var(--slate-500);margin-top:8px">Na dúvida entre este documento e o Figma, <b>vale o protótipo publicado</b>: é onde o comportamento existe de verdade, e é dele que saíram todas as capturas daqui. O arquivo do Figma serve de apoio visual e continua disponível para consulta de medida e cor.</p>
 </section>
 
 <div class="rodape wrap" style="padding-left:0;padding-right:0">
   <b>Pacote de entrega · Dashboards da área logada · Recicla Goiás (SISLOG Reversa)</b><br>
   Atualizado em 17 de agosto de 2026. Protótipo publicado em <a href="https://reciclagoias.vercel.app/entrar" target="_blank" rel="noopener">reciclagoias.vercel.app</a>.
-  Decisões de UX em <code>docs/sistema/DECISOES-UX.md</code>; convenções de código em <code>CLAUDE.md</code>.
   As imagens são capturas do protótipo publicado em 1440px, não montagens.
 </div>
 
