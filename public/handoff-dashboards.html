@@ -1,0 +1,1743 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8">
+  <meta name="doc-tipo" content="handoff">
+  <meta name="doc-sistema" content="recicla-goias">
+  <meta name="doc-ciclo" content="2026-08">
+  <meta name="doc-atualizado" content="2026-08-17">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboards da área logada · Pacote de entrega para desenvolvimento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   Recicla Goiás · subset dos tokens --rg-* para o documento
+   Os valores abaixo são os mesmos de src/design-system/tokens/
+   ============================================================ */
+:root{
+  --brand-50:#E9F6EE; --brand-100:#C8E8D4; --brand-200:#9FD5B0; --brand-300:#71BF8A;
+  --brand-500:#279C50; --brand-600:#1F8344; --brand-700:#176935; --brand-800:#12522A;
+  --slate-0:#FFFFFF; --slate-50:#F8FAFC; --slate-100:#F1F5F9; --slate-200:#E2E8F0;
+  --slate-300:#CBD5E1; --slate-400:#94A3B8; --slate-500:#64748B; --slate-600:#475569;
+  --slate-700:#334155; --slate-800:#1E293B; --slate-900:#0F172A;
+  --amber-50:#FFFBEB; --amber-200:#FDE68A; --amber-500:#F59E0B; --amber-600:#D97706; --amber-700:#B45309;
+  --blue-50:#EFF6FF; --blue-200:#BFDBFE; --blue-600:#2563EB; --blue-700:#1D4ED8;
+  --red-50:#FEF2F2; --red-200:#FECACA; --red-600:#DC2626; --red-700:#B91C1C;
+  --pink-600:#DB2777; --teal-600:#059669;
+  --page:#F5F7FA; --line:#E8EDF3;
+  --font:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Consolas,'Liberation Mono',monospace;
+  --shadow-1:0 1px 2px rgba(15,23,42,.04),0 1px 3px rgba(15,23,42,.05);
+  --shadow-2:0 4px 10px rgba(15,23,42,.06),0 12px 28px rgba(15,23,42,.07);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:88px}
+body{font:400 15px/1.65 var(--font);color:var(--slate-700);background:var(--page);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1160px;margin:0 auto;padding:0 32px}
+
+/* ---------- hero ---------- */
+.hero{background:var(--brand-800);color:#fff;padding:64px 0 72px;position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;inset:0;background:
+  radial-gradient(760px 380px at 88% -20%, rgba(113,191,138,.30), transparent 62%),
+  radial-gradient(560px 320px at 4% 120%, rgba(10,55,20,.55), transparent 60%);pointer-events:none}
+.hero .wrap{position:relative;z-index:1}
+.hero__eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:var(--brand-200)}
+.hero h1{font-size:38px;line-height:1.14;letter-spacing:-.025em;font-weight:700;margin:14px 0 0;max-width:20ch}
+.hero__lede{margin-top:18px;max-width:64ch;font-size:16.5px;line-height:1.6;color:rgba(255,255,255,.86)}
+.hero__meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px}
+.hero__meta span{font:600 12px/1 var(--font);padding:8px 13px;border-radius:999px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);color:#fff}
+.hero__acoes{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px}
+.btn{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:11px;padding:13px 22px;font:600 14px/1 var(--font);text-decoration:none;cursor:pointer;transition:transform .15s cubic-bezier(.2,0,0,1),background .15s,box-shadow .15s}
+.btn--claro{background:#fff;color:var(--brand-800);box-shadow:0 6px 18px rgba(0,0,0,.16)}
+.btn--claro:hover{transform:translateY(-2px)}
+.btn--ghost{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.34)}
+.btn--ghost:hover{background:rgba(255,255,255,.18)}
+.btn--verde{background:var(--brand-700);color:#fff;border:0}
+.btn--verde:hover{background:var(--brand-800);transform:translateY(-1px)}
+
+/* ---------- nav sticky ---------- */
+.subnav{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.subnav__in{display:flex;align-items:center;gap:18px;height:58px;overflow-x:auto;scrollbar-width:none}
+.subnav__in::-webkit-scrollbar{display:none}
+.subnav__marca{font:700 13px/1 var(--font);color:var(--brand-700);white-space:nowrap;padding-right:18px;border-right:1px solid var(--line)}
+.subnav a{font:500 13px/1 var(--font);color:var(--slate-500);text-decoration:none;white-space:nowrap;padding:8px 2px;border-bottom:2px solid transparent;transition:color .15s,border-color .15s}
+.subnav a:hover{color:var(--slate-800)}
+.subnav a.is-ativo{color:var(--brand-700);border-bottom-color:var(--brand-500);font-weight:600}
+
+/* ---------- partes ---------- */
+.parte{padding:78px 0 8px}
+.parte__cab{display:flex;align-items:baseline;gap:20px;padding-bottom:26px;border-bottom:2px solid var(--slate-900)}
+.parte__num{font:700 15px/1 var(--font);color:var(--brand-600);letter-spacing:.16em;text-transform:uppercase;white-space:nowrap}
+.parte__t{font:700 27px/1.2 var(--font);letter-spacing:-.02em;color:var(--slate-900)}
+.parte__d{margin-left:auto;font-size:13.5px;color:var(--slate-500);max-width:48ch;text-align:right}
+
+/* ---------- blocos ---------- */
+section.bloco{margin-top:34px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:38px 40px;box-shadow:var(--shadow-1);scroll-margin-top:76px}
+.bloco > h2{font:700 21px/1.3 var(--font);letter-spacing:-.015em;color:var(--slate-900);display:flex;align-items:center;gap:13px}
+.bloco > h2 .n{flex:none;width:30px;height:30px;border-radius:9px;background:var(--brand-50);color:var(--brand-700);display:inline-grid;place-items:center;font:700 13px/1 var(--font)}
+.bloco > .intro{margin-top:12px;color:var(--slate-500);font-size:14.5px;max-width:80ch}
+h3.sub{font:600 15px/1.4 var(--font);color:var(--slate-900);margin:38px 0 4px;display:flex;align-items:center;gap:10px}
+h3.sub::before{content:"";width:5px;height:16px;border-radius:3px;background:var(--brand-300)}
+h4.rot{font:600 11px/1.3 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--slate-400);margin:30px 0 12px}
+p+p{margin-top:12px}
+.bloco p{max-width:82ch}
+b,strong{font-weight:600;color:var(--slate-900)}
+code{font:500 12.5px/1.5 var(--mono);background:var(--slate-100);color:var(--slate-800);border-radius:5px;padding:2px 6px}
+a{color:var(--brand-700);text-decoration:none;border-bottom:1px solid var(--brand-200)}
+a:hover{border-bottom-color:var(--brand-500)}
+ul.lista{margin:12px 0 0;padding-left:20px}
+ul.lista li{margin:6px 0;font-size:14.3px}
+kbd{display:inline-block;font:600 11.5px/1.4 var(--mono);color:var(--slate-700);background:#fff;border:1px solid var(--slate-300);border-bottom-width:2px;border-radius:5px;padding:1px 6px;white-space:nowrap}
+
+/* copy do produto (citação verbatim) */
+.copy{font-style:italic;color:var(--slate-900);background:linear-gradient(transparent 62%, var(--brand-50) 0)}
+.copy::before{content:"“"} .copy::after{content:"”"}
+
+/* ---------- avisos ---------- */
+.aviso{display:flex;gap:14px;padding:18px 20px;border-radius:13px;margin:22px 0;font-size:14px;line-height:1.6}
+.aviso__i{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font:700 12px/1 var(--font);color:#fff;margin-top:1px}
+.aviso--info{background:var(--blue-50);color:var(--blue-700)} .aviso--info .aviso__i{background:var(--blue-600)}
+.aviso--warn{background:var(--amber-50);color:var(--amber-700)} .aviso--warn .aviso__i{background:var(--amber-600)}
+.aviso--danger{background:var(--red-50);color:var(--red-700)} .aviso--danger .aviso__i{background:var(--red-600)}
+.aviso--ok{background:var(--brand-50);color:var(--brand-700)} .aviso--ok .aviso__i{background:var(--brand-600)}
+.aviso b{color:inherit;display:block;margin-bottom:2px}
+
+/* ---------- chips ---------- */
+.chip{display:inline-block;border-radius:999px;padding:3px 11px;font:600 11.5px/1.6 var(--font);white-space:nowrap;vertical-align:middle}
+.chip--info{background:var(--blue-50);color:var(--blue-700);border:1px solid var(--blue-200)}
+.chip--success{background:var(--brand-50);color:var(--brand-700);border:1px solid var(--brand-100)}
+.chip--warn{background:var(--amber-50);color:var(--amber-700);border:1px solid var(--amber-200)}
+.chip--danger{background:var(--red-50);color:var(--red-700);border:1px solid var(--red-200)}
+.chip--neutral{background:var(--slate-100);color:var(--slate-600);border:1px solid var(--slate-200)}
+.chip--file{background:var(--slate-50);color:var(--slate-500);border:1px solid var(--slate-200);font-family:var(--mono);font-size:11px;font-weight:500}
+
+/* ---------- problema × solução ---------- */
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:26px}
+.duo__c{border-radius:14px;padding:24px 26px;border:1px solid var(--line)}
+.duo__c--mal{background:var(--slate-50)}
+.duo__c--bem{background:var(--brand-50);border-color:var(--brand-100)}
+.duo__t{font:600 13px/1.3 var(--font);letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px}
+.duo__c--mal .duo__t{color:var(--slate-500)} .duo__c--bem .duo__t{color:var(--brand-700)}
+.duo__c p{font-size:14px;max-width:none}
+.duo__c ul{margin:10px 0 0;padding-left:18px;font-size:14px}
+.duo__c li{margin:5px 0}
+
+/* ---------- cards de tela ---------- */
+.telas{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:22px;margin-top:26px}
+.tela{display:flex;flex-direction:column;background:#fff;border:1px solid var(--line);border-radius:15px;overflow:hidden;transition:transform .18s cubic-bezier(.2,0,0,1),box-shadow .18s,border-color .18s}
+.tela:hover{transform:translateY(-3px);box-shadow:var(--shadow-2);border-color:var(--brand-200)}
+.tela__shot{position:relative;display:block;aspect-ratio:16/10;overflow:hidden;background:var(--slate-100);border-bottom:1px solid var(--line);cursor:zoom-in;border:0}
+.tela__shot img{width:100%;height:100%;object-fit:cover;object-position:top left;display:block}
+.tela__lupa{position:absolute;right:10px;bottom:10px;background:rgba(15,23,42,.78);color:#fff;border-radius:8px;font:600 10.5px/1 var(--font);padding:6px 9px;opacity:0;transition:opacity .18s}
+.tela__shot:hover .tela__lupa{opacity:1}
+.tela__b{padding:18px 20px 20px;display:flex;flex-direction:column;gap:7px;flex:1}
+.tela__t{font:600 15px/1.3 var(--font);color:var(--slate-900)}
+.tela__rota{font:500 11.5px/1 var(--mono);color:var(--brand-700);background:var(--brand-50);border-radius:6px;padding:5px 8px;align-self:flex-start}
+.tela__d{font-size:13.2px;line-height:1.55;color:var(--slate-500);flex:1}
+.tela__link{font:600 13px/1 var(--font);color:var(--brand-700);border:0;margin-top:4px}
+.apoio-linha{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:26px;font-size:13.2px;color:var(--slate-400)}
+
+/* ---------- diagrama ---------- */
+.diagrama{margin-top:26px;border:1px solid var(--line);border-radius:14px;background:#fff;padding:10px;overflow-x:auto}
+.diagrama svg{display:block;min-width:900px;width:100%;height:auto}
+
+/* ---------- passos ---------- */
+.passos{display:flex;align-items:stretch;gap:10px;margin-top:16px;flex-wrap:wrap}
+.passo{flex:1;min-width:210px;display:flex;gap:12px;background:var(--slate-50);border:1px solid var(--line);border-radius:13px;padding:16px 18px}
+.passo--seta{flex:none;min-width:0;border:0;background:none;align-items:center;justify-content:center;color:var(--slate-300);font-size:20px;padding:0 2px}
+.passo__n{flex:none;width:24px;height:24px;border-radius:50%;background:var(--slate-900);color:#fff;display:grid;place-items:center;font:700 11.5px/1 var(--font)}
+.passo strong{display:block;font-size:14.5px;color:var(--slate-900)}
+.passo code{display:inline-block;margin:5px 0 6px;font-size:11.5px;background:#fff}
+.passo span{display:block;font-size:12.8px;line-height:1.5;color:var(--slate-500)}
+
+/* ---------- motion ---------- */
+.motion{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;margin-top:18px}
+.motion__i{border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.motion__t{font:600 13.5px/1.35 var(--font);color:var(--slate-900)}
+.motion__d{margin-top:5px;font-size:12.8px;line-height:1.5;color:var(--slate-500)}
+.motion__v{margin-top:9px;display:inline-block;font:600 11.5px/1 var(--mono);color:var(--brand-700);background:var(--brand-50);border-radius:6px;padding:5px 8px}
+
+/* ---------- spec rows ---------- */
+.specs{margin-top:8px}
+.spec{display:grid;grid-template-columns:250px 1fr;gap:32px;padding:24px 0;border-top:1px solid var(--line)}
+.spec:first-child{border-top:0}
+.spec__k strong{display:block;font-size:15px;color:var(--slate-900);line-height:1.35}
+.spec__quando{margin-top:8px;font-size:13px;color:var(--slate-500);line-height:1.5}
+.spec__quando i{display:block;font:600 10px/1.3 var(--font);letter-spacing:.1em;text-transform:uppercase;color:var(--slate-400);font-style:normal;margin-bottom:3px}
+.spec__v{font-size:14.3px;line-height:1.65}
+.spec__v ul{margin:9px 0 0;padding-left:18px}
+.spec__v li{margin:5px 0}
+.spec__fonte{margin-top:12px;display:flex;flex-wrap:wrap;gap:6px}
+.spec__shot{margin-top:14px;display:block;max-width:430px;border:1px solid var(--line);border-radius:10px;overflow:hidden;cursor:zoom-in;background:none;padding:0}
+.spec__shot img{width:100%;display:block}
+
+/* ---------- tabela ---------- */
+.trol{overflow-x:auto;border:1px solid var(--line);border-radius:12px;margin-top:16px}
+table{width:100%;border-collapse:collapse;font-size:13.6px}
+thead th{background:var(--slate-50);text-align:left;font:600 11px/1.4 var(--font);letter-spacing:.07em;text-transform:uppercase;color:var(--slate-500);padding:13px 16px;border-bottom:1px solid var(--line);white-space:nowrap}
+tbody td{padding:13px 16px;border-bottom:1px solid var(--slate-100);vertical-align:top;line-height:1.55}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:#FCFDFE}
+
+/* ---------- regras ---------- */
+.regra{display:grid;grid-template-columns:38px 1fr 150px;gap:18px;align-items:start;padding:18px 0;border-top:1px solid var(--line)}
+.regra:first-of-type{border-top:0}
+.regra__n{width:30px;height:30px;border-radius:50%;background:var(--slate-900);color:#fff;display:grid;place-items:center;font:700 12.5px/1 var(--font)}
+.regra__t{font-size:14.4px;line-height:1.6}
+.regra__o{justify-self:end;font:600 11px/1.5 var(--font);color:var(--slate-400);text-align:right}
+
+/* ---------- código ---------- */
+.codigo{margin-top:20px;background:var(--slate-900);border-radius:14px;padding:24px 26px;overflow-x:auto}
+.codigo pre{font:400 12.8px/1.75 var(--mono);color:#CBD5E1;white-space:pre}
+.codigo .k{color:#71BF8A} .codigo .c{color:#64748B;font-style:italic} .codigo .s{color:#FDE68A} .codigo .t{color:#93C5FD}
+
+/* ---------- tokens ---------- */
+.tokens{display:grid;grid-template-columns:repeat(auto-fill,minmax(238px,1fr));gap:14px;margin-top:18px}
+.token{border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;gap:12px;align-items:flex-start}
+.token__sw{flex:none;width:38px;height:38px;border-radius:9px;border:1px solid rgba(15,23,42,.09)}
+.token__n{font:600 11px/1.4 var(--mono);color:var(--slate-800);overflow-wrap:anywhere}
+.token__v{font:500 11px/1.5 var(--mono);color:var(--slate-400)}
+.token__u{font-size:11.5px;color:var(--slate-500);margin-top:3px;line-height:1.45}
+
+/* ---------- checklist ---------- */
+.prog{display:flex;align-items:center;gap:16px;margin-top:20px;padding:16px 20px;background:var(--slate-50);border-radius:12px}
+.prog__bar{flex:1;height:8px;border-radius:99px;background:var(--slate-200);overflow:hidden}
+.prog__fill{height:100%;width:0;background:var(--brand-500);border-radius:99px;transition:width .3s cubic-bezier(.2,0,0,1)}
+.prog__n{font:600 13px/1 var(--font);color:var(--slate-600);white-space:nowrap}
+.btn-mini{border:1px solid var(--line);background:#fff;border-radius:9px;padding:9px 14px;font:600 12.5px/1 var(--font);color:var(--slate-600);cursor:pointer}
+.btn-mini:hover{border-color:var(--brand-300);color:var(--brand-700)}
+.check{margin-top:6px}
+.check label{display:flex;gap:11px;align-items:flex-start;padding:9px 0;font-size:14px;line-height:1.55;cursor:pointer;border-top:1px solid var(--slate-100)}
+.check label:first-child{border-top:0}
+.check input{width:17px;height:17px;margin-top:2px;flex:none;accent-color:var(--brand-500);cursor:pointer}
+.check input:checked+span{color:var(--slate-400);text-decoration:line-through;text-decoration-color:var(--slate-300)}
+
+/* ---------- timeline ---------- */
+.tl{margin-top:20px;position:relative;padding-left:26px}
+.tl::before{content:"";position:absolute;left:6px;top:8px;bottom:8px;width:2px;background:var(--line)}
+.tl__i{position:relative;padding:14px 0}
+.tl__i::before{content:"";position:absolute;left:-24px;top:21px;width:10px;height:10px;border-radius:50%;background:var(--brand-500);border:2px solid #fff;box-shadow:0 0 0 2px var(--brand-100)}
+.tl__i--sup::before{background:var(--slate-300);box-shadow:0 0 0 2px var(--slate-100)}
+.tl__d{font:600 11.5px/1 var(--mono);color:var(--slate-400)}
+.tl__t{margin-top:6px;font-size:14.3px;line-height:1.6;color:var(--slate-900)}
+.tl__m{margin-top:5px;font-size:13.3px;color:var(--slate-500);line-height:1.55}
+
+/* ---------- perguntas ---------- */
+.perg{display:grid;grid-template-columns:30px 1fr;gap:14px;padding:15px 0;border-top:1px solid var(--line);font-size:14.3px;line-height:1.6}
+.perg:first-of-type{border-top:0}
+.perg__n{width:26px;height:26px;border-radius:50%;background:var(--red-50);color:var(--red-700);display:grid;place-items:center;font:700 12px/1 var(--font);border:1px solid var(--red-200)}
+
+/* ---------- demos ao vivo ---------- */
+.demo{margin-top:18px;border:1px solid var(--line);border-radius:14px;background:var(--slate-50);padding:26px}
+.demo__t{font:600 12px/1 var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--slate-400);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.demo__t::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--brand-500)}
+.demo__nota{margin-top:16px;font-size:12.8px;color:var(--slate-500);line-height:1.55}
+.demo__grade{display:flex;flex-wrap:wrap;gap:26px;align-items:flex-start}
+
+/* réplica: card de prazo */
+.rp{width:360px;background:#fff;border:1px solid var(--slate-200);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:16px;font-family:var(--font)}
+.rp__eyebrow{font:600 11px/14px var(--font);letter-spacing:.06em;color:var(--slate-500)}
+.rp__data{font:600 20px/26px var(--font);color:var(--brand-700);margin-top:4px}
+.rp__contador{font:400 13px/18px var(--font);color:var(--slate-600);margin-top:4px}
+.rp__bloco{background:var(--slate-100);border:1px solid var(--slate-200);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:12px}
+.rp__chip{align-self:flex-start;background:var(--red-50);color:var(--red-700);border-radius:999px;padding:4px 10px;font:600 12px/16px var(--font)}
+.rp__disc{position:relative}
+.rp__gatilho{display:flex;align-items:center;gap:8px;width:100%;padding:0;border:0;background:none;font:500 13px/18px var(--font);color:var(--brand-700);text-align:left;cursor:pointer}
+.rp__gatilho span{text-decoration:underline}
+.rp__gatilho:focus-visible{outline:2px solid var(--brand-600);outline-offset:2px;border-radius:4px}
+.rp__pop{position:absolute;top:calc(100% + 10px);left:-12px;z-index:5;width:324px;background:#fff;border:1px solid var(--slate-200);border-radius:12px;box-shadow:var(--shadow-2);padding:16px}
+.rp__pop h5{display:flex;align-items:center;gap:8px;font:600 14px/20px var(--font);color:var(--slate-900)}
+.rp__pop h5 i{color:var(--red-600);font-style:normal;font-weight:700}
+.rp__x{position:absolute;top:12px;right:12px;border:0;background:none;color:var(--slate-500);cursor:pointer;font-size:15px;line-height:1}
+.rp__desc{margin-top:8px;font:400 12.5px/17px var(--font);color:var(--slate-600)}
+.rp__ate{margin-top:14px;padding-top:12px;border-top:1px solid var(--slate-200);font:600 11px/14px var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--slate-500)}
+.rp__lista{margin:10px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+.rp__lista--rola{max-height:240px;overflow-y:auto}
+.rp__lista li{display:flex;gap:8px;font:400 13px/18px var(--font);color:var(--slate-800)}
+.rp__lista li::before{content:"✓";color:var(--brand-600);font-weight:700}
+.rp__acao{height:48px;border:1.5px solid var(--brand-600);border-radius:8px;background:none;font:600 15px/20px var(--font);color:var(--brand-700);cursor:default}
+
+/* réplica: rosca */
+.rd{width:400px;background:#fff;border:1px solid var(--slate-200);border-radius:12px;padding:24px;font-family:var(--font)}
+.rd__cab{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.rd__cab h5{font:600 16px/22px var(--font);color:var(--slate-900)}
+.rd__cab span{font:400 12px/16px var(--font);color:var(--slate-500)}
+.rd__corpo{display:flex;align-items:center;gap:20px;margin-top:18px}
+.rd__svg{position:relative;flex:none;width:120px;height:120px}
+.rd__centro{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.rd__centro b{display:block;font:700 22px/26px var(--font);color:var(--slate-900)}
+.rd__centro small{display:block;font:600 11px/14px var(--font);letter-spacing:.06em;text-transform:uppercase;color:var(--slate-500);margin-top:2px}
+.rd__leg{flex:1;display:flex;flex-direction:column;gap:2px;margin:0;padding:0;list-style:none}
+.rd__b{display:flex;align-items:center;gap:10px;width:100%;padding:7px 9px;border:0;border-radius:8px;background:none;font:inherit;text-align:left;cursor:pointer;transition:background .12s cubic-bezier(.2,0,0,1)}
+.rd__b:hover,.rd__b.is-on{background:var(--slate-100)}
+.rd__b:focus-visible{outline:2px solid var(--brand-600);outline-offset:-2px}
+.rd__ponto{width:9px;height:9px;border-radius:50%;flex:none}
+.rd__q{font:600 14px/20px var(--font);color:var(--slate-900)}
+.rd__r{flex:1;font:400 13px/18px var(--font);color:var(--slate-600)}
+.rd__p{font:600 12px/16px var(--font);color:var(--slate-500);opacity:0;transition:opacity .12s cubic-bezier(.2,0,0,1)}
+.rd__b:hover .rd__p,.rd__b:focus .rd__p,.rd__b.is-on .rd__p{opacity:1}
+
+/* réplica: seletor de ano */
+.ry{font-family:var(--font)}
+.ry__rot{font:600 11px/14px var(--font);letter-spacing:.08em;text-transform:uppercase;color:var(--slate-500);margin-bottom:8px}
+.ry__g{display:inline-flex;border:1px solid var(--slate-200);border-radius:8px;overflow:hidden;background:#fff}
+.ry__g button{border:0;background:none;padding:0 20px;height:44px;font:500 15px/1 var(--font);color:var(--slate-700);cursor:pointer;border-right:1px solid var(--slate-200);transition:background .12s cubic-bezier(.2,0,0,1)}
+.ry__g button:last-child{border-right:0}
+.ry__g button:hover:not(:disabled){background:var(--slate-50)}
+.ry__g button:focus-visible{outline:2px solid var(--brand-600);outline-offset:-2px}
+.ry__g button[disabled]{color:var(--slate-300);cursor:default}
+.ry__g .is-ativo{background:var(--brand-50);color:var(--brand-700);font-weight:600}
+.ry__seta{padding:0 14px !important;color:var(--slate-500) !important}
+.ry__saida{margin-top:12px;font:500 12.5px/1.5 var(--mono);color:var(--slate-500)}
+
+/* réplica: linha da documentação */
+.rl{width:100%;background:#fff;border:1px solid var(--slate-200);border-radius:12px;padding:8px 24px;font-family:var(--font)}
+.rl__linha{display:flex;align-items:center;gap:16px;padding:16px 0;border-top:1px solid var(--slate-200)}
+.rl__linha:first-child{border-top:0}
+.rl__ico{flex:none;width:36px;height:36px;border-radius:8px;background:var(--slate-100);display:grid;place-items:center;color:var(--brand-700);font-size:16px}
+.rl__txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.rl__t1{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rl__tit{font:600 14px/20px var(--font);color:var(--slate-900)}
+.rl__tot{font:400 12px/16px var(--font);color:var(--slate-500)}
+.rl__vazio{font:400 13px/18px var(--font);color:var(--slate-500)}
+.rl__bar{display:flex;gap:2px;width:clamp(240px,28%,560px);height:6px;border-radius:999px;overflow:hidden}
+.rl__bar i{flex-basis:0;min-width:2px}
+.rl__l2{display:flex;flex-wrap:wrap;gap:4px 14px;margin:0;padding:0;list-style:none}
+.rl__l2 li{display:flex;align-items:center;gap:6px;font:400 13px/18px var(--font);color:var(--slate-600)}
+.rl__l2 span{width:8px;height:8px;border-radius:50%}
+.rl__link{flex:none;font:500 13px/18px var(--font);color:var(--brand-700);border:0;background:none;cursor:default}
+
+/* ---------- rodapé ---------- */
+.rodape{margin-top:70px;padding:36px 0 60px;border-top:1px solid var(--line);font-size:12.8px;color:var(--slate-400)}
+.rodape b{color:var(--slate-600)}
+
+/* ---------- lightbox ---------- */
+.lb{position:fixed;inset:0;background:rgba(15,23,42,.86);z-index:90;display:none;place-items:center;padding:36px;cursor:zoom-out}
+.lb.is-on{display:grid}
+.lb img{max-width:100%;max-height:100%;border-radius:10px;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.lb__x{position:absolute;top:22px;right:26px;color:#fff;font:600 13px/1 var(--font);background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);border-radius:9px;padding:10px 14px;cursor:pointer}
+
+/* ---------- responsivo ---------- */
+@media (max-width:900px){
+  .wrap{padding:0 20px}
+  .hero{padding:44px 0 48px} .hero h1{font-size:29px}
+  .parte__cab{flex-wrap:wrap;gap:10px} .parte__d{margin-left:0;text-align:left}
+  section.bloco{padding:26px 22px;border-radius:14px}
+  .duo{grid-template-columns:1fr}
+  .spec{grid-template-columns:1fr;gap:12px;padding:20px 0}
+  .regra{grid-template-columns:32px 1fr;gap:12px} .regra__o{grid-column:2;justify-self:start;text-align:left}
+  .rp,.rd{width:100%}
+  .rd__corpo{flex-wrap:wrap}
+  .demo{padding:18px}
+  .rp__pop{width:min(324px,calc(100vw - 76px));left:0}
+}
+
+/* ---------- movimento reduzido ---------- */
+@media (prefers-reduced-motion: reduce){
+  *{transition:none !important;animation:none !important}
+  html{scroll-behavior:auto}
+}
+
+/* ---------- impressão ---------- */
+@media print{
+  @page{size:A4;margin:14mm}
+  html{scroll-padding-top:0}
+  body{background:#fff;font-size:10.5px}
+  .wrap{max-width:none;padding:0}
+  .subnav,.hero__acoes,.tela__lupa,.btn-mini,.lb,.demo{display:none !important}
+  .hero{background:#fff;color:var(--slate-900);padding:0 0 18px;border-bottom:3px solid var(--brand-700);break-inside:avoid;break-after:avoid}
+  .hero::after{display:none}
+  .hero__eyebrow{color:var(--brand-700)} .hero h1{font-size:23px;max-width:none}
+  .hero__lede{color:var(--slate-600);font-size:12px}
+  .hero__meta span{background:var(--slate-50);border-color:var(--line);color:var(--slate-600)}
+  .parte{padding:22px 0 0;break-before:page} .parte:first-of-type{break-before:auto}
+  .parte__t{font-size:18px}
+  section.bloco{box-shadow:none;padding:16px 0;border:0;border-top:1px solid var(--line);border-radius:0;margin-top:16px}
+  .bloco>h2{font-size:15px;break-after:avoid}
+  .spec{break-inside:avoid;padding:12px 0}
+  .tela,.regra,.tl__i,.perg,.aviso,.trol,.diagrama{break-inside:avoid}
+  .telas{grid-template-columns:repeat(3,1fr);gap:10px}
+  .diagrama svg{min-width:0}
+  .codigo{background:var(--slate-50);border:1px solid var(--line)}
+  .codigo pre{color:var(--slate-800)} .codigo .c{color:var(--slate-400)}
+  table{font-size:9.5px} thead{display:table-header-group} tr{break-inside:avoid}
+  a{color:var(--slate-800);border:0}
+  .chip,.aviso,.regra__n,.token__sw,.copy,.tl__i::before,thead th,.duo__c{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════ HERO ══════════════════════════ -->
+<header class="hero">
+  <div class="wrap">
+    <div class="hero__eyebrow">Recicla Goiás · Área logada · Pacote de entrega · Agosto 2026</div>
+    <h1>Dashboards da área logada</h1>
+    <p class="hero__lede">Login provisório e os três dashboards do sistema: Entidade Gestora, Administração (SIC) e Verificador de Resultados. São poucas telas, mas cada uma tem estado, camada, teclado e microcópia definidos. Tudo que está aqui existe rodando: o protótipo publicado é a referência de comportamento, este documento é o mapa dele.</p>
+    <div class="hero__meta">
+      <span>4 rotas</span>
+      <span>18 componentes</span>
+      <span>26 estados</span>
+      <span>24 regras</span>
+      <span>5 réplicas ao vivo</span>
+      <span>D-R001 · D-R002 · D-R003</span>
+    </div>
+    <div class="hero__acoes">
+      <a class="btn btn--claro" href="https://reciclagoias.vercel.app/entrar" target="_blank" rel="noopener">Abrir protótipo interativo</a>
+      <a class="btn btn--ghost" href="https://reciclagoias.vercel.app/roteiro-dashboards.html" target="_blank" rel="noopener">Roteiro de testes</a>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════════════════ NAV ══════════════════════════ -->
+<nav class="subnav"><div class="wrap subnav__in">
+  <span class="subnav__marca">Dashboards</span>
+  <a href="#contexto">Contexto</a>
+  <a href="#telas">Telas</a>
+  <a href="#composicao">Composição</a>
+  <a href="#prazo">Prazo</a>
+  <a href="#documentacao">Documentação</a>
+  <a href="#indicadores">Indicadores</a>
+  <a href="#camadas">Camadas</a>
+  <a href="#regras">Regras</a>
+  <a href="#dados">Dados</a>
+  <a href="#tokens">Tokens</a>
+  <a href="#motion">Motion</a>
+  <a href="#a11y">Acessibilidade</a>
+  <a href="#responsivo">Responsivo</a>
+  <a href="#checklist">Checklist</a>
+  <a href="#aberto">Aberto</a>
+  <a href="#decisoes">Decisões</a>
+</div></nav>
+
+<main class="wrap">
+
+<!-- ══════════════════════════ PARTE 1 ══════════════════════════ -->
+<div class="parte">
+  <div class="parte__cab">
+    <span class="parte__num">Parte 1</span>
+    <h2 class="parte__t">Contexto</h2>
+    <p class="parte__d">Por que estas telas existem e onde vê-las funcionando.</p>
+  </div>
+</div>
+
+<section class="bloco" id="contexto">
+  <h2><span class="n">1</span>Por que estas telas existem</h2>
+  <p class="intro">O dashboard é a porta de entrada: é a primeira coisa que a pessoa vê depois de entrar e é onde ela decide o que fazer. O redesenho começou pelo dashboard da Entidade Gestora, a pedido do cliente, e quando ele ficou de pé os outros dois passaram a destoar: mesma base de dados, mesmo usuário, duas linguagens visuais diferentes. Por isso os três estão neste pacote.</p>
+
+  <div class="duo">
+    <div class="duo__c duo__c--mal">
+      <div class="duo__t">No sistema atual</div>
+      <p>A informação existe, mas o dashboard não ajuda a ler: números soltos, gráfico que se contradiz e regra administrativa ocupando o espaço do dado.</p>
+      <ul>
+        <li>Cabeçalho de linha com um total que não bate com a soma dentro da própria barra</li>
+        <li>Anel de recuperação marcando 100% com 86.632 t recuperadas sobre 49.788 t produzidas</li>
+        <li>Lista de ações do período restritivo dentro do card, empurrando a data para baixo</li>
+        <li>Pílulas fixas de ano no cabeçalho, uma por exercício, que crescem para sempre</li>
+      </ul>
+    </div>
+    <div class="duo__c duo__c--bem">
+      <div class="duo__t">Nesta entrega</div>
+      <p>Mesma informação, com hierarquia declarada e cada número derivado de uma fonte só.</p>
+      <ul>
+        <li>Total é sempre a soma dos status, e status zerado não é desenhado</li>
+        <li>Taxa, meta em tonelada e o "bateu ou não bateu" derivam das duas massas</li>
+        <li>O card de prazo conta as ações e o popover mostra a lista, com altura constante</li>
+        <li>Seletor de ano com janela deslizante de três células, que não cresce com a série</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="aviso aviso--warn" style="margin-top:26px">
+    <span class="aviso__i">!</span>
+    <div><b>É protótipo de UX, não o sistema</b>
+      Os dados são mockados, não existe backend e o login não autentica nada: escolher o perfil grava uma string em <code>sessionStorage</code>. O que este pacote entrega é forma, estado, copy, comportamento e regra. Autenticação, listagens de destino, estados de carregamento e de erro ficam para o sistema real e estão listados na seção 16.</div>
+  </div>
+
+  <h3 class="sub">Onde isso roda</h3>
+  <div class="trol"><table>
+    <thead><tr><th style="width:150px">Rota</th><th>O que é</th><th style="width:120px">Perfil exigido</th><th style="width:270px">Página no protótipo</th></tr></thead>
+    <tbody>
+      <tr><td><code>/entrar</code></td><td>Login provisório: escolha de perfil, sem senha</td><td>nenhum</td><td><span class="chip chip--file">pages/EntrarPage.vue</span></td></tr>
+      <tr><td><code>/gestora</code></td><td>Dashboard da Entidade Gestora</td><td><code>gestora</code></td><td><span class="chip chip--file">pages/GestoraDashboardPage.vue</span></td></tr>
+      <tr><td><code>/admin</code></td><td>Dashboard da Administração (SIC)</td><td><code>admin</code></td><td><span class="chip chip--file">pages/AdminDashboardPage.vue</span></td></tr>
+      <tr><td><code>/verificador</code></td><td>Dashboard do Verificador de Resultados</td><td><code>verificador</code></td><td><span class="chip chip--file">pages/VerificadorDashboardPage.vue</span></td></tr>
+    </tbody>
+  </table></div>
+
+  <p style="margin-top:16px;font-size:13.6px;color:var(--slate-500)">As três telas logadas usam a mesma casca, o <code>GestoraShell</code>: TopBar verde de marca, menu lateral de 260px com a altura toda da viewport e área de conteúdo em largura total. O menu vem do perfil da sessão, não da tela: o verificador tem <span class="copy">Notas Fiscais</span> onde a gestora tem <span class="copy">Planos</span>.</p>
+
+  <h3 class="sub">O guard, em uma frase por caso</h3>
+  <div class="trol"><table>
+    <thead><tr><th style="width:44%">Situação</th><th>O que acontece</th></tr></thead>
+    <tbody>
+      <tr><td>Sem perfil na sessão, abrindo <code>/gestora</code></td><td>Vai para <code>/entrar?destino=/gestora</code>. Depois de entrar, volta exatamente para a URL pedida, com query e hash preservados.</td></tr>
+      <tr><td>Logado como verificador, digitando <code>/admin</code></td><td>Volta para <code>/verificador</code>, o dashboard do próprio perfil. Não desloga e não mostra erro.</td></tr>
+      <tr><td>Perfil correto</td><td>Passa direto.</td></tr>
+      <tr><td>URL fora das rotas conhecidas</td><td>Nada é montado. <b>Não existe página 404</b>, e isso é lacuna do protótipo, não decisão: está na seção 16.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="bloco" id="telas">
+  <h2><span class="n">2</span>As telas, para abrir agora</h2>
+  <p class="intro">Cada card abre a variação real no protótipo publicado. Os dados vivem em memória, então recarregar devolve tudo ao estado inicial e o teste pode ser repetido à vontade. As imagens são capturas do protótipo em 1440px, não montagens.</p>
+
+  <div class="telas">
+    <article class="tela">
+      <button class="tela__shot" data-lb="img/handoff/entrar.png"><img src="img/handoff/entrar.png" width="1584" height="1155" alt="Tela de login com os quatro cards de perfil" loading="lazy"><span class="tela__lupa">ampliar</span></button>
+      <div class="tela__b">
+        <span class="tela__t">Login provisório</span>
+        <span class="tela__rota">/entrar</span>
+        <span class="tela__d">Quatro perfis em radio group nativo, Entidade Gestora pré-selecionada. O Operador Logístico aparece desabilitado, com chip <span class="copy">Em breve</span>, porque ainda não tem tela.</span>
+        <a class="tela__link" href="https://reciclagoias.vercel.app/entrar" target="_blank" rel="noopener">Abrir tela →</a>
+      </div>
+    </article>
+
+    <article class="tela">
+      <button class="tela__shot" data-lb="img/handoff/gestora.png"><img src="img/handoff/gestora.png" width="1584" height="1155" alt="Dashboard da Entidade Gestora" loading="lazy"><span class="tela__lupa">ampliar</span></button>
+      <div class="tela__b">
+        <span class="tela__t">Entidade Gestora</span>
+        <span class="tela__rota">/gestora</span>
+        <span class="tela__d">Status da documentação em três linhas, dois cards de prazo (um deles em período restritivo) e o Acesso Rápido. É a tela onde o explorador de cenários funciona.</span>
+        <a class="tela__link" href="https://reciclagoias.vercel.app/gestora" target="_blank" rel="noopener">Abrir tela →</a>
+      </div>
+    </article>
+
+    <article class="tela">
+      <button class="tela__shot" data-lb="img/handoff/admin.png"><img src="img/handoff/admin.png" width="1584" height="1576" alt="Dashboard da Administração (SIC)" loading="lazy"><span class="tela__lupa">ampliar</span></button>
+      <div class="tela__b">
+        <span class="tela__t">Administração (SIC)</span>
+        <span class="tela__rota">/admin</span>
+        <span class="tela__d">A tela mais densa: quatro indicadores, documentação, massas disponíveis, distribuição de usuários em rosca, dois prazos e a fileira de recuperação por material.</span>
+        <a class="tela__link" href="https://reciclagoias.vercel.app/admin" target="_blank" rel="noopener">Abrir tela →</a>
+      </div>
+    </article>
+
+    <article class="tela">
+      <button class="tela__shot" data-lb="img/handoff/verificador.png"><img src="img/handoff/verificador.png" width="1584" height="1045" alt="Dashboard do Verificador de Resultados" loading="lazy"><span class="tela__lupa">ampliar</span></button>
+      <div class="tela__b">
+        <span class="tela__t">Verificador de Resultados</span>
+        <span class="tela__rota">/verificador</span>
+        <span class="tela__d">A mais enxuta. Prova dois estados de uma vez: linha com um status só (sem barra) e linha com zero documentos (frase, sem barra e sem contagem).</span>
+        <a class="tela__link" href="https://reciclagoias.vercel.app/verificador" target="_blank" rel="noopener">Abrir tela →</a>
+      </div>
+    </article>
+
+    <article class="tela">
+      <button class="tela__shot" data-lb="img/handoff/doc-variacoes.png"><img src="img/handoff/doc-variacoes.png" width="1013" height="452" alt="As três variações da linha de documentação na mesma tela" loading="lazy"><span class="tela__lupa">ampliar</span></button>
+      <div class="tela__b">
+        <span class="tela__t">Variações da linha</span>
+        <span class="tela__rota">/gestora?cenario=variacoes</span>
+        <span class="tela__d">Zero, um e quatro status na mesma tela. É a tira B do Figma reproduzida em dado real, e o jeito mais rápido de conferir a regra da barra empilhada.</span>
+        <a class="tela__link" href="https://reciclagoias.vercel.app/gestora?cenario=variacoes" target="_blank" rel="noopener">Abrir tela →</a>
+      </div>
+    </article>
+
+    <article class="tela">
+      <button class="tela__shot" data-lb="img/handoff/popover-20.png"><img src="img/handoff/popover-20.png" width="458" height="732" alt="Popover do período restritivo com vinte ações e lista rolando" loading="lazy"><span class="tela__lupa">ampliar</span></button>
+      <div class="tela__b">
+        <span class="tela__t">Vinte ações liberadas</span>
+        <span class="tela__rota">/gestora?cenario=rec06</span>
+        <span class="tela__d">O caso extremo da D-R001: o card tem exatamente a mesma altura de quando há uma ação só, e quem rola é a lista dentro do popover.</span>
+        <a class="tela__link" href="https://reciclagoias.vercel.app/gestora?cenario=rec06" target="_blank" rel="noopener">Abrir tela →</a>
+      </div>
+    </article>
+  </div>
+
+  <p class="apoio-linha">
+    <a class="btn btn--verde" href="https://reciclagoias.vercel.app/entrar" target="_blank" rel="noopener">Abrir protótipo interativo</a>
+    <span>Entrada pelo login em <a href="https://reciclagoias.vercel.app/entrar" target="_blank" rel="noopener">reciclagoias.vercel.app</a>, sem credencial.</span>
+  </p>
+
+  <h3 class="sub">Todos os cenários por URL</h3>
+  <p style="font-size:14px;color:var(--slate-500);margin-top:8px">Só na Entidade Gestora. O parâmetro <code>?cenario=</code> carrega um recorte pronto do catálogo e fica em sincronia com o painel do explorador nos dois sentidos. Cenário desconhecido é ignorado em silêncio: a tela abre no estado atual, sem mensagem de erro.</p>
+  <div class="trol"><table>
+    <thead><tr><th style="width:210px">URL</th><th style="width:170px">Nome no painel</th><th>O que prova</th></tr></thead>
+    <tbody>
+      <tr><td><code>?cenario=hoje</code></td><td>Hoje <span class="chip chip--success">padrão</span></td><td>Exercício com volume; planos em período restritivo com 2 ações</td></tr>
+      <tr><td><code>?cenario=rec01</code></td><td>REC-01</td><td>Dentro do prazo: nenhum card fala de período restritivo</td></tr>
+      <tr><td><code>?cenario=rec02</code></td><td>REC-02</td><td>Planos em período restritivo com 2 ações, relatórios dentro do prazo</td></tr>
+      <tr><td><code>?cenario=rec03</code></td><td>REC-03</td><td>Escala e exceção lado a lado: 6 ações num card, 1 no outro</td></tr>
+      <tr><td><code>?cenario=rec06</code></td><td>REC-06</td><td>Vinte ações: o card não cresce e a lista do popover rola</td></tr>
+      <tr><td><code>?cenario=variacoes</code></td><td>Variações da linha</td><td>Zero, um e quatro status na mesma tela</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ══════════════════════════ PARTE 2 ══════════════════════════ -->
+<div class="parte">
+  <div class="parte__cab">
+    <span class="parte__num">Parte 2</span>
+    <h2 class="parte__t">Comportamento</h2>
+    <p class="parte__d">O que as telas fazem, estado por estado. É a parte que precisa ser reproduzida fielmente.</p>
+  </div>
+</div>
+
+<section class="bloco" id="composicao">
+  <h2><span class="n">3</span>Composição das três telas</h2>
+  <p class="intro">A casca e a ordem dos blocos são as mesmas nas três telas. O que muda é quais blocos existem e com que dado. Esta tabela é o mapa do que é compartilhado e do que é exclusivo: um componente marcado em duas colunas é o <b>mesmo</b> componente, com props diferentes, não uma cópia.</p>
+
+  <div class="trol"><table>
+    <thead><tr><th style="width:250px">Bloco, na ordem em que aparece</th><th style="width:110px">Gestora</th><th style="width:110px">Admin</th><th style="width:110px">Verificador</th><th>Observação</th></tr></thead>
+    <tbody>
+      <tr><td>Cabeçalho: saudação + seletor de ano</td><td>✓</td><td>✓</td><td>✓</td><td><code>h1</code> é <span class="copy">Olá, {nome}</span>; a segunda linha é o campo de identificação do perfil</td></tr>
+      <tr><td>Faixa de contexto (ano de execução e ano base)</td><td>✓</td><td>✓</td><td>✓</td><td>Ano base é sempre ano de execução menos 1</td></tr>
+      <tr><td>Fileira de indicadores (<code>KpiCard</code>)</td><td>—</td><td>✓ 4 cartões</td><td>—</td><td>Só o quarto cartão tem chips</td></tr>
+      <tr><td>Status da Documentação</td><td>✓ 3 linhas</td><td>✓ 2 linhas</td><td>✓ 2 linhas</td><td>Mesmo componente; muda a descrição e as linhas</td></tr>
+      <tr><td>Relatório de Massas Disponível</td><td>—</td><td>✓</td><td>—</td><td>Três dos quatro materiais sem dado</td></tr>
+      <tr><td>Distribuição de Usuários (rosca)</td><td>—</td><td>✓</td><td>—</td><td>Único gráfico circular de proporção do pacote</td></tr>
+      <tr><td>Cards de prazo</td><td>✓ 2</td><td>✓ 2</td><td>✓ 1</td><td>Mesmo componente nos três; estados diferentes</td></tr>
+      <tr><td>Acesso Rápido</td><td>✓ 3 botões</td><td>—</td><td>✓ 2 botões</td><td>O último botão é o preenchido</td></tr>
+      <tr><td>Massa Produzida e Recuperada</td><td>—</td><td>✓ 4 materiais</td><td>—</td><td>Ocupa a largura toda, abaixo da grade</td></tr>
+      <tr><td>Explorador de cenários (rodapé do menu)</td><td>✓</td><td>—</td><td>—</td><td><b>Ferramenta de protótipo.</b> Não vai para o sistema real</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3 class="sub">A grade</h3>
+  <p style="font-size:14px;color:var(--slate-500);margin-top:8px">Nas três telas: coluna principal fluida mais coluna lateral de largura <code>clamp(360px, 22%, 520px)</code>, com <code>gap</code> de 20px. Os 360px são a medida do frame de 1440 e são o piso. O conteúdo ocupa a largura toda, do recuo depois do menu até o recuo da direita, com <code>padding-inline: max(40px, min(2.5vw, 80px))</code>. Nada de largura fixa centralizada: com margem grande dos dois lados a tela parece que não foi feita sob medida, e num monitor 4K seria pior.</p>
+
+  <h3 class="sub">Os dois blocos de uma tela só</h3>
+  <div class="demo__grade" style="margin-top:18px">
+    <div style="max-width:300px">
+      <button class="spec__shot" style="margin-top:0" data-lb="img/handoff/acesso-rapido.png"><img src="img/handoff/acesso-rapido.png" width="458" height="335" alt="Card de Acesso Rápido com três botões" loading="lazy"></button>
+      <p style="font-size:13.2px;color:var(--slate-500);margin-top:10px"><b>Acesso Rápido</b> existe na gestora e no verificador, com conjuntos diferentes. O último botão é o preenchido, porque é o destino mais provável. Nesta rodada todos são inertes: as listagens de destino ainda não existem.</p>
+    </div>
+    <div style="max-width:300px">
+      <button class="spec__shot" style="margin-top:0" data-lb="img/handoff/explorador.png"><img src="img/handoff/explorador.png" width="423" height="1378" alt="Painel do explorador de cenários aberto" loading="lazy"></button>
+      <p style="font-size:13.2px;color:var(--slate-500);margin-top:10px"><b>Explorador de cenários</b>, no rodapé do menu da gestora. É ferramenta de protótipo e <b>não vai para o sistema real</b>: serve para inspecionar as variações sem precisar de dado novo. Os controles nascem do catálogo, e as regras que ele respeita são as da seção 8.</p>
+    </div>
+  </div>
+
+  <h3 class="sub">Como se chega em cada tela</h3>
+  <div class="passos">
+    <div class="passo"><span class="passo__n">1</span><div><strong>Login</strong><code>/entrar</code><span>Escolhe o perfil. Grava a string em <code>sessionStorage</code> na chave <code>rg:sessao:perfil</code>.</span></div></div>
+    <div class="passo passo--seta">→</div>
+    <div class="passo"><span class="passo__n">2</span><div><strong>Rota inicial do perfil</strong><code>/gestora · /admin · /verificador</code><span>Vem do próprio perfil. Se havia <code>?destino=</code>, ele vence.</span></div></div>
+    <div class="passo passo--seta">→</div>
+    <div class="passo"><span class="passo__n">3</span><div><strong>Dashboard</strong><code>GestoraShell</code><span>Mesma casca nos três, com o menu do perfil. Sair é pelo avatar da TopBar.</span></div></div>
+  </div>
+</section>
+
+<section class="bloco" id="prazo">
+  <h2><span class="n">4</span>Card de prazo, estado por estado</h2>
+  <p class="intro">É o componente com mais regra do pacote, e o que a decisão <b>D-R001</b> governa. A ideia inteira cabe numa frase: <b>o card conta, o popover mostra</b>. Fazer diferente é o que quebrava a tela no sistema atual, onde a lista de ações morava dentro do card e empurrava a data para baixo a cada ação nova.</p>
+
+  <div class="diagrama">
+  <svg viewBox="0 0 1000 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama de estados do card de prazo, com as transições entre vigência normal, período restritivo e popover aberto">
+    <defs>
+      <marker id="st1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#475569"/></marker>
+    </defs>
+    <style>
+      .st{font:600 15px 'Inter',sans-serif;fill:#0F172A}
+      .sd{font:400 11px 'Inter',sans-serif;fill:#64748B}
+      .tr{font:600 11.5px 'Inter',sans-serif;fill:#334155}
+      .gu{font:400 11.5px 'Inter',sans-serif;fill:#64748B}
+      .no{font:600 12px 'Inter',sans-serif;fill:#B91C1C}
+    </style>
+
+    <circle cx="40" cy="120" r="11" fill="#0F172A"/>
+    <path d="M51 120 H 140" stroke="#475569" stroke-width="1.6" marker-end="url(#st1)"/>
+    <text x="52" y="110" class="gu">vigência do admin</text>
+
+    <rect x="146" y="76" width="200" height="90" rx="14" fill="#F1F5F9" stroke="#64748B" stroke-width="2"/>
+    <text x="246" y="112" text-anchor="middle" class="st">Prazo normal</text>
+    <text x="246" y="132" text-anchor="middle" class="sd">data, contador e a ação</text>
+    <text x="246" y="147" text-anchor="middle" class="sd">que o prazo habilita</text>
+
+    <path d="M346 121 H 470" stroke="#475569" stroke-width="1.6" marker-end="url(#st1)"/>
+    <text x="352" y="110" class="tr">diretoria autoriza</text>
+    <text x="352" y="140" class="gu">[libera ao menos 1 ação]</text>
+
+    <rect x="476" y="60" width="230" height="122" rx="14" fill="#FEF2F2" stroke="#DC2626" stroke-width="2"/>
+    <text x="591" y="94" text-anchor="middle" class="st">Período restritivo</text>
+    <text x="591" y="115" text-anchor="middle" class="sd">chip vermelho + gatilho que conta</text>
+    <text x="591" y="132" text-anchor="middle" class="sd">n = 1  ·  “Ver a ação liberada até …”</text>
+    <text x="591" y="149" text-anchor="middle" class="sd">n ≥ 2  ·  “Ver as n ações liberadas até …”</text>
+    <text x="591" y="169" text-anchor="middle" class="no">altura do card não muda com n</text>
+
+    <path d="M706 121 H 820" stroke="#475569" stroke-width="1.6" marker-end="url(#st1)"/>
+    <text x="712" y="110" class="tr">clique no gatilho</text>
+    <text x="712" y="140" class="gu">[nunca hover]</text>
+
+    <rect x="826" y="76" width="150" height="90" rx="14" fill="#E9F6EE" stroke="#1F8344" stroke-width="2"/>
+    <text x="901" y="112" text-anchor="middle" class="st">Popover</text>
+    <text x="901" y="132" text-anchor="middle" class="sd">conceito, prazo</text>
+    <text x="901" y="147" text-anchor="middle" class="sd">e a lista de ações</text>
+
+    <path d="M901 166 V 232 H 591 V 186" stroke="#475569" stroke-width="1.6" fill="none" marker-end="url(#st1)"/>
+    <text x="700" y="252" text-anchor="middle" class="tr">Esc · botão X · clique fora</text>
+    <text x="700" y="270" text-anchor="middle" class="gu">Esc e X devolvem o foco ao gatilho; clique fora não</text>
+
+    <path d="M540 186 V 300 H 246 V 172" stroke="#475569" stroke-width="1.6" fill="none" marker-end="url(#st1)"/>
+    <text x="392" y="320" text-anchor="middle" class="tr">desmarcar a última ação</text>
+    <text x="392" y="338" text-anchor="middle" class="gu">[n chega a 0 → o período desliga junto]</text>
+
+    <rect x="146" y="352" width="830" height="52" rx="12" fill="#FFFBEB" stroke="#FDE68A"/>
+    <text x="166" y="374" class="tr" style="fill:#B45309">Estado inexistente</text>
+    <text x="166" y="392" class="gu" style="fill:#B45309">Período restritivo com n = 0 não é estado válido do domínio: seria um prazo fechado com aparência de aberto. O backend precisa garantir a mesma invariante.</text>
+  </svg>
+  </div>
+
+  <div class="specs">
+    <div class="spec">
+      <div class="spec__k">
+        <strong>Prazo normal</strong>
+        <div class="spec__quando"><i>Quando</i>A vigência não está marcada como restritiva</div>
+      </div>
+      <div class="spec__v">
+        Eyebrow em caixa alta com o escopo da vigência, data de fim em 20px verde de marca, contador e, no rodapé, o botão da ação que o prazo habilita. <b>O card normal não menciona período restritivo em lugar nenhum</b>: só se fala do conceito quando a flag está ativa, senão ele vira ruído permanente.
+        <ul>
+          <li>Contador padrão: <span class="copy">Faltam 18 dias para o fim do prazo</span>, com singular em 1 dia (<span class="copy">Falta 1 dia para o fim do prazo</span>).</li>
+          <li>Se o dado trouxer o campo <code>contador</code>, ele <b>vence</b> o cálculo. É como saem <span class="copy">Finaliza hoje</span> e <span class="copy">Prazo ainda não definido</span>. Sem isso, um prazo com zero dias mostraria "Faltam 0 dias".</li>
+          <li>Sem <code>acaoRotulo</code> o card fica só com o cabeçalho. É o caso de <span class="copy">PRAZO FINAL PLANOS</span> no admin, com data <span class="copy">—</span>.</li>
+        </ul>
+        <button class="spec__shot" data-lb="img/handoff/prazo-simples.png"><img src="img/handoff/prazo-simples.png" width="458" height="251" alt="Card de prazo sem período restritivo"></button>
+        <div class="spec__fonte"><span class="chip chip--file">DeadlineCard.vue</span></div>
+      </div>
+    </div>
+
+    <div class="spec">
+      <div class="spec__k">
+        <strong>Período restritivo · n = 1</strong>
+        <div class="spec__quando"><i>Quando</i>Exatamente uma ação liberada</div>
+      </div>
+      <div class="spec__v">
+        Bloco cinza com chip <span class="copy">Período restritivo</span> em vermelho e o gatilho <span class="copy">Ver a ação liberada até 02/09</span>. <b>Nem com uma ação só o card diz qual é a ação.</b> A versão anterior abria essa exceção e foi descartada: quebrava a altura constante, criava um segundo jeito de ler o mesmo bloco e obrigava a redigir uma frase para cada ação do catálogo. Contar é uma regra; contar às vezes e mostrar às vezes são duas.
+        <button class="spec__shot" data-lb="img/handoff/prazo-restritivo-1.png"><img src="img/handoff/prazo-restritivo-1.png" width="458" height="286" alt="Card de prazo com uma ação liberada"></button>
+        <div class="spec__fonte"><span class="chip chip--file">DeadlineCard.vue</span> <span class="chip chip--neutral">?cenario=rec03</span></div>
+      </div>
+    </div>
+
+    <div class="spec">
+      <div class="spec__k">
+        <strong>Período restritivo · n ≥ 2</strong>
+        <div class="spec__quando"><i>Quando</i>Duas ou mais ações liberadas</div>
+      </div>
+      <div class="spec__v">
+        O gatilho passa ao plural e conta: <span class="copy">Ver as 6 ações liberadas até 29/08</span>. O rótulo declara <b>assunto, tamanho do conjunto e prazo</b> de propósito: um link escrito só <span class="copy">Período restritivo</span> é jargão administrativo e não diz o que vai acontecer no clique.
+        <button class="spec__shot" data-lb="img/handoff/prazo-restritivo-6.png"><img src="img/handoff/prazo-restritivo-6.png" width="435" height="286" alt="Card de prazo com seis ações liberadas"></button>
+        <div class="spec__fonte"><span class="chip chip--file">DeadlineCard.vue</span> <span class="chip chip--neutral">?cenario=rec03</span></div>
+      </div>
+    </div>
+
+    <div class="spec">
+      <div class="spec__k">
+        <strong>Popover aberto</strong>
+        <div class="spec__quando"><i>Quando</i>Clique ou Enter no gatilho</div>
+      </div>
+      <div class="spec__v">
+        Camada de <b>324px</b> ancorada abaixo do gatilho (<code>top: 100% + 10px</code>, <code>left: -12px</code>), com três partes fixas e uma rolável:
+        <ul>
+          <li><b>Título</b> com o (i) vermelho ao lado, nunca sozinho: <span class="copy">Período restritivo</span>, e o botão X com nome acessível <span class="copy">Fechar</span>.</li>
+          <li><b>Explicação</b>, texto fixo em todos os cards: <span class="copy">É uma extensão excepcional de um prazo que já terminou. Não tem calendário e não é rotina: acontece quando a diretoria autoriza, caso a caso, e libera apenas algumas ações.</span></li>
+          <li><b>Prazo</b> em caixa alta: <span class="copy">Liberadas até 29/08</span>, no singular quando há uma ação só (<span class="copy">Liberado até 02/09</span>).</li>
+          <li><b>Lista</b> em <code>&lt;ul&gt;&lt;li&gt;</code> de verdade. Acima de 11 ações ela trava em 240px e rola; o resto continua parado.</li>
+        </ul>
+        <button class="spec__shot" data-lb="img/handoff/popover-6.png"><img src="img/handoff/popover-6.png" width="458" height="651" alt="Popover do período restritivo aberto com seis ações"></button>
+        <div class="spec__fonte"><span class="chip chip--file">RestrictedPeriodPopover.vue</span></div>
+      </div>
+    </div>
+
+    <div class="spec">
+      <div class="spec__k">
+        <strong>Popover com lista rolando</strong>
+        <div class="spec__quando"><i>Quando</i>Mais de 11 ações liberadas</div>
+      </div>
+      <div class="spec__v">
+        O corte é <b>por altura, não por contagem de itens</b>: rótulos longos quebram em duas linhas e ocupam o dobro do espaço, então travar a altura é honesto e fingir um número fixo de itens não seria. Com 20 ações, o card continua com a mesma altura da variação de uma ação só.
+        <button class="spec__shot" data-lb="img/handoff/popover-20.png"><img src="img/handoff/popover-20.png" width="458" height="732" alt="Popover com vinte ações e a lista rolando"></button>
+        <div class="spec__fonte"><span class="chip chip--file">RestrictedPeriodPopover.vue</span> <span class="chip chip--neutral">?cenario=rec06</span></div>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="sub">O que precisa ser igual</h3>
+  <div class="trol"><table>
+    <thead><tr><th style="width:200px">Item</th><th>Valor</th></tr></thead>
+    <tbody>
+      <tr><td>Largura do popover</td><td><b>324px</b> fixos</td></tr>
+      <tr><td>Altura máxima da lista</td><td><b>240px</b>, a partir de 12 ações (<code>LIMITE_SEM_ROLAGEM = 11</code>)</td></tr>
+      <tr><td>Data longa e data curta</td><td>O card mostra <code>DD/MM/AAAA</code>; gatilho e popover mostram <code>DD/MM</code></td></tr>
+      <tr><td>Elemento do gatilho</td><td><code>&lt;button aria-expanded aria-controls&gt;</code>, nunca <code>&lt;a href&gt;</code></td></tr>
+      <tr><td>Abertura</td><td>Clique. <b>Nunca hover</b></td></tr>
+      <tr><td>Fechamento</td><td><code>Esc</code>, botão X e clique fora. Sem scrim, sem <code>role="dialog"</code>, sem trap de foco</td></tr>
+      <tr><td>Devolução de foco</td><td><code>Esc</code> e X devolvem ao gatilho; clique fora não devolve</td></tr>
+      <tr><td>Ordem das ações</td><td>A do catálogo. Os cenários sempre ligam os n primeiros, então <span class="copy">Incluir nota fiscal</span> é sempre a primeira</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="aviso aviso--danger">
+    <span class="aviso__i">!</span>
+    <div><b>A altura constante não está travada por CSS</b>
+      Não existe <code>height</code> nem <code>min-height</code> no card. A altura se mantém porque o bloco restritivo tem sempre um chip de uma linha e um gatilho de uma linha. Quem for implementar precisa garantir que o rótulo do gatilho <b>caiba em uma linha</b> na largura da coluna, senão a promessa cai justamente no caso de número grande.</div>
+  </div>
+</section>
+
+<section class="bloco" id="documentacao">
+  <h2><span class="n">5</span>Status da Documentação, linha por linha</h2>
+  <p class="intro">Um card, uma linha por tipo de documento, e a linha se adapta sozinha ao dado. É a decisão <b>D-R003</b>. O título <span class="copy">Status da Documentação</span> é requisição do cliente e não muda.</p>
+
+  <button class="spec__shot" style="max-width:100%;margin-top:24px" data-lb="img/handoff/doc-variacoes.png"><img src="img/handoff/doc-variacoes.png" width="1013" height="452" alt="As três variações da linha na mesma tela"></button>
+
+  <div class="trol"><table>
+    <thead><tr><th style="width:150px">Situação</th><th style="width:190px">O que a linha desenha</th><th>Por quê</th></tr></thead>
+    <tbody>
+      <tr><td><b>0 documentos</b><br><span class="chip chip--neutral">total = 0</span></td><td>Frase. Sem barra, sem contagem.</td><td>Uma barra vazia mentiria sobre a existência de dado. A frase é redigida por tipo: <span class="copy">Nenhum plano enviado ainda.</span> · <span class="copy">Nenhum relatório aberto ainda.</span> · <span class="copy">Nenhum certificado recebido até agora.</span></td></tr>
+      <tr><td><b>1 status</b><br><span class="chip chip--neutral">1 status &gt; 0</span></td><td>Contagem com ponto colorido. Sem barra.</td><td>Com um status só a proporção não significa nada: a barra seria uma faixa cheia de uma cor só.</td></tr>
+      <tr><td><b>2 ou mais status</b><br><span class="chip chip--neutral">≥ 2 status &gt; 0</span></td><td>Barra empilhada mais a contagem por status.</td><td>Aqui existe proporção para comparar, e a contagem escrita fica logo abaixo.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3 class="sub">As quatro regras que sustentam a linha</h3>
+  <ul class="lista">
+    <li><b>O total nunca é digitado.</b> É a soma dos status já filtrados. Isso elimina a classe inteira de bug em que o número do cabeçalho discorda da lista, que é exatamente o que o sistema atual faz na tela do verificador: <b>18</b> no cabeçalho e <b>27</b> dentro da barra da mesma linha.</li>
+    <li><b>Status zerado não aparece</b>, nem na barra, nem na contagem, nem no total. Mostrar "0 retificados" gasta uma linha para não dizer nada. O filtro está em dois lugares de propósito: mesmo que a API mande zerado, o componente não desenha.</li>
+    <li><b>A ordem é a do catálogo</b>, nunca por quantidade. Ordenar por quantidade faria a barra trocar de arranjo a cada atualização de dado, e a lista de contagem deixaria de ler na mesma sequência da barra.</li>
+    <li><b>A contagem fica escrita</b>, com o rótulo ao lado do ponto colorido. É por isso que a barra pode ser <code>aria-hidden</code>: a informação já está em texto. Se alguém remover a contagem escrita, o <code>aria-hidden</code> vira perda de informação.</li>
+  </ul>
+
+  <h3 class="sub">Barra empilhada</h3>
+  <div class="trol"><table>
+    <thead><tr><th style="width:210px">Propriedade</th><th>Valor e motivo</th></tr></thead>
+    <tbody>
+      <tr><td>Largura</td><td><code>clamp(320px, 28%, 560px)</code>. Os 320px são a medida do frame de 1440 e são o piso; em tela grande a barra cresce para não virar um risquinho perdido dentro de um card largo</td></tr>
+      <tr><td>Altura e raio</td><td>6px, cantos arredondados em pílula</td></tr>
+      <tr><td>Faixa mínima</td><td><code>min-width: 2px</code>. <b>Nenhuma faixa pode desaparecer</b>: um status com quantidade muito pequena ficaria com fração de pixel. O custo aceito é que, nesses casos, a proporção deixa de ser exata</td></tr>
+      <tr><td>Cores</td><td>Semáforo do design system, não uma escala de verdes: três tons do mesmo verde são indistinguíveis para boa parte das pessoas</td></tr>
+      <tr><td>Acessibilidade</td><td><code>aria-hidden="true"</code>, porque a mesma informação está escrita abaixo</td></tr>
+    </tbody>
+  </table></div>
+
+  <h4 class="rot">Mapa de tom para cor</h4>
+  <div class="tokens">
+    <div class="token"><span class="token__sw" style="background:#1F8344"></span><div><div class="token__n">success</div><div class="token__v">#1F8344</div><div class="token__u">enviados, aprovados, aprovadas/enviadas</div></div></div>
+    <div class="token"><span class="token__sw" style="background:#2563EB"></span><div><div class="token__n">info</div><div class="token__v">#2563EB</div><div class="token__u">retificados, transferidos</div></div></div>
+    <div class="token"><span class="token__sw" style="background:#D97706"></span><div><div class="token__n">warning</div><div class="token__v">#D97706</div><div class="token__u">em preenchimento, retificando, em conciliação</div></div></div>
+    <div class="token"><span class="token__sw" style="background:#DC2626"></span><div><div class="token__n">danger</div><div class="token__v">#DC2626</div><div class="token__u">bloqueadas (existe no catálogo do verificador, hoje com quantidade 0)</div></div></div>
+    <div class="token"><span class="token__sw" style="background:#64748B"></span><div><div class="token__n">neutral</div><div class="token__v">#64748B</div><div class="token__u">cancelados</div></div></div>
+  </div>
+
+  <div class="aviso aviso--info">
+    <span class="aviso__i">i</span>
+    <div><b>Singular e plural vêm no dado, sempre os dois</b>
+      Não há pluralização automática: cada status carrega o próprio par. Alguns pares são <b>iguais de propósito</b> (<span class="copy">em preenchimento</span>, <span class="copy">retificando</span>, <span class="copy">em conciliação</span>) e outros são compostos por refletirem dois status do sistema atual num número só (<span class="copy">aprovadas/enviadas</span>, <span class="copy">em preenchimento/retificando</span>). O backend precisa entregar os dois campos mesmo quando forem idênticos.</div>
+  </div>
+
+  <div class="aviso aviso--warn">
+    <span class="aviso__i">!</span>
+    <div><b>Esta linha muda de altura, e tudo bem</b>
+      A regra de altura constante é do <b>card de prazo</b> (D-R001), não daqui. Na linha de documentação a adaptação de altura entre as três variações é o comportamento esperado.</div>
+  </div>
+</section>
+
+<section class="bloco" id="indicadores">
+  <h2><span class="n">6</span>Indicadores do Admin</h2>
+  <p class="intro">Quatro blocos que só existem em <code>/admin</code>. A regra de forma que governa a tela: <b>proporção de um todo com poucas categorias vai em gráfico circular; comparação de categorias com contagem exata continua em barra empilhada</b>. Comparar comprimento é mais preciso que comparar ângulo. Em todos os casos o número fica escrito.</p>
+
+  <h3 class="sub">Fileira de indicadores</h3>
+  <button class="spec__shot" style="max-width:100%" data-lb="img/handoff/kpis.png"><img src="img/handoff/kpis.png" width="1431" height="196" alt="Os quatro indicadores do topo do dashboard do admin"></button>
+  <ul class="lista">
+    <li>Grade de quatro colunas iguais, <code>gap</code> de 20px. Cada cartão tem eyebrow em caixa alta, valor em 28px neutro, frase de apoio e uma caixa de ícone verde-clara no canto.</li>
+    <li><b>A caixa de ícone é o único toque de cor.</b> O valor fica em neutro, senão a fileira inteira compete com os cards de prazo da coluna lateral.</li>
+    <li><code>height: 100%</code> em todos os cartões é obrigatório: a fileira é grid e o quarto cartão tem chips, então sem isso ele fica mais alto e a linha desalinha.</li>
+    <li>Só o quarto cartão tem chips: <span class="copy">99 pendentes</span> (warning) e <span class="copy">5 aprovadas</span> (success).</li>
+    <li>O ano do primeiro eyebrow é reescrito pelo seletor: <span class="copy">META DE RECICLAGEM 2025</span> vira o ano selecionado. Os outros três não terminam em quatro dígitos, então não mudam.</li>
+  </ul>
+
+  <div class="aviso aviso--warn">
+    <span class="aviso__i">!</span>
+    <div><b>Os chips de Justificativas não somam o valor</b>
+      O cartão mostra <b>130</b>, e 99 + 5 = 104. Aqui os chips são recortes de dois estados, não a decomposição do total, ao contrário da regra do Status da Documentação. Vale confirmar com o SIC se o número certo é esse ou se faltam estados na decomposição: está na seção 16.</div>
+  </div>
+
+  <h3 class="sub">Relatório de Massas Disponível</h3>
+  <button class="spec__shot" style="max-width:100%" data-lb="img/handoff/massas-disponiveis.png"><img src="img/handoff/massas-disponiveis.png" width="1013" height="256" alt="Card de massas disponíveis com três materiais sem dado"></button>
+  <ul class="lista">
+    <li>Quatro blocos, um por material, com um fio colorido à esquerda. <b>O fio é redundante de propósito</b>: o nome do material está escrito ao lado, então a cor identifica sem ser o único canal.</li>
+    <li>Material sem massa mostra <span class="copy">—</span> no lugar do número e mantém a palavra <span class="copy">toneladas</span> abaixo. Não vira zero, não vira "sem dado" e não some da lista: mostrar 0 diria "zerou", o que é falso, e sumir com o bloco quebraria a comparação entre os quatro materiais.</li>
+    <li>O total do cabeçalho vem pronto do dado (<span class="copy">Total disponível: 74,2 t</span>). Como três materiais estão sem medição, aqui a soma não pode ser derivada.</li>
+  </ul>
+
+  <h3 class="sub">Distribuição de Usuários</h3>
+  <button class="spec__shot" data-lb="img/handoff/donut-destaque.png"><img src="img/handoff/donut-destaque.png" width="458" height="289" alt="Rosca de distribuição de usuários com uma fatia em destaque"></button>
+  <ul class="lista">
+    <li>Rosca com o total no miolo. O total <b>é sempre a soma das quantidades</b>, nunca um número digitado.</li>
+    <li>Fatia com quantidade zero não é desenhada, mesma regra da barra empilhada.</li>
+    <li><b>O detalhe aparece dentro do gráfico</b>, não numa camada flutuante. São três motivos: em toque não existe hover; camada flutuante sobre o próprio elemento dispara as obrigações da WCAG 1.4.13; e o miolo já era espaço morto. Em repouso o miolo mostra o total e a palavra <span class="copy">TOTAL</span>; em destaque, a quantidade da fatia e a porcentagem dela.</li>
+    <li><b>Quem recebe o foco é a legenda</b>, feita de <code>&lt;button&gt;</code>. O SVG é <code>aria-hidden</code>. Assim o detalhe existe no teclado e no toque, não só no mouse.</li>
+    <li><b>A legenda não tem <code>@click</code> e não alterna nada.</b> No toque o navegador dispara <code>mouseenter</code> e <code>focus</code> antes do clique, então um alternador aqui desligaria o destaque que os dois acabaram de acender. Isso já foi encontrado e corrigido uma vez: não reintroduzir.</li>
+    <li><code>Esc</code> limpa o destaque sem tirar o foco do botão.</li>
+    <li>A porcentagem da legenda é revelada por <code>opacity</code>, não por <code>v-if</code>: o layout não pula quando o detalhe aparece, e o leitor de tela lê a porcentagem sempre.</li>
+  </ul>
+
+  <h3 class="sub">Massa Produzida e Recuperada</h3>
+  <button class="spec__shot" style="max-width:100%" data-lb="img/handoff/massa.png"><img src="img/handoff/massa.png" width="1431" height="519" alt="Os quatro cartões de material com anel de recuperação"></button>
+
+  <p style="margin-top:18px">Este é o card em que o sistema atual se contradiz, e a correção é conceitual, não visual. <b>Só duas grandezas são guardadas por material: massa produzida e massa recuperada, em tonelada.</b> Todo o resto é derivado:</p>
+
+  <div class="codigo"><pre><span class="c">// por material, em tonelada</span>
+meta   = produzida * <span class="k">META_PERCENTUAL</span> / 100     <span class="c">// META_PERCENTUAL = 30</span>
+taxa   = produzida &gt; 0 ? recuperada / produzida * 100 : 0
+atingiu = recuperada &gt;= meta                    <span class="c">// NÃO é taxa &gt;= 100</span>
+
+<span class="c">// Papel:   49.788,0 t produzidas · meta 14.936,4 t · 86.632,0 t recuperadas → 174,0% · atingiu</span>
+<span class="c">// Plástico: 12.692,0 t · meta 3.807,6 t · 10.335,0 t → 81,4% · atingiu</span>
+<span class="c">// Metal:     8.846,0 t · meta 2.653,8 t ·  2.210,0 t → 25,0% · ABAIXO da meta</span>
+<span class="c">// Vidro:     7.746,0 t · meta 2.323,8 t ·  4.116,0 t → 53,1% · atingiu</span></pre></div>
+
+  <ul class="lista">
+    <li><b>A taxa pode passar de 100%.</b> Recuperar mais massa do que se colocou no mercado no exercício é resultado possível, e é o caso do papel. <b>O arco trava em 100%</b>, porque um anel cheio é cheio, mas o número no centro continua o valor real: <span class="copy">174,0%</span>.</li>
+    <li><b>Bateu a meta é <code>recuperada &gt;= meta</code></b>, comparação em tonelada. Usar "taxa &gt;= 100%" faria o Plástico e o Vidro aparecerem como reprovados, quando os dois bateram a meta com folga.</li>
+    <li><b>Um estado, três canais coerentes:</b> cor do arco, texto do chip e fundo do cartão. Quem bateu fica com arco verde, chip <span class="copy">Meta atingida</span> e fundo verde-claro com borda de marca. Quem não bateu fica com arco âmbar, chip <span class="copy">Abaixo da meta</span> e <b>fundo cinza padrão</b>: pintar o cartão reprovado de âmbar transformaria a fileira num semáforo gritante. O âmbar foi escolhido por ser aviso, não erro; se o SIC preferir vermelho, é troca de token.</li>
+    <li><b>O número no centro do anel fica sempre neutro</b>, nos dois estados. Quem carrega o estado é a cor do arco e o chip; colorir o número seria um quarto canal repetindo a mesma coisa.</li>
+    <li><b>A ordem dos três números é narrativa e não pode ser reordenada:</b> Produzida (base) → Meta (30%) (limiar) → Recuperada (resultado, destacada com linha em cima). O rótulo <span class="copy">Meta (30%)</span> carrega o percentual entre parênteses para amarrar o indicador <span class="copy">META DE RECICLAGEM</span> do topo da tela ao número em tonelada aqui embaixo.</li>
+    <li>Os três números alinham pelo rodapé nos quatro cartões (<code>margin-top: auto</code>), senão um nome de material em duas linhas desalinha a fileira.</li>
+  </ul>
+
+  <h4 class="rot">Duas regras de formatação diferentes, de propósito</h4>
+  <div class="trol"><table>
+    <thead><tr><th style="width:220px">Onde</th><th style="width:230px">Formato</th><th>Motivo</th></tr></thead>
+    <tbody>
+      <tr><td>Tonelada, nos três números</td><td>pt-BR, <b>exatamente 1 casa</b>, sufixo <code> t</code><br><span class="chip chip--neutral">49.788,0 t</span></td><td>Base, limiar e resultado precisam ter a mesma forma para serem comparados de relance</td></tr>
+      <tr><td>Percentual do anel</td><td>pt-BR, <b>exatamente 1 casa</b>, sufixo <code>%</code><br><span class="chip chip--neutral">25,0%</span></td><td>Medida contínua comparada a uma meta: a casa decimal sempre aparece</td></tr>
+      <tr><td>Percentual da rosca e da legenda</td><td>pt-BR, <b>no máximo 1 casa</b><br><span class="chip chip--neutral">55,6%</span> · <span class="chip chip--neutral">50%</span></td><td>Ali a porcentagem é detalhe de apoio à contagem escrita, então "50%" é melhor que "50,0%"</td></tr>
+    </tbody>
+  </table></div>
+  <p style="margin-top:12px;font-size:13.6px;color:var(--slate-500)">Não uniformizar as duas últimas: são regras distintas e a diferença é intencional.</p>
+</section>
+
+<section class="bloco" id="camadas">
+  <h2><span class="n">7</span>Camadas, hover e foco: réplicas ao vivo</h2>
+  <p class="intro">As cinco interações abaixo estão reconstruídas aqui dentro, com a mesma copy, os mesmos tempos e o mesmo comportamento de teclado do protótipo. Servem para comparar lado a lado durante a implementação: se a sua versão faz diferente de alguma destas, é divergência. Elas funcionam com mouse, com toque e com <kbd>Tab</kbd>.</p>
+
+  <div class="demo">
+    <div class="demo__t">Réplica 1 · Card de prazo e popover</div>
+    <div class="demo__grade">
+      <div class="rp" id="d-prazo">
+        <div>
+          <div class="rp__eyebrow">PRAZO · PLANOS 2024</div>
+          <div class="rp__data">29/08/2026</div>
+          <div class="rp__contador">Faltam 18 dias para o fim do prazo</div>
+        </div>
+        <div class="rp__bloco">
+          <p class="rp__chip">Período restritivo</p>
+          <div class="rp__disc" id="d-disc">
+            <button type="button" class="rp__gatilho" id="d-gatilho" aria-expanded="false" aria-controls="d-pop">
+              <span aria-hidden="true" style="color:var(--red-600);font-weight:700">ⓘ</span>
+              <span id="d-rotulo">Ver as 6 ações liberadas até 29/08</span>
+            </button>
+            <div class="rp__pop" id="d-pop" hidden>
+              <button type="button" class="rp__x" id="d-x" aria-label="Fechar">✕</button>
+              <h5><i>ⓘ</i>Período restritivo</h5>
+              <p class="rp__desc">É uma extensão excepcional de um prazo que já terminou. Não tem calendário e não é rotina: acontece quando a diretoria autoriza, caso a caso, e libera apenas algumas ações.</p>
+              <div class="rp__ate" id="d-ate">Liberadas até 29/08</div>
+              <ul class="rp__lista" id="d-lista"></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="demo__t" style="margin-bottom:10px">Trocar o n</div>
+        <div class="ry__g" role="group" aria-label="Número de ações liberadas">
+          <button type="button" class="d-n" data-n="1">n = 1</button>
+          <button type="button" class="d-n is-ativo" data-n="6">n = 6</button>
+          <button type="button" class="d-n" data-n="20">n = 20</button>
+        </div>
+        <p class="demo__nota" style="max-width:34ch">Repare que <b>a altura do card não muda</b> nas três opções, e que o gatilho vai para o singular só em n = 1, sem nunca dizer qual é a ação. Em n = 20 quem rola é a lista, travada em 240px.<br><br>Abra o popover e experimente <kbd>Esc</kbd>: ele fecha e o foco volta para o gatilho. Clique fora: fecha e o foco fica onde você clicou.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="demo">
+    <div class="demo__t">Réplica 2 · Rosca com detalhe sob demanda</div>
+    <div class="demo__grade">
+      <div class="rd" id="d-rosca">
+        <div class="rd__cab"><h5>Distribuição de Usuários</h5><span>54 no total</span></div>
+        <div class="rd__corpo">
+          <div class="rd__svg">
+            <svg viewBox="0 0 36 36" width="120" height="120" aria-hidden="true" style="transform:rotate(-90deg)">
+              <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#F1F5F9" stroke-width="4.6"></circle>
+              <circle class="d-arco" data-i="0" cx="18" cy="18" r="15.9155" fill="none" stroke="#1F8344" stroke-width="4.6" stroke-dasharray="55.6 44.4" stroke-dashoffset="0"></circle>
+              <circle class="d-arco" data-i="1" cx="18" cy="18" r="15.9155" fill="none" stroke="#2563EB" stroke-width="4.6" stroke-dasharray="16.7 83.3" stroke-dashoffset="-55.6"></circle>
+              <circle class="d-arco" data-i="2" cx="18" cy="18" r="15.9155" fill="none" stroke="#94A3B8" stroke-width="4.6" stroke-dasharray="27.8 72.2" stroke-dashoffset="-72.3"></circle>
+            </svg>
+            <div class="rd__centro"><b id="d-centro-v">54</b><small id="d-centro-r">Total</small></div>
+          </div>
+          <ul class="rd__leg" id="d-leg">
+            <li><button type="button" class="rd__b" data-i="0" data-q="30" data-p="55,6%"><span class="rd__ponto" style="background:#1F8344"></span><span class="rd__q">30</span><span class="rd__r">entidades gestoras</span><span class="rd__p">55,6%</span></button></li>
+            <li><button type="button" class="rd__b" data-i="1" data-q="9" data-p="16,7%"><span class="rd__ponto" style="background:#2563EB"></span><span class="rd__q">9</span><span class="rd__r">operadores logísticos</span><span class="rd__p">16,7%</span></button></li>
+            <li><button type="button" class="rd__b" data-i="2" data-q="15" data-p="27,8%"><span class="rd__ponto" style="background:#94A3B8"></span><span class="rd__q">15</span><span class="rd__r">verificadores</span><span class="rd__p">27,8%</span></button></li>
+          </ul>
+        </div>
+      </div>
+      <p class="demo__nota" style="max-width:36ch;margin-top:0">Passe o mouse, ou navegue com <kbd>Tab</kbd>: o detalhe aparece <b>dentro</b> do miolo e na própria linha da legenda, nunca numa camada flutuante. <kbd>Esc</kbd> limpa o destaque e mantém o foco.<br><br>O raio do círculo é <code>15.9155</code>, o que faz a circunferência valer 100 e transforma o <code>stroke-dasharray</code> em porcentagem literal. O <code>rotate(-90deg)</code> começa a primeira fatia às 12 horas.</p>
+    </div>
+  </div>
+
+  <div class="demo">
+    <div class="demo__t">Réplica 3 · Seletor de ano de execução</div>
+    <div class="demo__grade">
+      <div class="ry">
+        <div class="ry__rot" id="d-ano-rot">Ano de execução</div>
+        <div class="ry__g" role="group" aria-labelledby="d-ano-rot" id="d-ano"></div>
+        <p class="ry__saida" id="d-ano-saida"></p>
+      </div>
+      <p class="demo__nota" style="max-width:38ch;margin-top:0">Série de 2018 a 2025, janela de <b>três células sempre</b>. O selecionado fica no centro e as setas deslocam a janela inteira, então <b>ele não pula de posição</b>. Nos extremos a janela trava, o selecionado passa para a borda e a seta desabilita com o atributo <code>disabled</code>, não só com cor.<br><br>Com o foco dentro do grupo: <kbd>←</kbd> <kbd>→</kbd> andam na série, <kbd>Home</kbd> e <kbd>End</kbd> vão para os extremos. As setas anunciam o destino: <span class="copy">Ano anterior, 2023</span>.</p>
+    </div>
+    <div class="demo__grade" style="margin-top:8px;gap:18px">
+      <div><button class="spec__shot" style="margin-top:0;max-width:300px" data-lb="img/handoff/ano-meio.png"><img src="img/handoff/ano-meio.png" width="370" height="122" alt="Seletor de ano no meio da série" loading="lazy"></button><p style="font-size:12.8px;color:var(--slate-500);margin-top:8px">Meio da série: as duas setas ativas.</p></div>
+      <div><button class="spec__shot" style="margin-top:0;max-width:300px" data-lb="img/handoff/ano-fim.png"><img src="img/handoff/ano-fim.png" width="373" height="122" alt="Seletor de ano no fim da série, com a seta direita desabilitada" loading="lazy"></button><p style="font-size:12.8px;color:var(--slate-500);margin-top:8px">Fim da série: o selecionado ocupa a borda e a seta direita desabilita.</p></div>
+    </div>
+  </div>
+
+  <div class="demo">
+    <div class="demo__t">Réplica 4 · As três variações da linha de documentação</div>
+    <div class="rl">
+      <div class="rl__linha">
+        <span class="rl__ico">▤</span>
+        <div class="rl__txt">
+          <p class="rl__t1"><span class="rl__tit">Planos 2024</span><span class="rl__tot">0 no total</span></p>
+          <p class="rl__vazio">Nenhum plano enviado ainda.</p>
+        </div>
+        <button class="rl__link">Ver planos ›</button>
+      </div>
+      <div class="rl__linha">
+        <span class="rl__ico">▤</span>
+        <div class="rl__txt">
+          <p class="rl__t1"><span class="rl__tit">Relatórios 2024</span><span class="rl__tot">1 no total</span></p>
+          <ul class="rl__l2"><li><span style="background:#1F8344"></span>1 enviado</li></ul>
+        </div>
+        <button class="rl__link">Ver relatórios ›</button>
+      </div>
+      <div class="rl__linha">
+        <span class="rl__ico">▤</span>
+        <div class="rl__txt">
+          <p class="rl__t1"><span class="rl__tit">Certificados de massa 2024</span><span class="rl__tot">128 no total</span></p>
+          <div class="rl__bar" aria-hidden="true">
+            <i style="background:#1F8344;flex-grow:96"></i><i style="background:#2563EB;flex-grow:18"></i><i style="background:#D97706;flex-grow:9"></i><i style="background:#64748B;flex-grow:5"></i>
+          </div>
+          <ul class="rl__l2">
+            <li><span style="background:#1F8344"></span>96 aprovados</li>
+            <li><span style="background:#2563EB"></span>18 transferidos</li>
+            <li><span style="background:#D97706"></span>9 em conciliação</li>
+            <li><span style="background:#64748B"></span>5 cancelados</li>
+          </ul>
+        </div>
+        <button class="rl__link">Ver certificados ›</button>
+      </div>
+    </div>
+    <p class="demo__nota">A barra só existe na terceira. A primeira não tem contagem nenhuma e a segunda não tem barra. Note também que a soma escrita fecha o total: 96 + 18 + 9 + 5 = 128.</p>
+  </div>
+
+  <div class="demo">
+    <div class="demo__t">Réplica 5 · Anel de recuperação nos dois estados</div>
+    <div class="demo__grade" id="d-aneis"></div>
+    <p class="demo__nota">Arraste o controle para ver a virada. A meta é 30% do produzido: abaixo dela o arco vira âmbar, o chip troca de texto e o cartão perde o fundo verde. Acima de 100% o arco fica cheio e o número continua contando.</p>
+    <div style="margin-top:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <label for="d-slider" style="font:600 12.5px/1 var(--font);color:var(--slate-600)">Massa recuperada</label>
+      <input id="d-slider" type="range" min="0" max="20000" step="10" value="2210" style="width:280px;accent-color:var(--brand-600)">
+      <span id="d-slider-v" style="font:600 12.5px/1 var(--mono);color:var(--slate-500)"></span>
+    </div>
+  </div>
+</section>
+
+<section class="bloco" id="regras">
+  <h2><span class="n">8</span>Regras</h2>
+  <p class="intro">O que precisa continuar verdadeiro depois que o mock der lugar ao backend. À direita, onde a regra nasceu. As que dizem <b>modelo</b> não são de tela: se o backend permitir o contrário, a tela volta a se contradizer.</p>
+
+  <div class="regra"><span class="regra__n">1</span><span class="regra__t">O <b>total de uma linha é sempre a soma dos status</b>, nunca um campo independente. É o que impede o cabeçalho de discordar da barra, como acontece hoje no verificador (18 contra 27).</span><span class="regra__o">modelo<br>D-R003</span></div>
+  <div class="regra"><span class="regra__n">2</span><span class="regra__t"><b>Status com quantidade zero não é desenhado</b>, nem na barra, nem na contagem. Mesmo que a API mande zerado, a tela filtra.</span><span class="regra__o">tela<br>D-R003</span></div>
+  <div class="regra"><span class="regra__n">3</span><span class="regra__t">A <b>barra empilhada só existe com dois status ou mais</b>. Com um, contagem e ponto colorido. Com zero documentos, frase.</span><span class="regra__o">tela<br>D-R003</span></div>
+  <div class="regra"><span class="regra__n">4</span><span class="regra__t">A <b>contagem por status fica escrita</b>, ao lado do ponto colorido. Cor nunca é canal único.</span><span class="regra__o">tela · WCAG 1.4.1<br>D-R003</span></div>
+  <div class="regra"><span class="regra__n">5</span><span class="regra__t">A ordem dos status é a <b>ordem do catálogo</b>, nunca por quantidade: barra e lista precisam ler na mesma sequência.</span><span class="regra__o">modelo</span></div>
+  <div class="regra"><span class="regra__n">6</span><span class="regra__t"><b>Período restritivo implica ao menos uma ação liberada.</b> Vigência restritiva com n = 0 não é estado válido: seria um prazo fechado com aparência de aberto. O backend precisa garantir a invariante; a validação vive na tela de parâmetros do admin, não no dashboard.</span><span class="regra__o">modelo<br>D-R001</span></div>
+  <div class="regra"><span class="regra__n">7</span><span class="regra__t">O <b>n é por card</b>: planos e relatórios têm vigência, flag e lista de ações independentes. A janela pode estar restritiva num documento e normal no outro.</span><span class="regra__o">modelo<br>D-R001</span></div>
+  <div class="regra"><span class="regra__n">8</span><span class="regra__t">O <b>card de prazo não muda de altura</b> com o número de ações liberadas, e <b>nunca mostra qual ação está liberada</b>, nem quando há uma só.</span><span class="regra__o">tela<br>D-R001</span></div>
+  <div class="regra"><span class="regra__n">9</span><span class="regra__t"><b>Uma data só.</b> O card mostra a data de fim da vigência e o contador diz para que ela serve. Não são duas janelas encadeadas: é a mesma vigência, eventualmente prorrogada.</span><span class="regra__o">modelo<br>D-R001</span></div>
+  <div class="regra"><span class="regra__n">10</span><span class="regra__t">O campo de contador, quando existe, <b>vence o cálculo de dias</b>. É como saem <span class="copy">Finaliza hoje</span> e <span class="copy">Prazo ainda não definido</span>.</span><span class="regra__o">modelo</span></div>
+  <div class="regra"><span class="regra__n">11</span><span class="regra__t">Camada que abre na mesma página é <b><code>&lt;button aria-expanded&gt;</code>, nunca <code>&lt;a href&gt;</code></b>, e abre por <b>clique, nunca por hover</b>.</span><span class="regra__o">tela · ARIA APG<br>WCAG 1.4.13</span></div>
+  <div class="regra"><span class="regra__n">12</span><span class="regra__t">O popover <b>não é modal</b>: sem scrim, sem <code>role="dialog"</code>, sem trap de foco. É consulta, não decisão, e não bloqueia a tela.</span><span class="regra__o">tela<br>D-R001</span></div>
+  <div class="regra"><span class="regra__n">13</span><span class="regra__t"><b>Meta, taxa de recuperação e cumprimento são derivados</b> da massa produzida e da massa recuperada. Nunca guardados, nunca digitados em campo separado.</span><span class="regra__o">modelo</span></div>
+  <div class="regra"><span class="regra__n">14</span><span class="regra__t"><b>Bateu a meta é <code>recuperada &gt;= produzida × 30%</code></b>, não "o anel chegou a 100%". A taxa é livre e pode passar de 100%; só o arco trava.</span><span class="regra__o">modelo</span></div>
+  <div class="regra"><span class="regra__n">15</span><span class="regra__t">O <b>total da distribuição de usuários é a soma das fatias</b>, e fatia com quantidade zero não é desenhada.</span><span class="regra__o">modelo</span></div>
+  <div class="regra"><span class="regra__n">16</span><span class="regra__t"><b>O ano base é sempre o ano de execução menos 1.</b> O usuário escolhe um; o outro é derivado e nunca é digitado duas vezes.</span><span class="regra__o">modelo<br>D-R002</span></div>
+  <div class="regra"><span class="regra__n">17</span><span class="regra__t">O <b>seletor de ano é um grupo de botões</b> com janela de três células, não um <code>&lt;select&gt;</code>. Filtro de contexto não é campo de dado.</span><span class="regra__o">tela<br>D-R002</span></div>
+  <div class="regra"><span class="regra__n">18</span><span class="regra__t">Nos extremos da série a <b>seta desabilita com o atributo <code>disabled</code></b>, não só com cor, e sai da ordem de foco.</span><span class="regra__o">tela<br>D-R002</span></div>
+  <div class="regra"><span class="regra__n">19</span><span class="regra__t">O <b>menu lateral vem do perfil</b>, não da tela. Trocar de perfil troca os itens.</span><span class="regra__o">modelo</span></div>
+  <div class="regra"><span class="regra__n">20</span><span class="regra__t"><b>Item de menu sem tela é <code>&lt;span&gt;</code> inerte, nunca <code>&lt;a&gt;</code>.</b> Linkar para rota que não existe é pior do que não linkar. Quando a tela existir, o item ganha rota e vira link: o componente já trata os dois casos.</span><span class="regra__o">tela</span></div>
+  <div class="regra"><span class="regra__n">21</span><span class="regra__t">Cada dashboard <b>só abre para o seu perfil</b>. Perfil errado volta ao próprio dashboard, não ao login. Sem perfil, vai ao login com <code>?destino=</code> e volta para a URL pedida depois de entrar.</span><span class="regra__o">tela</span></div>
+  <div class="regra"><span class="regra__n">22</span><span class="regra__t">Cada rota tem <b>título de aba próprio</b>, no formato <code>&lt;título&gt; · Recicla Goiás</code>.</span><span class="regra__o">tela · WCAG 2.4.2</span></div>
+  <div class="regra"><span class="regra__n">23</span><span class="regra__t">O conteúdo ocupa a <b>largura toda</b>, do recuo depois do menu até o recuo da direita. Nada de largura fixa centralizada.</span><span class="regra__o">tela</span></div>
+  <div class="regra"><span class="regra__n">24</span><span class="regra__t"><b>Cor nunca é o único canal.</b> Barra tem contagem escrita, anel tem chip escrito, fio de material tem o nome ao lado, fatia da rosca tem legenda em texto.</span><span class="regra__o">tela · WCAG 1.4.1</span></div>
+</section>
+
+<!-- ══════════════════════════ PARTE 3 ══════════════════════════ -->
+<div class="parte">
+  <div class="parte__cab">
+    <span class="parte__num">Parte 3</span>
+    <h2 class="parte__t">Implementação</h2>
+    <p class="parte__d">Insumos para quem vai construir. Aqui a palavra final é de vocês.</p>
+  </div>
+</div>
+
+<section class="bloco" id="dados">
+  <h2><span class="n">9</span>Dados que as telas consomem</h2>
+  <p class="intro">Os tipos abaixo são o contrato que o protótipo assume. Não é proposta de esquema de banco: é a menor forma que sustenta as regras da seção 8. O ponto crítico está no que <b>não</b> aparece aqui: total de linha, meta em tonelada, taxa de recuperação e "bateu ou não bateu" não são campos, são contas.</p>
+
+  <div class="codigo"><pre><span class="c">// uma linha do card Status da Documentação</span>
+<span class="k">interface</span> <span class="t">LinhaDocumentacao</span> {
+  id: <span class="t">string</span>
+  icone: <span class="t">string</span>                <span class="c">// nome do ícone</span>
+  titulo: <span class="t">string</span>               <span class="c">// sem o ano; o ano é concatenado na tela</span>
+  total: <span class="t">number</span>                <span class="c">// = soma das quantidades. NUNCA um campo próprio</span>
+  statuses: <span class="t">StatusDocumento</span>[]  <span class="c">// na ordem do catálogo</span>
+  fraseVazia: <span class="t">string</span>           <span class="c">// usada só quando total === 0</span>
+  linkRotulo: <span class="t">string</span>
+}
+
+<span class="k">interface</span> <span class="t">StatusDocumento</span> {
+  singular: <span class="t">string</span>             <span class="c">// os dois vêm sempre, mesmo quando idênticos</span>
+  plural: <span class="t">string</span>
+  quantidade: <span class="t">number</span>           <span class="c">// zero = não desenhar</span>
+  tone: <span class="s">'success'</span> | <span class="s">'info'</span> | <span class="s">'warning'</span> | <span class="s">'danger'</span> | <span class="s">'neutral'</span>
+}
+
+<span class="c">// um card de prazo</span>
+<span class="k">interface</span> <span class="t">CardPrazo</span> {
+  id: <span class="t">string</span>
+  eyebrow: <span class="t">string</span>              <span class="c">// escopo da vigência, em caixa alta</span>
+  data: <span class="t">string</span>                 <span class="c">// DD/MM/AAAA, ou '—' quando não há</span>
+  diasRestantes: <span class="t">number</span>
+  contador?: <span class="t">string</span>            <span class="c">// se vier, vence o cálculo de dias</span>
+  acaoRotulo?: <span class="t">string</span>          <span class="c">// botão do card sem período restritivo</span>
+  restritivo?: {                 <span class="c">// ausente = vigência normal</span>
+    ate: <span class="t">string</span>                <span class="c">// DD/MM, forma curta</span>
+    acoes: <span class="t">string</span>[]            <span class="c">// length &gt;= 1 SEMPRE. length === 0 é inválido</span>
+  }
+}
+
+<span class="c">// um material da fileira de massa</span>
+<span class="k">interface</span> <span class="t">MaterialRecuperado</span> {
+  nome: <span class="t">string</span>
+  produzida: <span class="t">number</span>            <span class="c">// tonelada</span>
+  recuperada: <span class="t">number</span>           <span class="c">// tonelada</span>
+}                                <span class="c">// meta, taxa e cumprimento são derivados</span></pre></div>
+
+  <h3 class="sub">Onde o ano de execução repercute</h3>
+  <p style="font-size:14px;color:var(--slate-500);margin-top:8px">Hoje o seletor muda apenas texto derivado. Datas de prazo, massas, materiais e distribuição de usuários <b>não</b> reagem ao ano, porque nesta rodada o protótipo mostra a forma, não a série histórica.</p>
+  <div class="trol"><table>
+    <thead><tr><th style="width:44%">Muda com o ano</th><th>Não muda</th></tr></thead>
+    <tbody>
+      <tr><td>Faixa de contexto (os dois anos)</td><td>Datas dos cards de prazo</td></tr>
+      <tr><td>Sufixo do título de cada linha de documentação</td><td>Quantidades por status</td></tr>
+      <tr><td>Eyebrow dos cards de prazo da gestora</td><td>Massas produzida, recuperada e disponível</td></tr>
+      <tr><td>Eyebrow <span class="copy">META DE RECICLAGEM</span> do admin</td><td>Distribuição de usuários</td></tr>
+      <tr><td>Frase do card de massa</td><td>Indicadores 2, 3 e 4 do admin</td></tr>
+    </tbody>
+  </table></div>
+  <div class="aviso aviso--warn">
+    <span class="aviso__i">!</span>
+    <div><b>Decidir antes de implementar: o que é realmente por exercício</b>
+      No sistema real o ano de execução provavelmente é o filtro de mais alto nível e recarrega tudo. Também há uma assimetria do protótipo a não copiar: aplicar um cenário sobrescreve o ano escolhido, mas trocar o ano não invalida o cenário. Isso é artefato da ferramenta de protótipo, não comportamento de produto.</div>
+  </div>
+
+  <h3 class="sub">Um detalhe do protótipo que não deve ser copiado</h3>
+  <p style="font-size:14px">Na gestora o ano é <b>concatenado</b> ao título (<code>'Planos' + ' ' + ano</code>); no admin e no verificador o ano é <b>substituído por regex</b> nos quatro dígitos finais de uma string que já vem com ano (<code>'Planos 2025'</code>). São dois modelos para o mesmo efeito visual, resquício de terem nascido em momentos diferentes. No sistema real, guarde o título sem ano e concatene.</p>
+
+  <h3 class="sub">O que precisamos saber de vocês</h3>
+  <div class="perg"><span class="perg__n">1</span><span>As <b>quantidades por status</b> chegam decompostas pela API, ou a tela vai precisar agrupar? A regra do total como soma depende de receber a decomposição.</span></div>
+  <div class="perg"><span class="perg__n">2</span><span>Existe endpoint que devolva <b>massa produzida e massa recuperada por material</b>, ou hoje só existe a taxa já calculada? Se só existir a taxa, a contradição do papel volta.</span></div>
+  <div class="perg"><span class="perg__n">3</span><span>A <b>vigência restritiva</b> e a lista de ações liberadas vêm da tela de parâmetros do admin? Quem garante a invariante de nunca haver vigência restritiva sem ação liberada?</span></div>
+  <div class="perg"><span class="perg__n">4</span><span>Os rótulos compostos (<span class="copy">aprovadas/enviadas</span>, <span class="copy">em preenchimento/retificando</span>) são dois status distintos somados numa contagem só? Se forem, dá para separar, ou o agrupamento é a leitura correta do negócio?</span></div>
+</section>
+
+<section class="bloco" id="tokens">
+  <h2><span class="n">10</span>Componentes e tokens</h2>
+  <p class="intro">As telas usam só variáveis CSS <code>--rg-*</code>: não há um único hex cru nem <code>rgba()</code> solto nos 18 componentes da área logada. A promessa é que migrar para a biblioteca definitiva seja um rename, não uma reescrita. Se o sistema real tiver outro nome de token, é trocar o nome, sem caçar cor perdida no CSS.</p>
+
+  <h3 class="sub">Componentes</h3>
+  <div class="trol"><table>
+    <thead><tr><th style="width:250px">Componente</th><th style="width:130px">Telas</th><th>O que é</th></tr></thead>
+    <tbody>
+      <tr><td><span class="chip chip--file">GestoraShell</span></td><td>as 3</td><td>Casca: skip link, TopBar, menu, área de conteúdo em largura total</td></tr>
+      <tr><td><span class="chip chip--file">TopBarRecicla</span></td><td>as 3</td><td>Marca, contexto, sino e avatar. O avatar é o único ponto de saída</td></tr>
+      <tr><td><span class="chip chip--file">SideMenuRecicla</span></td><td>as 3</td><td>Menu do perfil, item ativo, trilha de ícones abaixo de 1024px</td></tr>
+      <tr><td><span class="chip chip--file">ContextStrip</span></td><td>as 3</td><td>Ano de execução e ano base, cada um com a descrição ao lado</td></tr>
+      <tr><td><span class="chip chip--file">YearSelect</span></td><td>as 3</td><td>Segmentado com janela deslizante de três células</td></tr>
+      <tr><td><span class="chip chip--file">DocumentationCard</span> <span class="chip chip--file">DocumentationRow</span> <span class="chip chip--file">StackedBar</span></td><td>as 3</td><td>Status da Documentação e as três variações da linha</td></tr>
+      <tr><td><span class="chip chip--file">DeadlineCard</span> <span class="chip chip--file">RestrictedPeriodPopover</span></td><td>as 3</td><td>Prazo e a camada do período restritivo</td></tr>
+      <tr><td><span class="chip chip--file">QuickAccessCard</span></td><td>gestora, verificador</td><td>Acesso Rápido; o último botão é o preenchido</td></tr>
+      <tr><td><span class="chip chip--file">KpiCard</span></td><td>admin</td><td>Indicador com eyebrow, valor, apoio, ícone e chips opcionais</td></tr>
+      <tr><td><span class="chip chip--file">DonutChart</span> <span class="chip chip--file">UserDistributionCard</span></td><td>admin</td><td>Rosca com detalhe no miolo e legenda focável</td></tr>
+      <tr><td><span class="chip chip--file">RingChart</span> <span class="chip chip--file">MassRecoveryCard</span></td><td>admin</td><td>Anel de taxa e o cartão por material</td></tr>
+      <tr><td><span class="chip chip--file">AvailableMassCard</span></td><td>admin</td><td>Massas disponíveis, com o traço para material sem dado</td></tr>
+      <tr><td><span class="chip chip--file">ExploradorCenarios</span></td><td>gestora</td><td><b>Ferramenta de protótipo.</b> Não vai para o sistema real</td></tr>
+    </tbody>
+  </table></div>
+
+  <h4 class="rot">Candidatos a componente de biblioteca</h4>
+  <p style="font-size:14px">Nasceram aqui e servem a mais de uma tela desde o primeiro dia: <b>casca da área logada</b>, <b>seletor de ano segmentado</b>, <b>linha de status com barra empilhada</b>, <b>card de prazo</b>, <b>popover de disclosure</b>, <b>cartão de indicador</b>, <b>rosca com detalhe no miolo</b> e <b>anel de taxa</b>. O explorador de cenários fica de fora de propósito.</p>
+
+  <h3 class="sub">Tokens que estas telas usam</h3>
+  <div class="tokens">
+    <div class="token"><span class="token__sw" style="background:#1F8344"></span><div><div class="token__n">--rg-color-action-primary</div><div class="token__v">#1F8344 · brand-600</div><div class="token__u">Botão primário, TopBar, ano ativo, anel de foco</div></div></div>
+    <div class="token"><span class="token__sw" style="background:#1F8344"></span><div><div class="token__n">--rg-color-feedback-success</div><div class="token__v">#1F8344</div><div class="token__u">Verde de sucesso. É o <b>mesmo</b> token do verde de marca, de propósito</div></div></div>
+    <div class="token"><span class="token__sw" style="background:#176935"></span><div><div class="token__n">--rg-color-text-brand</div><div class="token__v">#176935 · brand-700</div><div class="token__u">Data do prazo, links de linha, valor do anel verde</div></div></div>
+    <div class="token"><span class="token__sw" style="background:#E9F6EE"></span><div><div class="token__n">--rg-color-surface-brand</div><div class="token__v">#E9F6EE · brand-50</div><div class="token__u">Item ativo do menu, caixa de ícone, cartão com meta atingida</div></div></div>
+    <div class="token"><span class="token__sw" style="background:#F8FAFC"></span><div><div class="token__n">--rg-color-surface-muted</div><div class="token__v">#F8FAFC</div><div class="token__u">Fundo da página</div></div></div>
+    <div class="token"><span class="token__sw" style="background:#F1F5F9"></span><div><div class="token__n">--rg-color-surface-subtle</div><div class="token__v">#F1F5F9</div><div class="token__u">Bloco do período restritivo, cartão de material, caixa de ícone da linha</div></div></div>
+    <div class="token"><span class="token__sw" style="background:#FFFFFF;border-color:#CBD5E1"></span><div><div class="token__n">--rg-color-surface-raised</div><div class="token__v">#FFFFFF</div><div class="token__u">Todos os cards e o popover</div></div></div>
+    <div class="token"><span class="token__sw" style="background:#E2E8F0"></span><div><div class="token__n">--rg-color-border-subtle</div><div class="token__v">#E2E8F0</div><div class="token__u">Borda de card, divisor entre linhas</div></div></div>
+    <div class="token"><span class="token__sw" style="background:#0F172A"></span><div><div class="token__n">--rg-color-text-primary</div><div class="token__v">#0F172A</div><div class="token__u">Títulos, valores, número no centro do anel</div></div></div>
+    <div class="token"><span class="token__sw" style="background:#475569"></span><div><div class="token__n">--rg-color-text-secondary</div><div class="token__v">#475569</div><div class="token__u">Contagem por status, apoio, identificação</div></div></div>
+    <div class="token"><span class="token__sw" style="background:#64748B"></span><div><div class="token__n">--rg-color-text-muted</div><div class="token__v">#64748B</div><div class="token__u">Eyebrow, total da linha, item de menu sem tela</div></div></div>
+    <div class="token"><span class="token__sw" style="background:#D97706"></span><div><div class="token__n">--rg-color-feedback-warning</div><div class="token__v">#D97706</div><div class="token__u">Status de atenção, anel abaixo da meta</div></div></div>
+    <div class="token"><span class="token__sw" style="background:#DC2626"></span><div><div class="token__n">--rg-color-feedback-danger</div><div class="token__v">#DC2626</div><div class="token__u">Ícone (i) do popover, status bloqueada</div></div></div>
+    <div class="token"><span class="token__sw" style="background:#FEF2F2"></span><div><div class="token__n">--rg-color-feedback-danger-soft</div><div class="token__v">#FEF2F2</div><div class="token__u">Fundo do chip <span class="copy">Período restritivo</span></div></div></div>
+    <div class="token"><span class="token__sw" style="background:#2563EB"></span><div><div class="token__n">--rg-color-feedback-info</div><div class="token__v">#2563EB</div><div class="token__u">Status retificados e transferidos; fatia da rosca</div></div></div>
+    <div class="token"><span class="token__sw" style="background:#fff;border:1px solid #CBD5E1"></span><div><div class="token__n">--rg-radius-lg · md · pill</div><div class="token__v">12px · 8px · 9999px</div><div class="token__u">Card · botão, bloco e campo · chip</div></div></div>
+    <div class="token"><span class="token__sw" style="background:#fff;box-shadow:0 0 0 3px rgba(31,131,68,.25) inset;border-color:#E2E8F0"></span><div><div class="token__n">--rg-ring-focus</div><div class="token__v">0 0 0 3px rgba(31,131,68,.25)</div><div class="token__u">Anel de foco por sombra, sempre com outline transparente junto</div></div></div>
+    <div class="token"><span class="token__sw" style="background:#0F172A"></span><div><div class="token__n">tipografia</div><div class="token__v">Inter Variable</div><div class="token__u">28/34 título · 20/26 data · 16/22 título de card · 14/20 corpo · 13/18 apoio · 12/16 eyebrow · 11 rótulo</div></div></div>
+  </div>
+
+  <h4 class="rot">Seis primitivas usadas direto, e por quê</h4>
+  <p style="font-size:14px">A regra é consumir o semântico. As exceções existem porque não há par semântico equivalente e todas resolvem contraste: <code>brand-100</code> e <code>brand-200</code> para texto e borda sobre superfície verde; <code>brand-300</code> na faixa de contexto; <code>neutral-700</code> no item de menu; <code>amber-700</code> e <code>red-700</code> para <b>texto</b> sobre os fundos <code>-soft</code>, porque o tom 600 do semáforo sobre o tom 50 não passaria em AA.</p>
+
+  <div class="aviso aviso--info">
+    <span class="aviso__i">i</span>
+    <div><b>A escala de espaço do Figma não indexa igual à do código</b>
+      Mapeie <b>por valor</b>, nunca pelo número do token: <code>space/7</code> do Figma é 32px e vira <code>--rg-space-8</code>. Da mesma forma, os raios do Figma foram convertidos, não replicados: 14 virou 12 (<code>--rg-radius-lg</code>) e 10 virou 8 (<code>--rg-radius-md</code>), para não criar dois degraus de uso único na escala. Quem abrir o Figma vai ver 14px e encontrar 12px no código: é decisão, não erro de medição.</div>
+  </div>
+</section>
+
+<section class="bloco" id="motion">
+  <h2><span class="n">11</span>Movimento</h2>
+  <p class="intro">Aqui movimento é quase ausência de movimento, e isso é a decisão. A área logada é sistema de trabalho, não peça de marketing: todo movimento existente é feedback de estado imediato, nada é narrativo.</p>
+
+  <div class="motion">
+    <div class="motion__i">
+      <div class="motion__t">Uma duração e uma curva, em tudo</div>
+      <div class="motion__d">As oito transições da área logada usam exatamente o mesmo par. Introduzir uma duração "lenta" ou "enfática" aqui faria o dashboard parecer devagar.</div>
+      <span class="motion__v">120ms · cubic-bezier(.2, 0, 0, 1)</span>
+    </div>
+    <div class="motion__i">
+      <div class="motion__t">Camadas não animam na abertura</div>
+      <div class="motion__d">Popover e painel entram e saem direto. Consulta tem que ser instantânea: um fade num popover que a pessoa abriu de propósito só adiciona latência percebida.</div>
+      <span class="motion__v">sem transição</span>
+    </div>
+    <div class="motion__i">
+      <div class="motion__t">Hover de item e de célula</div>
+      <div class="motion__d">Mudança de fundo no item de menu, na célula do ano e na linha da legenda da rosca.</div>
+      <span class="motion__v">120ms</span>
+    </div>
+    <div class="motion__i">
+      <div class="motion__t">Detalhe da rosca</div>
+      <div class="motion__d">A porcentagem da legenda vai de opacidade 0 a 1, e a fatia em destaque muda de espessura. O elemento continua no DOM, então o layout não pula.</div>
+      <span class="motion__v">120ms</span>
+    </div>
+    <div class="motion__i">
+      <div class="motion__t">Movimento reduzido</div>
+      <div class="motion__d">Quem liga a preferência do sistema não vê transição nenhuma. Há rede global e override em cada componente, para que a peça continue correta quando for extraída para a biblioteca.</div>
+      <span class="motion__v">prefers-reduced-motion</span>
+    </div>
+    <div class="motion__i">
+      <div class="motion__t">O que não existe</div>
+      <div class="motion__d">Não há skeleton, spinner, toast, animação de entrada de card nem contador animado. Não é esquecimento: não há carga assíncrona no protótipo. No sistema real, esses estados precisam ser <b>projetados</b>, não inferidos daqui.</div>
+      <span class="motion__v">a definir</span>
+    </div>
+  </div>
+</section>
+
+<section class="bloco" id="a11y">
+  <h2><span class="n">12</span>Acessibilidade</h2>
+  <p class="intro">Não é camada de verniz no fim: metade das decisões desta entrega tem justificativa de acessibilidade junto. O que está abaixo precisa sobreviver à implementação.</p>
+
+  <h3 class="sub">Estrutura e navegação</h3>
+  <ul class="lista">
+    <li><b>Skip link é o primeiro elemento tabulável</b> e aponta para o <code>&lt;main tabindex="-1"&gt;</code>: o <code>tabindex</code> garante que o foco se mova, e não só a rolagem. Hoje o menu tem um item clicável só, mas a casca é o molde das três telas e vai para o sistema real (WCAG 2.4.1).</li>
+    <li><b>Cada rota tem título de aba próprio</b> (WCAG 2.4.2). Isso nasceu de um problema real: a sessão vive por aba, e comparar dois dashboards lado a lado dava duas abas com o mesmo nome.</li>
+    <li>Hierarquia de headings: <code>h1</code> é a saudação, <code>h2</code> é o título de cada card, <code>h3</code> é o nome do material.</li>
+    <li>Lista é <code>&lt;ul&gt;&lt;li&gt;</code> de verdade, nunca <code>&lt;div&gt;</code> com bullet desenhado: a semântica é o que dá contagem de itens e navegação por lista ao leitor de tela.</li>
+    <li><b>A navegação não move foco programaticamente</b>, e isso é intencional no protótipo (o gancho de rota também dispara nos <code>replace</code> que sincronizam o cenário na URL). No sistema real, sem esse parâmetro, gerenciar foco após navegação é o comportamento correto de SPA. Reavaliar.</li>
+  </ul>
+
+  <h3 class="sub">Foco</h3>
+  <ul class="lista">
+    <li>Anel por <code>box-shadow</code> vem <b>sempre acompanhado de <code>outline: 2px solid transparent</code></b>, nunca de <code>outline: none</code>: no modo de alto contraste do Windows o box-shadow é descartado e o foco sumiria.</li>
+    <li><b>Sobre a TopBar verde o anel é branco</b>, não verde: o anel padrão é exatamente a cor de fundo da barra e desapareceria. Qualquer controle sobre superfície de marca precisa da mesma inversão.</li>
+    <li>No seletor de ano o anel é desenhado <b>por dentro</b> (<code>outline-offset: -2px</code>), porque as células ficam num grupo com <code>overflow: hidden</code> e um offset positivo seria cortado.</li>
+    <li>Ao fechar uma camada com <code>Esc</code> ou pelo botão X, <b>o foco volta para o gatilho</b>. Ao fechar por clique fora, não volta: a atenção já foi para onde a pessoa clicou, e devolver seria roubo de foco.</li>
+  </ul>
+
+  <h3 class="sub">Cor, ícone e estado</h3>
+  <ul class="lista">
+    <li><b>Cor nunca é canal único</b> (WCAG 1.4.1). Os gráficos são <code>aria-hidden</code> justamente porque a mesma informação está escrita ao lado: quem recebe o foco é a legenda, não o SVG.</li>
+    <li><b>Ícone nunca aparece sozinho.</b> O (i) acompanha o rótulo textual e nunca o substitui. Na trilha de ícones abaixo de 1024px o rótulo visível sai, e o <code>title</code> passa a ser o canal textual.</li>
+    <li><b>Camada abre por clique, nunca por hover.</b> Em toque não existe hover, e hover dispararia as três obrigações da WCAG 1.4.13 (dispensável, sobrevoável, persistente). Manter o clique evita as três.</li>
+    <li>Botões inertes usam <code>aria-disabled="true"</code>, não o atributo <code>disabled</code>: continuam focáveis e anunciados. Já as setas do seletor de ano usam <code>disabled</code> de verdade, porque ali sair da ordem de foco é o correto.</li>
+    <li>Controles nativos com <code>accent-color</code> em vez de reconstruídos: mantém foco, estado indeterminado e teclado do navegador intactos.</li>
+  </ul>
+
+  <h3 class="sub">Teclado, por componente</h3>
+  <div class="trol"><table>
+    <thead><tr><th style="width:230px">Componente</th><th>Teclas</th></tr></thead>
+    <tbody>
+      <tr><td>Seletor de ano</td><td><kbd>←</kbd> <kbd>→</kbd> andam na série · <kbd>Home</kbd> e <kbd>End</kbd> vão para os extremos · <kbd>Tab</kbd> entra e sai do grupo</td></tr>
+      <tr><td>Card de prazo</td><td><kbd>Enter</kbd> ou <kbd>Espaço</kbd> abrem o popover · <kbd>Esc</kbd> fecha e devolve o foco</td></tr>
+      <tr><td>Rosca</td><td><kbd>Tab</kbd> percorre a legenda e acende o destaque · <kbd>Esc</kbd> limpa o destaque sem tirar o foco</td></tr>
+      <tr><td>Login</td><td>Radio group nativo: <kbd>↑</kbd> <kbd>↓</kbd> trocam de perfil, o desabilitado sai da tabulação, <kbd>Enter</kbd> envia</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="aviso aviso--warn">
+    <span class="aviso__i">!</span>
+    <div><b>Dois pontos conhecidos, para não serem herdados</b>
+      O foco visível dos cards de perfil do login depende do seletor <code>:has()</code>, e a página de login ainda usa <code>outline: none</code> num ponto, sem o padrão do outline transparente descrito acima. Os dois estão na lista da seção 16.</div>
+  </div>
+</section>
+
+<section class="bloco" id="responsivo">
+  <h2><span class="n">13</span>Responsividade</h2>
+  <p class="intro">O Figma só tem o desktop de 1440. Tudo que existe fora disso foi decidido em código e é o mínimo para o protótipo não quebrar em tela menor. A medida do frame de 1440 é sempre o <b>piso</b>, nunca o teto.</p>
+
+  <div class="trol"><table>
+    <thead><tr><th style="width:150px">Largura</th><th>O que muda</th></tr></thead>
+    <tbody>
+      <tr><td><b>≥ 1440</b></td><td>Conteúdo em largura total. O recuo lateral cresce de 40px até 80px, a coluna lateral de 360px até 520px e a barra empilhada de 320px até 560px. Até cerca de 1900px de viewport tudo fica exatamente no valor do Figma</td></tr>
+      <tr><td><b>≤ 1120</b></td><td>A coluna lateral desce para baixo da principal e seus cards dividem a linha (<code>flex: 1 1 320px</code>). No admin, a fileira de indicadores passa de 4 para 2 colunas e a fileira de materiais de 4 para 2</td></tr>
+      <tr><td><b>≤ 1023</b></td><td>O menu vira <b>trilha de ícones de 72px</b>. Os rótulos saem da tela e ficam no <code>title</code></td></tr>
+      <tr><td><b>≤ 940</b></td><td>Os dois blocos da faixa de contexto quebram em linhas e o divisor vertical some: um traço entre duas linhas empilhadas não separa nada</td></tr>
+      <tr><td><b>≤ 720</b></td><td>Cabeçalho empilha, o título cai de 28px para 24px, o seletor de ano ocupa a largura toda, o link da linha de documentação desce alinhado ao texto e a fileira de indicadores vira uma coluna</td></tr>
+      <tr><td><b>≤ 560</b></td><td>A fileira de materiais vira uma coluna</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="telas" style="margin-top:26px">
+    <article class="tela">
+      <button class="tela__shot" data-lb="img/handoff/responsivo-1000.png"><img src="img/handoff/responsivo-1000.png" width="1000" height="1300" alt="Dashboard da gestora em 1000px com trilha de ícones" loading="lazy"><span class="tela__lupa">ampliar</span></button>
+      <div class="tela__b"><span class="tela__t">1000px</span><span class="tela__d">Trilha de ícones no menu e os dois cards de prazo dividindo a linha, com o Acesso Rápido abaixo.</span></div>
+    </article>
+    <article class="tela">
+      <button class="tela__shot" data-lb="img/handoff/responsivo-700.png"><img src="img/handoff/responsivo-700.png" width="700" height="1200" alt="Dashboard da gestora em 700px com cabeçalho empilhado" loading="lazy"><span class="tela__lupa">ampliar</span></button>
+      <div class="tela__b"><span class="tela__t">700px</span><span class="tela__d">Cabeçalho empilhado, seletor de ano em largura total e link da linha descendo para baixo do texto.</span></div>
+    </article>
+  </div>
+
+  <div class="aviso aviso--info">
+    <span class="aviso__i">i</span>
+    <div><b>Layout de celular não está desenhado</b>
+      O que existe abaixo de 720px é reflow defensivo, não desenho. Se o produto precisar de mobile de verdade, é rodada própria: está na seção 16.</div>
+  </div>
+</section>
+
+<!-- ══════════════════════════ PARTE 4 ══════════════════════════ -->
+<div class="parte">
+  <div class="parte__cab">
+    <span class="parte__num">Parte 4</span>
+    <h2 class="parte__t">Aceite</h2>
+    <p class="parte__d">Como saber que ficou pronto, e o que ainda está em aberto.</p>
+  </div>
+</div>
+
+<section class="bloco" id="checklist">
+  <h2><span class="n">14</span>Checklist de cobertura</h2>
+  <p class="intro">Marque enquanto desenvolve. Cada item tem um estado correspondente nas partes anteriores e pode ser conferido no protótipo publicado.</p>
+
+  <div class="prog">
+    <div class="prog__bar"><div class="prog__fill" id="pf"></div></div>
+    <span class="prog__n" id="pn">0 de 0</span>
+    <button class="btn-mini" id="copiar">Copiar como markdown</button>
+  </div>
+
+  <h4 class="rot">Casca e navegação</h4>
+  <div class="check">
+    <label><input type="checkbox"><span>Skip link é o primeiro elemento tabulável e move o foco para o conteúdo</span></label>
+    <label><input type="checkbox"><span>Menu vem do perfil: verificador mostra Notas Fiscais onde a gestora mostra Planos</span></label>
+    <label><input type="checkbox"><span>Item de menu sem tela é inerte, com cor muted, e não é um link</span></label>
+    <label><input type="checkbox"><span>Exatamente um item recebe o destaque de ativo e <code>aria-current="page"</code></span></label>
+    <label><input type="checkbox"><span>Conteúdo ocupa a largura toda, com recuo de 40px crescendo até 80px</span></label>
+    <label><input type="checkbox"><span>Anel de foco sobre a TopBar verde é branco, não verde</span></label>
+    <label><input type="checkbox"><span>Cada rota tem título de aba próprio no formato "título · Recicla Goiás"</span></label>
+    <label><input type="checkbox"><span>Sem sessão, rota protegida leva ao login com destino e volta para a URL pedida</span></label>
+    <label><input type="checkbox"><span>Perfil logado tentando outro dashboard volta ao próprio, sem deslogar</span></label>
+  </div>
+
+  <h4 class="rot">Cabeçalho e seletor de ano</h4>
+  <div class="check">
+    <label><input type="checkbox"><span>Janela de três células, com o ano selecionado sempre no centro</span></label>
+    <label><input type="checkbox"><span>Setas deslocam a janela inteira e o selecionado não pula de posição</span></label>
+    <label><input type="checkbox"><span>Nos extremos a janela trava, o selecionado vai para a borda e a seta desabilita com <code>disabled</code></span></label>
+    <label><input type="checkbox"><span>Setas anunciam o ano de destino, não só a direção</span></label>
+    <label><input type="checkbox"><span>Setas do teclado andam na série; Home e End vão para os extremos</span></label>
+    <label><input type="checkbox"><span>Ano base acompanha como ano de execução menos 1, nos dois lugares da faixa</span></label>
+    <label><input type="checkbox"><span>Cada ano da faixa de contexto vem com a descrição ao lado, nunca sozinho</span></label>
+  </div>
+
+  <h4 class="rot">Status da Documentação</h4>
+  <div class="check">
+    <label><input type="checkbox"><span>Total do cabeçalho é a soma dos status, e bate com a contagem escrita</span></label>
+    <label><input type="checkbox"><span>Status com quantidade zero não aparece em lugar nenhum</span></label>
+    <label><input type="checkbox"><span>Zero documentos vira frase, sem barra e sem contagem</span></label>
+    <label><input type="checkbox"><span>Um status vira contagem com ponto colorido, sem barra</span></label>
+    <label><input type="checkbox"><span>Dois status ou mais desenham a barra empilhada mais a contagem</span></label>
+    <label><input type="checkbox"><span>Nenhuma faixa da barra desaparece: mínimo de 2px</span></label>
+    <label><input type="checkbox"><span>Ordem dos status é a do catálogo, igual na barra e na lista</span></label>
+    <label><input type="checkbox"><span>Singular e plural saem do dado, inclusive quando são idênticos</span></label>
+    <label><input type="checkbox"><span>Barra é <code>aria-hidden</code> e a contagem escrita continua presente</span></label>
+    <label><input type="checkbox"><span>Barra cresce de 320px até 560px conforme a largura</span></label>
+  </div>
+
+  <h4 class="rot">Card de prazo e popover</h4>
+  <div class="check">
+    <label><input type="checkbox"><span>Card tem a mesma altura com 1, 2, 6 e 20 ações liberadas</span></label>
+    <label><input type="checkbox"><span>Rótulo do gatilho cabe em uma linha na largura da coluna</span></label>
+    <label><input type="checkbox"><span>Com uma ação o gatilho vai para o singular e continua sem dizer qual é</span></label>
+    <label><input type="checkbox"><span>Card sem período restritivo não menciona o conceito e mostra o botão da ação</span></label>
+    <label><input type="checkbox"><span>Contador customizado vence o cálculo de dias ("Finaliza hoje")</span></label>
+    <label><input type="checkbox"><span>Contador calculado usa singular em 1 dia</span></label>
+    <label><input type="checkbox"><span>Data longa no card e data curta no gatilho e no popover</span></label>
+    <label><input type="checkbox"><span>Gatilho é <code>button</code> com <code>aria-expanded</code> e <code>aria-controls</code></span></label>
+    <label><input type="checkbox"><span>Popover abre por clique e nunca por hover</span></label>
+    <label><input type="checkbox"><span>Popover tem 324px, sem scrim, sem <code>role="dialog"</code> e sem trap de foco</span></label>
+    <label><input type="checkbox"><span>Esc e o botão X fecham e devolvem o foco ao gatilho</span></label>
+    <label><input type="checkbox"><span>Clique fora fecha e não devolve o foco</span></label>
+    <label><input type="checkbox"><span>Acima de 11 ações só a lista rola, travada em 240px</span></label>
+    <label><input type="checkbox"><span>Título, explicação e a linha "liberadas até" ficam fixos durante a rolagem</span></label>
+    <label><input type="checkbox"><span>Lista de ações é <code>ul</code> com <code>li</code>, não div com bullet desenhado</span></label>
+    <label><input type="checkbox"><span>Os dois cards têm estado independente, inclusive o popover aberto</span></label>
+  </div>
+
+  <h4 class="rot">Indicadores do admin</h4>
+  <div class="check">
+    <label><input type="checkbox"><span>Os quatro cartões da fileira têm a mesma altura, mesmo com o quarto tendo chips</span></label>
+    <label><input type="checkbox"><span>Valor do indicador fica em neutro; a cor mora só na caixa de ícone</span></label>
+    <label><input type="checkbox"><span>Total da rosca é a soma das fatias e fatia zerada não é desenhada</span></label>
+    <label><input type="checkbox"><span>Detalhe da rosca aparece dentro do miolo, nunca em camada flutuante</span></label>
+    <label><input type="checkbox"><span>Legenda é feita de botões e o SVG é <code>aria-hidden</code></span></label>
+    <label><input type="checkbox"><span>Legenda não tem clique que alterne o destaque (quebraria o toque)</span></label>
+    <label><input type="checkbox"><span>Esc limpa o destaque sem tirar o foco do botão</span></label>
+    <label><input type="checkbox"><span>Porcentagem da legenda é revelada por opacidade, sem pular o layout</span></label>
+    <label><input type="checkbox"><span>Meta, taxa e cumprimento são derivados das duas massas</span></label>
+    <label><input type="checkbox"><span>Taxa acima de 100% mostra o número real com o arco cheio</span></label>
+    <label><input type="checkbox"><span>Meta atingida é recuperada maior ou igual a 30% da produzida</span></label>
+    <label><input type="checkbox"><span>Abaixo da meta muda arco e chip, e o fundo do cartão continua cinza</span></label>
+    <label><input type="checkbox"><span>Número no centro do anel fica neutro nos dois estados</span></label>
+    <label><input type="checkbox"><span>Ordem dos três números: produzida, meta com o percentual, recuperada em destaque</span></label>
+    <label><input type="checkbox"><span>Os três números alinham pelo rodapé nos quatro cartões</span></label>
+    <label><input type="checkbox"><span>Tonelada com uma casa decimal; percentual do anel com uma casa; percentual da rosca com no máximo uma</span></label>
+    <label><input type="checkbox"><span>Material sem massa mostra o traço, mantém "toneladas" e não vira zero</span></label>
+  </div>
+
+  <h4 class="rot">Movimento, responsivo e bordas</h4>
+  <div class="check">
+    <label><input type="checkbox"><span>Todas as transições em 120ms com a mesma curva</span></label>
+    <label><input type="checkbox"><span>Popover e painel abrem sem animação</span></label>
+    <label><input type="checkbox"><span>Movimento reduzido no sistema desliga as transições</span></label>
+    <label><input type="checkbox"><span>Abaixo de 1120px a coluna lateral desce e seus cards dividem a linha</span></label>
+    <label><input type="checkbox"><span>Abaixo de 1024px o menu vira trilha de ícones de 72px com rótulo no title</span></label>
+    <label><input type="checkbox"><span>Abaixo de 940px o divisor da faixa de contexto some</span></label>
+    <label><input type="checkbox"><span>Abaixo de 720px o cabeçalho empilha e o seletor de ano ocupa a largura toda</span></label>
+    <label><input type="checkbox"><span>Título de linha muito longo não quebra o alinhamento do link</span></label>
+    <label><input type="checkbox"><span>Nenhum hex cru: toda cor vem de token</span></label>
+    <label><input type="checkbox"><span>Anel de foco por sombra sempre acompanhado de outline transparente</span></label>
+  </div>
+</section>
+
+<section class="bloco" id="roteiro">
+  <h2><span class="n">15</span>Roteiro de testes</h2>
+  <p class="intro">O passo a passo com o resultado esperado de cada ação está publicado à parte, para ser seguido com a tela aberta ao lado. Ele cobre os seis cenários por URL, as micro-interações e a navegação por teclado.</p>
+  <p style="margin-top:14px"><a class="btn btn--verde" href="https://reciclagoias.vercel.app/roteiro-dashboards.html" target="_blank" rel="noopener">Abrir o roteiro de testes</a></p>
+  <div class="trol"><table>
+    <thead><tr><th style="width:70px">Bloco</th><th>Cobre</th></tr></thead>
+    <tbody>
+      <tr><td><b>0</b></td><td>Preparação: dados em memória, sessão por aba, como voltar ao estado inicial</td></tr>
+      <tr><td><b>1</b></td><td>Login e guard: os quatro perfis, o perfil sem tela, deep link e troca de perfil</td></tr>
+      <tr><td><b>2</b></td><td>Casca: menu por perfil, item inerte, skip link, saída pelo avatar</td></tr>
+      <tr><td><b>3</b></td><td>Seletor de ano: janela, travas de extremo, teclado e o que muda na tela</td></tr>
+      <tr><td><b>4</b></td><td>Status da Documentação: as três variações, o total como soma e a barra</td></tr>
+      <tr><td><b>5</b></td><td>Card de prazo: os seis cenários, a altura constante e o popover completo</td></tr>
+      <tr><td><b>6</b></td><td>Admin: indicadores, rosca com destaque, massas disponíveis e a fileira de materiais</td></tr>
+      <tr><td><b>7</b></td><td>Verificador: linha com um status e linha vazia na mesma tela</td></tr>
+      <tr><td><b>8</b></td><td>Responsividade e movimento reduzido</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="bloco" id="aberto">
+  <h2><span class="n">16</span>Em aberto</h2>
+  <p class="intro">Nada aqui deve ser resolvido por dedução durante a implementação. São decisões que ainda dependem de gente, ou lacunas conhecidas do protótipo.</p>
+
+  <h4 class="rot">Com o SIC e com o negócio</h4>
+  <div class="perg"><span class="perg__n">1</span><span>O indicador <b>Justificativas</b> mostra 130 com chips de 99 pendentes e 5 aprovadas. Os chips são recortes ou faltam estados na decomposição?</span></div>
+  <div class="perg"><span class="perg__n">2</span><span>Em <b>Massas Disponíveis</b>, três materiais estão sem dado. O traço significa "não medido" ou "ainda não apurado no exercício"? A diferença muda a frase de apoio.</span></div>
+  <div class="perg"><span class="perg__n">3</span><span>Existe estado de <b>prazo encerrado</b>? Hoje o contador só conta para baixo e o protótipo nunca produz "o prazo acabou". Se existir, precisa ser desenhado.</span></div>
+  <div class="perg"><span class="perg__n">4</span><span>O <b>ano de execução</b> deve recarregar todos os dados da tela? Hoje ele só muda texto derivado.</span></div>
+  <div class="perg"><span class="perg__n">5</span><span>Os rótulos compostos (<span class="copy">aprovadas/enviadas</span>) vieram do sistema atual. Vale separar em dois status, ou o agrupamento é a leitura correta?</span></div>
+
+  <h4 class="rot">Com o time de desenvolvimento</h4>
+  <div class="perg"><span class="perg__n">6</span><span>Estados de <b>carregamento, erro e vazio por falha</b> não existem no protótipo, porque não há chamada assíncrona. Precisam ser projetados antes da implementação, não inferidos daqui.</span></div>
+  <div class="perg"><span class="perg__n">7</span><span>Não existe <b>rota de 404</b>. URL fora das conhecidas não monta nada. É lacuna, não decisão.</span></div>
+  <div class="perg"><span class="perg__n">8</span><span>O popover <b>não tem lógica de colisão</b>: se o card puder ficar colado na borda da viewport, o reposicionamento precisa ser resolvido no sistema real.</span></div>
+  <div class="perg"><span class="perg__n">9</span><span>O <code>?destino=</code> do login <b>não é validado</b>. No sistema real, aceitar só caminhos internos e checar compatibilidade com o perfil.</span></div>
+  <div class="perg"><span class="perg__n">10</span><span>O item ativo do menu é casado por <b>comparação de texto</b> com o rótulo. Migrar para a rota ativa: hoje, renomear um item quebraria o destaque.</span></div>
+  <div class="perg"><span class="perg__n">11</span><span>Contraste de texto muted sobre superfície colorida ainda depende de token novo em alguns pontos, e a página de login tem um <code>outline: none</code> fora do padrão do foco.</span></div>
+
+  <h4 class="rot">Fora deste pacote, de propósito</h4>
+  <div class="trol"><table>
+    <thead><tr><th style="width:52%">Item</th><th>Destino</th></tr></thead>
+    <tbody>
+      <tr><td>Autenticação, sessão real, perfis e permissões</td><td>Backend. O protótipo entra sem credencial</td></tr>
+      <tr><td>As telas de destino: Planos, Relatórios, Notas Fiscais, Certificados e Minha Conta</td><td>Rodadas próprias. Por isso os botões e itens ficam inertes</td></tr>
+      <tr><td>Menu de conta no avatar</td><td>Hoje o avatar sai direto do protótipo</td></tr>
+      <tr><td>Notificações no sino</td><td>Não há painel nem badge desenhados</td></tr>
+      <tr><td>Layout de celular</td><td>Rodada própria, se o produto pedir</td></tr>
+      <tr><td>Dashboard do Operador Logístico</td><td>Perfil existe no login, desabilitado, sem tela</td></tr>
+      <tr><td>Explorador de cenários</td><td>Ferramenta de protótipo. Não portar</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="bloco" id="decisoes">
+  <h2><span class="n">17</span>Decisões</h2>
+  <p class="intro">Regra do projeto: decisão superada não volta. Se uma proposta nova parece igual a algo que já foi descartado, é sinal de que falta contexto. As três decisões numeradas estão registradas em <code>docs/sistema/DECISOES-UX.md</code>, que é a fonte da verdade quando houver dúvida de direção.</p>
+
+  <div class="tl">
+    <div class="tl__i"><div class="tl__d">D-R001</div><div class="tl__t">O card de prazo <b>conta as ações liberadas</b>; a lista mora no popover.</div><div class="tl__m">Com a lista dentro do card, cada ação nova empurrava o layout e a data, que é o dado pelo qual o card existe, perdia espaço para regra administrativa. Com a contagem, o n vira um número dentro de um rótulo e o problema de escala deixa de existir.</div></div>
+    <div class="tl__i tl__i--sup"><div class="tl__d">superada</div><div class="tl__t">A exceção que mostrava a ação na frase quando havia <b>uma só</b> foi descartada.</div><div class="tl__m">Quebrava a altura constante, criava um segundo jeito de ler o mesmo bloco e obrigava a redigir uma frase por ação do catálogo. Contar é uma regra; contar às vezes e mostrar às vezes são duas. Não reintroduzir.</div></div>
+    <div class="tl__i"><div class="tl__d">D-R001</div><div class="tl__t">O rótulo do gatilho declara <b>assunto, tamanho e prazo</b>: "Ver as 6 ações liberadas até 29/08".</div><div class="tl__m">Um link escrito só "Período restritivo" é jargão administrativo e não diz o que acontece no clique. A formulação atual também deixa claro que o resultado é uma camada ancorada, não uma navegação.</div></div>
+    <div class="tl__i"><div class="tl__d">D-R001</div><div class="tl__t">O vermelho fica <b>confinado ao chip</b> e ao ícone; o gatilho fica verde de link.</div><div class="tl__m">Requisição do cliente manter o vermelho. Se o gatilho também fosse vermelho, o bloco inteiro viraria um alarme.</div></div>
+    <div class="tl__i"><div class="tl__d">D-R002</div><div class="tl__t">As pílulas fixas de ano viraram um <b>segmentado com janela deslizante</b> de três células.</div><div class="tl__m">Uma pílula por exercício não sobrevive a 2039: cada ano novo empurra o cabeçalho. A janela resolve a escala sem mudar a largura do controle, e o menu passou a ir do topo ao rodapé.</div></div>
+    <div class="tl__i tl__i--sup"><div class="tl__d">superada</div><div class="tl__t">O <b>dropdown de ano</b> foi descartado.</div><div class="tl__m">Resolve a escala, mas cobra um clique para tudo e esconde os anos vizinhos, que é justamente o movimento mais comum: comparar o exercício atual com o anterior. Filtro de contexto também não é campo de dado.</div></div>
+    <div class="tl__i"><div class="tl__d">D-R002</div><div class="tl__t">Custo aceito, com saída já decidida: saltar muitos anos exige vários cliques.</div><div class="tl__m">É movimento raro. Se aparecer demanda, o rótulo do ano central vira gatilho de uma lista completa, sem mudar o resto. Registrado para que ninguém invente um dropdown por conta própria.</div></div>
+    <div class="tl__i"><div class="tl__d">D-R003</div><div class="tl__t">O gráfico da documentação virou <b>barra empilhada com a contagem escrita ao lado</b>.</div><div class="tl__m">A legenda separada obrigava o vaivém entre gráfico e legenda. Com a contagem escrita, quem lê em preto e branco continua entendendo, e a barra pode ser invisível para tecnologia assistiva.</div></div>
+    <div class="tl__i"><div class="tl__d">D-R003</div><div class="tl__t">As cores dos status seguem o <b>semáforo do design system</b>, não uma escala de verdes.</div><div class="tl__m">Três tons próximos do mesmo verde são difíceis de separar mesmo para quem enxerga cor normalmente, e ficam idênticos para boa parte das pessoas com daltonismo. No Recicla o verde de sucesso e o verde de marca são o mesmo token, de propósito.</div></div>
+    <div class="tl__i"><div class="tl__d">agosto/2026</div><div class="tl__t">O conteúdo passou a ocupar a <b>largura toda</b>, do recuo depois do menu ao recuo da direita.</div><div class="tl__m">Travar numa largura fixa e centralizar fazia a tela cheia parecer que não foi feita sob medida, e num 4K ficaria pior. O que cresce é o recuo, a coluna lateral e a barra, sempre com a medida do frame de 1440 como piso.</div></div>
+    <div class="tl__i"><div class="tl__d">agosto/2026</div><div class="tl__t">O detalhe da rosca aparece <b>dentro do gráfico</b>, não em camada flutuante.</div><div class="tl__m">Em toque não existe hover, camada sobre o próprio elemento dispara as obrigações da WCAG 1.4.13, e o miolo já era espaço morto. Um clique que alternasse o destaque foi removido depois de quebrar o comportamento em toque.</div></div>
+    <div class="tl__i"><div class="tl__d">agosto/2026</div><div class="tl__t">"Bateu a meta" deixou de ser <b>"o anel chegou a 100%"</b>.</div><div class="tl__m">A meta do exercício é recuperar 30% do produzido. A taxa exibida é recuperada sobre produzida e não tem teto; só o arco trava em 100%. Foi assim que a contradição do papel apareceu, e é assim que ela não volta.</div></div>
+    <div class="tl__i tl__i--sup"><div class="tl__d">superada</div><div class="tl__t">Faixas de cor por limiar no anel foram descartadas.</div><div class="tl__m">Introduziam tons fora da paleta semântica do projeto. O estado passou a ser comunicado por três canais que já existem: cor do arco, chip escrito e fundo do cartão.</div></div>
+    <div class="tl__i"><div class="tl__d">agosto/2026</div><div class="tl__t">Os rótulos "em breve" saíram dos botões inertes.</div><div class="tl__m">Nesta rodada o protótipo mostra a forma, não o fluxo. O botão fica visível e inerte, sem prometer data. O chip continua só no perfil do login que ainda não tem tela.</div></div>
+  </div>
+
+  <h3 class="sub">Referência visual</h3>
+  <p style="font-size:14px;color:var(--slate-500);margin-top:8px">Figma <b>Incentiva Goiás</b>, página <code>Telas 2026</code>, seção <code>Agosto 2026 · Recicla Goiás · Dashboard da Entidade Gestora</code>. Os frames REC-01 a REC-06 são a gestora; REC-ADM e REC-VER são as duas telas novas, na linha de baixo. A tira <code>Estados do card de prazo</code> é a referência correta das medidas do card, e não os frames REC-03 e REC-04, onde o bloco de período restritivo com uma ação ficou com a altura antiga e duas linhas se sobrepõem. <b>Medidas se leem nos nós, nunca da imagem.</b></p>
+</section>
+
+<div class="rodape wrap" style="padding-left:0;padding-right:0">
+  <b>Pacote de entrega · Dashboards da área logada · Recicla Goiás (SISLOG Reversa)</b><br>
+  Atualizado em 17 de agosto de 2026. Protótipo publicado em <a href="https://reciclagoias.vercel.app/entrar" target="_blank" rel="noopener">reciclagoias.vercel.app</a>.
+  Decisões de UX em <code>docs/sistema/DECISOES-UX.md</code>; convenções de código em <code>CLAUDE.md</code>.
+  As imagens são capturas do protótipo publicado em 1440px, não montagens.
+</div>
+
+</main>
+
+<div class="lb" id="lb"><button class="lb__x" type="button">Fechar</button><img alt=""></div>
+
+<script>
+// ---------- scroll spy ----------
+(function () {
+  var links = [].slice.call(document.querySelectorAll('.subnav a'));
+  var alvos = links.map(function (a) { return document.querySelector(a.getAttribute('href')); }).filter(Boolean);
+  var obs = new IntersectionObserver(function (entradas) {
+    entradas.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      links.forEach(function (a) { a.classList.toggle('is-ativo', a.getAttribute('href') === '#' + e.target.id); });
+    });
+  }, { rootMargin: '-64px 0px -72% 0px' });
+  alvos.forEach(function (s) { obs.observe(s); });
+})();
+
+// ---------- lightbox ----------
+(function () {
+  var lb = document.getElementById('lb');
+  var img = lb.querySelector('img');
+  document.querySelectorAll('[data-lb]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      img.src = b.getAttribute('data-lb');
+      img.alt = (b.querySelector('img') || {}).alt || '';
+      lb.classList.add('is-on');
+    });
+  });
+  lb.addEventListener('click', function () { lb.classList.remove('is-on'); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') lb.classList.remove('is-on'); });
+})();
+
+// ---------- checklist ----------
+(function () {
+  var caixas = [].slice.call(document.querySelectorAll('.check input'));
+  var fill = document.getElementById('pf');
+  var num = document.getElementById('pn');
+  function atualizar() {
+    var feitos = caixas.filter(function (c) { return c.checked; }).length;
+    fill.style.width = (feitos / caixas.length * 100) + '%';
+    num.textContent = feitos + ' de ' + caixas.length;
+  }
+  caixas.forEach(function (c) { c.addEventListener('change', atualizar); });
+  atualizar();
+
+  document.getElementById('copiar').addEventListener('click', function () {
+    var linhas = [];
+    [].slice.call(document.querySelectorAll('#checklist .rot, #checklist .check label')).forEach(function (el) {
+      if (el.classList.contains('rot')) linhas.push('', '### ' + el.textContent.trim());
+      else linhas.push('- [' + (el.querySelector('input').checked ? 'x' : ' ') + '] ' + el.querySelector('span').textContent.trim());
+    });
+    var texto = '## Checklist · Dashboards da área logada' + linhas.join('\n');
+    navigator.clipboard.writeText(texto).then(function () {
+      var b = document.getElementById('copiar');
+      b.textContent = 'Copiado';
+      setTimeout(function () { b.textContent = 'Copiar como markdown'; }, 1800);
+    });
+  });
+})();
+
+// ---------- réplica 1 · card de prazo e popover ----------
+(function () {
+  var ACOES = ['Incluir nota fiscal','Excluir nota fiscal','Retificar relatório enviado','Ajustar massa recuperada',
+    'Incluir nota duplicada no relatório de não conformidades','Substituir certificado de massa',
+    'Editar dados do plano de gerenciamento','Reenviar relatório devolvido','Anexar comprovante de destinação',
+    'Corrigir CNPJ da empresa aderente','Transferir certificado entre entidades','Cancelar certificado emitido',
+    'Incluir operador logístico no plano','Remover operador logístico do plano','Ajustar meta percentual por material',
+    'Reabrir conciliação de massa','Importar notas fiscais em lote','Excluir relatório em preenchimento',
+    'Alterar responsável técnico','Solicitar revisão ao verificador'];
+  var LIMITE = 11, ATE = '29/08', n = 6;
+  var gat = document.getElementById('d-gatilho'), pop = document.getElementById('d-pop');
+  var disc = document.getElementById('d-disc'), lista = document.getElementById('d-lista');
+
+  function desenhar() {
+    document.getElementById('d-rotulo').textContent = n === 1
+      ? 'Ver a ação liberada até ' + ATE
+      : 'Ver as ' + n + ' ações liberadas até ' + ATE;
+    document.getElementById('d-ate').textContent = (n === 1 ? 'Liberado' : 'Liberadas') + ' até ' + ATE;
+    lista.innerHTML = '';
+    ACOES.slice(0, n).forEach(function (a) {
+      var li = document.createElement('li'); li.textContent = a; lista.appendChild(li);
+    });
+    lista.classList.toggle('rp__lista--rola', n > LIMITE);
+  }
+  function abrir(v, devolver) {
+    pop.hidden = !v;
+    gat.setAttribute('aria-expanded', String(v));
+    if (!v && devolver) gat.focus();
+  }
+  gat.addEventListener('click', function () { abrir(pop.hidden, false); });
+  document.getElementById('d-x').addEventListener('click', function () { abrir(false, true); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !pop.hidden) abrir(false, true); });
+  document.addEventListener('mousedown', function (e) { if (!pop.hidden && !disc.contains(e.target)) abrir(false, false); });
+  document.querySelectorAll('.d-n').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.querySelectorAll('.d-n').forEach(function (o) { o.classList.remove('is-ativo'); });
+      b.classList.add('is-ativo');
+      n = Number(b.getAttribute('data-n'));
+      desenhar();
+    });
+  });
+  desenhar();
+})();
+
+// ---------- réplica 2 · rosca ----------
+(function () {
+  var v = document.getElementById('d-centro-v'), r = document.getElementById('d-centro-r');
+  var botoes = [].slice.call(document.querySelectorAll('#d-leg .rd__b'));
+  var arcos = [].slice.call(document.querySelectorAll('.d-arco'));
+  function destacar(i) {
+    botoes.forEach(function (b, k) { b.classList.toggle('is-on', k === i); });
+    arcos.forEach(function (a, k) { a.setAttribute('stroke-width', i === null ? '4.6' : (k === i ? '6' : '4')); });
+    if (i === null) { v.textContent = '54'; r.textContent = 'Total'; }
+    else { v.textContent = botoes[i].getAttribute('data-q'); r.textContent = botoes[i].getAttribute('data-p'); }
+  }
+  botoes.forEach(function (b, i) {
+    b.addEventListener('mouseenter', function () { destacar(i); });
+    b.addEventListener('mouseleave', function () { destacar(null); });
+    b.addEventListener('focus', function () { destacar(i); });
+    b.addEventListener('blur', function () { destacar(null); });
+  });
+  document.getElementById('d-rosca').addEventListener('keydown', function (e) { if (e.key === 'Escape') destacar(null); });
+})();
+
+// ---------- réplica 3 · seletor de ano ----------
+(function () {
+  var ANOS = [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025];
+  var sel = 2024;
+  var grupo = document.getElementById('d-ano'), saida = document.getElementById('d-ano-saida');
+  function desenhar(focar) {
+    var i = ANOS.indexOf(sel);
+    var inicio = Math.max(0, Math.min(i - 1, ANOS.length - 3));
+    var janela = ANOS.slice(inicio, inicio + 3);
+    var podeVoltar = i > 0, podeAvancar = i < ANOS.length - 1;
+    grupo.innerHTML = '';
+    var esq = document.createElement('button');
+    esq.type = 'button'; esq.className = 'ry__seta'; esq.textContent = '‹'; esq.disabled = !podeVoltar;
+    esq.setAttribute('aria-label', podeVoltar ? 'Ano anterior, ' + ANOS[i - 1] : 'Ano anterior');
+    esq.addEventListener('click', function () { sel = ANOS[i - 1]; desenhar(true); });
+    grupo.appendChild(esq);
+    janela.forEach(function (a) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.textContent = a;
+      if (a === sel) { b.className = 'is-ativo'; b.setAttribute('aria-pressed', 'true'); }
+      b.addEventListener('click', function () { sel = a; desenhar(true); });
+      b.addEventListener('keydown', function (e) {
+        var j = ANOS.indexOf(sel);
+        if (e.key === 'ArrowLeft' && j > 0) { e.preventDefault(); sel = ANOS[j - 1]; desenhar(true); }
+        if (e.key === 'ArrowRight' && j < ANOS.length - 1) { e.preventDefault(); sel = ANOS[j + 1]; desenhar(true); }
+        if (e.key === 'Home') { e.preventDefault(); sel = ANOS[0]; desenhar(true); }
+        if (e.key === 'End') { e.preventDefault(); sel = ANOS[ANOS.length - 1]; desenhar(true); }
+      });
+      grupo.appendChild(b);
+    });
+    var dir = document.createElement('button');
+    dir.type = 'button'; dir.className = 'ry__seta'; dir.textContent = '›'; dir.disabled = !podeAvancar;
+    dir.setAttribute('aria-label', podeAvancar ? 'Próximo ano, ' + ANOS[i + 1] : 'Próximo ano');
+    dir.addEventListener('click', function () { sel = ANOS[i + 1]; desenhar(true); });
+    grupo.appendChild(dir);
+    saida.textContent = 'Ano de execução ' + sel + '  ·  ano base ' + (sel - 1);
+    if (focar) { var alvo = grupo.querySelector('.is-ativo'); if (alvo) alvo.focus(); }
+  }
+  desenhar(false);
+})();
+
+// ---------- réplica 5 · anel de recuperação ----------
+(function () {
+  var META = 30, alvo = document.getElementById('d-aneis');
+  var slider = document.getElementById('d-slider'), saida = document.getElementById('d-slider-v');
+  var t = function (x) { return x.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' t'; };
+  var p = function (x) { return x.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%'; };
+
+  function cartao(nome, produzida, recuperada) {
+    var meta = produzida * META / 100;
+    var taxa = produzida > 0 ? recuperada / produzida * 100 : 0;
+    var ok = recuperada >= meta;
+    var cor = ok ? '#1F8344' : '#D97706';
+    var arco = Math.max(0, Math.min(taxa, 100));
+    return '<li style="list-style:none;display:flex;flex-direction:column;align-items:center;gap:12px;padding:20px;width:210px;'
+      + 'border-radius:8px;border:1px solid ' + (ok ? '#9FD5B0' : 'transparent') + ';background:' + (ok ? '#E9F6EE' : '#F1F5F9') + '">'
+      + '<h5 style="font:600 14px/20px var(--font);color:#0F172A">' + nome + '</h5>'
+      + '<div style="position:relative;width:104px;height:104px">'
+      + '<svg viewBox="0 0 36 36" width="104" height="104" aria-hidden="true" style="transform:rotate(-90deg)">'
+      + '<circle cx="18" cy="18" r="15.9155" fill="none" stroke="#E2E8F0" stroke-width="4"></circle>'
+      + '<circle cx="18" cy="18" r="15.9155" fill="none" stroke="' + cor + '" stroke-width="4" stroke-linecap="round" stroke-dasharray="' + arco + ' ' + (100 - arco) + '"></circle>'
+      + '</svg>'
+      + '<span style="position:absolute;inset:0;display:grid;place-content:center;font:700 18px/22px var(--font);color:#0F172A">' + p(taxa) + '</span>'
+      + '</div>'
+      + '<p style="margin:0;padding:4px 10px;border-radius:999px;font:600 12px/16px var(--font);'
+      + (ok ? 'background:#fff;color:#176935' : 'background:#FFFBEB;color:#B45309') + '">' + (ok ? 'Meta atingida' : 'Abaixo da meta') + '</p>'
+      + '<dl style="width:100%;margin:auto 0 0;display:flex;flex-direction:column;gap:4px;font:400 12px/16px var(--font);color:#475569">'
+      + '<div style="display:flex;justify-content:space-between;gap:8px"><dt>Produzida</dt><dd style="margin:0;font-weight:500">' + t(produzida) + '</dd></div>'
+      + '<div style="display:flex;justify-content:space-between;gap:8px"><dt>Meta (30%)</dt><dd style="margin:0;font-weight:500">' + t(meta) + '</dd></div>'
+      + '<div style="display:flex;justify-content:space-between;gap:8px;padding-top:5px;margin-top:4px;border-top:1px solid #E2E8F0;color:#0F172A">'
+      + '<dt style="font-weight:500">Recuperada</dt><dd style="margin:0;font:600 14px/20px var(--font)">' + t(recuperada) + '</dd></div>'
+      + '</dl></li>';
+  }
+  function render() {
+    var rec = Number(slider.value);
+    alvo.innerHTML = '<ul style="display:flex;gap:20px;flex-wrap:wrap;margin:0;padding:0">'
+      + cartao('Papel', 49788, 86632) + cartao('Metal', 8846, rec) + '</ul>';
+    saida.textContent = t(rec) + '  ·  meta 2.653,8 t';
+  }
+  slider.addEventListener('input', render);
+  render();
+})();
+</script>
+</body>
+</html>
