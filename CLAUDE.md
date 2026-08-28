@@ -37,7 +37,7 @@ Leia antes de mexer em cada frente:
 | [`docs/sistema/PLANO-AREA-GESTORA.md`](docs/sistema/PLANO-AREA-GESTORA.md) | Rotas, componentes e ordem de trabalho da área logada; mapa de tokens Figma → código |
 | [`docs/sistema/DECISOES-UX.md`](docs/sistema/DECISOES-UX.md) | Decisões de UX que governam as telas do sistema (D-R001 período restritivo, D-R002 seletor de ano, D-R003 barra empilhada) — **fonte da verdade quando houver dúvida de direção** |
 | [`docs/sistema/HANDOFF-DASHBOARD-GESTORA.md`](docs/sistema/HANDOFF-DASHBOARD-GESTORA.md) | Documento para encaminhar: o que foi entregue, o porquê de cada decisão e o que vai para a biblioteca de componentes |
-| [`docs/sistema/PACOTE-ENTREGA-DASHBOARDS.md`](docs/sistema/PACOTE-ENTREGA-DASHBOARDS.md) | **O que vai para o time de desenvolvimento**: as três peças da entrega, as regras dos documentos (sem sigla nossa, sem diminuir o que já existia) e como refazer o recorte de código |
+| [`docs/sistema/PACOTE-ENTREGA-DASHBOARDS.md`](docs/sistema/PACOTE-ENTREGA-DASHBOARDS.md) | **O que vai para o time de desenvolvimento**: os pacotes já entregues, as três peças de cada um, as regras dos documentos (sem sigla nossa, sem diminuir o que já existia) e como refazer o recorte de código |
 | [`docs/HANDOFF-DESENVOLVIMENTO.md`](docs/HANDOFF-DESENVOLVIMENTO.md) | Landing page |
 | [`docs/HANDOFF-CONSULTA-REGULARIDADE.md`](docs/HANDOFF-CONSULTA-REGULARIDADE.md) | Consulta pública de regularidade |
 | [`README.md`](README.md) | Stack e filosofia geral |
@@ -116,13 +116,16 @@ Mapa Figma → código usado na área gestora:
 O guard é **por perfil**: sem perfil na store volta para `/entrar` com `?destino=`, e perfil
 logado tentando a rota de outro perfil volta para o próprio dashboard, sem deslogar.
 
-Os dois documentos publicados junto com o protótipo saem daqui e são o que se envia para
+Os documentos publicados junto com o protótipo saem daqui e são o que se envia para
 fora (ver [`docs/sistema/PACOTE-ENTREGA-DASHBOARDS.md`](docs/sistema/PACOTE-ENTREGA-DASHBOARDS.md)):
 
 ```
-public/handoff-dashboards.html    pacote de entrega, com réplicas ao vivo das interações
-public/roteiro-dashboards.html    roteiro de testes passo a passo
-public/img/handoff/               capturas do protótipo em 1440, usadas pelos dois
+public/handoff-dashboards.html    dashboards: pacote de entrega, com réplicas ao vivo
+public/roteiro-dashboards.html    dashboards: roteiro de testes passo a passo
+public/handoff-consulta.html      consulta pública: pacote de entrega
+public/roteiro-consulta.html      consulta pública: roteiro de testes
+public/img/handoff/               capturas dos dashboards em 1440
+public/img/handoff-consulta/      capturas da consulta em 1440
 ```
 
 ```

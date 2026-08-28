@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8">
+  <meta name="doc-tipo" content="roteiro">
+  <meta name="doc-sistema" content="recicla-goias">
+  <meta name="doc-ciclo" content="2026-08">
+  <meta name="doc-atualizado" content="2026-08-28">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Roteiro de testes · Consulta pública de regularidade</title>
+<style>
+  :root{
+    --verde:#279C50; --verde-600:#1F8344; --verde-700:#176935; --verde-800:#12522A; --verde-50:#E9F6EE;
+    --slate-900:#0F172A; --slate-700:#334155; --slate-500:#64748B; --slate-300:#CBD5E1; --slate-200:#E2E8F0; --slate-100:#F1F5F9; --slate-50:#F8FAFC;
+    --ambar-50:#FFFBEB; --ambar-700:#B45309; --azul-50:#EFF6FF; --azul-700:#1D4ED8; --verm-50:#FEF2F2; --verm-700:#B91C1C;
+    --font:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Consolas,'Liberation Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font:15px/1.6 var(--font);color:var(--slate-900);background:var(--slate-50);padding:0 0 80px}
+  .topo{background:var(--verde-700);color:#fff;padding:36px 24px}
+  .topo .mx{max-width:920px;margin:0 auto}
+  .topo .eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.78;font-weight:600}
+  .topo h1{font-size:28px;letter-spacing:-.02em;margin:6px 0 8px;font-weight:700}
+  .topo p{opacity:.9;max-width:700px}
+  .topo a{color:#fff}
+  main{max-width:920px;margin:0 auto;padding:32px 24px}
+  .prog{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:14px;background:rgba(248,250,252,.94);backdrop-filter:blur(8px);padding:14px 0;margin-bottom:8px;border-bottom:1px solid var(--slate-200)}
+  .prog__bar{flex:1;height:8px;border-radius:99px;background:var(--slate-200);overflow:hidden}
+  .prog__fill{height:100%;width:0;background:var(--verde);border-radius:99px;transition:width .3s cubic-bezier(.2,0,0,1)}
+  .prog__n{font:600 13px/1 var(--font);color:var(--slate-500);white-space:nowrap}
+  .bloco{background:#fff;border:1px solid var(--slate-200);border-radius:14px;padding:24px 26px;margin-bottom:22px}
+  .bloco h2{font-size:18px;letter-spacing:-.01em;margin-bottom:4px;display:flex;align-items:center;gap:10px;font-weight:700}
+  .num{flex:none;width:28px;height:28px;border-radius:999px;background:var(--verde-700);color:#fff;display:inline-grid;place-items:center;font-size:13px;font-weight:700}
+  .fala{background:var(--slate-50);border-left:3px solid var(--verde);border-radius:0 10px 10px 0;padding:12px 16px;margin:12px 0;color:var(--slate-700);font-size:14px}
+  .fala b{color:var(--slate-900)}
+  .nota{background:var(--ambar-50);border-radius:10px;padding:12px 16px;margin:12px 0;font-size:13.5px;color:var(--ambar-700)}
+  .nota>b{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px}
+  .duvida{background:var(--verm-50);border-radius:10px;padding:12px 16px;margin:12px 0;font-size:13.5px;color:var(--verm-700)}
+  .duvida>b{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px}
+  ul{padding-left:20px;margin:8px 0}
+  li{margin:4px 0}
+  .passos li{margin:7px 0;font-size:14px}
+  .teste{border:1px solid var(--slate-200);border-radius:10px;padding:14px 18px;margin:12px 0}
+  .teste h3{font-size:14.5px;display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;font-weight:600}
+  .teste h3 input{width:17px;height:17px;margin-top:2px;flex:none;accent-color:var(--verde)}
+  .esper{background:var(--verde-50);border-radius:8px;padding:10px 14px;margin-top:8px;font-size:13.5px}
+  .esper>b{color:var(--verde-700);display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+  .esper label b{color:var(--slate-900);font-weight:600}
+  .esper label{display:flex;gap:8px;align-items:flex-start;margin:5px 0;cursor:pointer}
+  .esper input{width:15px;height:15px;margin-top:3px;flex:none;accent-color:var(--verde)}
+  .check{background:var(--verde-50);border-radius:10px;padding:14px 18px;margin-top:10px}
+  .check b{color:var(--verde-700)}
+  code{background:var(--slate-100);border-radius:6px;padding:1px 7px;font:500 13px/1.5 var(--mono)}
+  kbd{display:inline-block;font:600 11.5px/1.4 var(--mono);color:var(--slate-700);background:#fff;border:1px solid var(--slate-300);border-bottom-width:2px;border-radius:5px;padding:1px 6px}
+  a{color:var(--verde-700)}
+  .mini{font-size:12.5px;color:var(--slate-500)}
+  @media (prefers-reduced-motion: reduce){*{transition:none !important}}
+  @media print{
+    body{background:#fff} .prog{display:none} .topo{background:#fff;color:var(--slate-900);border-bottom:3px solid var(--verde-700);padding:0 0 16px}
+    .topo a{color:var(--slate-900)} .bloco{break-inside:avoid;border:0;border-top:1px solid var(--slate-200);border-radius:0;padding:14px 0}
+    .esper,.check,.fala,.nota{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
+</style>
+</head>
+<body>
+<header class="topo"><div class="mx">
+  <div class="eyebrow">Recicla Goiás · Consulta pública · Agosto 2026</div>
+  <h1>Roteiro de testes: consulta de regularidade</h1>
+  <p>As duas telas públicas: consulta por CNPJ e validação de documento. Siga com a tela aberta ao lado. O pacote completo, com estados, tokens e regras, está no <a href="https://reciclagoias.vercel.app/handoff-consulta.html">documento de entrega</a>.</p>
+</div></header>
+<main>
+
+<div class="prog">
+  <div class="prog__bar"><div class="prog__fill" id="pf"></div></div>
+  <span class="prog__n" id="pn">0 de 0</span>
+</div>
+
+<div class="bloco">
+  <h2><span class="num">0</span>Antes de começar</h2>
+  <div class="check">
+    <b>Preparação</b>
+    <ul>
+      <li>Abra <a href="https://reciclagoias.vercel.app/consulta" target="_blank" rel="noopener">reciclagoias.vercel.app/consulta</a>. Não há login: as duas telas são públicas.</li>
+      <li>Os dados vivem <b>em memória</b>. Recarregar (F5) devolve tudo ao estado inicial.</li>
+      <li>A base tem <b>dois CNPJs</b>: <code>12.345.678/0001-90</code> (regular) e <code>98.765.432/0001-10</code> (com pendência). Qualquer outro de 14 dígitos cai em "não encontrado".</li>
+      <li>E <b>dois códigos</b> de documento: <code>RG-2026-4F8A-2C7B-90D1</code> e <code>RG-2026-9B12-7E44-AA03</code>.</li>
+      <li>Para pular direto a um estado, use os atalhos <code>?demo=</code> listados no documento de entrega.</li>
+    </ul>
+  </div>
+  <div class="fala">O que está sendo testado é <b>comportamento</b>, não dado. O que precisa bater é a regra por trás: a ordem das validações, o ritmo da varredura, qual é a ação principal de cada resultado e a coerência entre o código da tela e o do documento.</div>
+</div>
+
+<div class="bloco">
+  <h2><span class="num">1</span>Busca por CNPJ</h2>
+  <div class="teste">
+    <h3><input type="checkbox"> 1.1 · A máscara</h3>
+    <ul class="passos"><li>Clique no campo e digite <code>12345678000190</code> devagar.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Os pontos, a barra e o hífen aparecem sozinhos conforme você digita</label>
+      <label><input type="checkbox"> Letras e símbolos não entram</label>
+      <label><input type="checkbox"> O campo trava em 14 dígitos: continuar digitando não muda nada</label>
+      <label><input type="checkbox"> Colar <code>12.345.678/0001-90</code> ou <code>12345678/000190</code> funciona igual</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 1.2 · As duas validações, nesta ordem</h3>
+    <ul class="passos">
+      <li>Limpe o campo e clique em <b>Consultar situação</b>.</li>
+      <li>Depois preencha o CNPJ completo, deixe o captcha desmarcado e clique de novo.</li>
+    </ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Vazio: o card treme e aparece <b>"Digite o CNPJ completo (14 dígitos)."</b></label>
+      <label><input type="checkbox"> CNPJ completo sem captcha: treme e aparece <b>"Confirme que você não é um robô."</b></label>
+      <label><input type="checkbox"> Em nenhum dos dois casos a tela avança</label>
+      <label><input type="checkbox"> Com leitor de tela, a mensagem é anunciada assim que aparece</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 1.3 · O captcha</h3>
+    <ul class="passos"><li>Clique na caixa <b>Não sou um robô</b> e observe até o fim.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> A caixa vira um spinner por cerca de um segundo e depois um check verde</label>
+      <label><input type="checkbox"> O texto "Não sou um robô" <b>não muda</b> em nenhum momento</label>
+      <label><input type="checkbox"> O check entra crescendo, não simplesmente aparece</label>
+      <label><input type="checkbox"> Com <kbd>Tab</kbd> dá para chegar na caixa, e <kbd>Enter</kbd> ou <kbd>Espaço</kbd> marcam</label>
+    </div>
+    <div class="nota"><b>Lembrete</b> Este captcha é visual. O que precisa sobreviver na implementação é o portão: sem ele marcado, nada é enviado. A verificação de verdade é no servidor.</div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 1.4 · As saídas da tela</h3>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Abaixo do card: "Consulta gratuita e oficial. Nenhum dado é armazenado."</label>
+      <label><input type="checkbox"> Depois, a pílula "Recebeu uma certidão? Valide o documento", que leva para a outra tela</label>
+      <label><input type="checkbox"> Por último, o link da autodeclaração</label>
+      <label><input type="checkbox"> O botão do cabeçalho abre o modal "Como funciona a consulta", com três passos</label>
+      <label><input type="checkbox"> O modal fecha com <kbd>Esc</kbd>, com o X e clicando no fundo</label>
+    </div>
+  </div>
+</div>
+
+<div class="bloco">
+  <h2><span class="num">2</span>Varredura</h2>
+  <div class="fala">A varredura <b>não consulta nada</b>: ela recebe o resultado pronto e encena o tempo. É por isso que ela consegue ser mais curta quando o CNPJ não está na base.</div>
+  <div class="teste">
+    <h3><input type="checkbox"> 2.1 · O ciclo completo</h3>
+    <ul class="passos"><li>Consulte <code>12.345.678/0001-90</code> e observe sem clicar em nada.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Quatro etapas: Localizando a empresa · Verificando a adesão · Conferindo metas e certificados · Emitindo o resultado</label>
+      <label><input type="checkbox"> Cada etapa passa por três estados: cinza, ativa com fundo verde-claro e spinner, concluída com check</label>
+      <label><input type="checkbox"> A barra avança <b>em degraus</b>, não continuamente</label>
+      <label><input type="checkbox"> O CNPJ consultado aparece no chip, no meio do card</label>
+      <label><input type="checkbox"> No fim, a barra fecha em 100% e o resultado entra</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 2.2 · A varredura curta</h3>
+    <ul class="passos"><li>Consulte um CNPJ que não existe, por exemplo <code>11.111.111/0001-11</code>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> A etapa 1 conclui e o fluxo resolve direto, sem passar pelas etapas 3 e 4</label>
+      <label><input type="checkbox"> A barra <b>para em torno de 46%</b> e não chega a 100%</label>
+      <label><input type="checkbox"> É visivelmente mais rápido que o ciclo completo</label>
+    </div>
+    <div class="fala">Isso é de propósito: não faz sentido encenar a conferência de metas de uma empresa que não está na base.</div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 2.3 · Cancelar e movimento reduzido</h3>
+    <ul class="passos">
+      <li>Comece uma consulta e clique em <b>Cancelar consulta</b> no meio.</li>
+      <li>Ligue "reduzir movimento" no sistema e repita a consulta.</li>
+    </ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Cancelar volta para o formulário na hora, e nada continua acontecendo em segundo plano</label>
+      <label><input type="checkbox"> Com movimento reduzido, as etapas saltam rápido e nada gira nem pulsa</label>
+      <label><input type="checkbox"> O resultado continua chegando normalmente</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 2.4 · Leitor de tela</h3>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> O progresso é anunciado como <b>"Etapa 2 de 4: Verificando a adesão"</b></label>
+      <label><input type="checkbox"> Não há uma enxurrada de anúncios a cada etapa que acende</label>
+    </div>
+  </div>
+</div>
+
+<div class="bloco">
+  <h2><span class="num">3</span>Resultado · Empresa regular</h2>
+  <div class="teste">
+    <h3><input type="checkbox"> 3.1 · O card</h3>
+    <ul class="passos"><li>Consulte <code>12.345.678/0001-90</code> ou abra <a href="https://reciclagoias.vercel.app/consulta?demo=regular" target="_blank" rel="noopener">?demo=regular</a>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Selo verde, badge "SITUAÇÃO REGULAR" e o título com "Recicla Goiás" em verde</label>
+      <label><input type="checkbox"> Bloco "Empresa consultada" com razão social, CNPJ e município</label>
+      <label><input type="checkbox"> Bloco de autenticação com o código <code>RG-2026-4F8A-2C7B-90D1</code> e o QR</label>
+      <label><input type="checkbox"> Os blocos entram em cascata, de cima para baixo, não todos de uma vez</label>
+      <label><input type="checkbox"> A <b>ação principal é "Baixar certidão (PDF)"</b>; Imprimir vem ao lado e "Nova consulta" é discreta</label>
+      <label><input type="checkbox"> O aviso legal aparece no rodapé do card</label>
+      <label><input type="checkbox"> <b>Não há</b> linha de data no card: a data vive no documento</label>
+    </div>
+  </div>
+</div>
+
+<div class="bloco">
+  <h2><span class="num">4</span>Resultado · Com pendência</h2>
+  <div class="teste">
+    <h3><input type="checkbox"> 4.1 · A lista de pendências</h3>
+    <ul class="passos"><li>Consulte <code>98.765.432/0001-10</code> ou abra <a href="https://reciclagoias.vercel.app/consulta?demo=pendencia" target="_blank" rel="noopener">?demo=pendencia</a>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Selo e badge em <b>vermelho</b>, e o contador "4 pendências" ao lado do título da lista</label>
+      <label><input type="checkbox"> Quatro itens: adesão não localizada · metas não comprovadas · relatório anual em atraso · certificados insuficientes</label>
+      <label><input type="checkbox"> <b>Cada item</b> traz o problema, uma explicação e uma caixa com "Como resolver:"</label>
+      <label><input type="checkbox"> A identificação tem uma linha a mais que a tela regular: o perfil no sistema</label>
+      <label><input type="checkbox"> Aparece a linha "Consulta realizada em ..."</label>
+      <label><input type="checkbox"> Os itens da lista entram um a um, depois dos blocos de cima</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 4.2 · A hierarquia das ações</h3>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> A <b>ação principal é "Regularizar situação"</b>, não baixar o relatório</label>
+      <label><input type="checkbox"> "Baixar relatório (PDF)" é a secundária, ao lado</label>
+      <label><input type="checkbox"> "Nova consulta" fica embaixo, discreta</label>
+      <label><input type="checkbox"> O bloco "Como regularizar" traz o link da Autodeclaração de Não Enquadramento</label>
+      <label><input type="checkbox"> O aviso legal cita a lei e o decreto federais, em tom sóbrio, sem alarme</label>
+    </div>
+    <div class="fala">Repare no contraste com a tela regular: lá baixar o PDF é o objetivo, aqui é o consolo. A ordem dos botões conta essa diferença.</div>
+  </div>
+</div>
+
+<div class="bloco">
+  <h2><span class="num">5</span>Resultado · Não encontrado</h2>
+  <div class="teste">
+    <h3><input type="checkbox"> 5.1 · Tom e conteúdo</h3>
+    <ul class="passos"><li>Consulte um CNPJ inexistente ou abra <a href="https://reciclagoias.vercel.app/consulta?demo=nao-encontrado" target="_blank" rel="noopener">?demo=nao-encontrado</a>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Cinza neutro, <b>não vermelho</b>: não é tela de erro</label>
+      <label><input type="checkbox"> O título fala na primeira pessoa: "Não encontramos este CNPJ"</label>
+      <label><input type="checkbox"> O CNPJ consultado aparece ecoado numa pílula</label>
+      <label><input type="checkbox"> "O que você pode fazer" traz três caminhos: conferir a digitação, ver como aderir, ou fazer a autodeclaração</label>
+      <label><input type="checkbox"> <b>Uma ação só</b>: "Nova consulta", primária, ocupando a largura toda</label>
+      <label><input type="checkbox"> <b>Não existe</b> botão de baixar nada</label>
+    </div>
+  </div>
+</div>
+
+<div class="bloco">
+  <h2><span class="num">6</span>O documento A4</h2>
+  <div class="teste">
+    <h3><input type="checkbox"> 6.1 · A certidão</h3>
+    <ul class="passos"><li>No resultado regular, clique em <b>Baixar certidão (PDF)</b> ou em <b>Imprimir</b>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Abre uma camada escura com a barra de ações no topo e o papel embaixo</label>
+      <label><input type="checkbox"> Cabeçalho com o brasão (placeholder), "ESTADO DE GOIÁS", a logo do Recicla e o fio verde</label>
+      <label><input type="checkbox"> Título "CERTIFICADO DE SITUAÇÃO CADASTRAL" e badge verde</label>
+      <label><input type="checkbox"> Identificação, o texto do atesto, base legal em três itens</label>
+      <label><input type="checkbox"> Caixa com data de referência, validade de 90 dias e situação</label>
+      <label><input type="checkbox"> Rodapé com o código <b>igual ao do card</b>, a data de emissão, o QR e a URL de validação</label>
+      <label><input type="checkbox"> Fecha com <kbd>Esc</kbd>, com o X e clicando no fundo</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 6.2 · O relatório de pendências</h3>
+    <ul class="passos"><li>No resultado com pendência, clique em <b>Baixar relatório (PDF)</b>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Mesmo papel, com título "RELATÓRIO DE PENDÊNCIAS" e badge vermelho</label>
+      <label><input type="checkbox"> No lugar do atesto, a lista das pendências (só os títulos, sem a explicação)</label>
+      <label><input type="checkbox"> A nota de que o documento tem caráter informativo enquanto houver pendência</label>
+      <label><input type="checkbox"> Cabeçalho, base legal e rodapé continuam iguais aos da certidão</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 6.3 · Imprimir e baixar</h3>
+    <ul class="passos"><li>Clique em <b>Imprimir</b> e olhe a pré-visualização. Depois feche e clique em <b>Baixar PDF</b>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> A pré-visualização mostra <b>só o papel</b>, sem o site em volta</label>
+      <label><input type="checkbox"> Cabe em <b>uma página A4</b></label>
+      <label><input type="checkbox"> O download começa e aparece um aviso confirmando, com o nome do arquivo</label>
+      <label><input type="checkbox"> O nome traz o tipo e o CNPJ, por exemplo <code>certidao-situacao-cadastral-12345678000190.pdf</code></label>
+      <label><input type="checkbox"> O código impresso no PDF é o mesmo que aparece na tela</label>
+    </div>
+    <div class="duvida"><b>Ponto em aberto</b> No protótipo o PDF é o próprio HTML impresso. Para um comprovante oficial, a recomendação é gerar no servidor: texto pesquisável, QR real e arquivo idêntico independente do navegador.</div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 6.4 · O QR</h3>
+    <ul class="passos"><li>Com o documento aberto, clique no QR do rodapé.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Leva para a validação com o código já preenchido, simulando o escaneamento</label>
+      <label><input type="checkbox"> O código na URL é o mesmo que estava impresso</label>
+    </div>
+  </div>
+</div>
+
+<div class="bloco">
+  <h2><span class="num">7</span>Validação de documento</h2>
+  <div class="teste">
+    <h3><input type="checkbox"> 7.1 · O formulário</h3>
+    <ul class="passos"><li>Abra <a href="https://reciclagoias.vercel.app/consulta/validar" target="_blank" rel="noopener">/consulta/validar</a> e digite algo em minúsculas.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> O campo converte para caixa alta sozinho</label>
+      <label><input type="checkbox"> Código muito curto mostra "Informe o código completo impresso no documento."</label>
+      <label><input type="checkbox"> Sem captcha marcado, mostra a mensagem do robô</label>
+      <label><input type="checkbox"> É o mesmo captcha da tela de busca</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 7.2 · Chegando pelo QR</h3>
+    <ul class="passos"><li>Abra <a href="https://reciclagoias.vercel.app/consulta/validar?codigo=RG-2026-4F8A-2C7B-90D1" target="_blank" rel="noopener">a validação com o código na URL</a>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> O campo já vem preenchido</label>
+      <label><input type="checkbox"> Aparece a linha "Código preenchido pelo documento. Confirme que você não é um robô e valide."</label>
+      <label><input type="checkbox"> <b>A checagem NÃO roda sozinha</b>: ainda é preciso marcar o captcha e clicar</label>
+    </div>
+    <div class="fala">Esse clique a mais é a barreira que impede um QR compartilhado de virar um verificador aberto de códigos.</div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 7.3 · Documento autêntico</h3>
+    <ul class="passos"><li>Valide o código <code>RG-2026-4F8A-2C7B-90D1</code>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Passa por um estado de "Conferindo o documento" antes do resultado</label>
+      <label><input type="checkbox"> Selo verde e badge "DOCUMENTO AUTÊNTICO"</label>
+      <label><input type="checkbox"> Bloco com tipo, código, razão social, CNPJ, <b>situação na emissão</b> e data da validação</label>
+      <label><input type="checkbox"> A nota avisa que a situação pode ter mudado desde a emissão</label>
+      <label><input type="checkbox"> A ação principal é "Consultar situação atual"</label>
+      <label><input type="checkbox"> Validando o outro código, a situação na emissão aparece como "COM PENDÊNCIA" e o tipo muda para "Relatório de Pendências"</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 7.4 · Documento não localizado</h3>
+    <ul class="passos"><li>Valide um código inventado, por exemplo <code>RG-2026-AAAA-BBBB-CCCC</code>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Selo cinza e badge neutro, com o código digitado ecoado</label>
+      <label><input type="checkbox"> Três hipóteses: erro de digitação, documento alterado, documento não emitido pelo sistema</label>
+      <label><input type="checkbox"> A terceira hipótese é o alerta de fraude, e ela fica <b>dentro da lista</b>, sem cor de perigo</label>
+      <label><input type="checkbox"> Aqui a ação principal é "Tentar outro código" (reseta), e a secundária leva para a consulta</label>
+    </div>
+  </div>
+</div>
+
+<div class="bloco">
+  <h2><span class="num">8</span>Casca, telas estreitas e movimento</h2>
+  <div class="teste">
+    <h3><input type="checkbox"> 8.1 · O cabeçalho e o modal</h3>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Barra verde-escura nas duas rotas, com a logo à esquerda levando para a home</label>
+      <label><input type="checkbox"> O botão "Como funciona a consulta" abre o modal em qualquer uma das duas telas</label>
+      <label><input type="checkbox"> O modal traz três passos numerados e o link para a validação, que também fecha o modal</label>
+      <label><input type="checkbox"> Não há faixa de governo nem rodapé: a tela tem uma tarefa só</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 8.2 · Estreitando a janela</h3>
+    <ul class="passos"><li>Arraste a borda da janela até uma largura de celular, em cada estado.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Em nenhuma largura aparece rolagem horizontal na página</label>
+      <label><input type="checkbox"> Os botões dos resultados quebram em linhas em vez de encolher até ficarem ilegíveis</label>
+      <label><input type="checkbox"> O documento A4 continua legível, rolando dentro da própria camada</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 8.3 · Sem cor e sem movimento</h3>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Em escala de cinza, os três resultados continuam distinguíveis pelo texto</label>
+      <label><input type="checkbox"> Com movimento reduzido, nenhuma tela quebra e nada fica invisível esperando animação</label>
+      <label><input type="checkbox"> A troca entre busca, varredura e resultado continua acontecendo, só que sem transição</label>
+    </div>
+  </div>
+</div>
+
+<p class="mini" style="text-align:center;margin-top:30px">Roteiro de testes · Consulta pública de regularidade · Recicla Goiás · atualizado em 28 de agosto de 2026.<br>Pacote completo em <a href="https://reciclagoias.vercel.app/handoff-consulta.html">handoff-consulta.html</a>.</p>
+
+</main>
+<script>
+(function () {
+  var caixas = [].slice.call(document.querySelectorAll('input[type=checkbox]'));
+  var fill = document.getElementById('pf');
+  var num = document.getElementById('pn');
+  function atualizar() {
+    var feitos = caixas.filter(function (c) { return c.checked; }).length;
+    fill.style.width = (feitos / caixas.length * 100) + '%';
+    num.textContent = feitos + ' de ' + caixas.length;
+  }
+  caixas.forEach(function (c) { c.addEventListener('change', atualizar); });
+  atualizar();
+})();
+</script>
+</body>
+</html>

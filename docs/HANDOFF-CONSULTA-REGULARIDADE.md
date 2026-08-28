@@ -5,7 +5,7 @@ rota_base: /consulta
 afeta: []
 afetadoPor: [HANDOFF-DESENVOLVIMENTO]
 tags: [consulta-cnpj, captcha, certidao-pdf, qrcode, validacao-documento, off-system, mock]
-ultima_revisao: 2026-07-06
+ultima_revisao: 2026-08-28
 ---
 
 # Consulta de Regularidade por CNPJ — Mapa de Fluxos e Estados
@@ -85,7 +85,7 @@ flowchart TD
         ValOk -->|Validar outro documento| ValForm
     end
 
-    ValAuto["🔗 auto-validação<br/>?codigo= na URL"] --> ValLoad
+    ValAuto["🔗 chegada por QR<br/>?codigo= preenche o campo"] --> ValForm
     Busca -->|"Recebeu uma certidão?<br/>Valide o documento"| ValForm
     ValForm -->|Voltar para a consulta| Busca
     ValOk -->|Consultar situação atual| Busca
@@ -116,7 +116,7 @@ flowchart TD
 |---|---|
 | 🟢 retângulo verde | Rota (URL real) |
 | ⬜ retângulo cinza | Estado de uma rota (troca in-place, sem mudar URL) |
-| 🟡 losango âmbar | Modal / overlay |
+| 🟡 losango | Modal / overlay |
 | 📄 paralelogramo | Documento PDF gerado |
 | → linha sólida | Navegação direta |
 | -.-> linha pontilhada | Abre modal/overlay ou ação fora da navegação |
@@ -159,10 +159,10 @@ flowchart TD
 
 | Estado | Quando ocorre | UI mostrada | Componente fonte |
 |---|---|---|---|
-| **Resultado com pendência** | `empresa.status === 'pendencia'` | Card 640px com borda âmbar: selo âmbar (alert), badge sólido âmbar "COM PENDÊNCIA", título 2 linhas com accent, linha de data da consulta, identificação (+ perfil no sistema), lista **"Pendências identificadas"** com chip contador ("4 pendências"), bloco "Como regularizar" com link sublinhado pra Autodeclaração, aviso legal sóbrio (Lei 9.605/1998 + Decreto 6.514/2008), CTAs: **Regularizar situação →** · Baixar relatório (PDF) · Nova consulta | `components/consulta/ConsultaResultPendencia.vue` |
-| **Item de pendência** | Cada item da lista | Card com borda âmbar-clara: ícone em chip âmbar 36px + título + descrição + caixa tint com "**Como resolver:** ..." | `ConsultaResultPendencia.vue` |
+| **Resultado com pendência** | `empresa.status === 'pendencia'` | Card 640px com borda vermelha-clara: selo vermelho (alert), badge sólido vermelho "COM PENDÊNCIA", título 2 linhas com accent, linha de data da consulta, identificação (+ perfil no sistema), lista **"Pendências identificadas"** com chip contador ("4 pendências"), bloco "Como regularizar" com link sublinhado pra Autodeclaração, aviso legal sóbrio (Lei 9.605/1998 + Decreto 6.514/2008), CTAs: **Regularizar situação →** · Baixar relatório (PDF) · Nova consulta | `components/consulta/ConsultaResultPendencia.vue` |
+| **Item de pendência** | Cada item da lista | Card com borda vermelha-clara: ícone em chip vermelho 36px + título + descrição + caixa tint com "**Como resolver:** ..." | `ConsultaResultPendencia.vue` |
 | **Cascata das pendências** | Ao montar | Blocos de topo em fade-up (80→400ms); itens da lista entram em sequência (90ms entre cada, base 480ms) | `ConsultaResultPendencia.vue` |
-| **Âmbar local** | Sempre | A paleta âmbar é LOCAL da tela (`--cx-amber-*`: #FBF4E6 / #F5E6C8 / #E0A63B / #B8791B / #F0E4CC), **não** usa `--rg-primitive-amber-*` do DS (saturado demais pra página). Nunca vermelho: pendência é orientativa, não punição | `ConsultaResultPendencia.vue` |
+| **Vermelho local** | Sempre | A paleta é LOCAL da tela (`--cx-red-*`: #fdecec / #f8d4d4 / #f3c9c9 / #dc2626 / #b91c1c), **não** usa `--rg-primitive-red-*` do DS (saturado demais pra página inteira). Era âmbar até 07/2026 e virou vermelho no feedback daquela rodada (commit `bbf7c34`), junto com a variante de pendência da certidão e o chip da validação | `ConsultaResultPendencia.vue` |
 
 ### 2.5 Resultado · Não encontrado — estado in-place de `/consulta`
 
@@ -177,7 +177,7 @@ flowchart TD
 |---|---|---|---|
 | **Overlay aberto** | CTA de download/imprimir num resultado | Backdrop verde-escuro translúcido (fade 240ms), barra de ações no topo (Baixar PDF · Imprimir · X), papel A4 (820px, fade-up) com scroll interno | `components/consulta/ConsultaCertidao.vue` |
 | **Variante regular** | `tipo === 'certidao-regular'` | Título "CERTIFICADO DE SITUAÇÃO CADASTRAL", badge verde, seção "O que esta certidão atesta" (parágrafo) | `ConsultaCertidao.vue` |
-| **Variante pendências** | `tipo === 'relatorio-pendencias'` | Título "RELATÓRIO DE PENDÊNCIAS", badge âmbar "SITUAÇÃO COM PENDÊNCIA", seção "Pendências identificadas" (lista com ícones âmbar) + nota "caráter meramente informativo" | `ConsultaCertidao.vue` |
+| **Variante pendências** | `tipo === 'relatorio-pendencias'` | Título "RELATÓRIO DE PENDÊNCIAS", badge vermelho "SITUAÇÃO COM PENDÊNCIA", seção "Pendências identificadas" (lista com ícones vermelhos) + nota "caráter meramente informativo" | `ConsultaCertidao.vue` |
 | **Estrutura do papel** | Sempre | Cabeçalho institucional (brasão placeholder + ESTADO DE GOIÁS + logo Recicla + fio verde 3px), título, badge de situação, identificação (grid 2 col), atesto/pendências, base legal (bullets), referência/validade (card tint 3 colunas), rodapé de autenticação (código mono + QR 96px + URL de validação) | `ConsultaCertidao.vue` |
 | **Imprimir / Baixar PDF** | Click | `window.print()`. O `@media print` esconde o app e imprime **só o papel**: `@page A4 margin 0` + `zoom 0.82` → documento cabe em **1 página** | `ConsultaCertidao.vue` (style global) |
 | **QR clicável (protótipo)** | Click no QR do rodapé | Navega pra `/consulta/validar?codigo=<código>` simulando o escaneamento pela câmera | `ConsultaCertidao.vue` |
@@ -192,7 +192,7 @@ flowchart TD
 | **Código curto no submit** | `< 6` caracteres úteis | Hint vermelho "Informe o código completo impresso no documento." | `ConsultaValidarPage.vue` |
 | **Captcha não marcado no submit** | `captchaOk === false` | Hint "Confirme que você não é um robô." | `ConsultaValidarPage.vue` |
 | **Validando** | Submit ok (código + captcha) | Pill "VALIDANDO" (dot pulsa), card com anel girando + "Conferindo o documento" + eco do código (~1,4s; 300ms com reduced-motion) | `ConsultaValidarPage.vue` |
-| **Documento autêntico** | Código existe na base | Selo verde (check-decagram), badge "DOCUMENTO AUTÊNTICO", título com accent, bloco "Dados do documento" (tipo, código, razão social, CNPJ, **situação na emissão** com chip verde/âmbar, data da validação), nota "a situação pode ter mudado", CTAs: Consultar situação atual · Validar outro documento | `ConsultaValidarPage.vue` |
+| **Documento autêntico** | Código existe na base | Selo verde (check-decagram), badge "DOCUMENTO AUTÊNTICO", título com accent, bloco "Dados do documento" (tipo, código, razão social, CNPJ, **situação na emissão** com chip verde/vermelho, data da validação), nota "a situação pode ter mudado", CTAs: Consultar situação atual · Validar outro documento | `ConsultaValidarPage.vue` |
 | **Documento não localizado** | Código não existe | Selo cinza (file-question), badge neutro, eco do código digitado, bloco "O que isso pode significar" (erro de digitação / documento alterado / **não emitido pelo sistema: desconfie**), CTAs: Tentar outro código · Consultar por CNPJ | `ConsultaValidarPage.vue` |
 
 ### 2.8 Chrome compartilhado (todas as telas)
@@ -212,7 +212,7 @@ flowchart TD
 |---|---|---|---|
 | **Como funciona a consulta** | Botão do header (qualquer tela do módulo) | Título + 3 passos numerados (digite o CNPJ → sistema varre a base → recebe a situação) + nota com link pra validação de documentos | X, ESC ou clique no backdrop |
 | **Certidão A4 (regular)** | "Baixar certidão (PDF)" ou "Imprimir" no resultado Regular | Documento completo (ver §2.6) + barra Baixar PDF / Imprimir | X, ESC ou backdrop (fade-out) |
-| **Relatório A4 (pendências)** | "Baixar relatório (PDF)" no resultado Com pendência | Variante âmbar do documento | idem |
+| **Relatório A4 (pendências)** | "Baixar relatório (PDF)" no resultado Com pendência | Variante vermelha do documento | idem |
 
 ### Microcopy de feedback
 
@@ -370,8 +370,8 @@ Atalhos pra abrir qualquer estado sem passar pelo fluxo — úteis pra QA, demon
 
 ### Resultados (os 3)
 - [ ] Regular: selo pop + cascata de blocos + identificação + código/QR
-- [ ] Pendência: badge sólido âmbar, contador dinâmico, itens em cascata, "Como resolver" em caixa tint
-- [ ] Pendência: âmbar local (nunca o amber saturado do DS, nunca vermelho)
+- [ ] Pendência: badge sólido vermelho, contador dinâmico, itens em cascata, "Como resolver" em caixa tint
+- [ ] Pendência: vermelho local  (nunca o vermelho saturado do DS)
 - [ ] Não encontrado: chip com CNPJ ecoado, links sublinhados, CTA único, SEM baixar PDF
 - [ ] "Nova consulta" reseta o fluxo nos 3
 - [ ] Mobile: CTAs empilham SEM esmagar altura (`flex: none` na coluna — bug corrigido em 06/07)
@@ -388,11 +388,11 @@ Atalhos pra abrir qualquer estado sem passar pelo fluxo — úteis pra QA, demon
 - [ ] Form valida código curto
 - [ ] Uppercase automático no input
 - [ ] Loading ~1,4s com eco do código
-- [ ] Autêntico: dados completos + chip de situação na emissão (verde/âmbar)
+- [ ] Autêntico: dados completos + chip de situação na emissão (verde/vermelho)
 - [ ] Autêntico via QR: subtítulo específico
 - [ ] Não localizado: 3 hipóteses + alerta de fraude
 - [ ] "Validar outro documento" limpa `?codigo=` da URL
-- [ ] Deep-link `?codigo=` auto-valida ao carregar
+- [ ] Deep-link `?codigo=` preenche o campo e exige captcha + clique (não auto-valida)
 
 ### Geral
 - [ ] Header idêntico nas 2 rotas; logo volta pra home
@@ -413,7 +413,7 @@ Atalhos pra abrir qualquer estado sem passar pelo fluxo — úteis pra QA, demon
 
 Definições em `src/router/index.ts`. Componentes do módulo em `src/components/consulta/`. Mock em `src/data/mocks/consulta.ts`.
 
-**Tokens:** design system em `src/design-system/tokens/*.css` (ver `HANDOFF-DESENVOLVIMENTO.md` §tokens). O módulo usa Inter, verde brand (`--rg-primitive-brand-*`), soft-tint e o âmbar local descrito em §2.4.
+**Tokens:** design system em `src/design-system/tokens/*.css` (ver `HANDOFF-DESENVOLVIMENTO.md` §tokens). O módulo usa Inter, verde brand (`--rg-primitive-brand-*`), soft-tint e o vermelho local descrito em §2.4.
 
 ---
 

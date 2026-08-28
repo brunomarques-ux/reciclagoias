@@ -1,17 +1,29 @@
-# Pacote de entrega · Dashboards da área logada
+# Pacotes de entrega para desenvolvimento
 
-O que foi entregue ao time de desenvolvimento na rodada de agosto/2026, e como refazer
-o recorte quando a próxima frente fechar.
+O que já foi entregue ao time de desenvolvimento, e como montar o próximo pacote.
+Cada frente fechada vira um pacote com as mesmas três peças.
 
-A entrega tem **três peças**, e cada uma responde a uma pergunta diferente:
+Cada entrega tem **três peças**, e cada uma responde a uma pergunta diferente:
 
 | Peça | Responde | Onde vive |
 |---|---|---|
 | **Handoff** em HTML | O que a tela faz, estado por estado, e o que não pode mudar | [`public/handoff-dashboards.html`](../../public/handoff-dashboards.html) · publicado em `/handoff-dashboards.html` |
 | **Roteiro de testes** em HTML | Como conferir cada coisa, com o resultado esperado | [`public/roteiro-dashboards.html`](../../public/roteiro-dashboards.html) · publicado em `/roteiro-dashboards.html` |
-| **Pacote de código** em zip | Onde está cada arquivo e como colar no projeto deles | Fora do repositório, em `C:\Users\Bruno\recicla-dashboards` |
+| **Pacote de código** em zip | Onde está cada arquivo e como colar no projeto deles | Fora do repositório (ver a tabela abaixo) |
 
 O protótipo publicado é a referência de comportamento. O Figma fica como apoio visual.
+
+---
+
+## Pacotes já entregues
+
+| Frente | Handoff | Roteiro | Zip do código |
+|---|---|---|---|
+| **Dashboards da área logada** (login, gestora, admin e verificador) | `/handoff-dashboards.html` | `/roteiro-dashboards.html` | `recicla-dashboards`, 49 arquivos |
+| **Consulta pública de regularidade** (consulta por CNPJ e validação de documento) | `/handoff-consulta.html` | `/roteiro-consulta.html` | `recicla-consulta`, 38 arquivos |
+
+Os dois HTML de cada frente ficam em `public/` e são publicados junto com o protótipo.
+Os zips ficam **fora do repositório**, em `C:\Users\Bruno\<nome-do-pacote>`.
 
 ---
 
