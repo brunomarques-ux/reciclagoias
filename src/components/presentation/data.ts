@@ -84,7 +84,7 @@ const NPDF = 'É possível exportar o PDF do resumo.';
 const B = '/apresentacao/';
 
 export type Slide =
-  | { kind: 'capa' | 'intro' | 'perfis' | 'agradecimento' | 'home'; steps?: number }
+  | { kind: 'capa' | 'intro' | 'perfis' | 'agradecimento' | 'home' | 'fluxo' | 'capa-complemento'; steps?: number }
   | { kind: 'timeline'; steps: number }
   | { kind: 'cover'; profile: ProfileKey; name: string; role: string }
   | { kind: 'montage'; front: string; back: string; title: string; desc: string; notes?: string[]; steps?: number }
@@ -136,7 +136,55 @@ export const SLIDES: Slide[] = [
   { kind: 'agradecimento' },
 ];
 
-/** URLs de todas as imagens (telas + montagens) — pré-carregadas para evitar flash na troca. */
-export const SCREEN_IMAGES: string[] = SLIDES.flatMap((s) =>
-  s.kind === 'screen' ? [s.image] : s.kind === 'montage' ? [s.front, s.back] : [],
-);
+/**
+ * Deck próprio da proposta do Operador Logístico (rota /apresentacao-operador).
+ * É uma apresentação nova, não a continuação da institucional: capa própria,
+ * o fluxograma da proposta e as telas do protótipo funcional.
+ */
+export const SLIDES_COMPLEMENTO: Slide[] = [
+  { kind: 'capa-complemento' },
+  { kind: 'fluxo' },
+  { kind: 'screen', profile: 'op', image: B + 'pre-cadastro-producao.png',
+    title: 'O pré-cadastro fica como está',
+    desc: 'O registro atual serve três perfis e já pergunta o essencial: CNPJ, razão social, nome fantasia e se o operador é cooperativa ou empresa. É aqui que nascem o e-mail e a senha.',
+    notes: ['Nenhuma alteração no fluxo que está em produção.'] },
+  { kind: 'screen', profile: 'op', image: B + 'email-ativacao.png',
+    title: 'E-mail de ativação',
+    desc: 'Confirma o e-mail, adianta os documentos necessários e explica a regra de acesso: dá para entrar e preencher, e as funcionalidades abrem depois da aprovação.',
+    portrait: true },
+  { kind: 'screen', profile: 'op', image: B + 'complemento-etapa-1.png',
+    title: 'Complemento · Dados gerais',
+    desc: 'O que veio do pré-cadastro aparece travado; o operador preenche só o que é dele: contato, porte e endereço da unidade.',
+    notes: ['Protótipo funcional em código, navegável em /operador.'] },
+  { kind: 'screen', profile: 'op', image: B + 'complemento-etapa-2.png',
+    title: 'Complemento · Documentos',
+    desc: 'Cada documento é a mesma pergunta: possui? Sim abre o anexo; Não vira pendência declarada, sem bloquear o envio.',
+    portrait: true },
+  { kind: 'screen', profile: 'op', image: B + 'complemento-etapa-3.png',
+    title: 'Complemento · Operação',
+    desc: 'Toda opção "outro" marcada abre o campo de descrição; pergunta que não se aplica não aparece.',
+    notes: ['Na etapa 4, o mesmo padrão cobre área, triagem e o bloco condicional do vidro.'],
+    portrait: true },
+  { kind: 'screen', profile: 'op', image: B + 'complemento-etapa-5.png',
+    title: 'Complemento · Revisão e envio',
+    desc: 'O resumo é calculado do que foi preenchido de verdade: anexados, aguardando arquivo e marcados como "Não". A pendência fica dita, e o envio pede a declaração.',
+    portrait: true },
+  { kind: 'screen', profile: 'op', image: B + 'complemento-lobby.png',
+    title: 'Enviou, entrou na fila',
+    desc: 'Depois do envio a conta fica "em análise": o operador entra, vê a situação e uma cópia de leitura do que enviou. O resultado chega por e-mail.' },
+  { kind: 'screen', profile: 'op', image: B + 'email-aprovado.png',
+    title: 'Aprovado: acesso completo',
+    desc: 'O e-mail confirma a aprovação e libera as funcionalidades do perfil de operador logístico.',
+    portrait: true },
+  { kind: 'screen', profile: 'op', image: B + 'email-reprovado.png',
+    title: 'Reprovado: motivo e recurso',
+    desc: 'O acesso é encerrado, o motivo vai escrito no e-mail e o suporte é o canal de reavaliação.',
+    portrait: true },
+  { kind: 'agradecimento' },
+];
+
+/** URLs das imagens de um deck (telas + montagens) — pré-carregadas para evitar flash na troca. */
+export const imagensDe = (slides: Slide[]): string[] =>
+  slides.flatMap((s) => (s.kind === 'screen' ? [s.image] : s.kind === 'montage' ? [s.front, s.back] : []));
+
+export const SCREEN_IMAGES: string[] = imagensDe(SLIDES);

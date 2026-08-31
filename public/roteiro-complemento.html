@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8">
+  <meta name="doc-tipo" content="roteiro">
+  <meta name="doc-sistema" content="recicla-goias">
+  <meta name="doc-ciclo" content="2026-09">
+  <meta name="doc-atualizado" content="2026-08-31">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Roteiro de testes · Complemento de cadastro do Operador Logístico</title>
+<style>
+  :root{
+    --verde:#279C50; --verde-600:#1F8344; --verde-700:#176935; --verde-800:#12522A; --verde-50:#E9F6EE;
+    --slate-900:#0F172A; --slate-700:#334155; --slate-500:#64748B; --slate-300:#CBD5E1; --slate-200:#E2E8F0; --slate-100:#F1F5F9; --slate-50:#F8FAFC;
+    --ambar-50:#FFFBEB; --ambar-700:#B45309; --azul-50:#EFF6FF; --azul-700:#1D4ED8; --verm-50:#FEF2F2; --verm-700:#B91C1C;
+    --font:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Consolas,'Liberation Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font:15px/1.6 var(--font);color:var(--slate-900);background:var(--slate-50);padding:0 0 80px}
+  .topo{background:var(--verde-700);color:#fff;padding:36px 24px}
+  .topo .mx{max-width:920px;margin:0 auto}
+  .topo .eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.78;font-weight:600}
+  .topo h1{font-size:28px;letter-spacing:-.02em;margin:6px 0 8px;font-weight:700}
+  .topo p{opacity:.9;max-width:700px}
+  .topo a{color:#fff}
+  main{max-width:920px;margin:0 auto;padding:32px 24px}
+  .prog{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:14px;background:rgba(248,250,252,.94);backdrop-filter:blur(8px);padding:14px 0;margin-bottom:8px;border-bottom:1px solid var(--slate-200)}
+  .prog__bar{flex:1;height:8px;border-radius:99px;background:var(--slate-200);overflow:hidden}
+  .prog__fill{height:100%;width:0;background:var(--verde);border-radius:99px;transition:width .3s cubic-bezier(.2,0,0,1)}
+  .prog__n{font:600 13px/1 var(--font);color:var(--slate-500);white-space:nowrap}
+  .bloco{background:#fff;border:1px solid var(--slate-200);border-radius:14px;padding:24px 26px;margin-bottom:22px}
+  .bloco h2{font-size:18px;letter-spacing:-.01em;margin-bottom:4px;display:flex;align-items:center;gap:10px;font-weight:700}
+  .num{flex:none;width:28px;height:28px;border-radius:999px;background:var(--verde-700);color:#fff;display:inline-grid;place-items:center;font-size:13px;font-weight:700}
+  .fala{background:var(--slate-50);border-left:3px solid var(--verde);border-radius:0 10px 10px 0;padding:12px 16px;margin:12px 0;color:var(--slate-700);font-size:14px}
+  .fala b{color:var(--slate-900)}
+  .nota{background:var(--ambar-50);border-radius:10px;padding:12px 16px;margin:12px 0;font-size:13.5px;color:var(--ambar-700)}
+  .nota>b{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px}
+  ul{padding-left:20px;margin:8px 0}
+  li{margin:4px 0}
+  .passos li{margin:7px 0;font-size:14px}
+  .teste{border:1px solid var(--slate-200);border-radius:10px;padding:14px 18px;margin:12px 0}
+  .teste h3{font-size:14.5px;display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;font-weight:600}
+  .teste h3 input{width:17px;height:17px;margin-top:2px;flex:none;accent-color:var(--verde)}
+  .esper{background:var(--verde-50);border-radius:8px;padding:10px 14px;margin-top:8px;font-size:13.5px}
+  .esper>b{color:var(--verde-700);display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+  .esper label b{color:var(--slate-900);font-weight:600}
+  .esper label{display:flex;gap:8px;align-items:flex-start;margin:5px 0;cursor:pointer}
+  .esper input{width:15px;height:15px;margin-top:3px;flex:none;accent-color:var(--verde)}
+  .check{background:var(--verde-50);border-radius:10px;padding:14px 18px;margin-top:10px}
+  .check b{color:var(--verde-700)}
+  code{background:var(--slate-100);border-radius:6px;padding:1px 7px;font:500 13px/1.5 var(--mono)}
+  kbd{display:inline-block;font:600 11.5px/1.4 var(--mono);color:var(--slate-700);background:#fff;border:1px solid var(--slate-300);border-bottom-width:2px;border-radius:5px;padding:1px 6px}
+  a{color:var(--verde-700)}
+  .mini{font-size:12.5px;color:var(--slate-500)}
+  @media (prefers-reduced-motion: reduce){*{transition:none !important}}
+  @media print{
+    body{background:#fff} .prog{display:none} .topo{background:#fff;color:var(--slate-900);border-bottom:3px solid var(--verde-700);padding:0 0 16px}
+    .topo a{color:var(--slate-900)} .bloco{break-inside:avoid;border:0;border-top:1px solid var(--slate-200);border-radius:0;padding:14px 0}
+    .esper,.check,.fala,.nota{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
+</style>
+</head>
+<body>
+<header class="topo"><div class="mx">
+  <div class="eyebrow">Recicla Goiás · Operador Logístico · Setembro 2026</div>
+  <h1>Roteiro de testes: complemento de cadastro</h1>
+  <p>A segunda parte do registro do operador logístico: o pré-cadastro que já existe continua igual, e o complemento em cinco etapas nasce dentro do sistema. Siga com o protótipo aberto ao lado. A história completa da proposta está na <a href="https://reciclagoias.vercel.app/apresentacao-operador">apresentação</a>.</p>
+</div></header>
+<main>
+
+<div class="prog">
+  <div class="prog__bar"><div class="prog__fill" id="pf"></div></div>
+  <span class="prog__n" id="pn">0 de 0</span>
+</div>
+
+<div class="bloco">
+  <h2><span class="num">0</span>Antes de começar</h2>
+  <div class="check">
+    <b>Preparação</b>
+    <ul>
+      <li>Abra <a href="https://reciclagoias.vercel.app/entrar" target="_blank" rel="noopener">reciclagoias.vercel.app/entrar</a> e escolha <b>Operador Logístico</b>. Não há senha: é o login de navegação do protótipo.</li>
+      <li>O protótipo simula a conta <b>recém-ativada pelo e-mail</b>: ela nasce no estado "em complementação", direto no formulário.</li>
+      <li>Todos os dados são de demonstração e o anexo é <b>simulado</b>: o clique na área de anexo adiciona um arquivo de exemplo.</li>
+      <li>O rascunho vive na aba: <kbd>F5</kbd> mantém tudo, fechar a aba zera. Para recomeçar no meio do teste, use uma aba anônima ou termine o envio e clique em <b>Reiniciar demonstração</b> no final.</li>
+    </ul>
+  </div>
+  <div class="fala">O que está sendo testado é <b>comportamento e regra</b>, não dado: o que fica travado, o que abre e fecha condicionado às respostas, o que o rascunho segura e o que a revisão conta.</div>
+</div>
+
+<div class="bloco">
+  <h2><span class="num">1</span>A chegada</h2>
+  <div class="teste">
+    <h3><input type="checkbox"> 1.1 · A conta em complementação</h3>
+    <ul class="passos"><li>Observe a tela que abre depois do login.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> O menu lateral tem só <b>Minha Conta</b> e <b>Complemento de cadastro</b> (ativo). Não existe Dashboard: ele só nasce com a aprovação</label>
+      <label><input type="checkbox"> O título é <b>Complemento de cadastro</b>, com o stepper de 5 etapas logo abaixo</label>
+      <label><input type="checkbox"> O stepper é clicável: dá para visitar qualquer etapa e voltar</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 1.2 · O rascunho</h3>
+    <ul class="passos"><li>Mude qualquer campo editável (o telefone, por exemplo).</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> No topo direito aparece <b>"Rascunho salvo às HH:MM"</b>, atualizando a cada mudança</label>
+    </div>
+  </div>
+</div>
+
+<div class="bloco">
+  <h2><span class="num">2</span>Etapa 1 · Dados gerais</h2>
+  <div class="teste">
+    <h3><input type="checkbox"> 2.1 · O que veio do pré-cadastro fica travado</h3>
+    <ul class="passos"><li>Tente editar razão social, CNPJ, nome fantasia, e-mail e tipo de organização.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Os cinco campos têm fundo cinza e não aceitam edição</label>
+      <label><input type="checkbox"> A nota abaixo explica: vêm do pré-cadastro; correção é assunto de suporte</label>
+      <label><input type="checkbox"> Telefone, cooperados, ano e endereço continuam editáveis</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 2.2 · O tipo de organização condiciona o formulário</h3>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> <b>Tipo de organização: Cooperativa</b> aparece travado, herdado do pré-cadastro</label>
+      <label><input type="checkbox"> <b>Número de cooperados</b> existe porque é cooperativa; para uma empresa, o campo não existiria</label>
+    </div>
+  </div>
+</div>
+
+<div class="bloco">
+  <h2><span class="num">3</span>Etapa 2 · Documentos</h2>
+  <div class="teste">
+    <h3><input type="checkbox"> 3.1 · Os três estados na mesma lista</h3>
+    <ul class="passos"><li>Percorra a lista de 11 documentos sem mexer em nada.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> A maioria está <b>Sim + arquivo anexado</b>: clipe, nome do arquivo e a lixeira</label>
+      <label><input type="checkbox"> A <b>ata de eleição</b> está Sim, mas ainda sem arquivo: mostra a área de anexar</label>
+      <label><input type="checkbox"> A <b>declaração de capacidade</b> está <b>Não</b>, com o aviso de pendência em âmbar</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 3.2 · Anexar e remover</h3>
+    <ul class="passos">
+      <li>Clique na área de anexo da ata.</li>
+      <li>Depois remova o arquivo pela lixeira.</li>
+    </ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> O clique anexa e a área vira a linha de arquivo</label>
+      <label><input type="checkbox"> A lixeira remove e a área de anexo volta</label>
+      <label><input type="checkbox"> Não existe "substituir": arquivo errado se remove e anexa de novo</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 3.3 · A regra do Não</h3>
+    <ul class="passos"><li>Num item com arquivo anexado, marque <b>Não</b> e depois volte para <b>Sim</b>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Com Não, o arquivo some e entra o aviso de pendência</label>
+      <label><input type="checkbox"> Voltando para Sim, o arquivo <b>não volta</b>: o Não não guarda anexo, e a área de anexar reaparece</label>
+    </div>
+  </div>
+  <div class="nota"><b>Regra da proposta</b>Marcar "Não" não bloqueia o envio. A pendência fica declarada na revisão e a análise pode pedir o arquivo depois. Bloquear faria a cooperativa abandonar o cadastro.</div>
+</div>
+
+<div class="bloco">
+  <h2><span class="num">4</span>Etapa 3 · Operação</h2>
+  <div class="teste">
+    <h3><input type="checkbox"> 4.1 · "Outro" sempre abre a descrição</h3>
+    <ul class="passos">
+      <li>Em beneficiamentos, desmarque <b>Outro serviço</b>.</li>
+      <li>Marque de novo.</li>
+    </ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Desmarcado, o campo "Qual outro serviço?" some</label>
+      <label><input type="checkbox"> Marcado, ele volta, com a guia verde de condicional à esquerda</label>
+      <label><input type="checkbox"> O mesmo padrão vale para equipamentos, tipos de resíduo, origens e áreas</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 4.2 · Sim e Não que mudam a tela</h3>
+    <ul class="passos"><li>Em "coleta ou recebe resíduos de outros municípios?", responda <b>Não</b> e depois volte para <b>Sim</b>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Com Não, o campo "Quais municípios?" some; com Sim, volta preenchido</label>
+    </div>
+  </div>
+</div>
+
+<div class="bloco">
+  <h2><span class="num">5</span>Etapa 4 · Estrutura e capacidade</h2>
+  <div class="teste">
+    <h3><input type="checkbox"> 5.1 · O bloco do vidro</h3>
+    <ul class="passos"><li>Em "beneficiamento do vidro", responda <b>Não</b> e depois volte para <b>Sim</b>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Com Não, destinação e capacidade do vidro somem: pergunta que não se aplica não aparece</label>
+      <label><input type="checkbox"> Os grupos de situação da área, triagem e percepção aceitam uma escolha por grupo (radios)</label>
+    </div>
+  </div>
+</div>
+
+<div class="bloco">
+  <h2><span class="num">6</span>O rascunho aguenta recarga</h2>
+  <div class="teste">
+    <h3><input type="checkbox"> 6.1 · F5 no meio do caminho</h3>
+    <ul class="passos"><li>No meio da etapa 3 ou 4, com mudanças feitas, pressione <kbd>F5</kbd>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> A página volta <b>na mesma etapa</b>, com tudo o que você mudou preservado</label>
+    </div>
+  </div>
+  <div class="fala">No sistema real o rascunho é por conta, no servidor: a cooperativa pode parar para caçar um documento e continuar outro dia, de outro computador. No protótipo ele vive na aba.</div>
+</div>
+
+<div class="bloco">
+  <h2><span class="num">7</span>Etapa 5 · Revisão e envio</h2>
+  <div class="teste">
+    <h3><input type="checkbox"> 7.1 · O resumo é calculado, não decorado</h3>
+    <ul class="passos"><li>Compare a linha de Documentos com o que você deixou na etapa 2.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> A contagem de anexados bate com o estado real, e cada pendência é <b>nomeada</b></label>
+      <label><input type="checkbox"> A linha com pendência tem chip âmbar; as completas, chip verde "Completo"</label>
+      <label><input type="checkbox"> O aviso azul explica que dá para enviar assim mesmo</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 7.2 · A declaração trava o envio</h3>
+    <ul class="passos"><li>Observe o botão <b>Enviar cadastro</b>, marque a declaração e observe de novo.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Sem a declaração, o botão fica desabilitado</label>
+      <label><input type="checkbox"> Com ela marcada, habilita</label>
+      <label><input type="checkbox"> O <b>Editar</b> de cada linha volta para a etapa correspondente</label>
+    </div>
+  </div>
+</div>
+
+<div class="bloco">
+  <h2><span class="num">8</span>Envio, análise e leitura</h2>
+  <div class="teste">
+    <h3><input type="checkbox"> 8.1 · O envio</h3>
+    <ul class="passos"><li>Clique em <b>Enviar cadastro</b>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Confirmação com protocolo e a data e hora reais do envio</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 8.2 · O lobby de análise</h3>
+    <ul class="passos"><li>Clique em <b>Acompanhar análise</b> e depois pressione <kbd>F5</kbd>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> A tela "Cadastro em análise", com chip, protocolo e data</label>
+      <label><input type="checkbox"> Depois do F5, o lobby continua: a conta ficou "em análise", não volta ao formulário</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 8.3 · A cópia de leitura</h3>
+    <ul class="passos"><li>Clique em <b>Ver o que foi enviado</b>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> A revisão abre em modo leitura: sem Editar e sem a declaração</label>
+      <label><input type="checkbox"> O botão Voltar retorna ao lobby</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 8.4 · Reiniciar a demonstração</h3>
+    <ul class="passos"><li>No lobby, clique em <b>Reiniciar demonstração</b>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Tudo volta ao estado inicial, pronto para a próxima pessoa testar</label>
+    </div>
+  </div>
+  <div class="fala">Daqui em diante a história segue <b>por e-mail</b>: aprovado libera o acesso completo; reprovado encerra o acesso, com o motivo escrito e o suporte como canal de reavaliação. Os três e-mails estão desenhados na <a href="https://reciclagoias.vercel.app/apresentacao-operador">apresentação da proposta</a>.</div>
+</div>
+
+<div class="bloco">
+  <h2><span class="num">9</span>O que ainda não está aqui</h2>
+  <div class="nota"><b>Fora desta fatia, de propósito</b>Máscaras e validações campo a campo, estados de erro no envio, versão mobile, upload real de arquivos e a integração com o pré-cadastro de produção. O desenho de referência completo está na seção "Setembro 2026 · Recicla Goiás · Complemento de Cadastro do Operador Logístico" do Figma.</div>
+</div>
+
+<p class="mini" style="text-align:center;margin-top:30px">Roteiro de testes · Complemento de cadastro do Operador Logístico · Recicla Goiás · atualizado em 31 de agosto de 2026.<br>Apresentação da proposta em <a href="https://reciclagoias.vercel.app/apresentacao-operador">apresentacao-operador</a>.</p>
+
+</main>
+<script>
+(function () {
+  var caixas = [].slice.call(document.querySelectorAll('input[type=checkbox]'));
+  var fill = document.getElementById('pf');
+  var num = document.getElementById('pn');
+  function atualizar() {
+    var feitos = caixas.filter(function (c) { return c.checked; }).length;
+    fill.style.width = (feitos / caixas.length * 100) + '%';
+    num.textContent = feitos + ' de ' + caixas.length;
+  }
+  caixas.forEach(function (c) { c.addEventListener('change', atualizar); });
+  atualizar();
+})();
+</script>
+</body>
+</html>

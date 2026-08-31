@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onBeforeUnmount } from 'vue';
+import { useRoute } from 'vue-router';
 import { useWindowSize } from '@vueuse/core';
-import { SLIDES, SCREEN_IMAGES, type Slide } from '@/components/presentation/data';
+import { SLIDES, SLIDES_COMPLEMENTO, imagensDe, type Slide } from '@/components/presentation/data';
 import CapaSlide from '@/components/presentation/slides/CapaSlide.vue';
 import IntroSlide from '@/components/presentation/slides/IntroSlide.vue';
 import PerfisSlide from '@/components/presentation/slides/PerfisSlide.vue';
@@ -11,23 +12,30 @@ import CoverSlide from '@/components/presentation/slides/CoverSlide.vue';
 import HomeSlide from '@/components/presentation/slides/HomeSlide.vue';
 import MontageSlide from '@/components/presentation/slides/MontageSlide.vue';
 import AgradecimentoSlide from '@/components/presentation/slides/AgradecimentoSlide.vue';
+import FluxoSlide from '@/components/presentation/slides/FluxoSlide.vue';
+import CapaComplementoSlide from '@/components/presentation/slides/CapaComplementoSlide.vue';
 
 const COMPS: Record<string, any> = {
   capa: CapaSlide, intro: IntroSlide, perfis: PerfisSlide,
   timeline: TimelineSlide, screen: ScreenSlide, cover: CoverSlide,
   home: HomeSlide, montage: MontageSlide, agradecimento: AgradecimentoSlide,
+  fluxo: FluxoSlide, 'capa-complemento': CapaComplementoSlide,
 };
 const stepsOf = (s: Slide) => ('steps' in s && s.steps ? s.steps : 1);
+
+// A mesma view serve dois decks: a apresentação institucional e a da proposta
+// do Operador Logístico (`meta.deck`). São apresentações separadas de propósito.
+const DECK: Slide[] = useRoute().meta.deck === 'complemento' ? SLIDES_COMPLEMENTO : SLIDES;
 
 // ?step=N (1-based) → posição inicial (si, st). Resolvido no setup p/ não disparar transição de entrada.
 function resolveStep(g: number): [number, number] {
   let n = Math.max(0, Math.round(g) - 1);
-  for (let i = 0; i < SLIDES.length; i++) {
-    const steps = stepsOf(SLIDES[i]);
+  for (let i = 0; i < DECK.length; i++) {
+    const steps = stepsOf(DECK[i]);
     if (n < steps) return [i, n];
     n -= steps;
   }
-  return [SLIDES.length - 1, stepsOf(SLIDES[SLIDES.length - 1]) - 1];
+  return [DECK.length - 1, stepsOf(DECK[DECK.length - 1]) - 1];
 }
 const _q = new URLSearchParams(window.location.search);
 const _sp = parseInt(_q.get('step') || '', 10);
@@ -37,8 +45,8 @@ const si = ref(_si0); // slide index
 const st = ref(_st0); // step within slide
 const dir = ref(1); // navigation direction (for transition)
 
-const total = SLIDES.length;
-const current = computed(() => SLIDES[si.value]);
+const total = DECK.length;
+const current = computed(() => DECK[si.value]);
 const currentProps = computed(() => {
   const s = current.value as any;
   if (s.kind === 'timeline') return { step: st.value };
@@ -48,9 +56,9 @@ const currentProps = computed(() => {
   return {};
 });
 const globalPos = computed(() => {
-  let n = 0; for (let i = 0; i < si.value; i++) n += stepsOf(SLIDES[i]); return n + st.value;
+  let n = 0; for (let i = 0; i < si.value; i++) n += stepsOf(DECK[i]); return n + st.value;
 });
-const globalTotal = computed(() => SLIDES.reduce((a, s) => a + stepsOf(s), 0));
+const globalTotal = computed(() => DECK.reduce((a, s) => a + stepsOf(s), 0));
 
 function next() {
   dir.value = 1;
@@ -60,10 +68,10 @@ function next() {
 function prev() {
   dir.value = -1;
   if (st.value > 0) { st.value--; return; }
-  if (si.value > 0) { si.value--; st.value = stepsOf(SLIDES[si.value]) - 1; }
+  if (si.value > 0) { si.value--; st.value = stepsOf(DECK[si.value]) - 1; }
 }
 function goStart() { dir.value = -1; si.value = 0; st.value = 0; }
-function goEnd() { dir.value = 1; si.value = total - 1; st.value = stepsOf(SLIDES[total - 1]) - 1; }
+function goEnd() { dir.value = 1; si.value = total - 1; st.value = stepsOf(DECK[total - 1]) - 1; }
 
 // Modo export (?export=1): esconde a navegação/dica/barra p/ capturar o slide limpo.
 const exportMode = ref(_q.get('export') === '1');
@@ -105,7 +113,7 @@ onMounted(() => {
   else hintT = window.setTimeout(() => (showHint.value = false), 4200);
   // No modo export capturamos um slide por vez — sem preload (evita corrida de imagens).
   if (!exportMode.value) {
-    SCREEN_IMAGES.forEach((src) => { const im = new Image(); im.src = src; preloaded.push(im); });
+    imagensDe(DECK).forEach((src) => { const im = new Image(); im.src = src; preloaded.push(im); });
   }
 });
 onBeforeUnmount(() => {

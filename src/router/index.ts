@@ -16,6 +16,14 @@ const routes: RouteRecordRaw[] = [
     meta: { titulo: 'Apresentação' },
   },
   {
+    // Deck próprio da proposta do Operador Logístico — apresentação nova,
+    // separada da institucional de propósito (mesma view, outro conjunto de slides).
+    path: '/apresentacao-operador',
+    name: 'apresentacao-operador',
+    component: () => import('@/pages/PresentationView.vue'),
+    meta: { titulo: 'Apresentação · Operador Logístico', deck: 'complemento' },
+  },
+  {
     path: '/consulta',
     name: 'consulta',
     component: () => import('@/pages/ConsultaPage.vue'),
@@ -56,6 +64,14 @@ const routes: RouteRecordRaw[] = [
     name: 'admin',
     component: () => import('@/pages/AdminDashboardPage.vue'),
     meta: { titulo: 'Dashboard da Administração (SIC)', requerPerfil: 'admin' },
+  },
+  {
+    // O operador entra no sistema antes de aprovado, mas só para isto: a conta
+    // nasce "em complementação" e o dashboard dele só existe depois da análise.
+    path: '/operador',
+    name: 'operador',
+    component: () => import('@/pages/OperadorComplementoPage.vue'),
+    meta: { titulo: 'Complemento de cadastro', requerPerfil: 'operador' },
   },
 ];
 

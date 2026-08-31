@@ -47,7 +47,7 @@ export const PERFIS: Perfil[] = [
     nome: 'Operador Logístico',
     descricao: 'Registra coleta, transporte e destinação da massa reciclável.',
     icone: 'mdi-truck-outline',
-    rota: null,
+    rota: '/operador',
   },
 ];
 
@@ -76,9 +76,9 @@ export const USUARIOS: Record<PerfilId, Usuario> = {
     identificacao: 'Bem-vindo(a) ao sistema Recicla Goiás.',
   },
   operador: {
-    nome: 'Operador Logístico',
-    iniciais: 'OL',
-    identificacao: 'Bem-vindo(a) ao sistema Recicla Goiás.',
+    nome: 'Recicla Cerrado',
+    iniciais: 'RC',
+    identificacao: 'Operador logístico · CNPJ 23.481.907/0001-55',
   },
 };
 
@@ -108,9 +108,11 @@ export const MENUS: Record<PerfilId, ItemMenu[]> = {
     { rotulo: 'Planos', icone: 'mdi-clipboard-text', rota: null },
     { rotulo: 'Relatórios', icone: 'mdi-file-document', rota: null },
   ],
+  // Conta em complementação: até a aprovação da análise o operador só enxerga
+  // Minha Conta e o próprio complemento — o Dashboard nasce depois de aprovado.
   operador: [
-    { rotulo: 'Dashboard', icone: 'mdi-view-dashboard', rota: null },
     { rotulo: 'Minha Conta', icone: 'mdi-account', rota: null },
+    { rotulo: 'Complemento de cadastro', icone: 'mdi-clipboard-text', rota: '/operador' },
   ],
 };
 
