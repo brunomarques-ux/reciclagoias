@@ -57,6 +57,14 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/pages/AdminDashboardPage.vue'),
     meta: { titulo: 'Dashboard da Administração (SIC)', requerPerfil: 'admin' },
   },
+  {
+    // O operador entra no sistema antes de aprovado, mas só para isto: a conta
+    // nasce "em complementação" e o dashboard dele só existe depois da análise.
+    path: '/operador',
+    name: 'operador',
+    component: () => import('@/pages/OperadorComplementoPage.vue'),
+    meta: { titulo: 'Complemento de cadastro', requerPerfil: 'operador' },
+  },
 ];
 
 export const router = createRouter({

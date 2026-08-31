@@ -11,11 +11,13 @@ import CoverSlide from '@/components/presentation/slides/CoverSlide.vue';
 import HomeSlide from '@/components/presentation/slides/HomeSlide.vue';
 import MontageSlide from '@/components/presentation/slides/MontageSlide.vue';
 import AgradecimentoSlide from '@/components/presentation/slides/AgradecimentoSlide.vue';
+import FluxoSlide from '@/components/presentation/slides/FluxoSlide.vue';
 
 const COMPS: Record<string, any> = {
   capa: CapaSlide, intro: IntroSlide, perfis: PerfisSlide,
   timeline: TimelineSlide, screen: ScreenSlide, cover: CoverSlide,
   home: HomeSlide, montage: MontageSlide, agradecimento: AgradecimentoSlide,
+  fluxo: FluxoSlide,
 };
 const stepsOf = (s: Slide) => ('steps' in s && s.steps ? s.steps : 1);
 
