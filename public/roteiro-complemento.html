@@ -64,7 +64,7 @@
 <header class="topo"><div class="mx">
   <div class="eyebrow">Recicla Goiás · Operador Logístico · Setembro 2026</div>
   <h1>Roteiro de testes: complemento de cadastro</h1>
-  <p>A segunda parte do registro do operador logístico: o pré-cadastro que já existe continua igual, e o complemento em cinco etapas nasce dentro do sistema. Siga com o protótipo aberto ao lado. A história completa da proposta está na <a href="https://reciclagoias.vercel.app/apresentacao-operador">apresentação</a>.</p>
+  <p>O fluxo proposto para o cadastro do operador logístico: o pré-cadastro que já existe continua igual, e o complemento em cinco etapas nasce dentro do sistema. Este roteiro cobre só o fluxo novo. A história completa está na <a href="https://reciclagoias.vercel.app/apresentacao-operador">apresentação</a>.</p>
 </div></header>
 <main>
 
@@ -79,38 +79,18 @@
     <b>Preparação</b>
     <ul>
       <li>Abra <a href="https://reciclagoias.vercel.app/entrar" target="_blank" rel="noopener">reciclagoias.vercel.app/entrar</a> e escolha <b>Operador Logístico</b>. Não há senha: é o login de navegação do protótipo.</li>
-      <li>O protótipo simula a conta <b>recém-ativada pelo e-mail</b>: ela nasce no estado "em complementação", direto no formulário.</li>
+      <li>O protótipo simula a conta <b>recém-ativada pelo e-mail</b>: ela cai direto no complemento de cadastro, no meio do preenchimento.</li>
       <li>Todos os dados são de demonstração e o anexo é <b>simulado</b>: o clique na área de anexo adiciona um arquivo de exemplo.</li>
-      <li>O rascunho vive na aba: <kbd>F5</kbd> mantém tudo, fechar a aba zera. Para recomeçar no meio do teste, use uma aba anônima ou termine o envio e clique em <b>Reiniciar demonstração</b> no final.</li>
+      <li>Para recomeçar do zero, termine o envio e clique em <b>Reiniciar demonstração</b> na última tela.</li>
     </ul>
   </div>
-  <div class="fala">O que está sendo testado é <b>comportamento e regra</b>, não dado: o que fica travado, o que abre e fecha condicionado às respostas, o que o rascunho segura e o que a revisão conta.</div>
+  <div class="fala">O que está sendo testado é o <b>fluxo proposto</b>: o que fica travado, o que abre e fecha condicionado às respostas, o que a revisão conta e como o envio muda o estado da conta.</div>
 </div>
 
 <div class="bloco">
-  <h2><span class="num">1</span>A chegada</h2>
+  <h2><span class="num">1</span>Etapa 1 · Dados gerais</h2>
   <div class="teste">
-    <h3><input type="checkbox"> 1.1 · A conta em complementação</h3>
-    <ul class="passos"><li>Observe a tela que abre depois do login.</li></ul>
-    <div class="esper"><b>Esperado</b>
-      <label><input type="checkbox"> O menu lateral tem só <b>Minha Conta</b> e <b>Complemento de cadastro</b> (ativo). Não existe Dashboard: ele só nasce com a aprovação</label>
-      <label><input type="checkbox"> O título é <b>Complemento de cadastro</b>, com o stepper de 5 etapas logo abaixo</label>
-      <label><input type="checkbox"> O stepper é clicável: dá para visitar qualquer etapa e voltar</label>
-    </div>
-  </div>
-  <div class="teste">
-    <h3><input type="checkbox"> 1.2 · O rascunho</h3>
-    <ul class="passos"><li>Mude qualquer campo editável (o telefone, por exemplo).</li></ul>
-    <div class="esper"><b>Esperado</b>
-      <label><input type="checkbox"> No topo direito aparece <b>"Rascunho salvo às HH:MM"</b>, atualizando a cada mudança</label>
-    </div>
-  </div>
-</div>
-
-<div class="bloco">
-  <h2><span class="num">2</span>Etapa 1 · Dados gerais</h2>
-  <div class="teste">
-    <h3><input type="checkbox"> 2.1 · O que veio do pré-cadastro fica travado</h3>
+    <h3><input type="checkbox"> 1.1 · O que veio do pré-cadastro fica travado</h3>
     <ul class="passos"><li>Tente editar razão social, CNPJ, nome fantasia, e-mail e tipo de organização.</li></ul>
     <div class="esper"><b>Esperado</b>
       <label><input type="checkbox"> Os cinco campos têm fundo cinza e não aceitam edição</label>
@@ -119,7 +99,7 @@
     </div>
   </div>
   <div class="teste">
-    <h3><input type="checkbox"> 2.2 · O tipo de organização condiciona o formulário</h3>
+    <h3><input type="checkbox"> 1.2 · O tipo de organização condiciona o formulário</h3>
     <div class="esper"><b>Esperado</b>
       <label><input type="checkbox"> <b>Tipo de organização: Cooperativa</b> aparece travado, herdado do pré-cadastro</label>
       <label><input type="checkbox"> <b>Número de cooperados</b> existe porque é cooperativa; para uma empresa, o campo não existiria</label>
@@ -128,9 +108,9 @@
 </div>
 
 <div class="bloco">
-  <h2><span class="num">3</span>Etapa 2 · Documentos</h2>
+  <h2><span class="num">2</span>Etapa 2 · Documentos</h2>
   <div class="teste">
-    <h3><input type="checkbox"> 3.1 · Os três estados na mesma lista</h3>
+    <h3><input type="checkbox"> 2.1 · Os três estados na mesma lista</h3>
     <ul class="passos"><li>Percorra a lista de 11 documentos sem mexer em nada.</li></ul>
     <div class="esper"><b>Esperado</b>
       <label><input type="checkbox"> A maioria está <b>Sim + arquivo anexado</b>: clipe, nome do arquivo e a lixeira</label>
@@ -139,7 +119,7 @@
     </div>
   </div>
   <div class="teste">
-    <h3><input type="checkbox"> 3.2 · Anexar e remover</h3>
+    <h3><input type="checkbox"> 2.2 · Anexar e remover</h3>
     <ul class="passos">
       <li>Clique na área de anexo da ata.</li>
       <li>Depois remova o arquivo pela lixeira.</li>
@@ -151,7 +131,7 @@
     </div>
   </div>
   <div class="teste">
-    <h3><input type="checkbox"> 3.3 · A regra do Não</h3>
+    <h3><input type="checkbox"> 2.3 · A regra do Não</h3>
     <ul class="passos"><li>Num item com arquivo anexado, marque <b>Não</b> e depois volte para <b>Sim</b>.</li></ul>
     <div class="esper"><b>Esperado</b>
       <label><input type="checkbox"> Com Não, o arquivo some e entra o aviso de pendência</label>
@@ -162,9 +142,9 @@
 </div>
 
 <div class="bloco">
-  <h2><span class="num">4</span>Etapa 3 · Operação</h2>
+  <h2><span class="num">3</span>Etapa 3 · Operação</h2>
   <div class="teste">
-    <h3><input type="checkbox"> 4.1 · "Outro" sempre abre a descrição</h3>
+    <h3><input type="checkbox"> 3.1 · "Outro" sempre abre a descrição</h3>
     <ul class="passos">
       <li>Em beneficiamentos, desmarque <b>Outro serviço</b>.</li>
       <li>Marque de novo.</li>
@@ -176,7 +156,7 @@
     </div>
   </div>
   <div class="teste">
-    <h3><input type="checkbox"> 4.2 · Sim e Não que mudam a tela</h3>
+    <h3><input type="checkbox"> 3.2 · Sim e Não que mudam a tela</h3>
     <ul class="passos"><li>Em "coleta ou recebe resíduos de outros municípios?", responda <b>Não</b> e depois volte para <b>Sim</b>.</li></ul>
     <div class="esper"><b>Esperado</b>
       <label><input type="checkbox"> Com Não, o campo "Quais municípios?" some; com Sim, volta preenchido</label>
@@ -185,9 +165,9 @@
 </div>
 
 <div class="bloco">
-  <h2><span class="num">5</span>Etapa 4 · Estrutura e capacidade</h2>
+  <h2><span class="num">4</span>Etapa 4 · Estrutura e capacidade</h2>
   <div class="teste">
-    <h3><input type="checkbox"> 5.1 · O bloco do vidro</h3>
+    <h3><input type="checkbox"> 4.1 · O bloco do vidro</h3>
     <ul class="passos"><li>Em "beneficiamento do vidro", responda <b>Não</b> e depois volte para <b>Sim</b>.</li></ul>
     <div class="esper"><b>Esperado</b>
       <label><input type="checkbox"> Com Não, destinação e capacidade do vidro somem: pergunta que não se aplica não aparece</label>
@@ -197,21 +177,9 @@
 </div>
 
 <div class="bloco">
-  <h2><span class="num">6</span>O rascunho aguenta recarga</h2>
+  <h2><span class="num">5</span>Etapa 5 · Revisão e envio</h2>
   <div class="teste">
-    <h3><input type="checkbox"> 6.1 · F5 no meio do caminho</h3>
-    <ul class="passos"><li>No meio da etapa 3 ou 4, com mudanças feitas, pressione <kbd>F5</kbd>.</li></ul>
-    <div class="esper"><b>Esperado</b>
-      <label><input type="checkbox"> A página volta <b>na mesma etapa</b>, com tudo o que você mudou preservado</label>
-    </div>
-  </div>
-  <div class="fala">No sistema real o rascunho é por conta, no servidor: a cooperativa pode parar para caçar um documento e continuar outro dia, de outro computador. No protótipo ele vive na aba.</div>
-</div>
-
-<div class="bloco">
-  <h2><span class="num">7</span>Etapa 5 · Revisão e envio</h2>
-  <div class="teste">
-    <h3><input type="checkbox"> 7.1 · O resumo é calculado, não decorado</h3>
+    <h3><input type="checkbox"> 5.1 · O resumo é calculado, não decorado</h3>
     <ul class="passos"><li>Compare a linha de Documentos com o que você deixou na etapa 2.</li></ul>
     <div class="esper"><b>Esperado</b>
       <label><input type="checkbox"> A contagem de anexados bate com o estado real, e cada pendência é <b>nomeada</b></label>
@@ -220,7 +188,7 @@
     </div>
   </div>
   <div class="teste">
-    <h3><input type="checkbox"> 7.2 · A declaração trava o envio</h3>
+    <h3><input type="checkbox"> 5.2 · A declaração trava o envio</h3>
     <ul class="passos"><li>Observe o botão <b>Enviar cadastro</b>, marque a declaração e observe de novo.</li></ul>
     <div class="esper"><b>Esperado</b>
       <label><input type="checkbox"> Sem a declaração, o botão fica desabilitado</label>
@@ -231,24 +199,24 @@
 </div>
 
 <div class="bloco">
-  <h2><span class="num">8</span>Envio, análise e leitura</h2>
+  <h2><span class="num">6</span>Envio e análise</h2>
   <div class="teste">
-    <h3><input type="checkbox"> 8.1 · O envio</h3>
+    <h3><input type="checkbox"> 6.1 · O envio</h3>
     <ul class="passos"><li>Clique em <b>Enviar cadastro</b>.</li></ul>
     <div class="esper"><b>Esperado</b>
       <label><input type="checkbox"> Confirmação com protocolo e a data e hora reais do envio</label>
     </div>
   </div>
   <div class="teste">
-    <h3><input type="checkbox"> 8.2 · O lobby de análise</h3>
+    <h3><input type="checkbox"> 6.2 · A conta muda de estado</h3>
     <ul class="passos"><li>Clique em <b>Acompanhar análise</b> e depois pressione <kbd>F5</kbd>.</li></ul>
     <div class="esper"><b>Esperado</b>
       <label><input type="checkbox"> A tela "Cadastro em análise", com chip, protocolo e data</label>
-      <label><input type="checkbox"> Depois do F5, o lobby continua: a conta ficou "em análise", não volta ao formulário</label>
+      <label><input type="checkbox"> Depois do F5, o lobby continua: a conta ficou "em análise" e não volta ao formulário</label>
     </div>
   </div>
   <div class="teste">
-    <h3><input type="checkbox"> 8.3 · A cópia de leitura</h3>
+    <h3><input type="checkbox"> 6.3 · A cópia de leitura</h3>
     <ul class="passos"><li>Clique em <b>Ver o que foi enviado</b>.</li></ul>
     <div class="esper"><b>Esperado</b>
       <label><input type="checkbox"> A revisão abre em modo leitura: sem Editar e sem a declaração</label>
@@ -256,7 +224,7 @@
     </div>
   </div>
   <div class="teste">
-    <h3><input type="checkbox"> 8.4 · Reiniciar a demonstração</h3>
+    <h3><input type="checkbox"> 6.4 · Reiniciar a demonstração</h3>
     <ul class="passos"><li>No lobby, clique em <b>Reiniciar demonstração</b>.</li></ul>
     <div class="esper"><b>Esperado</b>
       <label><input type="checkbox"> Tudo volta ao estado inicial, pronto para a próxima pessoa testar</label>
@@ -266,7 +234,7 @@
 </div>
 
 <div class="bloco">
-  <h2><span class="num">9</span>O que ainda não está aqui</h2>
+  <h2><span class="num">7</span>O que ainda não está aqui</h2>
   <div class="nota"><b>Fora desta fatia, de propósito</b>Máscaras e validações campo a campo, estados de erro no envio, versão mobile, upload real de arquivos e a integração com o pré-cadastro de produção. O desenho de referência completo está na seção "Setembro 2026 · Recicla Goiás · Complemento de Cadastro do Operador Logístico" do Figma.</div>
 </div>
 

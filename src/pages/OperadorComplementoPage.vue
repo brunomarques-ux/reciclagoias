@@ -95,10 +95,6 @@ function reiniciar() {
             as etapas; nada é enviado antes da revisão final.
           </p>
         </div>
-        <p v-if="complemento.rascunhoSalvoEm" class="ox-pagina__rascunho" role="status">
-          <v-icon icon="mdi-check-circle-outline" size="14" aria-hidden="true" />
-          Rascunho salvo às {{ complemento.rascunhoSalvoEm }}
-        </p>
       </header>
 
       <ComplementoStepper :atual="complemento.etapa" @ir="complemento.irPara" />
@@ -157,16 +153,6 @@ function reiniciar() {
   font-size: 13px;
   line-height: 18px;
   color: var(--rg-color-text-secondary);
-}
-
-.ox-pagina__rascunho {
-  display: flex;
-  align-items: center;
-  gap: var(--rg-space-1);
-  margin: 0;
-  font-size: var(--rg-font-size-xs);
-  color: var(--rg-color-text-muted);
-  white-space: nowrap;
 }
 
 .ox-pagina__acoes {

@@ -3,15 +3,14 @@
  *
  * As regras de UX moram aqui, não nos componentes (mesma filosofia da store
  * `explorador`): responder "Não" a um documento apaga o anexo, "outro" fora da
- * lista limpa a descrição, o envio só libera com a declaração aceita, e o
- * rascunho é persistido a cada mudança — é a história do "salvar rascunho"
- * proposta à SIC, demonstrada de verdade no protótipo.
+ * lista limpa a descrição e o envio só libera com a declaração aceita.
  *
- * Persistência em `sessionStorage` (mesma decisão da sessão: por aba, some ao
- * fechar). No sistema real o rascunho é por conta, no servidor.
+ * Persistência: só o ENVIO é gravado (`sessionStorage`, por aba) — a conta
+ * "em análise" sobrevive à recarga, o preenchimento em andamento não. Decisão
+ * de 31/08: a proposta não tem rascunho provisório.
  */
 import { defineStore } from 'pinia';
-import { computed, reactive, ref, watch } from 'vue';
+import { computed, reactive, ref } from 'vue';
 
 import { DOCUMENTOS_EXIGIDOS, ETAPAS, PROTOCOLO_DEMO } from '@/data/mocks/operador';
 
@@ -121,7 +120,9 @@ function lerRascunho(): RascunhoSalvo | null {
   try {
     const bruto = sessionStorage.getItem(CHAVE_STORAGE);
     if (!bruto) return null;
-    return JSON.parse(bruto) as RascunhoSalvo;
+    const pacote = JSON.parse(bruto) as RascunhoSalvo;
+    // Só o envio é restaurado; preenchimento em andamento não persiste.
+    return pacote.fase === 'enviado' ? pacote : null;
   } catch {
     return null;
   }
@@ -134,26 +135,16 @@ export const useComplementoStore = defineStore('complemento', () => {
   const fase = ref<'preenchendo' | 'enviado'>(salvo?.fase ?? 'preenchendo');
   const formulario = reactive<FormularioComplemento>(salvo?.formulario ?? formularioPadrao());
   const dataEnvio = ref<string | null>(salvo?.dataEnvio ?? null);
-  /** Horário do último rascunho gravado — vira o selo "Rascunho salvo às HH:MM". */
-  const rascunhoSalvoEm = ref<string | null>(salvo ? 'agora' : null);
 
-  watch(
-    [formulario, etapa, fase, dataEnvio],
-    () => {
-      const pacote: RascunhoSalvo = {
-        etapa: etapa.value,
-        fase: fase.value,
-        formulario,
-        dataEnvio: dataEnvio.value,
-      };
-      sessionStorage.setItem(CHAVE_STORAGE, JSON.stringify(pacote));
-      rascunhoSalvoEm.value = new Date().toLocaleTimeString('pt-BR', {
-        hour: '2-digit',
-        minute: '2-digit',
-      });
-    },
-    { deep: true },
-  );
+  function persistirEnvio() {
+    const pacote: RascunhoSalvo = {
+      etapa: etapa.value,
+      fase: fase.value,
+      formulario,
+      dataEnvio: dataEnvio.value,
+    };
+    sessionStorage.setItem(CHAVE_STORAGE, JSON.stringify(pacote));
+  }
 
   // ---- documentos ----
   const totalDocumentos = DOCUMENTOS_EXIGIDOS.length;
@@ -228,6 +219,7 @@ export const useComplementoStore = defineStore('complemento', () => {
     dataEnvio.value = `${agora.toLocaleDateString('pt-BR')}, às ${agora
       .toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
       .replace(':', 'h')}`;
+    persistirEnvio();
   }
 
   /** Ferramenta de protótipo: volta ao estado de demonstração inicial. */
@@ -237,14 +229,12 @@ export const useComplementoStore = defineStore('complemento', () => {
     etapa.value = 1;
     fase.value = 'preenchendo';
     dataEnvio.value = null;
-    rascunhoSalvoEm.value = null;
   }
 
   return {
     etapa,
     fase,
     formulario,
-    rascunhoSalvoEm,
     totalDocumentos,
     documentosAnexados,
     documentosSemPossuir,
