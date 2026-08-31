@@ -72,7 +72,7 @@ const showComoFunciona = ref(false);
             </ol>
             <p class="cx-modal__note">
               Recebeu uma certidão e quer conferir se é verdadeira? Use a
-              <RouterLink to="/consulta/validar" @click="showComoFunciona = false">
+              <RouterLink to="/validar" @click="showComoFunciona = false">
                 validação de documentos</RouterLink>: basta o código de autenticação ou o QR Code
               impresso no documento.
             </p>

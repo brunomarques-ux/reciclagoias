@@ -96,7 +96,7 @@ function bounce() {
       Consulta gratuita e oficial. Nenhum dado é armazenado.
     </p>
 
-    <RouterLink to="/consulta/validar" class="cx-busca__validar">
+    <RouterLink to="/validar" class="cx-busca__validar">
       <v-icon icon="mdi-qrcode-scan" size="16" aria-hidden="true" />
       Recebeu uma certidão? Valide o documento
       <v-icon icon="mdi-arrow-right" size="16" aria-hidden="true" />

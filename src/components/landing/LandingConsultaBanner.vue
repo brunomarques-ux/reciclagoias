@@ -7,6 +7,11 @@
  * de descobrir que precisa aderir tem, na sequência, o atalho pra consultar a
  * situação de um CNPJ.
  *
+ * A validação de documento NÃO mora aqui: ela tem seção própria logo abaixo
+ * (LandingValidacao). São tarefas de gente diferente — aqui é quem tem uma
+ * pergunta e não tem a resposta; lá é quem já tem a resposta na mão e quer
+ * saber se o papel é falso — e por isso têm rotas e portas separadas.
+ *
  * Entrada: reveal-on-scroll (mesmo padrão das seções Perfis/Enquadramento) —
  * IntersectionObserver marca .is-visible e os elementos do card sobem em
  * cascata (delay por --d). Respeita prefers-reduced-motion.
@@ -41,6 +46,7 @@ onBeforeUnmount(() => observer?.disconnect());
 
 <template>
   <section
+    id="consultas"
     ref="sectionRef"
     :class="['rg-cbanner', { 'is-visible': isVisible }]"
     aria-labelledby="rg-cbanner-title"
@@ -199,7 +205,9 @@ onBeforeUnmount(() => observer?.disconnect());
   max-width: 46ch;
   font-size: var(--rg-font-size-md);
   line-height: var(--rg-line-height-relaxed);
-  color: rgba(255, 255, 255, 0.9);
+  /* Branco puro, não 90%: a 90% sobre brand-600 dá 4,20:1 e reprova o 4,5:1
+     do WCAG 1.4.3 pra texto de 16px. Puro dá 4,79:1. */
+  color: var(--rg-primitive-neutral-0);
 }
 
 /* ============ CTA branco ============ */

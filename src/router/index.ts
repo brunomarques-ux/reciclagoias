@@ -22,7 +22,11 @@ const routes: RouteRecordRaw[] = [
     meta: { titulo: 'Consulta de regularidade' },
   },
   {
-    path: '/consulta/validar',
+    // Rota curta e canônica: é ela que vai impressa na certidão, e /consulta
+    // fica sendo só a regularidade da empresa. `/consulta/validar` sobrevive
+    // como alias porque os pacotes de entrega já publicados apontam pra lá.
+    path: '/validar',
+    alias: '/consulta/validar',
     name: 'consulta-validar',
     component: () => import('@/pages/ConsultaValidarPage.vue'),
     meta: { titulo: 'Validação de documento' },

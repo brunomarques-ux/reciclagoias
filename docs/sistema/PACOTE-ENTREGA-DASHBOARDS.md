@@ -21,6 +21,7 @@ O protótipo publicado é a referência de comportamento. O Figma fica como apoi
 |---|---|---|---|
 | **Dashboards da área logada** (login, gestora, admin e verificador) | `/handoff-dashboards.html` | `/roteiro-dashboards.html` | `recicla-dashboards`, 49 arquivos |
 | **Consulta pública de regularidade** (consulta por CNPJ e validação de documento) | `/handoff-consulta.html` | `/roteiro-consulta.html` | `recicla-consulta`, 38 arquivos |
+| **Ponto de acesso à validação** (a seção da página inicial) | `/handoff-validacao.html` | dentro do handoff, parte 14 | não tem zip, o código vai dentro do documento |
 
 Os dois HTML de cada frente ficam em `public/` e são publicados junto com o protótipo.
 Os zips ficam **fora do repositório**, em `C:\Users\Bruno\<nome-do-pacote>`.
@@ -44,6 +45,28 @@ Valem para qualquer pacote daqui em diante. Todas nasceram de revisão do Bruno.
    contrato. Modelagem de dados, nomes de campo, cálculo e arquitetura são decisão do time de
    desenvolvimento, e o documento diz isso em voz alta.
 5. **Sem travessão** e sem prosa com cara de texto gerado.
+
+---
+
+## Quando o pacote é de uma peça só
+
+A entrega da seção de validação fugiu do formato de três peças, e o motivo vale registrar
+para a próxima vez que acontecer o mesmo: **o time já tinha o código adaptado**. Mandar um zip
+faria a pessoa procurar de novo o que já estava resolvido, no meio de arquivo que não ia usar.
+
+Quando a entrega é **uma peça isolada dentro de algo que já existe lá**, o pacote vira um
+documento só, e o código mora dentro dele:
+
+- **HTML, CSS e o comportamento**, sem framework e sem biblioteca de ícone, em bloco copiável
+- **Uma réplica ao vivo** que sai da mesma fonte dos blocos, então documento e código não
+  conseguem divergir
+- **As variáveis de cor, forma e ritmo** numa tabela, com o papel de cada uma, para eles
+  apontarem ao design system deles em um lugar só
+- **O roteiro** vira o checklist de aceite no fim do documento, porque são poucos itens e
+  nenhum depende de servidor
+
+A regra para escolher: se a entrega é uma **frente inteira**, são as três peças e o zip. Se é
+uma **peça que entra numa tela que já existe**, é documento único com o código dentro.
 
 ---
 

@@ -107,6 +107,7 @@ Mapa Figma → código usado na área gestora:
 ## Área da Entidade Gestora
 
 ```
+/validar       validação de documento (rota canônica; /consulta/validar segue como alias)
 /entrar        login provisório, sem autenticação real — escolhe o perfil e grava na store
 /gestora       dashboard da entidade gestora
 /admin         dashboard da Administração (SIC)
@@ -124,6 +125,8 @@ public/handoff-dashboards.html    dashboards: pacote de entrega, com réplicas a
 public/roteiro-dashboards.html    dashboards: roteiro de testes passo a passo
 public/handoff-consulta.html      consulta pública: pacote de entrega
 public/roteiro-consulta.html      consulta pública: roteiro de testes
+public/handoff-validacao.html     seção de validação na landing: pacote de peça única
+                                  (código embutido, réplica ao vivo e checklist no mesmo doc)
 public/img/handoff/               capturas dos dashboards em 1440
 public/img/handoff-consulta/      capturas da consulta em 1440
 ```

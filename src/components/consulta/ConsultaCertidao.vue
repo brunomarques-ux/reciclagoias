@@ -13,7 +13,7 @@
  *    server-side (ver docs/HANDOFF-CONSULTA-REGULARIDADE.md §4.4).
  *  - "Imprimir": abre o diálogo de impressão do navegador; o @media print
  *    global esconde o app e imprime só o papel (1 página A4).
- * O QR é um link real pra /consulta/validar?codigo=..., que simula o
+ * O QR é um link real pra /validar?codigo=..., que simula o
  * escaneamento no protótipo.
  */
 import { onBeforeUnmount, onMounted, ref } from 'vue';
@@ -256,7 +256,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
               </div>
               <div class="cx-cert__auth-right">
                 <RouterLink
-                  :to="{ path: '/consulta/validar', query: { codigo: empresa.codigoAutenticacao } }"
+                  :to="{ path: '/validar', query: { codigo: empresa.codigoAutenticacao } }"
                   class="cx-cert__qr"
                   title="No protótipo, clicar no QR simula escanear com a câmera"
                 >
@@ -264,7 +264,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
                 </RouterLink>
                 <span class="cx-cert__qr-txt">
                   <strong>Valide a autenticidade em</strong>
-                  <em>reciclagoias.go.gov.br/consulta/validar</em>
+                  <em>reciclagoias.go.gov.br/validar</em>
                   e informe o código ao lado, ou aponte a câmera para o QR Code.
                 </span>
               </div>

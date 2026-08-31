@@ -34,21 +34,34 @@ const year = new Date().getFullYear();
           </p>
         </div>
 
-        <!-- Coluna 2: Navegação -->
-        <nav class="rg-footer__nav" aria-label="Mapa do site">
-          <h4>Navegação</h4>
-          <ul>
-            <li><a href="#sobre">O que é Logística Reversa</a></li>
-            <li><a href="#perfis">Perfis do sistema</a></li>
-            <li><a href="#enquadramento">Quem precisa aderir</a></li>
-            <li><a href="#como-funciona">Como funciona</a></li>
-            <li><a href="#premio">Prêmios e reconhecimentos</a></li>
-            <li><a href="#comite">Comitê gestor</a></li>
-            <li><a href="#fluxo">Fluxo de operação</a></li>
-            <li><a href="#sistema">Sistema Recicla Goiás</a></li>
-            <li><a href="#duvidas">Perguntas frequentes</a></li>
-          </ul>
-        </nav>
+        <!-- Coluna 2: Navegação + Serviços.
+             Dois <nav> separados de propósito: o de cima são âncoras desta
+             página, o de baixo são as duas rotas públicas do produto. Até aqui
+             o "Mapa do site" tinha nove itens e nenhum saía da landing. -->
+        <div class="rg-footer__nav">
+          <nav aria-labelledby="rg-footer-nav-titulo">
+            <h4 id="rg-footer-nav-titulo">Navegação</h4>
+            <ul>
+              <li><a href="#sobre">O que é Logística Reversa</a></li>
+              <li><a href="#perfis">Perfis do sistema</a></li>
+              <li><a href="#enquadramento">Quem precisa aderir</a></li>
+              <li><a href="#como-funciona">Como funciona</a></li>
+              <li><a href="#premio">Prêmios e reconhecimentos</a></li>
+              <li><a href="#comite">Comitê gestor</a></li>
+              <li><a href="#fluxo">Fluxo de operação</a></li>
+              <li><a href="#sistema">Sistema Recicla Goiás</a></li>
+              <li><a href="#duvidas">Perguntas frequentes</a></li>
+            </ul>
+          </nav>
+
+          <nav aria-labelledby="rg-footer-servicos-titulo">
+            <h4 id="rg-footer-servicos-titulo">Serviços</h4>
+            <ul>
+              <li><RouterLink to="/consulta">Consultar regularidade</RouterLink></li>
+              <li><RouterLink to="/validar">Validar documento</RouterLink></li>
+            </ul>
+          </nav>
+        </div>
 
         <!-- Coluna 3: Secretarias parceiras -->
         <div class="rg-footer__partners">
@@ -201,6 +214,14 @@ const year = new Date().getFullYear();
 }
 
 /* ============ Coluna 2: Nav ============ */
+/* A coluna virou wrapper de dois <nav>; o resto das regras é por descendência
+   e continua valendo pros dois. */
+.rg-footer__nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rg-space-8);
+}
+
 .rg-footer__nav a {
   display: inline-block;
   font-size: var(--rg-font-size-sm);
