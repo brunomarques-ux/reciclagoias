@@ -1,19 +1,22 @@
 <script setup lang="ts">
 /**
- * Etapa 1 · Dados gerais — identificação e endereço da cooperativa.
+ * Etapa 1 · Dados gerais — identificação e endereço da organização.
  *
- * Razão social, nome fantasia, CNPJ e e-mail vêm do pré-cadastro de produção e
- * aparecem travados (decisão do fluxo de 31/08: o complemento não edita o que o
- * registro já criou; correção desses dados é assunto de suporte). O resto é o
- * que só a cooperativa sabe: contato, porte e endereço da unidade.
+ * Razão social, nome fantasia, CNPJ, e-mail e o tipo de organização vêm do
+ * pré-cadastro de produção e aparecem travados (decisão do fluxo de 31/08: o
+ * complemento não edita o que o registro já criou; correção é assunto de
+ * suporte). O tipo condiciona o formulário: "número de cooperados" só existe
+ * para cooperativa. O resto é o que só a organização sabe: contato, porte e
+ * endereço da unidade.
  */
 import OxCampo from '@/components/operador/OxCampo.vue';
 import OxCartao from '@/components/operador/OxCartao.vue';
-import { PRE_CADASTRO } from '@/data/mocks/operador';
+import { PRE_CADASTRO, ROTULO_TIPO } from '@/data/mocks/operador';
 import { useComplementoStore } from '@/stores/complemento';
 
 const complemento = useComplementoStore();
 const f = complemento.formulario;
+const ehCooperativa = PRE_CADASTRO.tipoOrganizacao === 'cooperativa';
 </script>
 
 <template>
@@ -37,13 +40,24 @@ const f = complemento.formulario;
         <OxCampo class="ox-col-5" rotulo="E-mail" :model-value="PRE_CADASTRO.email" travado />
         <OxCampo class="ox-col-3" rotulo="Telefone (com DDD)" v-model="f.telefone" />
 
-        <OxCampo class="ox-col-3" rotulo="Número de cooperados" v-model="f.cooperados" />
+        <OxCampo
+          class="ox-col-3"
+          rotulo="Tipo de organização"
+          :model-value="ROTULO_TIPO[PRE_CADASTRO.tipoOrganizacao]"
+          travado
+        />
+        <OxCampo
+          v-if="ehCooperativa"
+          class="ox-col-3"
+          rotulo="Número de cooperados"
+          v-model="f.cooperados"
+        />
         <OxCampo class="ox-col-3" rotulo="Ano de criação" v-model="f.anoCriacao" />
       </div>
 
       <p class="ox-nota">
-        Razão social, nome fantasia, CNPJ e e-mail vêm do pré-cadastro. Para corrigir algum deles,
-        fale com o suporte.
+        Razão social, nome fantasia, CNPJ, e-mail e o tipo de organização vêm do pré-cadastro. Para
+        corrigir algum deles, fale com o suporte.
       </p>
     </OxCartao>
 

@@ -12,11 +12,15 @@
  * vez só aqui — decisão registrada no cabeçalho da seção do Figma.
  */
 
+export type TipoOrganizacao = 'cooperativa' | 'empresa';
+
 export interface PreCadastro {
   razaoSocial: string;
   nomeFantasia: string;
   cnpj: string;
   email: string;
+  /** O pré-cadastro de produção já pergunta "Você é: Cooperativa / Empresa". */
+  tipoOrganizacao: TipoOrganizacao;
 }
 
 export const PRE_CADASTRO: PreCadastro = {
@@ -24,6 +28,12 @@ export const PRE_CADASTRO: PreCadastro = {
   nomeFantasia: 'Recicla Cerrado',
   cnpj: '23.481.907/0001-55',
   email: 'contato@reciclacerrado.org.br',
+  tipoOrganizacao: 'cooperativa',
+};
+
+export const ROTULO_TIPO: Record<TipoOrganizacao, string> = {
+  cooperativa: 'Cooperativa',
+  empresa: 'Empresa',
 };
 
 export const ETAPAS = [

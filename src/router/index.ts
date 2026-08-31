@@ -16,6 +16,14 @@ const routes: RouteRecordRaw[] = [
     meta: { titulo: 'Apresentação' },
   },
   {
+    // Deck próprio da proposta do Operador Logístico — apresentação nova,
+    // separada da institucional de propósito (mesma view, outro conjunto de slides).
+    path: '/apresentacao-operador',
+    name: 'apresentacao-operador',
+    component: () => import('@/pages/PresentationView.vue'),
+    meta: { titulo: 'Apresentação · Operador Logístico', deck: 'complemento' },
+  },
+  {
     path: '/consulta',
     name: 'consulta',
     component: () => import('@/pages/ConsultaPage.vue'),

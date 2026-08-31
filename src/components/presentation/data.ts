@@ -84,7 +84,7 @@ const NPDF = 'É possível exportar o PDF do resumo.';
 const B = '/apresentacao/';
 
 export type Slide =
-  | { kind: 'capa' | 'intro' | 'perfis' | 'agradecimento' | 'home' | 'fluxo'; steps?: number }
+  | { kind: 'capa' | 'intro' | 'perfis' | 'agradecimento' | 'home' | 'fluxo' | 'capa-complemento'; steps?: number }
   | { kind: 'timeline'; steps: number }
   | { kind: 'cover'; profile: ProfileKey; name: string; role: string }
   | { kind: 'montage'; front: string; back: string; title: string; desc: string; notes?: string[]; steps?: number }
@@ -133,7 +133,16 @@ export const SLIDES: Slide[] = [
   { kind: 'screen', profile: 'op', image: B + 'visualizar-certificado-op.png', title: 'Visualizar certificado', desc: 'Detalhe do certificado emitido pelo operador.', notes: [NADM], portrait: true },
   { kind: 'screen', profile: 'op', image: B + 'extrato-op.png', title: 'Extrato', desc: 'Extrato de movimentações de massa e de certificados do operador.', portrait: true },
   { kind: 'screen', profile: 'op', image: B + 'visualizar-saldo-op.png', title: 'Visualizar saldo', desc: 'Saldo de massa disponível do operador, por material reciclável.' },
-  // Proposta · Complemento de cadastro do Operador Logístico (definida em 31/08/2026 com a SIC)
+  { kind: 'agradecimento' },
+];
+
+/**
+ * Deck próprio da proposta do Operador Logístico (rota /apresentacao-operador).
+ * É uma apresentação nova, não a continuação da institucional: capa própria,
+ * o fluxograma da proposta e as telas do protótipo funcional.
+ */
+export const SLIDES_COMPLEMENTO: Slide[] = [
+  { kind: 'capa-complemento' },
   { kind: 'fluxo' },
   { kind: 'screen', profile: 'op', image: B + 'pre-cadastro-producao.png',
     title: 'O pré-cadastro fica como está',
@@ -174,7 +183,8 @@ export const SLIDES: Slide[] = [
   { kind: 'agradecimento' },
 ];
 
-/** URLs de todas as imagens (telas + montagens) — pré-carregadas para evitar flash na troca. */
-export const SCREEN_IMAGES: string[] = SLIDES.flatMap((s) =>
-  s.kind === 'screen' ? [s.image] : s.kind === 'montage' ? [s.front, s.back] : [],
-);
+/** URLs das imagens de um deck (telas + montagens) — pré-carregadas para evitar flash na troca. */
+export const imagensDe = (slides: Slide[]): string[] =>
+  slides.flatMap((s) => (s.kind === 'screen' ? [s.image] : s.kind === 'montage' ? [s.front, s.back] : []));
+
+export const SCREEN_IMAGES: string[] = imagensDe(SLIDES);

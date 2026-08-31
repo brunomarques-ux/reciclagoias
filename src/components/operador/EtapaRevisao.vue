@@ -11,7 +11,7 @@
 import { computed } from 'vue';
 
 import OxOpcao from '@/components/operador/OxOpcao.vue';
-import { MODOS_TRIAGEM, PRE_CADASTRO, SITUACOES_AREA } from '@/data/mocks/operador';
+import { MODOS_TRIAGEM, PRE_CADASTRO, ROTULO_TIPO, SITUACOES_AREA } from '@/data/mocks/operador';
 import { useComplementoStore } from '@/stores/complemento';
 
 withDefaults(defineProps<{ somenteLeitura?: boolean }>(), { somenteLeitura: false });
@@ -74,10 +74,12 @@ const linhas = computed(() => [
   <div class="ox-etapa">
     <section class="ox-resumo" aria-label="Resumo da cooperativa">
       <div v-for="dado in [
-          { rotulo: 'Cooperativa', valor: PRE_CADASTRO.razaoSocial },
+          { rotulo: ROTULO_TIPO[PRE_CADASTRO.tipoOrganizacao], valor: PRE_CADASTRO.razaoSocial },
           { rotulo: 'CNPJ', valor: PRE_CADASTRO.cnpj },
           { rotulo: 'Município', valor: `${f.municipio} · ${f.estado}` },
-          { rotulo: 'Cooperados', valor: f.cooperados },
+          ...(PRE_CADASTRO.tipoOrganizacao === 'cooperativa'
+            ? [{ rotulo: 'Cooperados', valor: f.cooperados }]
+            : []),
           { rotulo: 'Criada em', valor: f.anoCriacao },
         ]" :key="dado.rotulo" class="ox-resumo__dado">
         <span class="ox-resumo__rotulo">{{ dado.rotulo }}</span>
