@@ -98,7 +98,7 @@ function trocar(q: Qual) {
         <!-- o e-mail em tamanho real -->
         <div class="em">
           <article class="em__card">
-            <img class="em__brasao" src="/img/emails/brasao-goias.png" alt="Brasão do Estado de Goiás" width="89" height="119" />
+            <img class="em__brasao" src="/img/emails/brasao-goias-transparente.png" alt="Brasão do Estado de Goiás" width="89" height="119" />
 
             <template v-if="qual === 'ativacao'">
               <h2 class="em__titulo">Confirme seu e-mail para continuar o cadastro</h2>
