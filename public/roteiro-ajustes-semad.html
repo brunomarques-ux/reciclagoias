@@ -122,7 +122,32 @@
       <label><input type="checkbox"> Caixa de resumo com <b>organização, CNPJ e perfil</b></label>
       <label><input type="checkbox"> Os <b>11 documentos</b> listados acima do botão, com os nomes que a SEMAD usa</label>
       <label><input type="checkbox"> O destaque <b>Não é necessário enviar esses documentos por e-mail</b>, com a menção ao PDF</label>
-      <label><input type="checkbox"> O botão diz que abre o login do módulo Operador Logístico; embaixo, o canal de atendimento</label>
+      <label><input type="checkbox"> O texto avisa que o botão abre o login do módulo e que, se o e-mail já estiver confirmado, leva direto ao acesso</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 2.2 · Confirmar cai direto no login · SEMAD-03</h3>
+    <ul class="passos"><li>No e-mail, clique em <b>Confirmar e-mail</b>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Abre o login com o <b>Operador Logístico</b> já escolhido e o aviso verde <b>E-mail confirmado</b></label>
+      <label><input type="checkbox"> Não existe página intermediária: o próximo passo é entrar</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 2.3 · O link usado de novo · SEMAD-03</h3>
+    <ul class="passos"><li>Volte ao <a href="/emails-operador?email=ativacao" target="_blank" rel="noopener">e-mail de ativação</a> e clique de novo em <b>Confirmar e-mail</b>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> O login abre com o aviso azul <b>Este e-mail já está confirmado</b></label>
+      <label><input type="checkbox"> O link não quebra e nenhum e-mail novo é enviado</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 2.4 · O link expirado · SEMAD-03, 04</h3>
+    <ul class="passos"><li>Abra <a href="/entrar?perfil=operador&amp;destino=/operador&amp;confirmacao=expirado" target="_blank" rel="noopener">o login como se o link tivesse expirado</a> e clique em <b>Reenviar e-mail de confirmação</b>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> O aviso âmbar diz que o link expirou e que o e-mail ainda não foi confirmado</label>
+      <label><input type="checkbox"> Depois do clique, o aviso vira <b>Enviamos um novo link de confirmação</b>, dizendo onde procurar</label>
+      <label><input type="checkbox"> O novo e-mail é o mesmo de ativação, com a lista de documentos: nada é duplicado</label>
     </div>
   </div>
 </div>
@@ -156,11 +181,13 @@
     </div>
   </div>
   <div class="teste">
-    <h3><input type="checkbox"> 3.4 · Enviar</h3>
-    <ul class="passos"><li>Marque a declaração, clique em <b>Enviar cadastro</b> e depois em <b>Acompanhar análise</b>.</li></ul>
+    <h3><input type="checkbox"> 3.4 · Enviar, sabendo o que está pendente · SEMAD-15</h3>
+    <ul class="passos"><li>Marque a declaração e clique em <b>Enviar cadastro</b>.</li></ul>
     <div class="esper"><b>Esperado</b>
-      <label><input type="checkbox"> A confirmação avisa que, se faltar algo, o cadastro volta para correção sem perder o que foi preenchido</label>
-      <label><input type="checkbox"> O painel mostra <b>Cadastro em análise</b></label>
+      <label><input type="checkbox"> Abre a janela <b>Enviar o cadastro para análise?</b>, que lista pelo nome a declaração sem arquivo e o campo em branco</label>
+      <label><input type="checkbox"> <b>Voltar e revisar</b> fecha a janela sem enviar</label>
+      <label><input type="checkbox"> Em <b>Enviar para análise</b>, a tela vai direto para <b>Cadastro em análise</b>, com a confirmação verde e o protocolo no topo</label>
+      <label><input type="checkbox"> Não existe mais a tela intermediária com <b>Acompanhar análise</b></label>
     </div>
   </div>
 </div>
@@ -229,7 +256,7 @@
   </div>
   <div class="teste">
     <h3><input type="checkbox"> 6.2 · Corrigir e reenviar</h3>
-    <ul class="passos"><li>Anexe o alvará novo; na declaração, marque Sim e anexe. Clique em <b>Ir para a revisão</b>, marque a declaração e clique em <b>Reenviar para análise</b>.</li></ul>
+    <ul class="passos"><li>Anexe o alvará novo; na declaração, marque Sim e anexe. Clique em <b>Ir para a revisão</b>, marque a declaração e clique em <b>Reenviar para análise</b>, na tela e depois na janela.</li></ul>
     <div class="esper"><b>Esperado</b>
       <label><input type="checkbox"> Com tudo anexado, o alerta do topo vira <b>Correção pronta para reenvio</b></label>
       <label><input type="checkbox"> A revisão mostra os documentos corrigidos e só Documentos tem Editar</label>

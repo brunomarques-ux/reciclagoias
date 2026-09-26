@@ -50,6 +50,18 @@ const itensCorrecao = computed(() => {
 
 const PASTAS = ['Caixa de entrada', 'Com estrela', 'Adiados', 'Importante', 'Enviados', 'Rascunhos', 'Lixeira'];
 
+/** Primeiro clique confirma; os seguintes dizem que já está confirmado (sessão da aba). */
+function confirmarEmail() {
+  let ja = false;
+  try {
+    ja = sessionStorage.getItem('rg:email-confirmado') === '1';
+    sessionStorage.setItem('rg:email-confirmado', '1');
+  } catch {
+    /* ok */
+  }
+  void router.push({ name: 'entrar', query: { perfil: 'operador', destino: '/operador', confirmacao: ja ? 'ja' : 'ok' } });
+}
+
 function trocar(q: Qual) {
   void router.replace({ query: { email: q } });
 }
@@ -114,8 +126,8 @@ function trocar(q: Qual) {
                 <ul><li v-for="d in DOCUMENTOS_EXIGIDOS" :key="d.id">{{ d.rotulo }}</li></ul>
               </div>
               <p><strong class="em__forte">Não é necessário enviar esses documentos por e-mail.</strong> O envio é feito pelo sistema, no complemento de cadastro, em arquivos PDF.</p>
-              <p>Para continuar, confirme o endereço de e-mail informado. O botão abaixo abre o login do módulo Operador Logístico. Até a aprovação, o acesso fica restrito ao complemento de cadastro.</p>
-              <RouterLink class="em__botao" to="/operador">Confirmar e-mail</RouterLink>
+              <p>Para continuar, confirme o endereço de e-mail informado. O botão abre o módulo Operador Logístico; se o e-mail já estiver confirmado, ele leva direto ao acesso. Até a aprovação, o acesso fica restrito ao complemento de cadastro.</p>
+              <a class="em__botao" href="#" @click.prevent="confirmarEmail">Confirmar e-mail</a>
             </template>
 
             <template v-else-if="qual === 'correcao'">
