@@ -52,6 +52,10 @@
   kbd{display:inline-block;font:600 11.5px/1.4 var(--mono);color:var(--slate-700);background:#fff;border:1px solid var(--slate-300);border-bottom-width:2px;border-radius:5px;padding:1px 6px}
   a{color:var(--verde-700)}
   .mini{font-size:12.5px;color:var(--slate-500)}
+  .ref{position:relative;display:inline-block;margin:0 2px;padding:0 6px;border-radius:6px;background:var(--verde-50);color:var(--verde-700);font:600 12.5px/1.6 var(--font);cursor:help;outline-offset:2px}
+  .ref::after{content:attr(data-tip);position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);width:max-content;max-width:300px;padding:8px 11px;border-radius:8px;background:var(--slate-900);color:#fff;font:500 12.5px/1.45 var(--font);white-space:normal;text-align:left;opacity:0;pointer-events:none;transition:opacity .15s;z-index:20;box-shadow:0 6px 18px rgba(15,23,42,.25)}
+  .ref:hover::after,.ref:focus-visible::after{opacity:1}
+  .ref:focus-visible{outline:2px solid var(--verde)}
   @media (prefers-reduced-motion: reduce){*{transition:none !important}}
   @media print{
     body{background:#fff} .prog{display:none} .topo{background:#fff;color:var(--slate-900);border-bottom:3px solid var(--verde-700);padding:0 0 16px}
@@ -89,7 +93,7 @@
 
 <div class="bloco">
   <h2><span class="num">1</span>O que a SEMAD pediu</h2>
-  <ul>
+  <ul id="pedidos">
     <li><b>SEMAD-01</b> · Alerta grande no topo quando o cadastro volta para correção.</li>
     <li><b>SEMAD-02</b> · Alerta no stepper, no passo com pendência, no lugar do check.</li>
     <li><b>SEMAD-03</b> · Todo link dos e-mails leva ao login do módulo Operador Logístico.</li>
@@ -303,6 +307,31 @@
   }
   caixas.forEach(function (c) { c.addEventListener('change', atualizar); });
   atualizar();
+})();
+</script>
+<script>
+/* Cada código SEMAD-xx dos testes vira um selo com a descrição do pedido no tooltip
+   (passar o mouse ou focar com Tab). As descrições vêm da lista do bloco 1. */
+(function () {
+  var mapa = {};
+  [].forEach.call(document.querySelectorAll('#pedidos li'), function (li) {
+    var b = li.querySelector('b'); if (!b) return;
+    mapa[b.textContent.trim()] = li.textContent.replace(b.textContent, '').replace(/^\s*·\s*/, '').trim();
+  });
+  [].forEach.call(document.querySelectorAll('.teste h3'), function (h3) {
+    [].forEach.call(h3.childNodes, function (no) {
+      if (no.nodeType !== 3) return;
+      var m = no.textContent.match(/\s*·\s*SEMAD-(\d{2}(?:, \d{2})*)\s*$/);
+      if (!m) return;
+      no.textContent = no.textContent.slice(0, m.index) + ' · ';
+      m[1].split(', ').forEach(function (n) {
+        var cod = 'SEMAD-' + n, sp = document.createElement('span');
+        sp.className = 'ref'; sp.tabIndex = 0; sp.textContent = cod;
+        sp.setAttribute('data-tip', mapa[cod] || cod); sp.setAttribute('aria-label', cod + ': ' + (mapa[cod] || ''));
+        h3.appendChild(sp);
+      });
+    });
+  });
 })();
 </script>
 </body>
