@@ -148,7 +148,8 @@ const f = complemento.formulario;
 }
 
 .ox-dica-grupo {
-  margin: calc(-1 * var(--rg-space-2)) 0 0;
+  /* a legenda não entra no gap do fieldset: a margem negativa jogava a dica em cima dela */
+  margin: var(--rg-space-1) 0 0;
   font-size: var(--rg-font-size-xs);
   color: var(--rg-color-text-muted);
 }

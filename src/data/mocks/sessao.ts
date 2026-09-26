@@ -107,6 +107,7 @@ export const MENUS: Record<PerfilId, ItemMenu[]> = {
     { rotulo: 'Minha Conta', icone: 'mdi-account', rota: null },
     { rotulo: 'Planos', icone: 'mdi-clipboard-text', rota: null },
     { rotulo: 'Relatórios', icone: 'mdi-file-document', rota: null },
+    { rotulo: 'Cadastros de operador', icone: 'mdi-clipboard-account', rota: '/admin/cadastros' },
   ],
   // Conta em complementação: até a aprovação da análise o operador só enxerga
   // Minha Conta e o próprio complemento — o Dashboard nasce depois de aprovado.

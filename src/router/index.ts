@@ -73,6 +73,25 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/pages/OperadorComplementoPage.vue'),
     meta: { titulo: 'Complemento de cadastro', requerPerfil: 'operador' },
   },
+  {
+    path: '/admin/cadastros',
+    name: 'admin-cadastros',
+    component: () => import('@/pages/AdminCadastrosPage.vue'),
+    meta: { titulo: 'Cadastros de operador logístico', requerPerfil: 'admin' },
+  },
+  {
+    path: '/admin/cadastros/:protocolo',
+    name: 'admin-analise',
+    component: () => import('@/pages/AdminAnalisePage.vue'),
+    meta: { titulo: 'Análise do cadastro', requerPerfil: 'admin' },
+  },
+  {
+    // Moldura de protótipo: os e-mails do complemento num cliente de e-mail, só visual.
+    path: '/emails-operador',
+    name: 'emails-operador',
+    component: () => import('@/pages/EmailsOperadorPage.vue'),
+    meta: { titulo: 'E-mails do complemento' },
+  },
 ];
 
 export const router = createRouter({

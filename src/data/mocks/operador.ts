@@ -56,7 +56,7 @@ export const DOCUMENTOS_EXIGIDOS: DocumentoExigido[] = [
   { id: 'estatuto', rotulo: 'Estatuto social registrado', arquivoDemo: 'estatuto-social-registrado.pdf' },
   {
     id: 'ata',
-    rotulo: 'Ata de eleição da atual diretoria e dos conselhos (administração e fiscal)',
+    rotulo: 'Ata de eleição da atual Diretoria ou Conselho de Administração e Conselho Fiscal',
     arquivoDemo: 'ata-eleicao-diretoria.pdf',
   },
   {
@@ -69,17 +69,17 @@ export const DOCUMENTOS_EXIGIDOS: DocumentoExigido[] = [
     rotulo: 'Certidão simplificada da Junta Comercial',
     arquivoDemo: 'certidao-simplificada.pdf',
   },
-  { id: 'mtr', rotulo: 'Cadastro para emissão de MTR', arquivoDemo: 'cadastro-mtr.pdf' },
+  { id: 'mtr', rotulo: 'Comprovante de Cadastro no MTR', arquivoDemo: 'cadastro-mtr.pdf' },
   { id: 'licenca', rotulo: 'Licenciamento ambiental', arquivoDemo: 'licenca-ambiental-2025.pdf' },
   { id: 'cartao-cnpj', rotulo: 'Cartão de CNPJ (ativo)', arquivoDemo: 'cartao-cnpj.pdf' },
   {
     id: 'identidade',
-    rotulo: 'Documento de identidade do representante legal',
+    rotulo: 'Cópia do documento de identidade e CPF do representante legal',
     arquivoDemo: 'identidade-representante.pdf',
   },
   {
     id: 'capacidade',
-    rotulo: 'Declaração de capacidade de produção',
+    rotulo: 'Declaração de capacidade de operação/produção',
     arquivoDemo: 'declaracao-capacidade.pdf',
   },
   {
@@ -164,3 +164,20 @@ export const PERCEPCOES_OPERACAO: Opcao[] = [
 ];
 
 export const PROTOCOLO_DEMO = 'OPL-2026-00184';
+
+/** Motivos prontos da análise (SEMAD, 15/09): vencido e faltando, mais um aberto. */
+export const MOTIVOS_ANALISE = [
+  { id: 'vencido', rotulo: 'Documento vencido' },
+  { id: 'nao-enviado', rotulo: 'Documento não enviado' },
+  { id: 'outro', rotulo: 'Outro motivo' },
+] as const;
+export type MotivoAnalise = (typeof MOTIVOS_ANALISE)[number]['id'];
+
+/** Fila da análise no Admin. A primeira linha é a Recicla Cerrado, que vem da store. */
+export const FILA_CADASTROS = [
+  { protocolo: 'OPL-2026-00179', nome: 'Reciclagem Anhanguera Ltda', cnpj: '31.204.118/0001-09', tipo: 'Empresa', situacao: 'em-analise', enviado: '29/08/2026', docs: '11 de 11' },
+  { protocolo: 'OPL-2026-00171', nome: 'Cooperativa Mãos que Reciclam', cnpj: '18.330.442/0001-71', tipo: 'Cooperativa', situacao: 'devolvido', enviado: '27/08/2026', docs: '9 de 11' },
+  { protocolo: 'OPL-2026-00166', nome: 'Associação Catadores Meia Ponte', cnpj: '12.877.590/0001-38', tipo: 'Cooperativa', situacao: 'reenviado', enviado: '26/08/2026', docs: '11 de 11' },
+  { protocolo: 'OPL-2026-00158', nome: 'Ecoponto Sudoeste Reciclagem Ltda', cnpj: '40.115.623/0001-50', tipo: 'Empresa', situacao: 'aprovado', enviado: '22/08/2026', docs: '11 de 11' },
+  { protocolo: 'OPL-2026-00150', nome: 'Cooperativa Nova Esperança', cnpj: '09.664.201/0001-84', tipo: 'Cooperativa', situacao: 'aprovado', enviado: '20/08/2026', docs: '11 de 11' },
+] as const;

@@ -8,31 +8,41 @@
  * O "Reiniciar demonstração" é ferramenta de protótipo, como o explorador de
  * cenários da gestora: volta o fluxo ao estado inicial para a próxima demo.
  */
+import { computed } from 'vue';
+
 import RgButton from '@/components/RgButton.vue';
 import { useComplementoStore } from '@/stores/complemento';
 
 const emit = defineEmits<{ (e: 'ver-enviado'): void; (e: 'reiniciar'): void }>();
 const complemento = useComplementoStore();
+
+const TEXTOS = {
+  'em-analise': { titulo: 'Cadastro em análise', chip: 'Em análise', icone: 'mdi-clock-outline', texto: 'A equipe responsável está conferindo os dados e os documentos da cooperativa. Você recebe um e-mail assim que a análise terminar. Enquanto isso, o complemento fica fechado para edição.' },
+  reenviado: { titulo: 'Cadastro em nova análise', chip: 'Em nova análise', icone: 'mdi-clock-outline', texto: 'A equipe responsável está conferindo os documentos atualizados. Você recebe um e-mail assim que a análise terminar. Enquanto isso, o complemento fica fechado para edição.' },
+  aprovado: { titulo: 'Cadastro aprovado', chip: 'Aprovado', icone: 'mdi-check', texto: 'O acesso completo ao sistema foi liberado. O e-mail de aprovação traz o manual de como incluir notas fiscais e fazer transferências.' },
+} as const;
+const t = computed(() => TEXTOS[complemento.situacao as keyof typeof TEXTOS] ?? TEXTOS['em-analise']);
 </script>
 
 <template>
   <section class="ox-painel" aria-labelledby="ox-lobby-titulo">
-    <span class="ox-painel__selo ox-painel__selo--analise" aria-hidden="true">
-      <v-icon icon="mdi-clock-outline" size="26" />
+    <span
+      class="ox-painel__selo"
+      :class="complemento.situacao === 'aprovado' ? 'ox-painel__selo--aprovado' : 'ox-painel__selo--analise'"
+      aria-hidden="true"
+    >
+      <v-icon :icon="t.icone" size="26" />
     </span>
 
-    <h2 id="ox-lobby-titulo" class="ox-painel__titulo">Cadastro em análise</h2>
+    <h2 id="ox-lobby-titulo" class="ox-painel__titulo">{{ t.titulo }}</h2>
 
-    <span class="ox-painel__chip">Em análise</span>
+    <span class="ox-painel__chip" :class="{ 'ox-painel__chip--aprovado': complemento.situacao === 'aprovado' }">{{ t.chip }}</span>
 
     <p class="ox-painel__protocolo">
       Enviado em {{ complemento.dataEnvio }} · protocolo {{ complemento.protocolo }}
     </p>
 
-    <p class="ox-painel__texto">
-      A equipe responsável está conferindo os dados e os documentos da cooperativa. Você recebe um
-      e-mail assim que a análise terminar. Enquanto isso, o complemento fica fechado para edição.
-    </p>
+    <p class="ox-painel__texto">{{ t.texto }}</p>
 
     <div class="ox-painel__acoes">
       <RgButton variant="secondary" @click="emit('ver-enviado')">Ver o que foi enviado</RgButton>
@@ -68,6 +78,16 @@ const complemento = useComplementoStore();
 .ox-painel__selo--analise {
   background: var(--rg-color-feedback-info-soft);
   color: var(--rg-color-feedback-info);
+}
+
+.ox-painel__selo--aprovado {
+  background: var(--rg-color-feedback-success-soft);
+  color: var(--rg-color-feedback-success);
+}
+
+.ox-painel__chip--aprovado {
+  background: var(--rg-color-feedback-success-soft) !important;
+  color: var(--rg-color-feedback-success) !important;
 }
 
 .ox-painel__titulo {
