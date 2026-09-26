@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8">
+  <meta name="doc-tipo" content="roteiro">
+  <meta name="doc-sistema" content="recicla-goias">
+  <meta name="doc-ciclo" content="2026-09">
+  <meta name="doc-atualizado" content="2026-09-26">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Roteiro · Ajustes da SEMAD no complemento de cadastro</title>
+<style>
+  :root{
+    --verde:#279C50; --verde-600:#1F8344; --verde-700:#176935; --verde-800:#12522A; --verde-50:#E9F6EE;
+    --slate-900:#0F172A; --slate-700:#334155; --slate-500:#64748B; --slate-300:#CBD5E1; --slate-200:#E2E8F0; --slate-100:#F1F5F9; --slate-50:#F8FAFC;
+    --ambar-50:#FFFBEB; --ambar-700:#B45309; --azul-50:#EFF6FF; --azul-700:#1D4ED8; --verm-50:#FEF2F2; --verm-700:#B91C1C;
+    --font:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Consolas,'Liberation Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font:15px/1.6 var(--font);color:var(--slate-900);background:var(--slate-50);padding:0 0 80px}
+  .topo{background:var(--verde-700);color:#fff;padding:36px 24px}
+  .topo .mx{max-width:920px;margin:0 auto}
+  .topo .eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.78;font-weight:600}
+  .topo h1{font-size:28px;letter-spacing:-.02em;margin:6px 0 8px;font-weight:700}
+  .topo p{opacity:.9;max-width:700px}
+  .topo a{color:#fff}
+  main{max-width:920px;margin:0 auto;padding:32px 24px}
+  .prog{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:14px;background:rgba(248,250,252,.94);backdrop-filter:blur(8px);padding:14px 0;margin-bottom:8px;border-bottom:1px solid var(--slate-200)}
+  .prog__bar{flex:1;height:8px;border-radius:99px;background:var(--slate-200);overflow:hidden}
+  .prog__fill{height:100%;width:0;background:var(--verde);border-radius:99px;transition:width .3s cubic-bezier(.2,0,0,1)}
+  .prog__n{font:600 13px/1 var(--font);color:var(--slate-500);white-space:nowrap}
+  .bloco{background:#fff;border:1px solid var(--slate-200);border-radius:14px;padding:24px 26px;margin-bottom:22px}
+  .bloco h2{font-size:18px;letter-spacing:-.01em;margin-bottom:4px;display:flex;align-items:center;gap:10px;font-weight:700}
+  .num{flex:none;width:28px;height:28px;border-radius:999px;background:var(--verde-700);color:#fff;display:inline-grid;place-items:center;font-size:13px;font-weight:700}
+  .fala{background:var(--slate-50);border-left:3px solid var(--verde);border-radius:0 10px 10px 0;padding:12px 16px;margin:12px 0;color:var(--slate-700);font-size:14px}
+  .fala b{color:var(--slate-900)}
+  .nota{background:var(--ambar-50);border-radius:10px;padding:12px 16px;margin:12px 0;font-size:13.5px;color:var(--ambar-700)}
+  .nota>b{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:3px}
+  ul{padding-left:20px;margin:8px 0}
+  li{margin:4px 0}
+  .passos li{margin:7px 0;font-size:14px}
+  .teste{border:1px solid var(--slate-200);border-radius:10px;padding:14px 18px;margin:12px 0}
+  .teste h3{font-size:14.5px;display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;font-weight:600}
+  .teste h3 input{width:17px;height:17px;margin-top:2px;flex:none;accent-color:var(--verde)}
+  .esper{background:var(--verde-50);border-radius:8px;padding:10px 14px;margin-top:8px;font-size:13.5px}
+  .esper>b{color:var(--verde-700);display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+  .esper label b{color:var(--slate-900);font-weight:600}
+  .esper label{display:flex;gap:8px;align-items:flex-start;margin:5px 0;cursor:pointer}
+  .esper input{width:15px;height:15px;margin-top:3px;flex:none;accent-color:var(--verde)}
+  .check{background:var(--verde-50);border-radius:10px;padding:14px 18px;margin-top:10px}
+  .check b{color:var(--verde-700)}
+  code{background:var(--slate-100);border-radius:6px;padding:1px 7px;font:500 13px/1.5 var(--mono)}
+  kbd{display:inline-block;font:600 11.5px/1.4 var(--mono);color:var(--slate-700);background:#fff;border:1px solid var(--slate-300);border-bottom-width:2px;border-radius:5px;padding:1px 6px}
+  a{color:var(--verde-700)}
+  .mini{font-size:12.5px;color:var(--slate-500)}
+  @media (prefers-reduced-motion: reduce){*{transition:none !important}}
+  @media print{
+    body{background:#fff} .prog{display:none} .topo{background:#fff;color:var(--slate-900);border-bottom:3px solid var(--verde-700);padding:0 0 16px}
+    .topo a{color:var(--slate-900)} .bloco{break-inside:avoid;border:0;border-top:1px solid var(--slate-200);border-radius:0;padding:14px 0}
+    .esper,.check,.fala,.nota{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
+</style>
+</head>
+<body>
+<header class="topo"><div class="mx">
+  <div class="eyebrow">Recicla Goiás · Operador Logístico · Setembro 2026</div>
+  <h1>Roteiro: os ajustes pedidos pela SEMAD</h1>
+  <p>O que a validação de 15/09 pediu no complemento de cadastro, e onde cada pedido aparece no protótipo. O roteiro segue a volta completa: o operador envia, a análise devolve com motivo, o operador corrige, a análise aprova. Cada teste traz o código do pedido (SEMAD-01 a SEMAD-15), o mesmo das telas no Figma.</p>
+</div></header>
+<main>
+
+<div class="prog">
+  <div class="prog__bar"><div class="prog__fill" id="pf"></div></div>
+  <span class="prog__n" id="pn">0 de 0</span>
+</div>
+
+<div class="bloco">
+  <h2><span class="num">0</span>Antes de começar</h2>
+  <div class="check">
+    <b>Preparação</b>
+    <ul>
+      <li>Abra <a href="/entrar" target="_blank" rel="noopener">/entrar</a>. Não há senha: é o login de navegação do protótipo. A tela com os quatro perfis só existe aqui; no sistema, cada link cai direto no login do módulo.</li>
+      <li>A volta passa por <b>dois perfis</b>: <b>Operador Logístico</b> e <b>Administração (SIC)</b>, que faz o papel do analista da SEMAD. Para trocar, volte a <a href="/entrar" target="_blank" rel="noopener">/entrar</a> na mesma aba: o estado do cadastro continua.</li>
+      <li>Os e-mails abrem em <a href="/emails-operador" target="_blank" rel="noopener">/emails-operador</a>, numa moldura de Gmail que é só visual. O seletor no canto inferior esquerdo troca entre ativação, correção e aprovado.</li>
+      <li>Anexo é simulado: o clique na área de anexo adiciona um arquivo de exemplo. Para recomeçar, use <b>Reiniciar demonstração</b> no painel do operador depois do envio.</li>
+    </ul>
+  </div>
+  <div class="fala">O desenho de referência está no Figma, página <b>♻️ Arquivo Recicla 2026</b>, nas seções <b>Setembro 2026 · Recicla Goiás · Complemento de cadastro do Operador Logístico</b> e <b>Setembro 2026 · Recicla Goiás Admin · Análise do cadastro do Operador Logístico</b>.</div>
+</div>
+
+<div class="bloco">
+  <h2><span class="num">1</span>O que a SEMAD pediu</h2>
+  <ul>
+    <li><b>SEMAD-01</b> · Alerta grande no topo quando o cadastro volta para correção.</li>
+    <li><b>SEMAD-02</b> · Alerta no stepper, no passo com pendência, no lugar do check.</li>
+    <li><b>SEMAD-03</b> · Todo link dos e-mails leva ao login do módulo Operador Logístico.</li>
+    <li><b>SEMAD-04</b> · Lista completa dos documentos no e-mail de ativação, acima do botão.</li>
+    <li><b>SEMAD-05</b> · Aviso de que os documentos não vão por e-mail.</li>
+    <li><b>SEMAD-06</b> · Manual anexo ao e-mail de aprovado.</li>
+    <li><b>SEMAD-07</b> · "Não aprovado" vira "precisa de correção", com o motivo por item e o reenvio.</li>
+    <li><b>SEMAD-08</b> · Análise manual por checklist de documento; Não com justificativa obrigatória.</li>
+    <li><b>SEMAD-09</b> · Motivos prontos (vencido, não enviado) e um "outro" com texto.</li>
+    <li><b>SEMAD-10</b> · Mensagem de correção montada e editável, como no formulário de não enquadramento.</li>
+    <li><b>SEMAD-11</b> · Nome e CNPJ juntos onde a organização é identificada.</li>
+    <li><b>SEMAD-12</b> · Nota da análise embaixo de cada item devolvido.</li>
+    <li><b>SEMAD-13</b> · Anexo em PDF.</li>
+    <li><b>SEMAD-14</b> · Textos do documento da SEMAD nos e-mails.</li>
+    <li><b>SEMAD-15</b> · Revisão com os campos preenchidos por etapa e os que ficaram em branco.</li>
+  </ul>
+</div>
+
+<div class="bloco">
+  <h2><span class="num">2</span>E-mail de ativação</h2>
+  <div class="teste">
+    <h3><input type="checkbox"> 2.1 · O que chega depois do pré-cadastro · SEMAD-03, 04, 05, 11, 14</h3>
+    <ul class="passos"><li>Abra <a href="/emails-operador?email=ativacao" target="_blank" rel="noopener">o e-mail de ativação</a>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Assunto <b>Confirme seu e-mail para continuar o cadastro</b> e a saudação com o nome da cooperativa</label>
+      <label><input type="checkbox"> Caixa de resumo com <b>organização, CNPJ e perfil</b></label>
+      <label><input type="checkbox"> Os <b>11 documentos</b> listados acima do botão, com os nomes que a SEMAD usa</label>
+      <label><input type="checkbox"> O destaque <b>Não é necessário enviar esses documentos por e-mail</b>, com a menção ao PDF</label>
+      <label><input type="checkbox"> O botão diz que abre o login do módulo Operador Logístico; embaixo, o canal de atendimento</label>
+    </div>
+  </div>
+</div>
+
+<div class="bloco">
+  <h2><span class="num">3</span>O operador preenche e envia</h2>
+  <div class="teste">
+    <h3><input type="checkbox"> 3.1 · Alerta no stepper · SEMAD-02</h3>
+    <ul class="passos"><li>Em <a href="/entrar" target="_blank" rel="noopener">/entrar</a>, entre como <b>Operador Logístico</b>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> <b>Documentos</b> e <b>Estrutura e capacidade</b> aparecem com o sinal de exclamação em âmbar, não com o check</label>
+      <label><input type="checkbox"> Clicar no passo leva a ele</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 3.2 · Documentos em PDF · SEMAD-13, 14</h3>
+    <ul class="passos"><li>Vá à etapa <b>Documentos</b>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> A descrição e a área de anexo pedem o arquivo <b>em PDF</b></label>
+      <label><input type="checkbox"> Ata, MTR, identidade com CPF e declaração de capacidade de operação/produção com os nomes da SEMAD</label>
+      <label><input type="checkbox"> A declaração de capacidade segue como <b>Não</b>: pendência declarada, sem bloquear</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 3.3 · A revisão conta os campos · SEMAD-15</h3>
+    <ul class="passos"><li>Clique em <b>Revisão e envio</b> no stepper.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Cada etapa diz <b>quantos campos foram preenchidos</b></label>
+      <label><input type="checkbox"> Estrutura aponta <b>"Capacidade de beneficiamento do vidro" em branco</b>, com o chip "1 em branco"</label>
+      <label><input type="checkbox"> O aviso diz que dá para enviar assim mesmo</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 3.4 · Enviar</h3>
+    <ul class="passos"><li>Marque a declaração, clique em <b>Enviar cadastro</b> e depois em <b>Acompanhar análise</b>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> A confirmação avisa que, se faltar algo, o cadastro volta para correção sem perder o que foi preenchido</label>
+      <label><input type="checkbox"> O painel mostra <b>Cadastro em análise</b></label>
+    </div>
+  </div>
+</div>
+
+<div class="bloco">
+  <h2><span class="num">4</span>A análise confere e devolve</h2>
+  <div class="teste">
+    <h3><input type="checkbox"> 4.1 · A fila · SEMAD-11</h3>
+    <ul class="passos"><li>Em <a href="/entrar" target="_blank" rel="noopener">/entrar</a>, entre como <b>Administração (SIC)</b> e clique em <b>Cadastros de operador</b> no menu.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> A Recicla Cerrado aparece <b>Em análise</b>, com o <b>nome e o CNPJ na mesma coluna</b></label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 4.2 · O checklist · SEMAD-08</h3>
+    <ul class="passos"><li>Clique na linha da Recicla Cerrado. Abra um arquivo pelo ícone de olho e feche.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Cabeçalho com nome, CNPJ e protocolo; os dados das outras etapas só para leitura</label>
+      <label><input type="checkbox"> Cada documento tem o arquivo e a pergunta <b>Em conformidade? Sim ou Não</b></label>
+      <label><input type="checkbox"> A declaração de capacidade já chega com <b>Não</b> e o motivo "documento não enviado"</label>
+      <label><input type="checkbox"> <b>Aprovar cadastro</b> fica bloqueado enquanto houver documento sem resposta ou em Não</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 4.3 · O motivo é obrigatório · SEMAD-08, 09</h3>
+    <ul class="passos"><li>Marque <b>Sim</b> nos documentos e <b>Não</b> no alvará. Sem escrever nada, clique em <b>Devolver para correção</b>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> O Não abre os motivos prontos: <b>documento vencido, documento não enviado, outro motivo</b></label>
+      <label><input type="checkbox"> Sem motivo, o campo fica em erro, o aviso diz quantos faltam e nada é enviado</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 4.4 · A mensagem editável · SEMAD-10</h3>
+    <ul class="passos"><li>Escolha <b>Documento vencido</b>, escreva o motivo (por exemplo, "O alvará apresentado está vencido desde março de 2026.") e clique em <b>Devolver para correção</b>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> A janela mostra o destinatário com nome e CNPJ e a mensagem já montada com os motivos</label>
+      <label><input type="checkbox"> Dá para editar o texto antes de enviar</label>
+      <label><input type="checkbox"> Em <b>Enviar e devolver</b>, a situação passa a <b>Devolvido para correção</b> e o histórico registra o evento</label>
+    </div>
+  </div>
+</div>
+
+<div class="bloco">
+  <h2><span class="num">5</span>E-mail de correção</h2>
+  <div class="teste">
+    <h3><input type="checkbox"> 5.1 · Correção no lugar de reprovação · SEMAD-03, 07, 11, 14</h3>
+    <ul class="passos"><li>No aviso do Admin, clique em <b>Ver o e-mail</b>, ou abra <a href="/emails-operador?email=correcao" target="_blank" rel="noopener">o e-mail de correção</a>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Assunto e título <b>Seu cadastro precisa de correção</b>; não existe mais "acesso encerrado"</label>
+      <label><input type="checkbox"> "O que precisa ser corrigido" traz <b>os motivos que o analista escreveu</b>, item por item</label>
+      <label><input type="checkbox"> Os três passos da SEMAD e o botão <b>Corrigir o cadastro</b></label>
+    </div>
+  </div>
+</div>
+
+<div class="bloco">
+  <h2><span class="num">6</span>O operador corrige e reenvia</h2>
+  <div class="teste">
+    <h3><input type="checkbox"> 6.1 · O alerta e a nota · SEMAD-01, 02, 12</h3>
+    <ul class="passos"><li>Entre de novo como <b>Operador Logístico</b>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> O complemento abre <b>direto em Documentos</b>, com o <b>alerta vermelho no topo</b> listando o que corrigir</label>
+      <label><input type="checkbox"> No stepper, Documentos fica em vermelho</label>
+      <label><input type="checkbox"> Embaixo de cada item devolvido, a <b>nota da análise</b>; os outros aparecem <b>Conferido</b> e travados</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 6.2 · Corrigir e reenviar</h3>
+    <ul class="passos"><li>Anexe o alvará novo; na declaração, marque Sim e anexe. Clique em <b>Ir para a revisão</b>, marque a declaração e clique em <b>Reenviar para análise</b>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Com tudo anexado, o alerta do topo vira <b>Correção pronta para reenvio</b></label>
+      <label><input type="checkbox"> A revisão mostra os documentos corrigidos e só Documentos tem Editar</label>
+      <label><input type="checkbox"> O painel passa a <b>Cadastro em nova análise</b></label>
+    </div>
+  </div>
+</div>
+
+<div class="bloco">
+  <h2><span class="num">7</span>Reanálise e aprovação</h2>
+  <div class="teste">
+    <h3><input type="checkbox"> 7.1 · Só o que mudou · SEMAD-08, 12</h3>
+    <ul class="passos"><li>Entre como <b>Administração (SIC)</b>, abra a Recicla Cerrado na fila, agora <b>Reenviado</b>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> Os documentos conferidos antes chegam <b>travados</b>; os corrigidos aparecem em destaque, com o motivo anterior</label>
+      <label><input type="checkbox"> O histórico mostra envio, devolução e reenvio</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 7.2 · Aprovar · SEMAD-06, 11</h3>
+    <ul class="passos"><li>Marque <b>Sim</b> nos corrigidos, clique em <b>Aprovar cadastro</b> e confirme.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> A janela repete nome e CNPJ antes de aprovar</label>
+      <label><input type="checkbox"> A situação passa a <b>Aprovado</b> e o aviso confirma o e-mail com o manual</label>
+    </div>
+  </div>
+</div>
+
+<div class="bloco">
+  <h2><span class="num">8</span>E-mail de aprovado</h2>
+  <div class="teste">
+    <h3><input type="checkbox"> 8.1 · O manual vai junto · SEMAD-03, 06, 11, 14</h3>
+    <ul class="passos"><li>Abra <a href="/emails-operador?email=aprovado" target="_blank" rel="noopener">o e-mail de aprovado</a>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> "A documentação enviada foi analisada e está de acordo com os requisitos"</label>
+      <label><input type="checkbox"> Resumo com organização, CNPJ, protocolo e data da aprovação</label>
+      <label><input type="checkbox"> O manual aparece <b>como anexo do e-mail</b>, com o vídeo como alternativa no texto</label>
+      <label><input type="checkbox"> O agradecimento pela parceria fecha a mensagem</label>
+    </div>
+  </div>
+  <div class="teste">
+    <h3><input type="checkbox"> 8.2 · O operador aprovado</h3>
+    <ul class="passos"><li>Entre como <b>Operador Logístico</b>.</li></ul>
+    <div class="esper"><b>Esperado</b>
+      <label><input type="checkbox"> O painel mostra <b>Cadastro aprovado</b>, com o acesso liberado</label>
+    </div>
+  </div>
+</div>
+
+<div class="bloco">
+  <h2><span class="num">9</span>Para confirmar com a SEMAD</h2>
+  <div class="nota"><b>Pontos em aberto</b>
+    <ul>
+      <li>Quais documentos aceitam imagem, além de PDF.</li>
+      <li>A lista final de motivos de reprovação (na reunião: vencido e faltando).</li>
+      <li>O manual atualizado de notas fiscais e transferências, e se haverá vídeo.</li>
+      <li>O endereço que envia os e-mails do sistema e o nome do item no menu do Admin.</li>
+      <li>Se existe caso de recusa definitiva, sem correção. Nesta rodada, não.</li>
+    </ul>
+  </div>
+</div>
+
+<p class="mini" style="text-align:center;margin-top:30px">Roteiro · Ajustes da SEMAD no complemento de cadastro do Operador Logístico · Recicla Goiás · setembro de 2026.</p>
+
+</main>
+<script>
+(function () {
+  var caixas = [].slice.call(document.querySelectorAll('input[type=checkbox]'));
+  var fill = document.getElementById('pf');
+  var num = document.getElementById('pn');
+  function atualizar() {
+    var feitos = caixas.filter(function (c) { return c.checked; }).length;
+    fill.style.width = (feitos / caixas.length * 100) + '%';
+    num.textContent = feitos + ' de ' + caixas.length;
+  }
+  caixas.forEach(function (c) { c.addEventListener('change', atualizar); });
+  atualizar();
+})();
+</script>
+</body>
+</html>

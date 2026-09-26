@@ -7,6 +7,11 @@
  * real a regra de bloqueio de avanço é da store, não daqui.
  */
 import { ETAPAS } from '@/data/mocks/operador';
+import { useComplementoStore } from '@/stores/complemento';
+
+// SEMAD-02: passo com pendência mostra alerta no lugar do check (âmbar = declarado
+// pelo operador, vermelho = devolvido pela análise).
+const complemento = useComplementoStore();
 
 defineProps<{ atual: number }>();
 const emit = defineEmits<{ (e: 'ir', etapa: number): void }>();
@@ -23,12 +28,14 @@ const emit = defineEmits<{ (e: 'ir', etapa: number): void }>();
           :class="{
             'ox-stepper__botao--feito': indice + 1 < atual,
             'ox-stepper__botao--atual': indice + 1 === atual,
+            [`ox-stepper__botao--${complemento.alertaEtapa(indice + 1)}`]: !!complemento.alertaEtapa(indice + 1),
           }"
           :aria-current="indice + 1 === atual ? 'step' : undefined"
           @click="emit('ir', indice + 1)"
         >
           <span class="ox-stepper__bola" aria-hidden="true">
-            <v-icon v-if="indice + 1 < atual" icon="mdi-check" size="15" />
+            <v-icon v-if="complemento.alertaEtapa(indice + 1)" icon="mdi-exclamation" size="15" />
+            <v-icon v-else-if="indice + 1 < atual || (complemento.situacao !== 'preenchendo' && indice + 1 < 5)" icon="mdi-check" size="15" />
             <template v-else>{{ indice + 1 }}</template>
           </span>
           <span class="ox-stepper__rotulo">{{ rotulo }}</span>
@@ -104,6 +111,16 @@ const emit = defineEmits<{ (e: 'ir', etapa: number): void }>();
 .ox-stepper__botao--atual .ox-stepper__rotulo {
   color: var(--rg-color-text-primary);
   font-weight: var(--rg-font-weight-semibold);
+}
+
+.ox-stepper__botao--warning .ox-stepper__bola {
+  background: var(--rg-color-feedback-warning-soft);
+  color: var(--rg-primitive-amber-700);
+}
+
+.ox-stepper__botao--danger .ox-stepper__bola {
+  background: var(--rg-color-feedback-danger-soft);
+  color: var(--rg-primitive-red-700);
 }
 
 .ox-stepper__botao:focus-visible {

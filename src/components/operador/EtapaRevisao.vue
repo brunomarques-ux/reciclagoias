@@ -52,22 +52,60 @@ const resumoEstrutura = computed(() => {
   return `${situacao}, triagem ${triagem}, ${vidro}.`;
 });
 
-const linhas = computed(() => [
-  {
-    etapa: 1,
-    titulo: 'Dados gerais',
-    resumo: 'Identificação e endereço completos.',
-    pendencias: 0,
-  },
-  {
-    etapa: 2,
-    titulo: 'Documentos',
-    resumo: resumoDocumentos.value,
-    pendencias: complemento.totalPendencias,
-  },
-  { etapa: 3, titulo: 'Operação', resumo: resumoOperacao.value, pendencias: 0 },
-  { etapa: 4, titulo: 'Estrutura e capacidade', resumo: resumoEstrutura.value, pendencias: 0 },
-]);
+/** SEMAD-15: quantos campos foram preenchidos e quais ficaram em branco, sem bloquear. */
+function contagem(n: number, extra: string) {
+  const c = complemento.campos(n);
+  const ok = c.filter((x) => x.ok).length;
+  const brancos = c.filter((x) => !x.ok).map((x) => `"${x.rotulo}"`);
+  const base = `${ok} de ${c.length} campos preenchidos`;
+  return {
+    resumo: brancos.length ? `${base} · ${brancos.join(', ')} em branco.` : `${base}${extra ? ' · ' + extra : '.'}`,
+    brancos: brancos.length,
+  };
+}
+
+const minusculo = (t: string) => t.charAt(0).toLowerCase() + t.slice(1);
+
+const linhas = computed(() => {
+  const l1 = contagem(1, '');
+  const l3 = contagem(3, minusculo(resumoOperacao.value));
+  const l4 = contagem(4, minusculo(resumoEstrutura.value));
+  const corrigidos = complemento.idsDevolvidos.filter((id) => complemento.docCorrigido(id)).length;
+  const doc = complemento.emCorrecao
+    ? {
+        resumo: `${complemento.documentosAnexados} de ${complemento.totalDocumentos} anexados · ${corrigidos} de ${complemento.idsDevolvidos.length} devolvidos atualizados na correção.`,
+        chip: complemento.faltaCorrigir.length ? `${complemento.faltaCorrigir.length} para corrigir` : `${corrigidos} corrigidos`,
+        tom: complemento.faltaCorrigir.length ? 'danger' : 'info',
+      }
+    : {
+        resumo: resumoDocumentos.value,
+        chip: complemento.totalPendencias ? `${complemento.totalPendencias} ${complemento.totalPendencias === 1 ? 'pendência' : 'pendências'}` : 'Completo',
+        tom: complemento.totalPendencias ? 'warning' : 'ok',
+      };
+  const linhaCampos = (etapa: number, titulo: string, c: { resumo: string; brancos: number }) => ({
+    etapa,
+    titulo,
+    resumo: c.resumo,
+    chip: c.brancos ? `${c.brancos} em branco` : 'Completo',
+    tom: c.brancos ? 'warning' : 'ok',
+  });
+  return [
+    linhaCampos(1, 'Dados gerais', l1),
+    { etapa: 2, titulo: 'Documentos', ...doc },
+    linhaCampos(3, 'Operação', l3),
+    linhaCampos(4, 'Estrutura e capacidade', l4),
+  ];
+});
+
+const brancosTotal = computed(() => [1, 3, 4].reduce((s, n) => s + complemento.campos(n).filter((x) => !x.ok).length, 0));
+
+const aviso = computed(() => {
+  const partes: string[] = [];
+  if (!complemento.emCorrecao && complemento.totalPendencias)
+    partes.push(`${complemento.totalPendencias} ${complemento.totalPendencias === 1 ? 'documento com pendência' : 'documentos com pendência'}`);
+  if (brancosTotal.value) partes.push(`${brancosTotal.value} ${brancosTotal.value === 1 ? 'campo em branco' : 'campos em branco'}`);
+  return partes.length ? `Há ${partes.join(' e ')}.` : '';
+});
 </script>
 
 <template>
@@ -92,10 +130,10 @@ const linhas = computed(() => [
         <article class="ox-linha">
           <span
             class="ox-linha__marcador"
-            :class="{ 'ox-linha__marcador--pendencia': linha.pendencias > 0 }"
+            :class="{ 'ox-linha__marcador--pendencia': linha.tom === 'warning', 'ox-linha__marcador--erro': linha.tom === 'danger' }"
             aria-hidden="true"
           >
-            <v-icon :icon="linha.pendencias > 0 ? 'mdi-exclamation' : 'mdi-check'" size="15" />
+            <v-icon :icon="linha.tom === 'warning' || linha.tom === 'danger' ? 'mdi-exclamation' : 'mdi-check'" size="15" />
           </span>
 
           <div class="ox-linha__texto">
@@ -104,7 +142,7 @@ const linhas = computed(() => [
           </div>
 
           <button
-            v-if="!somenteLeitura"
+            v-if="!somenteLeitura && (!complemento.emCorrecao || linha.etapa === 2)"
             type="button"
             class="ox-linha__editar"
             @click="emit('editar', linha.etapa)"
@@ -112,30 +150,23 @@ const linhas = computed(() => [
             Editar
           </button>
 
-          <span
-            class="ox-linha__chip"
-            :class="{ 'ox-linha__chip--pendencia': linha.pendencias > 0 }"
-          >
-            {{
-              linha.pendencias > 0
-                ? `${linha.pendencias} ${linha.pendencias === 1 ? 'pendência' : 'pendências'}`
-                : 'Completo'
-            }}
+          <span class="ox-linha__chip" :class="`ox-linha__chip--${linha.tom}`">
+            {{ linha.chip }}
           </span>
         </article>
       </li>
     </ul>
 
-    <div v-if="complemento.totalPendencias > 0" class="ox-aviso" role="status">
+    <div v-if="aviso" class="ox-aviso" role="status">
       <v-icon icon="mdi-information" size="18" aria-hidden="true" />
       <div>
-        <p class="ox-aviso__titulo">
-          Há {{ complemento.totalPendencias }}
-          {{ complemento.totalPendencias === 1 ? 'pendência de documento' : 'pendências de documento' }}.
-        </p>
+        <p class="ox-aviso__titulo">{{ aviso }}</p>
         <p class="ox-aviso__texto">
-          Dá para enviar assim mesmo: a pendência fica registrada e a análise pode pedir o arquivo
-          depois, sem recomeçar o cadastro.
+          {{
+            complemento.emCorrecao
+              ? 'Dá para reenviar assim mesmo: a nova análise confere os documentos corrigidos.'
+              : 'Dá para enviar assim mesmo: a pendência fica registrada e a análise pode pedir o arquivo depois, sem recomeçar o cadastro.'
+          }}
         </p>
       </div>
     </div>
@@ -274,9 +305,24 @@ const linhas = computed(() => [
   color: var(--rg-color-text-brand);
 }
 
-.ox-linha__chip--pendencia {
+.ox-linha__chip--warning {
   background: var(--rg-color-feedback-warning-soft);
   color: var(--rg-primitive-amber-700);
+}
+
+.ox-linha__chip--danger {
+  background: var(--rg-color-feedback-danger-soft);
+  color: var(--rg-primitive-red-700);
+}
+
+.ox-linha__chip--info {
+  background: var(--rg-color-feedback-info-soft);
+  color: var(--rg-color-feedback-info);
+}
+
+.ox-linha__marcador--erro {
+  background: var(--rg-color-feedback-danger-soft);
+  color: var(--rg-primitive-red-700);
 }
 
 .ox-aviso {
