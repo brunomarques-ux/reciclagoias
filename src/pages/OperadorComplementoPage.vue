@@ -18,7 +18,6 @@ import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import GestoraShell from '@/components/gestora/GestoraShell.vue';
-import ComplementoConfirmacao from '@/components/operador/ComplementoConfirmacao.vue';
 import ComplementoLobby from '@/components/operador/ComplementoLobby.vue';
 import ComplementoStepper from '@/components/operador/ComplementoStepper.vue';
 import EtapaDadosGerais from '@/components/operador/EtapaDadosGerais.vue';
@@ -49,10 +48,31 @@ function cancelar() {
   void router.push({ name: 'entrar' });
 }
 
+// Antes de enviar, a janela diz o que ainda está pendente, pelo nome: não é um
+// "tem certeza?" genérico. Enviado, o operador cai direto no "em análise", com a
+// confirmação no topo (a tela intermediária com "Acompanhar análise" saiu).
+const confirmando = ref(false);
+const recemEnviado = ref(false);
+const pendenciasEnvio = computed(() => {
+  const itens: string[] = [];
+  if (!complemento.emCorrecao) {
+    for (const d of complemento.documentosSemPossuir) itens.push(`${d.rotulo}: resposta Não, sem arquivo`);
+    for (const d of complemento.documentosAguardandoArquivo) itens.push(`${d.rotulo}: sem arquivo`);
+  }
+  for (const n of [1, 3, 4]) for (const c of complemento.campos(n)) if (!c.ok) itens.push(`${c.rotulo}: em branco`);
+  return itens;
+});
+
 function enviar() {
+  confirmando.value = true;
+}
+
+function confirmarEnvio() {
   if (complemento.emCorrecao) complemento.reenviar();
   else complemento.enviar();
-  visao.value = 'confirmacao';
+  confirmando.value = false;
+  recemEnviado.value = true;
+  visao.value = 'lobby';
   window.scrollTo({ top: 0 });
 }
 
@@ -64,9 +84,22 @@ function reiniciar() {
 
 <template>
   <GestoraShell secao-ativa="Complemento de cadastro" :explorador="false">
-    <ComplementoLobby v-if="visao === 'lobby'" @ver-enviado="visao = 'enviado'" @reiniciar="reiniciar" />
+    <template v-if="visao === 'lobby'">
+      <div v-if="recemEnviado" class="ox-alerta ox-alerta--sucesso" role="status">
+        <v-icon icon="mdi-check-circle" size="22" aria-hidden="true" />
+        <div>
+          <p class="ox-alerta__titulo">
+            {{ complemento.situacao === 'reenviado' ? 'Cadastro reenviado para análise' : 'Cadastro enviado para análise' }}
+          </p>
+          <p class="ox-alerta__texto">
+            Protocolo {{ complemento.protocolo }}. O resultado chega no e-mail cadastrado. Se a análise encontrar algum
+            problema, o cadastro volta para correção, sem perder o que já foi preenchido.
+          </p>
+        </div>
+      </div>
+      <ComplementoLobby @ver-enviado="visao = 'enviado'" @reiniciar="reiniciar" />
+    </template>
 
-    <ComplementoConfirmacao v-else-if="visao === 'confirmacao'" @acompanhar="visao = 'lobby'" />
 
     <template v-else-if="visao === 'enviado'">
       <header class="ox-pagina__cabecalho">
@@ -158,6 +191,34 @@ function reiniciar() {
         </RgButton>
       </footer>
     </template>
+    <div v-if="confirmando" class="ox-veu" @click.self="confirmando = false">
+      <div class="ox-janela" role="dialog" aria-modal="true" aria-labelledby="ox-janela-titulo">
+        <h2 id="ox-janela-titulo" class="ox-janela__titulo">
+          {{ complemento.emCorrecao ? 'Reenviar o cadastro para análise?' : 'Enviar o cadastro para análise?' }}
+        </h2>
+        <p class="ox-janela__texto">
+          Depois do envio, o complemento fica fechado para edição até o resultado da análise.
+        </p>
+        <div v-if="pendenciasEnvio.length" class="ox-janela__pendencias">
+          <p>
+            <strong>
+              {{ pendenciasEnvio.length === 1 ? 'Ainda há 1 item pendente' : `Ainda há ${pendenciasEnvio.length} itens pendentes` }}
+            </strong>
+          </p>
+          <ul>
+            <li v-for="p in pendenciasEnvio" :key="p">{{ p }}</li>
+          </ul>
+          <p>Dá para enviar assim, mas a análise pode devolver o cadastro para correção.</p>
+        </div>
+        <p v-else class="ox-janela__texto">Tudo preenchido e anexado.</p>
+        <div class="ox-janela__acoes">
+          <RgButton variant="outline" @click="confirmando = false">Voltar e revisar</RgButton>
+          <RgButton variant="primary" @click="confirmarEnvio">
+            {{ complemento.emCorrecao ? 'Reenviar para análise' : 'Enviar para análise' }}
+          </RgButton>
+        </div>
+      </div>
+    </div>
   </GestoraShell>
 </template>
 
@@ -173,6 +234,76 @@ function reiniciar() {
   background: var(--rg-color-feedback-danger-soft);
   border: 1px solid var(--rg-primitive-red-100);
   color: var(--rg-color-feedback-danger);
+}
+
+.ox-alerta--sucesso {
+  background: var(--rg-color-feedback-success-soft);
+  color: var(--rg-color-feedback-success);
+}
+
+.ox-alerta--sucesso .ox-alerta__texto {
+  color: var(--rg-color-text-secondary);
+}
+
+.ox-veu {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: start center;
+  padding-top: 14vh;
+  background: rgb(15 23 42 / 0.55);
+}
+
+.ox-janela {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rg-space-4);
+  width: min(560px, calc(100vw - 32px));
+  padding: var(--rg-space-8);
+  border-radius: var(--rg-radius-lg);
+  background: var(--rg-color-surface-raised);
+}
+
+.ox-janela__titulo {
+  margin: 0;
+  font-size: 20px;
+  line-height: 26px;
+  font-weight: var(--rg-font-weight-bold);
+  color: var(--rg-color-text-primary);
+}
+
+.ox-janela__texto {
+  margin: 0;
+  font-size: var(--rg-font-size-sm);
+  line-height: var(--rg-line-height-base);
+  color: var(--rg-color-text-secondary);
+}
+
+.ox-janela__pendencias {
+  padding: var(--rg-space-4);
+  border-radius: var(--rg-radius-md);
+  background: var(--rg-color-feedback-warning-soft);
+  font-size: var(--rg-font-size-sm);
+  line-height: var(--rg-line-height-base);
+  color: var(--rg-primitive-amber-700);
+}
+
+.ox-janela__pendencias p {
+  margin: 0;
+}
+
+.ox-janela__pendencias ul {
+  margin: var(--rg-space-2) 0;
+  padding-left: var(--rg-space-5);
+  color: var(--rg-color-text-primary);
+}
+
+.ox-janela__acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--rg-space-3);
+  margin-top: var(--rg-space-2);
 }
 
 .ox-alerta--info {

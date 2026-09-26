@@ -17,7 +17,26 @@ const router = useRouter();
 const route = useRoute();
 const sessao = useSessaoStore();
 
-const perfilEscolhido = ref<PerfilId>('gestora');
+const perfilDaUrl = PERFIS.find((p) => p.id === route.query.perfil)?.id;
+const perfilEscolhido = ref<PerfilId>(perfilDaUrl ?? 'gestora');
+
+/*
+ * O botão do e-mail de ativação cai aqui, no login do módulo, com um aviso no topo
+ * (decisão de 26/09, no lugar de uma página intermediária). O mesmo link serve para
+ * o primeiro clique e para os seguintes; se expirou, dá para pedir outro.
+ */
+const reenviado = ref(false);
+const AVISOS = {
+  ok: { tom: 'sucesso', icone: 'mdi-check-circle', titulo: 'E-mail confirmado', texto: 'Entre com o e-mail e a senha do pré-cadastro para preencher o complemento de cadastro.' },
+  ja: { tom: 'info', icone: 'mdi-information', titulo: 'Este e-mail já está confirmado', texto: 'Não é preciso confirmar de novo. Entre para continuar o complemento de cadastro ou acompanhar a análise.' },
+  expirado: { tom: 'aviso', icone: 'mdi-clock-alert-outline', titulo: 'Este link de confirmação expirou', texto: 'O e-mail ainda não foi confirmado. Peça um novo link: ele chega no e-mail do pré-cadastro.' },
+  reenviado: { tom: 'sucesso', icone: 'mdi-email-fast-outline', titulo: 'Enviamos um novo link de confirmação', texto: 'Confira a caixa de entrada e o spam de contato@reciclacerrado.org.br. O e-mail é o mesmo de ativação, com a lista de documentos.' },
+} as const;
+const aviso = computed(() => {
+  if (reenviado.value) return AVISOS.reenviado;
+  const c = route.query.confirmacao;
+  return c === 'ok' || c === 'ja' || c === 'expirado' ? AVISOS[c] : null;
+});
 
 const perfilAtivo = computed(() => PERFIS.find((p) => p.id === perfilEscolhido.value));
 
@@ -48,6 +67,22 @@ function entrar() {
           Protótipo de navegação do Recicla Goiás. Escolha o perfil para conhecer as telas —
           não há senha e nenhum dado é enviado.
         </p>
+      </div>
+
+      <div v-if="aviso" class="gx-aviso" :class="`gx-aviso--${aviso.tom}`" role="status">
+        <v-icon :icon="aviso.icone" size="20" aria-hidden="true" />
+        <div>
+          <p class="gx-aviso__titulo">{{ aviso.titulo }}</p>
+          <p class="gx-aviso__texto">{{ aviso.texto }}</p>
+          <button
+            v-if="route.query.confirmacao === 'expirado' && !reenviado"
+            type="button"
+            class="gx-aviso__acao"
+            @click="reenviado = true"
+          >
+            Reenviar e-mail de confirmação
+          </button>
+        </div>
       </div>
 
       <form class="gx-entrar__form" @submit.prevent="entrar">
@@ -107,6 +142,14 @@ function entrar() {
 </template>
 
 <style scoped>
+.gx-aviso { display: flex; gap: var(--rg-space-3); padding: var(--rg-space-4); border-radius: var(--rg-radius-md); }
+.gx-aviso--sucesso { background: var(--rg-color-feedback-success-soft); color: var(--rg-color-feedback-success); }
+.gx-aviso--info { background: var(--rg-color-feedback-info-soft); color: var(--rg-color-feedback-info); }
+.gx-aviso--aviso { background: var(--rg-color-feedback-warning-soft); color: var(--rg-primitive-amber-700); }
+.gx-aviso__titulo { margin: 0; font-size: var(--rg-font-size-sm); font-weight: var(--rg-font-weight-semibold); }
+.gx-aviso__texto { margin: var(--rg-space-1) 0 0; font-size: var(--rg-font-size-sm); line-height: var(--rg-line-height-base); color: var(--rg-color-text-secondary); }
+.gx-aviso__acao { margin-top: var(--rg-space-3); padding: var(--rg-space-2) var(--rg-space-4); border: 1px solid currentColor; border-radius: var(--rg-radius-md); background: var(--rg-color-surface-raised); color: inherit; font: inherit; font-size: var(--rg-font-size-sm); font-weight: var(--rg-font-weight-semibold); cursor: pointer; }
+
 .gx-entrar {
   display: grid;
   place-items: center;
