@@ -2,67 +2,153 @@
 /**
  * Análise do cadastro do Operador Logístico, na área Admin (SEMAD).
  *
- * Figma: seção `Setembro 2026 · Recicla Goiás Admin · Análise do cadastro do
- * Operador Logístico`. Pedidos da SEMAD em 15/09: checklist manual por documento
- * (SEMAD-08), "Não" com motivo obrigatório e motivos prontos (SEMAD-09), mensagem
- * montada e editável antes de devolver (SEMAD-10), nome e CNPJ juntos (SEMAD-11).
- * As regras moram na store `complemento`; aqui só a tela.
+ * Figma: `Recicla Goiás - Figma`, seção do Admin (5901:10683), rodada da planning de
+ * 16/10 (fechada em 18/10): L1·2 a L1·4 (✓/✕ por campo e motivo do documento), L2·2
+ * e L2·3 (mensagem ao operador e devolvido), L3·2 (documento aberto), L4·2 a L4·4
+ * (reanálise e aprovação), L5·1 (salvar sem descrição) e L6 (editar o salvo).
+ *
+ * A análise confere todos os campos (✓ correto ou ✕ com a observação do que
+ * corrigir) e os 11 documentos (em conformidade? Sim ou Não com motivo). O analista
+ * não altera o dado. Só leitura com `?modo=visualizar` ou quando a situação não é
+ * Em análise. As regras moram na store `complemento`; aqui só a tela.
  */
-import { computed, onMounted, ref } from 'vue';
+import { computed, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
+import { dataPorExtenso, partesDaData, type Reanalise } from '@/components/admin/analise';
+import AxDocumentoConferencia from '@/components/admin/AxDocumentoConferencia.vue';
+import AxEtapaConferencia from '@/components/admin/AxEtapaConferencia.vue';
+import AxHistorico from '@/components/admin/AxHistorico.vue';
+import AxJanela from '@/components/admin/AxJanela.vue';
 import GestoraShell from '@/components/gestora/GestoraShell.vue';
-import EtapaRevisao from '@/components/operador/EtapaRevisao.vue';
-import OxEscolhaSimNao from '@/components/operador/OxEscolhaSimNao.vue';
 import RgButton from '@/components/RgButton.vue';
-import { DOCUMENTOS_EXIGIDOS, MOTIVOS_ANALISE, PRE_CADASTRO } from '@/data/mocks/operador';
+import { DOCUMENTOS_EXIGIDOS, ETAPAS, PRE_CADASTRO, ROTULO_TIPO } from '@/data/mocks/operador';
 import { useComplementoStore } from '@/stores/complemento';
 
+const route = useRoute();
+const router = useRouter();
 const c = useComplementoStore();
-const f = c.formulario;
 
-onMounted(() => c.prepararConferencia());
+/** Só a Recicla Cerrado (a linha viva da fila) tem cadastro aberto no protótipo. */
+const existe = computed(
+  () => c.situacao !== 'preenchendo' && String(route.params.protocolo ?? '').toLowerCase() === c.protocolo.toLowerCase(),
+);
+const visualizar = computed(() => route.query.modo === 'visualizar');
+const leitura = computed(() => visualizar.value || c.situacao !== 'em-analise');
 
-const aberta = computed(() => c.situacao === 'em-analise' || c.situacao === 'reenviado');
-const STATUS: Record<string, { rotulo: string; tom: string; icone: string }> = {
-  'em-analise': { rotulo: 'Em análise', tom: 'info', icone: 'mdi-clock-outline' },
-  reenviado: { rotulo: 'Reenviado', tom: 'info', icone: 'mdi-sync' },
-  devolvido: { rotulo: 'Devolvido para correção', tom: 'warning', icone: 'mdi-history' },
-  aprovado: { rotulo: 'Aprovado', tom: 'success', icone: 'mdi-check' },
-  preenchendo: { rotulo: 'Em complementação', tom: 'info', icone: 'mdi-pencil' },
-};
-const status = computed(() => STATUS[c.situacao] ?? STATUS['em-analise']);
+/** Data do evento mais recente com esse título no histórico. */
+const dataDoEvento = (titulo: string) => c.historico.find((h) => h.titulo === titulo)?.data ?? null;
 
-const corrigido = (id: string) => c.situacao === 'reenviado' && c.devolvidos[id] !== undefined;
-const tentouDevolver = ref(false);
+const reanalise = computed<Reanalise | null>(() => {
+  if (!c.reenvio || c.situacao === 'devolvido' || c.situacao === 'preenchendo') return null;
+  return {
+    corrigidoEm: partesDaData(c.dataEnvio)?.dia ?? '',
+    conferidoEm: partesDaData(dataDoEvento('Devolvido para correção'))?.dia ?? '',
+  };
+});
+
+// ---- cabeçalho ----
+const selo = computed(() => {
+  switch (c.situacao) {
+    case 'em-analise':
+      return { rotulo: 'Em análise', tom: 'info', icone: c.reenvio ? 'mdi-sync' : 'mdi-clock-outline' };
+    case 'devolvido':
+      return { rotulo: 'Devolvido para correção', tom: 'warning', icone: 'mdi-history' };
+    case 'aprovado':
+      return { rotulo: 'Aprovado', tom: 'success', icone: 'mdi-check' };
+    default:
+      return { rotulo: 'Enviado', tom: 'neutro', icone: c.reenvio ? 'mdi-sync' : 'mdi-send-outline' };
+  }
+});
+
+const linhaDoCabecalho = computed(() => {
+  const tipo = ROTULO_TIPO[PRE_CADASTRO.tipoOrganizacao].toLowerCase();
+  const quando =
+    c.situacao === 'aprovado'
+      ? `aprovado em ${partesDaData(dataDoEvento('Cadastro aprovado'))?.data ?? ''}`
+      : `${c.reenvio ? 'reenviado' : 'enviado'} em ${partesDaData(c.dataEnvio)?.data ?? ''}`;
+  return `CNPJ ${PRE_CADASTRO.cnpj} · protocolo ${c.protocolo} · ${tipo} · ${quando}`;
+});
+
+const descricaoDocumentos = computed(() => {
+  if (c.situacao === 'devolvido' || c.situacao === 'aprovado')
+    return 'Análise concluída. Os documentos e os motivos ficam disponíveis apenas para consulta.';
+  if (c.situacao === 'enviado') return 'Só para leitura. A conferência começa quando alguém clica em Analisar.';
+  if (visualizar.value) return `Só para leitura: a análise está com ${c.analista ?? 'outra pessoa'}.`;
+  return 'Abra cada documento e indique se está em conformidade. Para cada Não, descreva e salve o motivo, que é enviado ao operador no e-mail de correção. A aprovação exige todos os documentos em conformidade.';
+});
+
+// ---- rodapé ----
+const totalCampos = computed(() => c.todosOsCampos.length);
+const tudoConferido = computed(
+  () => c.camposConferidos === totalCampos.value && c.docsConferidos === c.totalDocumentos,
+);
+const motivoAberto = computed(() => c.docsEmNao.some((d) => !c.conferencia[d.id]?.salvo));
+
+const contagem = computed(() => {
+  const n = c.totalPendencias;
+  const pendencias = n === 0 ? 'nenhuma pendência' : `${n} ${n === 1 ? 'pendência' : 'pendências'}`;
+  const base = tudoConferido.value
+    ? 'Tudo conferido'
+    : `Conferidos: ${c.camposConferidos} de ${totalCampos.value} campos e ${c.docsConferidos} de ${c.totalDocumentos} documentos`;
+  const aberto = c.emEdicao
+    ? motivoAberto.value
+      ? ' · salve o motivo para devolver'
+      : ' · salve a observação para devolver'
+    : '';
+  return `${base} · ${pendencias}${aberto}`;
+});
+
+const situacaoNoRodape = computed(() => {
+  switch (c.situacao) {
+    case 'devolvido':
+      return `Devolvido em ${dataPorExtenso(dataDoEvento('Devolvido para correção'))}. Aguardando o reenvio pelo operador.`;
+    case 'aprovado':
+      return `Aprovado em ${dataPorExtenso(dataDoEvento('Cadastro aprovado'))}. O acesso completo foi liberado.`;
+    case 'enviado':
+      return `${c.reenvio ? 'Reenviado' : 'Enviado'} em ${dataPorExtenso(c.dataEnvio)}. Aguardando o início da análise.`;
+    default:
+      return `Em análise por ${c.analista ?? 'outra pessoa'}. Aberto só para leitura.`;
+  }
+});
+
+function analisar() {
+  c.iniciarAnalise();
+  void router.replace({ query: {} });
+}
+
+function abrirAnalise() {
+  void router.replace({ query: {} });
+}
+
+// ---- janelas e aviso ----
 const docVisto = ref<string | null>(null);
 const janela = ref<'mensagem' | 'aprovar' | null>(null);
 const mensagem = ref('');
-const aviso = ref<{ texto: string; email: string } | null>(null);
+const aviso = ref<{ texto: string; email: 'correcao' | 'aprovado' } | null>(null);
+
+const arquivoVisto = computed(() => (docVisto.value ? c.formulario.documentos[docVisto.value]?.arquivo ?? '' : ''));
 
 function pedirDevolucao() {
-  tentouDevolver.value = true;
-  if (c.semMotivo.length) return;
+  if (!c.podeDevolver) return;
   mensagem.value = c.mensagemPadrao;
   janela.value = 'mensagem';
 }
 
 function devolver() {
-  const n = c.emNao.length;
+  if (!mensagem.value.trim()) return;
   c.devolver(mensagem.value);
   janela.value = null;
-  tentouDevolver.value = false;
-  aviso.value = { texto: `Cadastro devolvido. O e-mail com ${n} ${n === 1 ? 'documento' : 'documentos'} para correção foi enviado.`, email: 'correcao' };
+  aviso.value = { texto: 'Cadastro devolvido para correção. O operador foi notificado por e-mail.', email: 'correcao' };
   window.scrollTo({ top: 0 });
 }
 
 function aprovar() {
   c.aprovar();
   janela.value = null;
-  aviso.value = { texto: 'Cadastro aprovado. O e-mail com o manual foi enviado ao operador.', email: 'aprovado' };
+  aviso.value = { texto: 'Cadastro aprovado. O operador foi notificado por e-mail.', email: 'aprovado' };
   window.scrollTo({ top: 0 });
 }
-
-const arquivo = (id: string) => (f.documentos[id]?.possui === 'sim' ? f.documentos[id]?.arquivo : null);
 </script>
 
 <template>
@@ -73,263 +159,407 @@ const arquivo = (id: string) => (f.documentos[id]?.possui === 'sim' ? f.document
       <strong>{{ PRE_CADASTRO.nomeFantasia }}</strong>
     </nav>
 
-    <div v-if="aviso" class="ax-toast" role="status">
-      <v-icon icon="mdi-check-circle" size="18" aria-hidden="true" />
-      <span>{{ aviso.texto }}</span>
-      <RouterLink :to="{ name: 'emails-operador', query: { email: aviso.email } }">Ver o e-mail</RouterLink>
-    </div>
-
-    <header class="ax-cab">
-      <span class="ax-status" :class="`ax-status--${status.tom}`">
-        <v-icon :icon="status.icone" size="16" aria-hidden="true" />{{ status.rotulo }}
-      </span>
-      <h1 class="ax-titulo">{{ PRE_CADASTRO.razaoSocial }}</h1>
-      <p class="ax-sub">
-        CNPJ {{ PRE_CADASTRO.cnpj }} · protocolo {{ c.protocolo }} · cooperativa · enviado em {{ c.dataEnvio }}
-      </p>
-    </header>
-
-    <section class="ax-bloco">
-      <h2 class="ax-h2">Dados do cadastro</h2>
-      <p class="ax-desc">O que o operador declarou, só para leitura: a análise confere os documentos.</p>
-      <EtapaRevisao somente-leitura />
-    </section>
-
-    <section class="ax-card">
-      <h2 class="ax-h2">Documentos</h2>
+    <section v-if="!existe" class="ax-card ax-vazio">
+      <h1 class="ax-h2">Cadastro não encontrado</h1>
       <p class="ax-desc">
-        Abra cada arquivo e marque se está em conformidade. Não pede o motivo, que vai para o e-mail do operador.
-        Aprovar só com todos em Sim.
+        No protótipo, só o cadastro da Recicla Cerrado abre, e só depois de enviado pelo perfil Operador Logístico.
       </p>
-
-      <ul class="ax-docs">
-        <li v-for="d in DOCUMENTOS_EXIGIDOS" :key="d.id" class="ax-doc" :class="{ 'ax-doc--corrigido': corrigido(d.id) }">
-          <div class="ax-doc__esq">
-            <p class="ax-doc__nome">
-              {{ d.rotulo }}
-              <span v-if="corrigido(d.id)" class="ax-chip">Corrigido pelo operador</span>
-            </p>
-            <div v-if="arquivo(d.id)" class="ax-arquivo">
-              <v-icon icon="mdi-paperclip" size="16" aria-hidden="true" />
-              <span>{{ arquivo(d.id) }}</span>
-              <button type="button" class="ax-ver" :aria-label="`Ver ${d.rotulo}`" @click="docVisto = d.id">
-                <v-icon icon="mdi-eye-outline" size="18" aria-hidden="true" />
-              </button>
-            </div>
-            <p v-else class="ax-mudo">O operador marcou que a cooperativa não possui o documento.</p>
-            <p v-if="corrigido(d.id)" class="ax-mudo">Motivo na análise anterior: {{ c.devolvidos[d.id] }}</p>
-
-            <div v-if="aberta && c.conferencia[d.id]?.resposta === 'nao'" class="ax-motivo">
-              <span class="ax-rotulo">Motivo</span>
-              <div class="ax-radios" role="radiogroup" :aria-label="`Motivo de ${d.rotulo}`">
-                <label v-for="m in MOTIVOS_ANALISE" :key="m.id" class="ax-radio">
-                  <input v-model="c.conferencia[d.id]!.motivo" type="radio" :value="m.id" :name="`motivo-${d.id}`" />
-                  {{ m.rotulo }}
-                </label>
-              </div>
-              <label class="ax-rotulo" :for="`texto-${d.id}`">Explique ao operador</label>
-              <textarea
-                :id="`texto-${d.id}`"
-                v-model="c.conferencia[d.id]!.texto"
-                class="ax-textarea"
-                :class="{ 'ax-textarea--erro': tentouDevolver && (!c.conferencia[d.id]?.motivo || !c.conferencia[d.id]?.texto.trim()) }"
-                rows="2"
-                placeholder="Descreva o motivo para o operador"
-              />
-              <span
-                class="ax-ajuda"
-                :class="{ 'ax-ajuda--erro': tentouDevolver && (!c.conferencia[d.id]?.motivo || !c.conferencia[d.id]?.texto.trim()) }"
-              >
-                {{
-                  tentouDevolver && (!c.conferencia[d.id]?.motivo || !c.conferencia[d.id]?.texto.trim())
-                    ? 'Informe o motivo para o operador. Ele vai no e-mail de correção.'
-                    : 'Obrigatório. O texto vai para o e-mail de correção, embaixo do nome do documento.'
-                }}
-              </span>
-            </div>
-          </div>
-
-          <div class="ax-doc__dir">
-            <span class="ax-rotulo">{{ c.conferencia[d.id]?.travado ? 'Conferido antes' : 'Em conformidade?' }}</span>
-            <OxEscolhaSimNao
-              :class="{ 'ax-travado': c.conferencia[d.id]?.travado || !aberta, 'ax-nao': c.conferencia[d.id]?.resposta === 'nao' }"
-              :rotulo="`${d.rotulo} em conformidade?`"
-              :model-value="c.conferencia[d.id]?.resposta ?? null"
-              @update:model-value="c.marcar(d.id, $event)"
-            />
-          </div>
-        </li>
-      </ul>
+      <RouterLink class="ax-link" to="/admin/cadastros">Voltar para a fila</RouterLink>
     </section>
 
-    <div v-if="tentouDevolver && c.semMotivo.length" class="ax-erro" role="alert">
-      <v-icon icon="mdi-alert-circle" size="20" aria-hidden="true" />
-      <div>
-        <strong>Falta o motivo de {{ c.semMotivo.length }} {{ c.semMotivo.length === 1 ? 'documento' : 'documentos' }}</strong>
-        <p>Escolha o motivo e explique ao operador o que corrigir. O cadastro só volta com o motivo de cada documento em Não.</p>
+    <template v-else>
+      <div v-if="aviso" class="ax-toast" role="status">
+        <v-icon icon="mdi-check-circle" size="18" aria-hidden="true" />
+        <span>{{ aviso.texto }}</span>
+        <RouterLink :to="{ name: 'emails-operador', query: { email: aviso.email } }">Ver o e-mail</RouterLink>
+        <button type="button" class="ax-toast__x" aria-label="Fechar aviso" @click="aviso = null">
+          <v-icon icon="mdi-close" size="16" aria-hidden="true" />
+        </button>
       </div>
-    </div>
 
-    <footer class="ax-rodape">
-      <span v-if="aberta">
-        {{ c.conferidos }} de {{ c.totalDocumentos }} conferidos ·
-        {{ c.emNao.length ? `${c.emNao.length} para correção` : 'nenhum para correção' }}
-      </span>
-      <span v-else-if="c.situacao === 'devolvido'">Devolvido para correção. Aguardando o reenvio do operador.</span>
-      <span v-else-if="c.situacao === 'aprovado'">Aprovado. O acesso completo foi liberado.</span>
-      <div v-if="aberta" class="ax-rodape__botoes">
-        <RgButton :variant="c.emNao.length ? 'primary' : 'outline'" :disabled="!c.emNao.length" @click="pedirDevolucao">
-          Devolver para correção
-        </RgButton>
-        <RgButton variant="primary" :disabled="!c.podeAprovar" @click="janela = 'aprovar'">Aprovar cadastro</RgButton>
-      </div>
-    </footer>
+      <header class="ax-cab">
+        <span class="ax-selo" :class="`ax-selo--${selo.tom}`">
+          <v-icon :icon="selo.icone" size="16" aria-hidden="true" />{{ selo.rotulo }}
+        </span>
+        <h1 class="ax-titulo">{{ PRE_CADASTRO.razaoSocial }}</h1>
+        <p class="ax-sub">{{ linhaDoCabecalho }}</p>
+      </header>
 
-    <section v-if="c.historico.length" class="ax-card">
-      <h2 class="ax-h2">Histórico</h2>
-      <ol class="ax-hist">
-        <li v-for="(h, i) in c.historico" :key="i">
-          <span class="ax-hist__data">{{ h.data }}</span>
-          <div>
-            <strong>{{ h.titulo }}</strong>
-            <p>{{ h.desc }}</p>
-            <small>{{ h.quem }}</small>
-          </div>
-        </li>
-      </ol>
-    </section>
-
-    <!-- janelas -->
-    <div v-if="docVisto || janela" class="ax-veu" @click.self="docVisto = null; janela = null">
-      <div v-if="docVisto" class="ax-janela ax-janela--pdf" role="dialog" aria-modal="true" aria-label="Documento">
-        <header class="ax-janela__topo">
-          <strong><v-icon icon="mdi-paperclip" size="16" aria-hidden="true" /> {{ arquivo(docVisto) }}</strong>
-          <button type="button" class="ax-x" aria-label="Fechar" @click="docVisto = null"><v-icon icon="mdi-close" size="18" /></button>
-        </header>
-        <div class="ax-pdf">
-          <div class="ax-pdf__folha">
-            <span /><span /><span /><span /><span /><span /><span />
-          </div>
+      <section class="ax-bloco" aria-labelledby="ax-dados-titulo">
+        <h2 id="ax-dados-titulo" class="ax-h2">Dados do cadastro</h2>
+        <p class="ax-desc">
+          Confira cada campo: ✓ quando estiver correto, ✕ quando a organização precisar corrigir, com a observação do que
+          mudar. O dado não é alterado aqui: quem corrige é a organização.
+        </p>
+        <div class="ax-etapas">
+          <AxEtapaConferencia
+            v-for="n in [1, 3, 4]"
+            :key="n"
+            :etapa="n"
+            :titulo="ETAPAS[n - 1] ?? ''"
+            :aberta-inicial="n === 1"
+            :leitura="leitura"
+            :reanalise="reanalise"
+          />
         </div>
-        <footer class="ax-janela__acoes">
-          <RgButton variant="outline" @click="docVisto = null">Fechar</RgButton>
-          <RgButton variant="primary" icon="mdi-download">Baixar documento</RgButton>
-        </footer>
-      </div>
+      </section>
 
-      <div v-else-if="janela === 'mensagem'" class="ax-janela" role="dialog" aria-modal="true" aria-labelledby="ax-msg-t">
-        <header class="ax-janela__topo">
-          <h2 id="ax-msg-t" class="ax-janela__titulo">Revisar a mensagem para o operador</h2>
-          <button type="button" class="ax-x" aria-label="Fechar" @click="janela = null"><v-icon icon="mdi-close" size="18" /></button>
-        </header>
-        <p class="ax-desc">
-          A mensagem vai no e-mail "Seu cadastro precisa de correção", para {{ PRE_CADASTRO.email }}. Ela sai montada com
-          os motivos de cada documento, e dá para editar antes de enviar.
-        </p>
-        <p class="ax-para"><strong>Para:</strong> {{ PRE_CADASTRO.razaoSocial }} · CNPJ {{ PRE_CADASTRO.cnpj }}</p>
-        <label class="ax-rotulo" for="ax-msg">Mensagem</label>
-        <textarea id="ax-msg" v-model="mensagem" class="ax-textarea" rows="11" />
-        <span class="ax-ajuda">O restante do e-mail entra sozinho: saudação, nome e CNPJ, o botão Corrigir o cadastro e o suporte.</span>
-        <footer class="ax-janela__acoes">
-          <RgButton variant="outline" @click="janela = null">Voltar</RgButton>
-          <RgButton variant="primary" @click="devolver">Enviar e devolver</RgButton>
-        </footer>
-      </div>
+      <section class="ax-card" aria-labelledby="ax-docs-titulo">
+        <h2 id="ax-docs-titulo" class="ax-h2">Documentos</h2>
+        <p class="ax-desc">{{ descricaoDocumentos }}</p>
+        <ul class="ax-docs">
+          <li v-for="d in DOCUMENTOS_EXIGIDOS" :key="d.id">
+            <AxDocumentoConferencia :doc="d" :leitura="leitura" :reanalise="reanalise" @ver="docVisto = $event" />
+          </li>
+        </ul>
+      </section>
 
-      <div v-else-if="janela === 'aprovar'" class="ax-janela ax-janela--curta" role="dialog" aria-modal="true" aria-labelledby="ax-apr-t">
-        <header class="ax-janela__topo">
-          <h2 id="ax-apr-t" class="ax-janela__titulo">Aprovar o cadastro?</h2>
-          <button type="button" class="ax-x" aria-label="Fechar" @click="janela = null"><v-icon icon="mdi-close" size="18" /></button>
-        </header>
-        <p class="ax-para"><strong>{{ PRE_CADASTRO.razaoSocial }}</strong><br />CNPJ {{ PRE_CADASTRO.cnpj }} · protocolo {{ c.protocolo }}</p>
-        <p class="ax-desc">
-          O acesso completo ao sistema é liberado e o e-mail de aprovação segue para {{ PRE_CADASTRO.email }}, com o manual
-          do operador logístico em anexo.
-        </p>
-        <footer class="ax-janela__acoes">
-          <RgButton variant="outline" @click="janela = null">Cancelar</RgButton>
-          <RgButton variant="primary" @click="aprovar">Aprovar cadastro</RgButton>
-        </footer>
+      <footer class="ax-rodape" :class="{ 'ax-rodape--fixo': !leitura }">
+        <template v-if="!leitura">
+          <p class="ax-rodape__texto" aria-live="polite">{{ contagem }}</p>
+          <RgButton
+            :variant="c.totalPendencias > 0 ? 'primary' : 'secondary'"
+            :disabled="!c.podeDevolver"
+            @click="pedirDevolucao"
+          >
+            Devolver para correção
+          </RgButton>
+          <RgButton variant="primary" :disabled="!c.podeAprovar" @click="janela = 'aprovar'">Aprovar cadastro</RgButton>
+        </template>
+        <template v-else>
+          <p class="ax-rodape__texto">{{ situacaoNoRodape }}</p>
+          <RgButton v-if="c.situacao === 'enviado'" variant="primary" @click="analisar">Analisar</RgButton>
+          <RgButton v-else-if="c.situacao === 'em-analise'" variant="secondary" @click="abrirAnalise">
+            Abrir a análise
+          </RgButton>
+        </template>
+      </footer>
+
+      <AxHistorico v-if="c.historico.length" :eventos="c.historico" />
+    </template>
+
+    <AxJanela
+      v-if="docVisto"
+      :titulo="arquivoVisto"
+      icone="mdi-paperclip"
+      :largura="720"
+      documento
+      @fechar="docVisto = null"
+    >
+      <div class="ax-pdf" role="img" :aria-label="`Prévia de ${arquivoVisto}`">
+        <div class="ax-pdf__folha"><span /><span /><span /><span /><span /><span /><span /></div>
       </div>
-    </div>
+      <template #acoes>
+        <RgButton variant="secondary" @click="docVisto = null">Fechar</RgButton>
+        <RgButton variant="primary" icon="mdi-download">Baixar documento</RgButton>
+      </template>
+    </AxJanela>
+
+    <AxJanela v-else-if="janela === 'mensagem'" titulo="Revisar a mensagem para o operador" @fechar="janela = null">
+      <p class="ax-desc">
+        A mensagem é enviada no e-mail "Seu cadastro precisa de correção" para {{ PRE_CADASTRO.email }}. O texto já
+        inclui o motivo de cada pendência e pode ser editado antes do envio.
+      </p>
+      <p class="ax-para"><strong>Para:</strong> {{ PRE_CADASTRO.razaoSocial }} · CNPJ {{ PRE_CADASTRO.cnpj }}</p>
+      <label class="ax-rotulo" for="ax-msg">Mensagem</label>
+      <textarea id="ax-msg" v-model="mensagem" class="ax-textarea" rows="12" data-foco-inicial aria-describedby="ax-msg-ajuda" />
+      <span id="ax-msg-ajuda" class="ax-ajuda">
+        Saudação, nome e CNPJ, o botão Corrigir o cadastro e o contato do atendimento são incluídos automaticamente.
+      </span>
+      <template #acoes>
+        <RgButton variant="secondary" @click="janela = null">Voltar</RgButton>
+        <RgButton variant="primary" :disabled="!mensagem.trim()" @click="devolver">Enviar e devolver</RgButton>
+      </template>
+    </AxJanela>
+
+    <AxJanela v-else-if="janela === 'aprovar'" titulo="Aprovar o cadastro?" :largura="560" @fechar="janela = null">
+      <p class="ax-para">
+        <strong>{{ PRE_CADASTRO.razaoSocial }}</strong><br />CNPJ {{ PRE_CADASTRO.cnpj }} · protocolo {{ c.protocolo }}
+      </p>
+      <p class="ax-desc">
+        O acesso completo ao sistema será liberado e o e-mail de aprovação, com o manual do operador logístico em anexo,
+        será enviado para {{ PRE_CADASTRO.email }}.
+      </p>
+      <template #acoes>
+        <RgButton variant="secondary" @click="janela = null">Cancelar</RgButton>
+        <RgButton variant="primary" @click="aprovar">Aprovar cadastro</RgButton>
+      </template>
+    </AxJanela>
   </GestoraShell>
 </template>
 
 <style scoped>
-.ax-trilha { display: flex; gap: var(--rg-space-2); font-size: var(--rg-font-size-sm); color: var(--rg-color-text-muted); }
-.ax-trilha a { color: var(--rg-color-text-muted); text-decoration: none; }
-.ax-trilha a:hover { text-decoration: underline; }
-.ax-trilha strong { color: var(--rg-color-text-primary); font-weight: var(--rg-font-weight-medium); }
+.ax-trilha {
+  display: flex;
+  gap: var(--rg-space-2);
+  font-size: var(--rg-font-size-sm);
+  color: var(--rg-color-text-muted);
+}
 
-.ax-cab { display: flex; flex-direction: column; align-items: flex-start; gap: var(--rg-space-2); }
-.ax-titulo { margin: 0; font-size: 28px; line-height: 34px; font-weight: var(--rg-font-weight-bold); color: var(--rg-color-text-primary); }
-.ax-sub { margin: 0; font-size: 13px; color: var(--rg-color-text-secondary); }
+.ax-trilha a {
+  color: var(--rg-color-text-muted);
+  text-decoration: none;
+}
 
-.ax-status { display: inline-flex; align-items: center; gap: var(--rg-space-1); padding: var(--rg-space-1) var(--rg-space-3); border-radius: var(--rg-radius-md); border: 1px solid currentColor; font-size: var(--rg-font-size-sm); font-weight: var(--rg-font-weight-semibold); }
-.ax-status--info { color: var(--rg-color-feedback-info); background: var(--rg-color-feedback-info-soft); }
-.ax-status--warning { color: var(--rg-primitive-amber-700); background: var(--rg-color-feedback-warning-soft); }
-.ax-status--success { color: var(--rg-color-feedback-success); background: var(--rg-color-feedback-success-soft); }
+.ax-trilha a:hover {
+  text-decoration: underline;
+}
 
-.ax-bloco { display: flex; flex-direction: column; gap: var(--rg-space-3); }
-.ax-card { display: flex; flex-direction: column; gap: var(--rg-space-2); padding: var(--rg-space-6); background: var(--rg-color-surface-raised); border: 1px solid var(--rg-color-border-subtle); border-radius: var(--rg-radius-lg); }
-.ax-h2 { margin: 0; font-size: var(--rg-font-size-md); font-weight: var(--rg-font-weight-semibold); color: var(--rg-color-text-primary); }
-.ax-desc { margin: 0; font-size: 13px; color: var(--rg-color-text-secondary); line-height: var(--rg-line-height-base); }
+.ax-trilha strong {
+  color: var(--rg-color-text-primary);
+  font-weight: var(--rg-font-weight-medium);
+}
 
-.ax-docs { margin: var(--rg-space-2) 0 0; padding: 0; list-style: none; }
-.ax-doc { display: flex; gap: var(--rg-space-6); align-items: center; padding: var(--rg-space-4) 0; }
-.ax-doc + .ax-doc { border-top: 1px solid var(--rg-color-border-subtle); }
-.ax-doc--corrigido { margin: 0 calc(var(--rg-space-3) * -1); padding-inline: var(--rg-space-3); border-radius: var(--rg-radius-md); background: var(--rg-color-feedback-info-soft); }
-.ax-doc__esq { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--rg-space-2); }
-.ax-doc__dir { display: flex; flex-direction: column; align-items: flex-end; gap: var(--rg-space-1); }
-.ax-doc__nome { margin: 0; display: flex; align-items: center; gap: var(--rg-space-3); font-size: var(--rg-font-size-sm); font-weight: var(--rg-font-weight-medium); color: var(--rg-color-text-primary); }
-.ax-chip { padding: 2px var(--rg-space-2); border-radius: var(--rg-radius-pill); background: var(--rg-color-surface-raised); color: var(--rg-color-feedback-info); font-size: var(--rg-font-size-xs); font-weight: var(--rg-font-weight-semibold); }
-.ax-arquivo { display: flex; align-items: center; gap: var(--rg-space-2); padding: var(--rg-space-2) var(--rg-space-3); border: 1px solid var(--rg-color-border-subtle); border-radius: var(--rg-radius-md); background: var(--rg-color-surface-muted); font-size: var(--rg-font-size-sm); color: var(--rg-color-text-primary); }
-.ax-arquivo span { flex: 1; }
-.ax-ver { display: grid; place-items: center; width: 28px; height: 28px; border: none; border-radius: var(--rg-radius-sm); background: none; color: var(--rg-color-text-muted); cursor: pointer; }
-.ax-ver:hover { background: var(--rg-color-surface-subtle); color: var(--rg-color-text-brand); }
-.ax-mudo { margin: 0; font-size: var(--rg-font-size-xs); color: var(--rg-color-text-muted); }
-.ax-rotulo { font-size: var(--rg-font-size-xs); font-weight: var(--rg-font-weight-medium); color: var(--rg-color-text-secondary); }
-.ax-travado { opacity: 0.5; pointer-events: none; }
-.ax-nao :deep(.ox-simnao__opcao--ativa) { background: var(--rg-color-feedback-danger-soft); color: var(--rg-primitive-red-700); }
+.ax-cab {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--rg-space-2);
+}
 
-.ax-motivo { display: flex; flex-direction: column; gap: var(--rg-space-2); padding: var(--rg-space-4); border-radius: var(--rg-radius-md); background: var(--rg-color-surface-subtle); }
-.ax-radios { display: flex; gap: var(--rg-space-6); }
-.ax-radio { display: flex; align-items: center; gap: var(--rg-space-2); font-size: var(--rg-font-size-sm); color: var(--rg-color-text-primary); cursor: pointer; }
-.ax-radio input { accent-color: var(--rg-color-action-primary); }
-.ax-textarea { width: 100%; padding: var(--rg-space-3); border: 1px solid var(--rg-primitive-neutral-500); border-radius: var(--rg-radius-md); font: inherit; font-size: var(--rg-font-size-sm); line-height: var(--rg-line-height-base); resize: vertical; background: var(--rg-color-surface-raised); }
-.ax-textarea--erro { border: 1.5px solid var(--rg-color-feedback-danger); }
-.ax-ajuda { font-size: var(--rg-font-size-xs); color: var(--rg-color-text-muted); }
-.ax-ajuda--erro { color: var(--rg-primitive-red-700); }
+.ax-titulo {
+  margin: 0;
+  font-size: 28px;
+  line-height: 34px;
+  font-weight: var(--rg-font-weight-bold);
+  color: var(--rg-color-text-primary);
+}
 
-.ax-erro { display: flex; gap: var(--rg-space-3); padding: var(--rg-space-4) var(--rg-space-5); border-radius: var(--rg-radius-lg); background: var(--rg-color-feedback-danger-soft); color: var(--rg-color-feedback-danger); }
-.ax-erro p { margin: var(--rg-space-1) 0 0; font-size: var(--rg-font-size-sm); color: var(--rg-primitive-red-700); }
+.ax-sub {
+  margin: 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--rg-color-text-secondary);
+}
 
-.ax-rodape { display: flex; align-items: center; justify-content: space-between; gap: var(--rg-space-4); padding: var(--rg-space-4) var(--rg-space-6); background: var(--rg-color-surface-raised); border: 1px solid var(--rg-color-border-subtle); border-radius: var(--rg-radius-lg); font-size: var(--rg-font-size-sm); font-weight: var(--rg-font-weight-medium); color: var(--rg-color-text-secondary); }
-.ax-rodape__botoes { display: flex; gap: var(--rg-space-3); }
+.ax-selo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rg-space-1);
+  padding: var(--rg-space-1) var(--rg-space-3);
+  border: 1px solid currentColor;
+  border-radius: var(--rg-radius-md);
+  font-size: var(--rg-font-size-sm);
+  font-weight: var(--rg-font-weight-semibold);
+  line-height: 20px;
+}
 
-.ax-hist { margin: var(--rg-space-2) 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: var(--rg-space-3); }
-.ax-hist li { display: flex; gap: var(--rg-space-4); padding: var(--rg-space-3) var(--rg-space-4); border: 1px solid var(--rg-color-border-subtle); border-radius: var(--rg-radius-md); font-size: var(--rg-font-size-sm); }
-.ax-hist__data { flex: 0 0 150px; color: var(--rg-color-text-muted); font-size: var(--rg-font-size-xs); }
-.ax-hist p { margin: 2px 0; color: var(--rg-color-text-secondary); }
-.ax-hist small { color: var(--rg-color-text-muted); }
+.ax-selo--info { color: var(--rg-color-feedback-info); background: var(--rg-color-feedback-info-soft); }
+.ax-selo--warning { color: var(--rg-primitive-amber-700); background: var(--rg-color-feedback-warning-soft); }
+.ax-selo--success { color: var(--rg-color-text-brand); background: var(--rg-color-feedback-success-soft); }
+.ax-selo--neutro { color: var(--rg-color-text-secondary); background: var(--rg-color-surface-subtle); }
 
-.ax-toast { position: fixed; top: 72px; right: 20px; z-index: 30; display: flex; align-items: center; gap: var(--rg-space-3); padding: var(--rg-space-3) var(--rg-space-4); border-radius: var(--rg-radius-md); background: var(--rg-primitive-neutral-900); color: var(--rg-primitive-neutral-0); font-size: var(--rg-font-size-sm); box-shadow: 0 8px 24px rgb(15 23 42 / 0.2); }
-.ax-toast a { color: var(--rg-primitive-brand-300); font-weight: var(--rg-font-weight-semibold); }
+.ax-bloco {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rg-space-3);
+}
 
-.ax-veu { position: fixed; inset: 0; z-index: 40; display: grid; place-items: start center; padding-top: 12vh; background: rgb(15 23 42 / 0.55); }
-.ax-janela { width: min(760px, calc(100vw - 32px)); display: flex; flex-direction: column; gap: var(--rg-space-4); padding: var(--rg-space-8); border-radius: var(--rg-radius-lg); background: var(--rg-color-surface-raised); }
-.ax-janela--curta { width: min(560px, calc(100vw - 32px)); }
-.ax-janela--pdf { width: min(720px, calc(100vw - 32px)); padding: 0; gap: 0; overflow: hidden; }
-.ax-janela--pdf .ax-janela__topo { padding: var(--rg-space-4) var(--rg-space-6); }
-.ax-janela--pdf .ax-janela__acoes { padding: var(--rg-space-4) var(--rg-space-6); border-top: 1px solid var(--rg-color-border-subtle); }
-.ax-janela__topo { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--rg-space-4); }
-.ax-janela__titulo { margin: 0; font-size: 20px; font-weight: var(--rg-font-weight-bold); color: var(--rg-color-text-primary); }
-.ax-janela__acoes { display: flex; justify-content: flex-end; gap: var(--rg-space-3); }
-.ax-x { border: none; background: none; cursor: pointer; color: var(--rg-color-text-muted); }
-.ax-para { margin: 0; padding: var(--rg-space-3) var(--rg-space-4); border-radius: var(--rg-radius-md); background: var(--rg-color-surface-subtle); font-size: var(--rg-font-size-sm); color: var(--rg-color-text-primary); }
-.ax-pdf { display: grid; place-items: center; padding: var(--rg-space-8); background: var(--rg-color-surface-subtle); }
-.ax-pdf__folha { display: flex; flex-direction: column; gap: 10px; width: 260px; height: 340px; padding: var(--rg-space-6); background: var(--rg-color-surface-raised); box-shadow: 0 2px 8px rgb(15 23 42 / 0.12); }
-.ax-pdf__folha span { height: 8px; border-radius: 4px; background: var(--rg-color-border-subtle); }
-.ax-pdf__folha span:first-child { width: 60%; height: 12px; background: var(--rg-primitive-neutral-500); }
-.ax-pdf__folha span:nth-child(3n) { width: 70%; }
+.ax-etapas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rg-space-3);
+}
+
+.ax-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rg-space-1);
+  padding: var(--rg-space-6);
+  background: var(--rg-color-surface-raised);
+  border: 1px solid var(--rg-color-border-subtle);
+  border-radius: var(--rg-radius-lg);
+}
+
+.ax-vazio {
+  align-items: flex-start;
+  gap: var(--rg-space-2);
+}
+
+.ax-link {
+  font-size: var(--rg-font-size-sm);
+  font-weight: var(--rg-font-weight-semibold);
+  color: var(--rg-color-text-brand);
+}
+
+.ax-h2 {
+  margin: 0;
+  font-size: var(--rg-font-size-md);
+  font-weight: var(--rg-font-weight-semibold);
+  line-height: 22px;
+  color: var(--rg-color-text-primary);
+}
+
+.ax-desc {
+  margin: 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--rg-color-text-secondary);
+}
+
+.ax-docs {
+  margin: var(--rg-space-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ax-docs li + li {
+  border-top: 1px solid var(--rg-color-border-subtle);
+}
+
+.ax-rodape {
+  display: flex;
+  align-items: center;
+  gap: var(--rg-space-4);
+  padding: var(--rg-space-4) var(--rg-space-6);
+  background: var(--rg-color-surface-raised);
+  border: 1px solid var(--rg-color-border-subtle);
+  border-radius: var(--rg-radius-lg);
+}
+
+/* Na análise o rodapé acompanha a rolagem e para no lugar dele, no fim da página. */
+.ax-rodape--fixo {
+  position: sticky;
+  bottom: var(--rg-space-4);
+  z-index: 3;
+  box-shadow: var(--rg-elevation-2);
+}
+
+.ax-rodape__texto {
+  flex: 1;
+  margin: 0;
+  font-size: var(--rg-font-size-sm);
+  font-weight: var(--rg-font-weight-medium);
+  line-height: 20px;
+  color: var(--rg-color-text-secondary);
+}
+
+.ax-toast {
+  position: fixed;
+  top: 72px;
+  right: 20px;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: var(--rg-space-3);
+  max-width: calc(100vw - 40px);
+  padding: var(--rg-space-3) var(--rg-space-2) var(--rg-space-3) var(--rg-space-4);
+  border-radius: var(--rg-radius-md);
+  background: var(--rg-primitive-neutral-900);
+  color: var(--rg-primitive-neutral-0);
+  font-size: var(--rg-font-size-sm);
+  box-shadow: var(--rg-elevation-3);
+}
+
+.ax-toast .v-icon:first-child {
+  color: var(--rg-primitive-brand-300);
+}
+
+.ax-toast a {
+  color: var(--rg-primitive-brand-300);
+  font-weight: var(--rg-font-weight-semibold);
+  white-space: nowrap;
+}
+
+.ax-toast__x {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: var(--rg-radius-sm);
+  background: none;
+  color: var(--rg-primitive-neutral-0);
+  cursor: pointer;
+}
+
+.ax-toast__x:focus-visible,
+.ax-toast a:focus-visible {
+  outline: 2px solid var(--rg-primitive-brand-300);
+  outline-offset: 2px;
+}
+
+.ax-para {
+  margin: 0;
+  padding: var(--rg-space-3) var(--rg-space-4);
+  border-radius: var(--rg-radius-md);
+  background: var(--rg-color-surface-subtle);
+  font-size: var(--rg-font-size-sm);
+  line-height: 20px;
+  color: var(--rg-color-text-primary);
+}
+
+.ax-rotulo {
+  font-size: var(--rg-font-size-xs);
+  font-weight: var(--rg-font-weight-medium);
+  color: var(--rg-color-text-secondary);
+}
+
+.ax-textarea {
+  width: 100%;
+  padding: var(--rg-space-3);
+  border: 1px solid var(--rg-primitive-neutral-500);
+  border-radius: var(--rg-radius-md);
+  font: inherit;
+  font-size: var(--rg-font-size-sm);
+  line-height: 20px;
+  color: var(--rg-color-text-primary);
+  resize: vertical;
+  background: var(--rg-color-surface-raised);
+}
+
+.ax-textarea:focus {
+  outline: none;
+  border: 2px solid var(--rg-color-action-primary);
+  padding: 11px;
+}
+
+.ax-ajuda {
+  font-size: var(--rg-font-size-xs);
+  color: var(--rg-color-text-muted);
+}
+
+.ax-pdf {
+  display: grid;
+  place-items: center;
+  padding: var(--rg-space-8);
+  background: var(--rg-color-surface-subtle);
+}
+
+.ax-pdf__folha {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 260px;
+  height: 340px;
+  padding: var(--rg-space-6);
+  background: var(--rg-color-surface-raised);
+  box-shadow: var(--rg-elevation-2);
+}
+
+.ax-pdf__folha span {
+  height: 8px;
+  border-radius: var(--rg-radius-xs);
+  background: var(--rg-color-border-subtle);
+}
+
+.ax-pdf__folha span:first-child {
+  width: 60%;
+  height: 12px;
+  background: var(--rg-primitive-neutral-500);
+}
+
+.ax-pdf__folha span:nth-child(3n) {
+  width: 70%;
+}
+
+@media (max-width: 720px) {
+  .ax-rodape {
+    flex-wrap: wrap;
+  }
+
+  .ax-rodape__texto {
+    flex-basis: 100%;
+  }
+}
 </style>
