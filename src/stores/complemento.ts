@@ -296,6 +296,7 @@ export const useComplementoStore = defineStore('complemento', () => {
       const g1 = ehCooperativa ? 'Identificação da cooperativa' : 'Identificação da empresa';
       add('razao-social', g1, 'Razão social', PRE_CADASTRO.razaoSocial);
       add('cnpj', g1, 'CNPJ', PRE_CADASTRO.cnpj);
+      add('cnae', g1, 'CNAE principal', PRE_CADASTRO.cnae);
       add('nome-fantasia', g1, 'Nome fantasia', PRE_CADASTRO.nomeFantasia);
       add('email', g1, 'E-mail', PRE_CADASTRO.email);
       add('telefone', g1, 'Telefone (com DDD)', f.telefone);

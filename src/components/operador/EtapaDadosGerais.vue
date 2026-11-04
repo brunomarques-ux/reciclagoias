@@ -2,7 +2,7 @@
 /**
  * Etapa 1 · Dados gerais — identificação e endereço da organização.
  *
- * Razão social, nome fantasia, CNPJ, e-mail e o tipo de organização vêm do
+ * Razão social, nome fantasia, CNPJ, CNAE, e-mail e o tipo de organização vêm do
  * pré-cadastro de produção e aparecem travados (decisão do fluxo de 31/08: o
  * complemento não edita o que o registro já criou; correção é assunto de
  * suporte). O tipo condiciona o formulário: "número de cooperados" só existe
@@ -31,12 +31,13 @@ const estado = (id: string, oQue: string) => ({
     <OxCartao titulo="Identificação da cooperativa">
       <div class="ox-campos">
         <OxCampo
-          class="ox-col-8"
+          class="ox-col-5"
           rotulo="Razão social"
           :model-value="PRE_CADASTRO.razaoSocial"
           travado
         />
-        <OxCampo class="ox-col-4" rotulo="CNPJ" :model-value="PRE_CADASTRO.cnpj" travado />
+        <OxCampo class="ox-col-3" rotulo="CNPJ" :model-value="PRE_CADASTRO.cnpj" travado />
+        <OxCampo class="ox-col-4" rotulo="CNAE principal" :model-value="PRE_CADASTRO.cnae" travado />
 
         <OxCampo
           class="ox-col-4"
@@ -64,8 +65,8 @@ const estado = (id: string, oQue: string) => ({
       </div>
 
       <p class="ox-nota">
-        Razão social, nome fantasia, CNPJ, e-mail e o tipo de organização vêm do pré-cadastro. Para
-        corrigir algum deles, fale com o suporte.
+        Razão social, nome fantasia, CNPJ, CNAE, e-mail e o tipo de organização vêm do pré-cadastro.
+        Para corrigir algum deles, fale com o suporte.
       </p>
     </OxCartao>
 

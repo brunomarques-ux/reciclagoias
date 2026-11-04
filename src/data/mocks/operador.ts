@@ -18,6 +18,12 @@ export interface PreCadastro {
   razaoSocial: string;
   nomeFantasia: string;
   cnpj: string;
+  /**
+   * CNAE principal do CNPJ, como a Receita devolve (código e descrição). Pedido
+   * de 04/11/2026: a análise vai validar CNAEs, então o operador precisa ver qual
+   * está registrado. Vem do CNPJ, então fica travado como o resto do pré-cadastro.
+   */
+  cnae: string;
   email: string;
   /** O pré-cadastro de produção já pergunta "Você é: Cooperativa / Empresa". */
   tipoOrganizacao: TipoOrganizacao;
@@ -27,6 +33,7 @@ export const PRE_CADASTRO: PreCadastro = {
   razaoSocial: 'Cooperativa de Catadores Recicla Cerrado',
   nomeFantasia: 'Recicla Cerrado',
   cnpj: '23.481.907/0001-55',
+  cnae: '3811-4/00 · Coleta de resíduos não perigosos',
   email: 'contato@reciclacerrado.org.br',
   tipoOrganizacao: 'cooperativa',
 };
