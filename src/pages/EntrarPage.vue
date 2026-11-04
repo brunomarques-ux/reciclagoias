@@ -136,6 +136,8 @@ function entrar() {
 
       <p class="gx-entrar__rodape">
         <RouterLink to="/" class="gx-entrar__voltar">Voltar para o site do Recicla Goiás</RouterLink>
+        <!-- camada do protótipo: os fluxos guiados (src/fluxos) -->
+        · <RouterLink to="/fluxos" class="gx-entrar__voltar">Fluxos do protótipo</RouterLink>
       </p>
     </main>
   </div>

@@ -92,6 +92,13 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/pages/EmailsOperadorPage.vue'),
     meta: { titulo: 'E-mails do complemento' },
   },
+  {
+    // Camada do protótipo, sem perfil: a lista dos fluxos guiados (src/fluxos, docs/sistema/FLUXOS-GUIADOS.md).
+    path: '/fluxos',
+    name: 'fluxos',
+    component: () => import('@/fluxos/FluxosPage.vue'),
+    meta: { titulo: 'Fluxos do protótipo' },
+  },
 ];
 
 export const router = createRouter({
