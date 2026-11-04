@@ -1,0 +1,142 @@
+/* A camada dos fluxos guiados (camada.ts): cursor virtual, destaque do alvo, pílula da ação, véu e onda.
+   Camada do protótipo, fora do produto. CSS global de propósito: os elementos nascem por DOM puro, fora dos
+   componentes Vue, então não há escopo para o scoped.
+
+   O rosa é a cor de anotação do protótipo (a dos marcadores do Figma, a mesma do SISLOG), de propósito FORA dos
+   tokens --rg-*: ninguém confunde com a interface. Por isso é hex cru, só aqui e no painel.
+   Nada aqui recebe clique (pointer-events: none): no modo manual a pessoa clica no alvo de verdade, através do véu. */
+.fx-camada {
+  --fx-rosa: #e0287d;
+  /* a pílula com texto branco: o rosa um tom abaixo, para 4,5:1 */
+  --fx-rosa-forte: #be226a;
+  --fx-veu: rgb(17 24 39 / 0.1);
+
+  position: fixed;
+  inset: 0;
+  /* acima das janelas (40), da certidão (1100) e do toast (1200); abaixo do painel do fluxo (10000). Fora da escala
+     do produto, que não tem token de z-index */
+  z-index: 9999;
+  pointer-events: none;
+}
+.fx-camada [hidden] { display: none !important; }
+
+/* o contorno em volta do alvo; o véu é a sombra que cobre o resto da tela */
+.fx-camada__caixa {
+  position: absolute;
+  left: 0;
+  top: 0;
+  box-sizing: border-box;
+  border: 3px solid var(--fx-rosa);
+  border-radius: var(--rg-radius-md);
+  background: color-mix(in srgb, var(--fx-rosa) 6%, transparent);
+  box-shadow: 0 0 0 200vmax var(--fx-veu);
+}
+.fx-camada__caixa::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  animation: fx-camada-pulso 1.6s ease-out infinite;
+}
+@keyframes fx-camada-pulso {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--fx-rosa) 45%, transparent); }
+  70% { box-shadow: 0 0 0 12px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+.fx-camada__pilula {
+  position: absolute;
+  left: 0;
+  top: 0;
+  max-width: min(28rem, calc(100vw - 16px));
+  padding: var(--rg-space-1) var(--rg-space-3);
+  border-radius: var(--rg-radius-pill);
+  background: var(--fx-rosa-forte);
+  color: #fff;
+  font-family: var(--rg-font-family-sans);
+  font-size: var(--rg-font-size-sm);
+  line-height: 20px;
+  font-weight: var(--rg-font-weight-semibold);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--fx-rosa) 35%, transparent);
+}
+
+/* a seta branca com contorno escuro e sombra; a ponta é o ponto do gesto */
+.fx-camada__cursor {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  width: 26px;
+  height: 30px;
+  transform-origin: 3px 2px;
+  filter: drop-shadow(0 2px 3px rgb(0 0 0 / 0.35));
+  will-change: transform;
+}
+.fx-camada__cursor svg { display: block; }
+
+.fx-camada__onda {
+  position: absolute;
+  z-index: 1;
+  width: 56px;
+  height: 56px;
+  border: 3px solid var(--fx-rosa);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--fx-rosa) 18%, transparent);
+}
+
+/* a cortina do preparo: opaca, com o fundo da página, sobre tudo menos o painel do fluxo. Segura o clique (só ela,
+   na camada) para ninguém mexer na tela enquanto o preparo a refaz */
+.fx-camada__cortina {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  padding: var(--rg-space-6);
+  background: var(--rg-color-surface-muted);
+  pointer-events: auto;
+}
+.fx-camada__cortina-caixa {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--rg-space-2);
+  max-width: 36rem;
+  text-align: center;
+  font-family: var(--rg-font-family-sans);
+}
+.fx-camada__cortina-roda {
+  width: 2rem;
+  height: 2rem;
+  margin-bottom: var(--rg-space-2);
+  border: 3px solid color-mix(in srgb, var(--fx-rosa) 25%, transparent);
+  border-top-color: var(--fx-rosa);
+  border-radius: 50%;
+  animation: fx-camada-roda 0.9s linear infinite;
+}
+@keyframes fx-camada-roda {
+  to { transform: rotate(360deg); }
+}
+.fx-camada__cortina-texto {
+  margin: 0;
+  color: var(--rg-color-text-secondary);
+  font-size: var(--rg-font-size-md);
+  line-height: 24px;
+  font-weight: var(--rg-font-weight-semibold);
+}
+.fx-camada__cortina-titulo {
+  margin: 0;
+  color: var(--rg-color-text-primary);
+  font-size: var(--rg-font-size-2xl);
+  line-height: 1.25;
+  font-weight: var(--rg-font-weight-bold);
+  letter-spacing: var(--rg-letter-spacing-tight);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-camada__caixa::after { animation: none; }
+  .fx-camada__cortina-roda { animation: none; }
+}

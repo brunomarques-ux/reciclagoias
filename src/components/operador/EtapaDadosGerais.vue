@@ -17,6 +17,13 @@ import { useComplementoStore } from '@/stores/complemento';
 const complemento = useComplementoStore();
 const f = complemento.formulario;
 const ehCooperativa = PRE_CADASTRO.tipoOrganizacao === 'cooperativa';
+
+/** Trava na correção (só o devolvido abre), erro do envio (L7) e o motivo da análise. */
+const estado = (id: string, oQue: string) => ({
+  travado: !complemento.editavel(id),
+  erro: complemento.campoEmErro(id) ? `Preencha ${oQue} para enviar o cadastro.` : undefined,
+  nota: complemento.emCorrecao ? complemento.devolvidos[id] : undefined,
+});
 </script>
 
 <template>
@@ -38,7 +45,7 @@ const ehCooperativa = PRE_CADASTRO.tipoOrganizacao === 'cooperativa';
           travado
         />
         <OxCampo class="ox-col-5" rotulo="E-mail" :model-value="PRE_CADASTRO.email" travado />
-        <OxCampo class="ox-col-3" rotulo="Telefone (com DDD)" v-model="f.telefone" />
+        <OxCampo class="ox-col-3" rotulo="Telefone (com DDD)" v-model="f.telefone" v-bind="estado('telefone', 'o telefone')" />
 
         <OxCampo
           class="ox-col-3"
@@ -51,8 +58,9 @@ const ehCooperativa = PRE_CADASTRO.tipoOrganizacao === 'cooperativa';
           class="ox-col-3"
           rotulo="Número de cooperados"
           v-model="f.cooperados"
+          v-bind="estado('cooperados', 'o número de cooperados')"
         />
-        <OxCampo class="ox-col-3" rotulo="Ano de criação" v-model="f.anoCriacao" />
+        <OxCampo class="ox-col-3" rotulo="Ano de criação" v-model="f.anoCriacao" v-bind="estado('ano-criacao', 'o ano de criação')" />
       </div>
 
       <p class="ox-nota">
@@ -63,12 +71,12 @@ const ehCooperativa = PRE_CADASTRO.tipoOrganizacao === 'cooperativa';
 
     <OxCartao titulo="Endereço da unidade">
       <div class="ox-campos">
-        <OxCampo class="ox-col-3" rotulo="CEP" v-model="f.cep" />
-        <OxCampo class="ox-col-7" rotulo="Logradouro" v-model="f.logradouro" />
-        <OxCampo class="ox-col-2" rotulo="Número" v-model="f.numero" />
+        <OxCampo class="ox-col-3" rotulo="CEP" v-model="f.cep" v-bind="estado('cep', 'o CEP')" />
+        <OxCampo class="ox-col-7" rotulo="Logradouro" v-model="f.logradouro" v-bind="estado('logradouro', 'o logradouro')" />
+        <OxCampo class="ox-col-2" rotulo="Número" v-model="f.numero" v-bind="estado('numero', 'o número')" />
 
-        <OxCampo class="ox-col-3" rotulo="Estado" v-model="f.estado" />
-        <OxCampo class="ox-col-9" rotulo="Município" v-model="f.municipio" />
+        <OxCampo class="ox-col-3" rotulo="Estado" v-model="f.estado" v-bind="estado('estado', 'o estado')" />
+        <OxCampo class="ox-col-9" rotulo="Município" v-model="f.municipio" v-bind="estado('municipio', 'o município')" />
       </div>
 
       <p class="ox-nota">

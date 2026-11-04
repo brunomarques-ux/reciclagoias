@@ -1,0 +1,47 @@
+/* A posição do painel do fluxo (posicao.ts). Camada do protótipo, fora do produto. CSS global: o posicao.ts mexe
+   nos atributos do painel e no <body> fora dos componentes.
+   O painel fica no canto inferior direito; quando ali ele cobriria o alvo do passo ou uma camada aberta (uma janela,
+   um menu, o popover do período restritivo, o explorador de cenários), ele vai para o primeiro lugar livre: inferior
+   esquerdo, superior direito ou superior esquerdo (abaixo da TopBar). data-desvio diz o lugar; data-apertado, que
+   nenhum lugar está livre e ele fica compacto até liberar. --fluxo-painel-topo é a borda de baixo da TopBar
+   (posicao.ts). */
+.fx-painel {
+  --fluxo-painel-topo: 56px;
+  --fluxo-painel-teto: min(36rem, calc(100vh - var(--fluxo-painel-topo) - 2 * var(--rg-space-6)));
+
+  position: fixed;
+  right: var(--rg-space-6);
+  bottom: var(--rg-space-6);
+  max-height: var(--fluxo-painel-teto);
+}
+.fx-painel[data-desvio='esquerda'] {
+  right: auto;
+  left: var(--rg-space-6);
+}
+.fx-painel[data-desvio='acima'],
+.fx-painel[data-desvio='acima-esquerda'] {
+  top: calc(var(--fluxo-painel-topo) + var(--rg-space-6));
+  bottom: auto;
+}
+.fx-painel[data-desvio='acima-esquerda'] {
+  right: auto;
+  left: var(--rg-space-6);
+}
+
+/* sem lugar livre: compacto como na execução (o título, o andamento e os botões), até liberar */
+.fx-painel[data-apertado] .fx-painel__block,
+.fx-painel[data-apertado] .fx-painel__about,
+.fx-painel[data-apertado] .fx-painel__steps,
+.fx-painel[data-apertado] .fx-painel__do,
+.fx-painel[data-apertado] .fx-painel__see,
+.fx-painel[data-apertado] .fx-painel__settings { display: none; }
+
+/* o fim da rolagem: o contêiner que rola por baixo do painel (no Recicla, o <body>) ganha um espaço no fim, do
+   tamanho da parte coberta, para o último conteúdo poder subir acima do painel. Só enquanto o painel está na tela */
+[data-fluxo-reserva]::after {
+  content: '';
+  display: block;
+  flex: none;
+  height: var(--fluxo-reserva, 0px);
+  pointer-events: none;
+}

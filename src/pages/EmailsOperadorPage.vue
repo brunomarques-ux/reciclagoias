@@ -4,8 +4,9 @@
  *
  * É só visual: um frame para mostrar o e-mail como ele chega, com as proporções
  * reais (corpo de 680 px), igual ao mockup do Figma. Nada aqui funciona como caixa
- * de entrada. O e-mail de correção lê os motivos que o analista escreveu na
- * análise, quando existem; sem análise feita, mostra o exemplo do Figma.
+ * de entrada. O e-mail de correção lista o que o analista devolveu na análise,
+ * campos e documentos (rodada de 16/10), com o motivo de cada um; sem análise
+ * feita, mostra o exemplo do Figma.
  */
 import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -38,15 +39,26 @@ const itensCorrecao = computed(() => {
   const ids = Object.keys(c.devolvidos);
   if (!ids.length) {
     return [
-      { nome: 'Alvará de funcionamento', motivo: 'o documento apresentado está vencido desde março de 2026.' },
-      { nome: 'Declaração de capacidade de operação/produção', motivo: 'documento não enviado.' },
+      {
+        nome: 'Alvará de funcionamento',
+        motivo: 'o documento apresentado está vencido desde março de 2026. Anexe o alvará válido e atualizado.',
+      },
+      {
+        nome: 'Telefone (com DDD)',
+        motivo: 'o telefone informado não atende. Informe um número de contato ativo, com DDD.',
+      },
     ];
   }
   return ids.map((id) => ({
-    nome: DOCUMENTOS_EXIGIDOS.find((d) => d.id === id)?.rotulo ?? id,
+    nome: c.rotuloDoItem(id),
     motivo: c.devolvidos[id] ?? '',
   }));
 });
+
+/** Data da aprovação no histórico; sem aprovação feita, a do exemplo do Figma. */
+const aprovadoEm = computed(
+  () => c.historico.find((h) => h.titulo === 'Cadastro aprovado')?.data.split(',')[0] ?? '08/09/2026',
+);
 
 const PASTAS = ['Caixa de entrada', 'Com estrela', 'Adiados', 'Importante', 'Enviados', 'Rascunhos', 'Lixeira'];
 
@@ -133,7 +145,7 @@ function trocar(q: Qual) {
             <template v-else-if="qual === 'correcao'">
               <h2 class="em__titulo">Seu cadastro precisa de correção</h2>
               <p class="em__saudacao">Prezado(a) representante da {{ PRE_CADASTRO.razaoSocial }},</p>
-              <p>Após a análise, identificamos pendências no cadastro da cooperativa como operador logístico.</p>
+              <p>Após a análise, identificamos pendências no cadastro da organização como operador logístico.</p>
               <dl class="em__resumo">
                 <div><dt>Organização</dt><dd>{{ PRE_CADASTRO.razaoSocial }}</dd></div>
                 <div><dt>CNPJ</dt><dd>{{ PRE_CADASTRO.cnpj }}</dd></div>
@@ -145,8 +157,8 @@ function trocar(q: Qual) {
               </div>
               <p class="em__saudacao">O que você deve fazer</p>
               <ol class="em__passos">
-                <li>Providencie os documentos válidos e atualizados.</li>
-                <li>Atualize os documentos no sistema.</li>
+                <li>Corrija os dados e providencie os documentos válidos e atualizados.</li>
+                <li>Atualize o cadastro no sistema.</li>
                 <li>Envie o cadastro novamente para uma nova análise.</li>
               </ol>
               <RouterLink class="em__botao" to="/operador">Corrigir o cadastro</RouterLink>
@@ -161,7 +173,7 @@ function trocar(q: Qual) {
                 <div><dt>Organização</dt><dd>{{ PRE_CADASTRO.razaoSocial }}</dd></div>
                 <div><dt>CNPJ</dt><dd>{{ PRE_CADASTRO.cnpj }}</dd></div>
                 <div><dt>Protocolo</dt><dd>{{ c.protocolo }}</dd></div>
-                <div><dt>Aprovado em</dt><dd>08/09/2026</dd></div>
+                <div><dt>Aprovado em</dt><dd>{{ aprovadoEm }}</dd></div>
               </dl>
               <p class="em__saudacao">Próximo passo</p>
               <p>Já é possível acessar o sistema e usar as funcionalidades do operador logístico. O manual em anexo mostra, passo a passo, como incluir notas fiscais e fazer transferências. Se preferir, o mesmo passo a passo está no <a href="#" @click.prevent>tutorial em vídeo</a>.</p>
