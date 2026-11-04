@@ -115,15 +115,16 @@ const vBtnProps = computed(() => {
   border-color: var(--rg-primitive-brand-700) !important;
 }
 
-/* Outline */
+/* Outline (contorno neutro). Border pelo mesmo motivo do secondary: o box-shadow
+   inset era apagado pelo elevation-0 do Vuetify e o botão saía sem contorno. */
 .rg-button--outline {
   background-color: transparent !important;
   color: var(--rg-color-text-primary) !important;
-  box-shadow: inset 0 0 0 1px var(--rg-color-border-base);
+  border: 1px solid var(--rg-primitive-neutral-500) !important;
 }
 .rg-button--outline:hover:not(:disabled) {
   background-color: var(--rg-color-surface-muted) !important;
-  box-shadow: inset 0 0 0 1px var(--rg-color-border-strong);
+  border-color: var(--rg-color-border-strong) !important;
 }
 
 /* Ghost (sem borda, sem fundo) */
