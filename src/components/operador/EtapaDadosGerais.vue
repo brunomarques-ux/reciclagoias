@@ -37,7 +37,7 @@ const estado = (id: string, oQue: string) => ({
           travado
         />
         <OxCampo class="ox-col-3" rotulo="CNPJ" :model-value="PRE_CADASTRO.cnpj" travado />
-        <OxCampo class="ox-col-4" rotulo="CNAE principal" :model-value="PRE_CADASTRO.cnae" travado />
+        <OxCampo class="ox-col-4" rotulo="CNAE" :model-value="PRE_CADASTRO.cnae" travado />
 
         <OxCampo
           class="ox-col-4"
