@@ -173,11 +173,14 @@ export const MOTIVOS_ANALISE = [
 ] as const;
 export type MotivoAnalise = (typeof MOTIVOS_ANALISE)[number]['id'];
 
-/** Fila da análise no Admin. A primeira linha é a Recicla Cerrado, que vem da store. */
+/**
+ * Fila da análise no Admin. A primeira linha é a Recicla Cerrado, que vem da store.
+ * Quatro situações (planning de 16/10): não existe Reenviado.
+ */
 export const FILA_CADASTROS = [
-  { protocolo: 'OPL-2026-00179', nome: 'Reciclagem Anhanguera Ltda', cnpj: '31.204.118/0001-09', tipo: 'Empresa', situacao: 'em-analise', enviado: '29/08/2026', docs: '11 de 11' },
-  { protocolo: 'OPL-2026-00171', nome: 'Cooperativa Mãos que Reciclam', cnpj: '18.330.442/0001-71', tipo: 'Cooperativa', situacao: 'devolvido', enviado: '27/08/2026', docs: '9 de 11' },
-  { protocolo: 'OPL-2026-00166', nome: 'Associação Catadores Meia Ponte', cnpj: '12.877.590/0001-38', tipo: 'Cooperativa', situacao: 'reenviado', enviado: '26/08/2026', docs: '11 de 11' },
-  { protocolo: 'OPL-2026-00158', nome: 'Ecoponto Sudoeste Reciclagem Ltda', cnpj: '40.115.623/0001-50', tipo: 'Empresa', situacao: 'aprovado', enviado: '22/08/2026', docs: '11 de 11' },
-  { protocolo: 'OPL-2026-00150', nome: 'Cooperativa Nova Esperança', cnpj: '09.664.201/0001-84', tipo: 'Cooperativa', situacao: 'aprovado', enviado: '20/08/2026', docs: '11 de 11' },
+  { protocolo: 'OPL-2026-00179', nome: 'Reciclagem Anhanguera Ltda', cnpj: '31.204.118/0001-09', tipo: 'Empresa', situacao: 'em-analise', enviado: '29/08/2026', analista: 'Carlos Mendes' },
+  { protocolo: 'OPL-2026-00171', nome: 'Cooperativa Mãos que Reciclam', cnpj: '18.330.442/0001-71', tipo: 'Cooperativa', situacao: 'devolvido', enviado: '27/08/2026', analista: 'Ana Ribeiro' },
+  { protocolo: 'OPL-2026-00166', nome: 'Associação Catadores Meia Ponte', cnpj: '12.877.590/0001-38', tipo: 'Cooperativa', situacao: 'enviado', enviado: '26/08/2026', analista: null },
+  { protocolo: 'OPL-2026-00158', nome: 'Ecoponto Sudoeste Reciclagem Ltda', cnpj: '40.115.623/0001-50', tipo: 'Empresa', situacao: 'aprovado', enviado: '22/08/2026', analista: 'Carlos Mendes' },
+  { protocolo: 'OPL-2026-00150', nome: 'Cooperativa Nova Esperança', cnpj: '09.664.201/0001-84', tipo: 'Cooperativa', situacao: 'aprovado', enviado: '20/08/2026', analista: 'Ana Ribeiro' },
 ] as const;

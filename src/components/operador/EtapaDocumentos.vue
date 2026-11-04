@@ -1,26 +1,31 @@
 <script setup lang="ts">
 /**
- * Etapa 2 · Documentos — os 11 itens do formulário da SIC como "possui? + anexo".
+ * Etapa 2 · Documentos — os 11 itens do formulário da SIC, um anexo por item.
  *
- * Cada linha é a mesma pergunta: Sim abre a área de anexo (Dropzone/FileRow da
- * biblioteca no Figma); Não vira pendência declarada, sem bloquear o envio —
- * bloquear faria a cooperativa abandonar o cadastro. O anexo aqui é simulado
- * (clique anexa um arquivo de demonstração); remoção é por ícone, sem link
- * "substituir": arquivo errado se apaga e anexa de novo.
+ * Planning de 16/10: todos os documentos são obrigatórios e o "possui? Sim/Não"
+ * saiu da tela do operador (fica só na conferência do analista). Sem o
+ * documento, a organização anexa no lugar dele o protocolo do pedido ou uma
+ * justificativa e explica na observação, no fim da etapa.
+ *
+ * Anexo simulado: clicar no Dropzone anexa um arquivo de demonstração. O
+ * FileRow da biblioteca tem baixar e lixeira, por ícone (nada de "substituir":
+ * arquivo errado se apaga e anexa de novo).
+ *
+ * Correção (L3): o devolvido traz o motivo, o anexo recusado continua listado
+ * (só com baixar) e o corrigido entra logo abaixo, com contorno tracejado. O
+ * que a análise conferiu fica bloqueado, com o selo Conferido.
  */
+import OxCampo from '@/components/operador/OxCampo.vue';
 import OxCartao from '@/components/operador/OxCartao.vue';
-import OxEscolhaSimNao from '@/components/operador/OxEscolhaSimNao.vue';
 import { DOCUMENTOS_EXIGIDOS } from '@/data/mocks/operador';
 import { useComplementoStore } from '@/stores/complemento';
 
 const complemento = useComplementoStore();
 const f = complemento.formulario;
 
-// Correção (SEMAD-07/12): o devolvido abre de novo, com a nota da análise embaixo;
-// o que foi conferido fica travado.
 const devolvido = (id: string) => complemento.emCorrecao && complemento.devolvidos[id] !== undefined;
-const travado = (id: string) => complemento.emCorrecao && complemento.devolvidos[id] === undefined;
-const mostraArquivo = (id: string) => !devolvido(id) || complemento.docCorrigido(id);
+const conferido = (id: string) => complemento.emCorrecao && complemento.devolvidos[id] === undefined;
+const emErro = (id: string) => complemento.camposEmErro.includes(id) && !f.documentos[id]?.arquivo;
 </script>
 
 <template>
@@ -28,59 +33,90 @@ const mostraArquivo = (id: string) => !devolvido(id) || complemento.docCorrigido
     titulo="Documentos da cooperativa"
     :descricao="
       complemento.emCorrecao
-        ? 'Os documentos conferidos pela análise ficam travados. Corrija os devolvidos: a nota da análise fica embaixo de cada um até o reenvio.'
-        : 'Para cada documento, diga se a cooperativa possui e anexe o arquivo em PDF. Itens marcados como Não não impedem o envio: entram como pendência na análise.'
+        ? 'Os documentos conferidos pela análise não podem ser alterados. No documento com pendência, o motivo aparece abaixo do nome.'
+        : 'Todos os documentos são obrigatórios. Anexe cada arquivo em PDF. Se a cooperativa ainda não tem algum documento, anexe no lugar dele o protocolo do pedido ou uma justificativa, e explique na observação, no fim da etapa.'
     "
   >
     <ul class="ox-docs">
       <li v-for="doc in DOCUMENTOS_EXIGIDOS" :key="doc.id" class="ox-docs__item">
-        <div class="ox-docs__pergunta">
-          <span class="ox-docs__rotulo">{{ doc.rotulo }}</span>
-          <span v-if="travado(doc.id)" class="ox-docs__conferido">Conferido</span>
-          <OxEscolhaSimNao
-            :class="{ 'ox-docs__travado': travado(doc.id) }"
-            :rotulo="`Possui ${doc.rotulo}?`"
-            :model-value="f.documentos[doc.id]?.possui ?? null"
-            @update:model-value="!travado(doc.id) && complemento.definirPossui(doc.id, $event)"
-          />
+        <div class="ox-docs__cabeca">
+          <span :id="`doc-${doc.id}`" class="ox-docs__rotulo">
+            {{ doc.rotulo }}<span v-if="!complemento.emCorrecao" aria-hidden="true"> *</span>
+          </span>
+          <span v-if="conferido(doc.id)" class="ox-docs__conferido">Conferido</span>
         </div>
 
         <p v-if="devolvido(doc.id)" class="ox-docs__nota" role="note">
           <v-icon icon="mdi-alert" size="16" aria-hidden="true" />
-          <span><strong>Análise:</strong> {{ complemento.devolvidos[doc.id] }}</span>
+          <span><strong>Motivo:</strong> {{ complemento.devolvidos[doc.id] }}</span>
         </p>
 
-        <template v-if="f.documentos[doc.id]?.possui === 'sim'">
-          <div v-if="f.documentos[doc.id]?.arquivo && mostraArquivo(doc.id)" class="ox-docs__arquivo">
+        <div v-if="f.documentos[doc.id]?.arquivo" class="ox-docs__arquivo">
+          <v-icon icon="mdi-paperclip" size="16" aria-hidden="true" />
+          <span class="ox-docs__nome">{{ f.documentos[doc.id]?.arquivo }}</span>
+          <button type="button" class="ox-docs__icone" :aria-label="`Baixar ${f.documentos[doc.id]?.arquivo}`">
+            <v-icon icon="mdi-tray-arrow-down" size="16" aria-hidden="true" />
+          </button>
+          <button
+            v-if="!complemento.emCorrecao"
+            type="button"
+            class="ox-docs__icone ox-docs__icone--remover"
+            :aria-label="`Excluir o arquivo de ${doc.rotulo}`"
+            @click="complemento.removerArquivo(doc.id)"
+          >
+            <v-icon icon="mdi-trash-can-outline" size="16" aria-hidden="true" />
+          </button>
+        </div>
+
+        <template v-if="devolvido(doc.id)">
+          <div v-if="complemento.arquivoNovo(doc.id)" class="ox-docs__arquivo ox-docs__arquivo--novo">
             <v-icon icon="mdi-paperclip" size="16" aria-hidden="true" />
-            <span class="ox-docs__nome">{{ f.documentos[doc.id]?.arquivo }}</span>
+            <span class="ox-docs__nome">{{ complemento.arquivoNovo(doc.id) }}</span>
+            <button type="button" class="ox-docs__icone" :aria-label="`Baixar ${complemento.arquivoNovo(doc.id)}`">
+              <v-icon icon="mdi-tray-arrow-down" size="16" aria-hidden="true" />
+            </button>
             <button
-              v-if="!travado(doc.id)"
               type="button"
-              class="ox-docs__remover"
-              :aria-label="`Remover o arquivo de ${doc.rotulo}`"
+              class="ox-docs__icone ox-docs__icone--remover"
+              :aria-label="`Excluir o arquivo corrigido de ${doc.rotulo}`"
               @click="complemento.removerArquivo(doc.id)"
             >
               <v-icon icon="mdi-trash-can-outline" size="16" aria-hidden="true" />
             </button>
           </div>
+          <button v-else type="button" class="ox-docs__anexar" @click="complemento.anexarArquivo(doc.id)">
+            <v-icon icon="mdi-tray-arrow-up" size="18" aria-hidden="true" />
+            <span>Anexe o documento corrigido em PDF: arraste o arquivo aqui ou selecione do computador</span>
+          </button>
+        </template>
 
+        <template v-else-if="!f.documentos[doc.id]?.arquivo">
           <button
-            v-else
             type="button"
             class="ox-docs__anexar"
+            :class="{ 'ox-docs__anexar--erro': emErro(doc.id) }"
+            :aria-describedby="`doc-${doc.id}`"
             @click="complemento.anexarArquivo(doc.id)"
           >
             <v-icon icon="mdi-tray-arrow-up" size="18" aria-hidden="true" />
             <span class="ox-docs__anexar-acao">Arraste o arquivo em PDF aqui ou selecione do computador</span>
           </button>
+          <p v-if="emErro(doc.id)" class="ox-docs__erro">
+            Anexe o documento, ou o protocolo do pedido, para enviar o cadastro.
+          </p>
         </template>
-
-        <p v-else-if="f.documentos[doc.id]?.possui === 'nao' && !devolvido(doc.id)" class="ox-docs__pendencia">
-          Sem o documento, o item entra como pendência na análise. O envio continua possível.
-        </p>
       </li>
     </ul>
+
+    <OxCampo
+      class="ox-docs__observacao"
+      rotulo="Observações sobre os documentos"
+      v-model="f.observacaoDocumentos"
+      multilinha
+      opcional
+      :travado="complemento.emCorrecao"
+      dica="Use para explicar o que foi anexado no lugar de um documento, como um protocolo ou uma justificativa. Se todos os documentos estão anexados, deixe em branco."
+    />
   </OxCartao>
 </template>
 
@@ -102,7 +138,7 @@ const mostraArquivo = (id: string) => !devolvido(id) || complemento.docCorrigido
   border-top: 1px solid var(--rg-color-border-subtle);
 }
 
-.ox-docs__pergunta {
+.ox-docs__cabeca {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -121,24 +157,28 @@ const mostraArquivo = (id: string) => !devolvido(id) || complemento.docCorrigido
   align-items: center;
   gap: var(--rg-space-2);
   padding: var(--rg-space-2) var(--rg-space-3);
-  border: 1px solid var(--rg-color-border-subtle);
+  border: 1px solid transparent;
   border-radius: var(--rg-radius-md);
   background: var(--rg-color-surface-muted);
   color: var(--rg-color-text-muted);
+}
+
+.ox-docs__arquivo--novo {
+  border: 1.5px dashed var(--rg-color-border-brand);
+  background: var(--rg-color-surface-raised);
 }
 
 .ox-docs__nome {
   flex: 1;
   min-width: 0;
   font-size: var(--rg-font-size-sm);
-  font-weight: var(--rg-font-weight-medium);
   color: var(--rg-color-text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.ox-docs__remover {
+.ox-docs__icone {
   display: grid;
   place-items: center;
   width: 28px;
@@ -150,12 +190,17 @@ const mostraArquivo = (id: string) => !devolvido(id) || complemento.docCorrigido
   cursor: pointer;
 }
 
-.ox-docs__remover:hover {
+.ox-docs__icone:hover {
   background: var(--rg-color-surface-subtle);
+  color: var(--rg-color-text-brand);
+}
+
+.ox-docs__icone--remover:hover {
   color: var(--rg-color-feedback-danger);
 }
 
-.ox-docs__remover:focus-visible {
+.ox-docs__icone:focus-visible,
+.ox-docs__anexar:focus-visible {
   outline: 2px solid var(--rg-color-action-primary);
   outline-offset: 2px;
 }
@@ -166,6 +211,7 @@ const mostraArquivo = (id: string) => !devolvido(id) || complemento.docCorrigido
   justify-content: center;
   gap: var(--rg-space-2);
   min-height: 52px;
+  padding-inline: var(--rg-space-4);
   border: 1.5px dashed var(--rg-color-border-base);
   border-radius: var(--rg-radius-md);
   background: var(--rg-color-surface-base);
@@ -180,9 +226,8 @@ const mostraArquivo = (id: string) => !devolvido(id) || complemento.docCorrigido
   border-color: var(--rg-color-border-brand);
 }
 
-.ox-docs__anexar:focus-visible {
-  outline: 2px solid var(--rg-color-action-primary);
-  outline-offset: 2px;
+.ox-docs__anexar--erro {
+  border-color: var(--rg-color-feedback-danger);
 }
 
 .ox-docs__anexar-acao {
@@ -190,19 +235,19 @@ const mostraArquivo = (id: string) => !devolvido(id) || complemento.docCorrigido
   font-weight: var(--rg-font-weight-semibold);
 }
 
+.ox-docs__erro {
+  margin: 0;
+  font-size: var(--rg-font-size-xs);
+  color: var(--rg-primitive-red-700);
+}
+
 .ox-docs__conferido {
-  margin-left: auto;
   padding: 2px var(--rg-space-2);
   border-radius: var(--rg-radius-pill);
   background: var(--rg-color-feedback-success-soft);
   color: var(--rg-color-feedback-success);
   font-size: var(--rg-font-size-xs);
   font-weight: var(--rg-font-weight-semibold);
-}
-
-.ox-docs__travado {
-  opacity: 0.5;
-  pointer-events: none;
 }
 
 .ox-docs__nota {
@@ -218,9 +263,8 @@ const mostraArquivo = (id: string) => !devolvido(id) || complemento.docCorrigido
   line-height: var(--rg-line-height-base);
 }
 
-.ox-docs__pendencia {
-  margin: 0;
-  font-size: var(--rg-font-size-xs);
-  color: var(--rg-primitive-amber-700);
+.ox-docs__observacao {
+  padding-top: var(--rg-space-5);
+  border-top: 1px solid var(--rg-color-border-subtle);
 }
 </style>

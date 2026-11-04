@@ -7,6 +7,10 @@
  * `travado` é o `State=locked`: dado que veio do pré-cadastro e não se edita
  * aqui — fica em leitura, com fundo sutil, mas continua legível por leitor de
  * tela (input `readonly`, não `disabled`).
+ *
+ * Rodada de 16/10: todo campo aberto é obrigatório (asterisco no rótulo). `erro`
+ * é a mensagem do campo que a janela de envio mandou preencher (L7); `nota` é o
+ * motivo que a análise escreveu, na correção (L3).
  */
 import { computed, useId } from 'vue';
 
@@ -18,14 +22,24 @@ const props = withDefaults(
     dica?: string;
     tipo?: string;
     multilinha?: boolean;
+    erro?: string;
+    nota?: string;
+    placeholder?: string;
+    /** A observação dos documentos é a única que pode ficar em branco. */
+    opcional?: boolean;
   }>(),
-  { travado: false, dica: undefined, tipo: 'text', multilinha: false },
+  { travado: false, dica: undefined, tipo: 'text', multilinha: false, erro: undefined, nota: undefined, placeholder: undefined, opcional: false },
 );
 
 const emit = defineEmits<{ (e: 'update:modelValue', valor: string): void }>();
 
 const id = useId();
-const dicaId = computed(() => (props.dica ? `${id}-dica` : undefined));
+const descritoPor = computed(
+  () =>
+    [props.nota ? `${id}-nota` : '', props.erro ? `${id}-erro` : '', props.dica ? `${id}-dica` : '']
+      .filter(Boolean)
+      .join(' ') || undefined,
+);
 
 function aoDigitar(evento: Event) {
   emit('update:modelValue', (evento.target as HTMLInputElement | HTMLTextAreaElement).value);
@@ -33,8 +47,15 @@ function aoDigitar(evento: Event) {
 </script>
 
 <template>
-  <div class="ox-campo" :class="{ 'ox-campo--travado': travado }">
-    <label class="ox-campo__rotulo" :for="id">{{ rotulo }}</label>
+  <div class="ox-campo" :class="{ 'ox-campo--travado': travado, 'ox-campo--erro': erro, 'ox-campo--devolvido': nota }">
+    <label class="ox-campo__rotulo" :for="id">
+      {{ rotulo }}<span v-if="!travado && !opcional" class="ox-campo__obrigatorio" aria-hidden="true"> *</span>
+    </label>
+
+    <p v-if="nota" :id="`${id}-nota`" class="ox-campo__nota">
+      <v-icon icon="mdi-alert" size="16" aria-hidden="true" />
+      <span><strong>Motivo:</strong> {{ nota }}</span>
+    </p>
 
     <div class="ox-campo__caixa">
       <textarea
@@ -43,7 +64,10 @@ function aoDigitar(evento: Event) {
         class="ox-campo__entrada ox-campo__entrada--area"
         :value="modelValue"
         :readonly="travado"
-        :aria-describedby="dicaId"
+        :required="!travado && !opcional"
+        :aria-invalid="erro ? 'true' : undefined"
+        :aria-describedby="descritoPor"
+        :placeholder="placeholder"
         rows="3"
         @input="aoDigitar"
       />
@@ -54,12 +78,16 @@ function aoDigitar(evento: Event) {
         :type="tipo"
         :value="modelValue"
         :readonly="travado"
-        :aria-describedby="dicaId"
+        :required="!travado && !opcional"
+        :aria-invalid="erro ? 'true' : undefined"
+        :aria-describedby="descritoPor"
+        :placeholder="placeholder"
         @input="aoDigitar"
       />
     </div>
 
-    <p v-if="dica" :id="dicaId" class="ox-campo__dica">{{ dica }}</p>
+    <p v-if="erro" :id="`${id}-erro`" class="ox-campo__erro">{{ erro }}</p>
+    <p v-if="dica" :id="`${id}-dica`" class="ox-campo__dica">{{ dica }}</p>
   </div>
 </template>
 
@@ -103,6 +131,10 @@ function aoDigitar(evento: Event) {
   color: var(--rg-color-text-primary);
 }
 
+.ox-campo__entrada::placeholder {
+  color: var(--rg-color-text-muted);
+}
+
 .ox-campo__entrada--area {
   height: auto;
   min-height: 84px;
@@ -124,6 +156,29 @@ function aoDigitar(evento: Event) {
 .ox-campo--travado .ox-campo__caixa:focus-within {
   border-color: var(--rg-color-border-subtle);
   box-shadow: none;
+}
+
+.ox-campo--erro .ox-campo__caixa {
+  border-color: var(--rg-color-feedback-danger);
+}
+
+.ox-campo__erro {
+  margin: 0;
+  font-size: var(--rg-font-size-xs);
+  color: var(--rg-primitive-red-700);
+}
+
+.ox-campo__nota {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--rg-space-2);
+  margin: 0 0 var(--rg-space-1);
+  padding: var(--rg-space-2) var(--rg-space-3);
+  border-radius: var(--rg-radius-md);
+  background: var(--rg-color-feedback-danger-soft);
+  font-size: var(--rg-font-size-xs);
+  line-height: var(--rg-line-height-base);
+  color: var(--rg-primitive-red-700);
 }
 
 .ox-campo__dica {

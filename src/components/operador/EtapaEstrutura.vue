@@ -6,6 +6,8 @@
  * resposta de beneficiamento do vidro é "sim" — pergunta que não se aplica não
  * aparece. Radios são nativos, agrupados por `fieldset` com `name` próprio.
  */
+import { computed } from 'vue';
+
 import OxCampo from '@/components/operador/OxCampo.vue';
 import OxCartao from '@/components/operador/OxCartao.vue';
 import OxCondicional from '@/components/operador/OxCondicional.vue';
@@ -21,10 +23,19 @@ import { useComplementoStore } from '@/stores/complemento';
 
 const complemento = useComplementoStore();
 const f = complemento.formulario;
+
+/** Na correção, etapa sem nada devolvido fica só para conferir (fieldset desabilitado). */
+const bloqueada = computed(() => complemento.emCorrecao && complemento.devolvidosNaEtapa(4).length === 0);
+const estado = (id: string, oQue: string) => ({
+  travado: !complemento.editavel(id),
+  erro: complemento.campoEmErro(id) ? `Preencha ${oQue} para enviar o cadastro.` : undefined,
+  nota: complemento.emCorrecao ? complemento.devolvidos[id] : undefined,
+});
 </script>
 
 <template>
-  <div class="ox-etapa">
+  <fieldset class="ox-etapa" :disabled="bloqueada">
+    <legend class="ox-visualmente-oculto-etapa">Estrutura e capacidade</legend>
     <OxCartao titulo="Área e instalações">
       <fieldset class="ox-grupo">
         <legend class="ox-pergunta">Qual a situação da área onde a unidade se encontra?</legend>
@@ -40,7 +51,7 @@ const f = complemento.formulario;
           />
         </div>
         <OxCondicional v-if="f.situacaoArea === 'outro'">
-          <OxCampo rotulo="Qual a situação da área?" v-model="f.situacaoOutra" />
+          <OxCampo rotulo="Qual a situação da área?" v-model="f.situacaoOutra" v-bind="estado('situacao-outra', 'a situação da área')" />
         </OxCondicional>
       </fieldset>
 
@@ -59,7 +70,7 @@ const f = complemento.formulario;
           />
         </div>
         <OxCondicional v-if="f.areas.includes('outro')">
-          <OxCampo rotulo="Qual outra área?" v-model="f.areaOutra" />
+          <OxCampo rotulo="Qual outra área?" v-model="f.areaOutra" v-bind="estado('area-outra', 'a outra área')" />
         </OxCondicional>
       </fieldset>
     </OxCartao>
@@ -85,6 +96,7 @@ const f = complemento.formulario;
       <OxCampo
         rotulo="Qual a capacidade operacional da cooperativa?"
         v-model="f.capacidadeOperacional"
+        v-bind="estado('capacidade-operacional', 'a capacidade operacional')"
         multilinha
         dica="Descreva volumes, turnos e o que limita a operação hoje."
       />
@@ -117,15 +129,19 @@ const f = complemento.formulario;
       </div>
 
       <OxCondicional v-if="f.beneficiaVidro === 'sim'">
-        <OxCampo rotulo="Qual a destinação do vidro?" v-model="f.destinacaoVidro" />
-        <OxCampo rotulo="Capacidade de beneficiamento" v-model="f.capacidadeVidro" />
+        <OxCampo rotulo="Qual a destinação do vidro?" v-model="f.destinacaoVidro" v-bind="estado('destinacao-vidro', 'a destinação do vidro')" />
+        <OxCampo rotulo="Capacidade de beneficiamento" v-model="f.capacidadeVidro" placeholder="Ex.: 10 toneladas por mês" v-bind="estado('capacidade-vidro', 'a capacidade de beneficiamento')" />
       </OxCondicional>
     </OxCartao>
-  </div>
+  </fieldset>
 </template>
 
 <style scoped>
 .ox-etapa {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
   display: flex;
   flex-direction: column;
   gap: var(--rg-space-6);
@@ -138,6 +154,20 @@ const f = complemento.formulario;
   margin: 0;
   padding: 0;
   border: none;
+}
+
+.ox-visualmente-oculto-etapa {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Rodada de 16/10: toda pergunta é obrigatória. */
+.ox-pergunta::after {
+  content: ' *';
 }
 
 .ox-pergunta {

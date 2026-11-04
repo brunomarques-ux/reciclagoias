@@ -7,6 +7,8 @@
  * na moldura condicional (OxCondicional) — padrão único do complemento. O mesmo
  * vale para "recebe de outros municípios?": o Sim abre o campo de quais.
  */
+import { computed } from 'vue';
+
 import OxCampo from '@/components/operador/OxCampo.vue';
 import OxCartao from '@/components/operador/OxCartao.vue';
 import OxCondicional from '@/components/operador/OxCondicional.vue';
@@ -22,10 +24,19 @@ import { useComplementoStore } from '@/stores/complemento';
 
 const complemento = useComplementoStore();
 const f = complemento.formulario;
+
+/** Na correção, etapa sem nada devolvido fica só para conferir (fieldset desabilitado). */
+const bloqueada = computed(() => complemento.emCorrecao && complemento.devolvidosNaEtapa(3).length === 0);
+const estado = (id: string, oQue: string) => ({
+  travado: !complemento.editavel(id),
+  erro: complemento.campoEmErro(id) ? `Preencha ${oQue} para enviar o cadastro.` : undefined,
+  nota: complemento.emCorrecao ? complemento.devolvidos[id] : undefined,
+});
 </script>
 
 <template>
-  <div class="ox-etapa">
+  <fieldset class="ox-etapa" :disabled="bloqueada">
+    <legend class="ox-visualmente-oculto-etapa">Operação</legend>
     <OxCartao titulo="Serviços e beneficiamento">
       <div class="ox-pergunta-linha">
         <span class="ox-pergunta">A cooperativa realiza serviço de coleta?</span>
@@ -47,7 +58,7 @@ const f = complemento.formulario;
           />
         </div>
         <OxCondicional v-if="f.beneficiamentos.includes('outro')">
-          <OxCampo rotulo="Qual outro serviço?" v-model="f.beneficiamentoOutro" />
+          <OxCampo rotulo="Qual outro serviço?" v-model="f.beneficiamentoOutro" v-bind="estado('beneficiamento-outro', 'o outro serviço')" />
         </OxCondicional>
       </fieldset>
     </OxCartao>
@@ -65,7 +76,7 @@ const f = complemento.formulario;
           />
         </div>
         <OxCondicional v-if="f.equipamentos.includes('outro')">
-          <OxCampo rotulo="Quais outros equipamentos?" v-model="f.equipamentoOutro" />
+          <OxCampo rotulo="Quais outros equipamentos?" v-model="f.equipamentoOutro" v-bind="estado('equipamento-outro', 'os outros equipamentos')" />
         </OxCondicional>
       </fieldset>
     </OxCartao>
@@ -83,7 +94,7 @@ const f = complemento.formulario;
           />
         </div>
         <OxCondicional v-if="f.residuos.includes('outro')">
-          <OxCampo rotulo="Qual outro tipo?" v-model="f.residuoOutro" />
+          <OxCampo rotulo="Qual outro tipo?" v-model="f.residuoOutro" v-bind="estado('residuo-outro', 'o outro tipo')" />
         </OxCondicional>
       </fieldset>
 
@@ -102,7 +113,7 @@ const f = complemento.formulario;
           />
         </div>
         <OxCondicional v-if="f.origens.includes('outro')">
-          <OxCampo rotulo="Qual outra origem?" v-model="f.origemOutra" />
+          <OxCampo rotulo="Qual outra origem?" v-model="f.origemOutra" v-bind="estado('origem-outra', 'a outra origem')" />
         </OxCondicional>
       </fieldset>
 
@@ -116,7 +127,7 @@ const f = complemento.formulario;
         />
       </div>
       <OxCondicional v-if="f.outrosMunicipios === 'sim'">
-        <OxCampo rotulo="Quais municípios?" v-model="f.quaisMunicipios" />
+        <OxCampo rotulo="Quais municípios?" v-model="f.quaisMunicipios" v-bind="estado('quais-municipios', 'os municípios')" />
       </OxCondicional>
 
       <hr class="ox-divisor" />
@@ -141,11 +152,15 @@ const f = complemento.formulario;
         />
       </div>
     </OxCartao>
-  </div>
+  </fieldset>
 </template>
 
 <style scoped>
 .ox-etapa {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
   display: flex;
   flex-direction: column;
   gap: var(--rg-space-6);
@@ -158,6 +173,20 @@ const f = complemento.formulario;
   margin: 0;
   padding: 0;
   border: none;
+}
+
+.ox-visualmente-oculto-etapa {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Rodada de 16/10: toda pergunta é obrigatória. */
+.ox-pergunta::after {
+  content: ' *';
 }
 
 .ox-pergunta {

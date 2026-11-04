@@ -26,7 +26,8 @@ const emit = defineEmits<{ (e: 'ir', etapa: number): void }>();
           type="button"
           class="ox-stepper__botao"
           :class="{
-            'ox-stepper__botao--feito': indice + 1 < atual,
+            'ox-stepper__botao--feito':
+              indice + 1 < atual || (complemento.situacao !== 'preenchendo' && indice + 1 < 5),
             'ox-stepper__botao--atual': indice + 1 === atual,
             [`ox-stepper__botao--${complemento.alertaEtapa(indice + 1)}`]: !!complemento.alertaEtapa(indice + 1),
           }"
