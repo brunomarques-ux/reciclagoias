@@ -7,6 +7,10 @@
  * (Não abre o motivo), L1·4 (motivo salvo), L5·1 (salvar sem descrição), L6·1 e
  * L6·2 (editar motivo, com Cancelar que volta ao salvo) e L4·2 (reanálise: o
  * corrigido em destaque com o motivo anterior; o que estava em Sim, bloqueado).
+ *
+ * Planning de 13/11/2026 (Figma `6507:7059`, L2·2): na conferência do documento
+ * trocado depois do vencimento, ele leva o selo Atualizado e a validade informada
+ * pelo operador; os demais aparecem como já conferidos.
  */
 import { computed, nextTick, ref } from 'vue';
 
@@ -32,6 +36,8 @@ const resposta = computed(() => conf.value?.resposta ?? null);
 const travado = computed(() => !!conf.value?.travado);
 const bloqueado = computed(() => props.leitura || travado.value);
 const devolvidoAntes = computed(() => !!props.reanalise && c.devolvidos[props.doc.id] !== undefined);
+/** O documento trocado depois do vencimento, enquanto o Admin confere. */
+const atualizado = computed(() => c.revalidacao && c.vencimento?.doc === props.doc.id);
 
 const aberto = computed(() => resposta.value === 'nao' && !conf.value?.salvo && !props.leitura);
 const salvo = computed(
@@ -120,7 +126,8 @@ function cancelar() {
     <div class="ax-doc__esq">
       <p class="ax-doc__nome">
         <span :id="`${id}-nome`">{{ doc.rotulo }}</span>
-        <span v-if="devolvidoAntes" class="ax-doc__selo">Corrigido em {{ reanalise?.corrigidoEm }}</span>
+        <span v-if="atualizado" class="ax-doc__selo">Atualizado</span>
+        <span v-else-if="devolvidoAntes" class="ax-doc__selo">Corrigido em {{ reanalise?.corrigidoEm }}</span>
       </p>
 
       <div class="ax-arquivo">
@@ -137,7 +144,11 @@ function cancelar() {
         </button>
       </div>
 
-      <p v-if="devolvidoAntes" class="ax-doc__anterior">Motivo anterior: {{ c.devolvidos[doc.id] }}</p>
+      <p v-if="atualizado" class="ax-doc__anterior">
+        Validade informada pelo operador: {{ c.troca.validade }}. O documento anterior venceu em
+        {{ c.vencimento?.venceEm }}.
+      </p>
+      <p v-else-if="devolvidoAntes" class="ax-doc__anterior">Motivo anterior: {{ c.devolvidos[doc.id] }}</p>
 
       <div v-if="aberto" class="ax-motivo">
         <fieldset class="ax-motivo__opcoes">
@@ -257,7 +268,7 @@ function cancelar() {
 }
 
 .ax-doc__selo {
-  padding: 2px 10px;
+  padding: var(--rg-space-1) 10px;
   border-radius: var(--rg-radius-pill);
   background: var(--rg-color-feedback-info-soft);
   color: var(--rg-color-feedback-info);

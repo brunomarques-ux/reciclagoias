@@ -19,13 +19,16 @@ import {
   PERCEPCOES_OPERACAO,
   SITUACOES_AREA,
 } from '@/data/mocks/operador';
+import OxNotaDaEtapa from '@/components/operador/OxNotaDaEtapa.vue';
 import { useComplementoStore } from '@/stores/complemento';
 
 const complemento = useComplementoStore();
 const f = complemento.formulario;
 
 /** Na correção, etapa sem nada devolvido fica só para conferir (fieldset desabilitado). */
-const bloqueada = computed(() => complemento.emCorrecao && complemento.devolvidosNaEtapa(4).length === 0);
+const bloqueada = computed(
+  () => complemento.contaTravada || (complemento.emCorrecao && complemento.devolvidosNaEtapa(4).length === 0),
+);
 const estado = (id: string, oQue: string) => ({
   travado: !complemento.editavel(id),
   erro: complemento.campoEmErro(id) ? `Preencha ${oQue} para enviar o cadastro.` : undefined,
@@ -36,6 +39,7 @@ const estado = (id: string, oQue: string) => ({
 <template>
   <fieldset class="ox-etapa" :disabled="bloqueada">
     <legend class="ox-visualmente-oculto-etapa">Estrutura e capacidade</legend>
+    <OxNotaDaEtapa :etapa="4" />
     <OxCartao titulo="Área e instalações">
       <fieldset class="ox-grupo">
         <legend class="ox-pergunta">Qual a situação da área onde a unidade se encontra?</legend>

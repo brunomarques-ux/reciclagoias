@@ -15,17 +15,19 @@
  */
 import { computed } from 'vue';
 
+import type { ItemMenu } from '@/data/mocks/sessao';
 import { useSessaoStore } from '@/stores/sessao';
 import ExploradorCenarios from './ExploradorCenarios.vue';
 
-const props = withDefaults(defineProps<{ ativo: string; explorador?: boolean }>(), {
+const props = withDefaults(defineProps<{ ativo: string; explorador?: boolean; itens?: ItemMenu[] }>(), {
   explorador: true,
+  itens: undefined,
 });
 
 const sessao = useSessaoStore();
 
 /** Os itens vêm do perfil: o verificador tem Notas Fiscais onde a gestora tem Planos. */
-const ITENS = computed(() => sessao.menu);
+const ITENS = computed(() => props.itens ?? sessao.menu);
 const mostraExplorador = computed(() => props.explorador);
 </script>
 

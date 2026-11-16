@@ -14,8 +14,19 @@
  * Correção (L3): o devolvido traz o motivo, o anexo recusado continua listado
  * (só com baixar) e o corrigido entra logo abaixo, com contorno tracejado. O
  * que a análise conferiu fica bloqueado, com o selo Conferido.
+ *
+ * Planning de 13/11/2026 (Figma: seção `6506:4284`, linha L1):
+ * - Dentro de Minha Conta os documentos são só consulta, todos como Conferido.
+ * - Bloqueado por documentação vencida (L1·4, `6507:6214`): só o documento vencido
+ *   aceita troca. O arquivo vencido continua listado, o novo entra pelo mesmo
+ *   Dropzone da correção e a validade é informada no campo ao lado.
+ * - Enviado para conferência (L1·5, `6507:6524`): o documento novo fica só para
+ *   consulta, com o chip Em conferência e a validade travada.
+ * O campo de validade é PROVISÓRIO: o definitivo vem do print da homologação.
  */
 import OxCampo from '@/components/operador/OxCampo.vue';
+import { computed } from 'vue';
+
 import OxCartao from '@/components/operador/OxCartao.vue';
 import { DOCUMENTOS_EXIGIDOS } from '@/data/mocks/operador';
 import { useComplementoStore } from '@/stores/complemento';
@@ -24,27 +35,56 @@ const complemento = useComplementoStore();
 const f = complemento.formulario;
 
 const devolvido = (id: string) => complemento.emCorrecao && complemento.devolvidos[id] !== undefined;
-const conferido = (id: string) => complemento.emCorrecao && complemento.devolvidos[id] === undefined;
+/** O documento vencido, enquanto o cadastro está bloqueado: o único que aceita troca. */
+const vencido = (id: string) => complemento.bloqueado && complemento.vencimento?.doc === id;
+/** O documento novo, enquanto o Admin confere. */
+const emConferencia = (id: string) => complemento.emConferencia && complemento.vencimento?.doc === id;
+const conferido = (id: string) =>
+  (complemento.emCorrecao && complemento.devolvidos[id] === undefined) ||
+  (complemento.naMinhaConta && !vencido(id) && !emConferencia(id));
+/** Na correção e dentro de Minha Conta, o que já foi conferido não se altera. */
+const soConsulta = computed(() => complemento.emCorrecao || complemento.naMinhaConta);
+
+const descricao = computed(() => {
+  if (complemento.bloqueado)
+    return 'Só o documento vencido pode ser trocado. Os demais continuam conferidos e não precisam ser enviados de novo.';
+  if (complemento.emConferencia) return 'O documento enviado está em conferência. Os demais continuam conferidos.';
+  if (complemento.naMinhaConta) return 'Os documentos foram conferidos na análise do cadastro e ficam só para consulta.';
+  if (complemento.emCorrecao)
+    return 'Os documentos conferidos pela análise não podem ser alterados. No documento com pendência, o motivo aparece abaixo do nome.';
+  return 'Todos os documentos são obrigatórios. Anexe cada arquivo em PDF. Se a cooperativa ainda não tem algum documento, anexe no lugar dele o protocolo do pedido ou uma justificativa, e explique na observação, no fim da etapa.';
+});
+
+/** O motivo no documento vencido: a recusa da conferência, se houve, ou o vencimento. */
+const motivoDoVencido = computed(() => {
+  if (complemento.troca.recusa) return complemento.troca.recusa;
+  const v = complemento.vencimento;
+  const nome = DOCUMENTOS_EXIGIDOS.find((d) => d.id === v?.doc)?.nomeCurto ?? 'documento';
+  return `o ${nome} venceu em ${v?.venceEm ?? ''}. Anexe o ${nome} válido e informe a nova data de validade.`;
+});
+const erroDaTroca = (qual: 'arquivo' | 'validade') => complemento.errosDaTroca.includes(qual);
 const emErro = (id: string) => complemento.camposEmErro.includes(id) && !f.documentos[id]?.arquivo;
 </script>
 
 <template>
   <OxCartao
     titulo="Documentos da cooperativa"
-    :descricao="
-      complemento.emCorrecao
-        ? 'Os documentos conferidos pela análise não podem ser alterados. No documento com pendência, o motivo aparece abaixo do nome.'
-        : 'Todos os documentos são obrigatórios. Anexe cada arquivo em PDF. Se a cooperativa ainda não tem algum documento, anexe no lugar dele o protocolo do pedido ou uma justificativa, e explique na observação, no fim da etapa.'
-    "
+    :descricao="descricao"
   >
     <ul class="ox-docs">
       <li v-for="doc in DOCUMENTOS_EXIGIDOS" :key="doc.id" class="ox-docs__item">
         <div class="ox-docs__cabeca">
           <span :id="`doc-${doc.id}`" class="ox-docs__rotulo">
-            {{ doc.rotulo }}<span v-if="!complemento.emCorrecao" aria-hidden="true"> *</span>
+            {{ doc.rotulo }}<span v-if="!soConsulta" aria-hidden="true"> *</span>
           </span>
-          <span v-if="conferido(doc.id)" class="ox-docs__conferido">Conferido</span>
+          <span v-if="emConferencia(doc.id)" class="ox-docs__em-conferencia">Em conferência</span>
+          <span v-else-if="conferido(doc.id)" class="ox-docs__conferido">Conferido</span>
         </div>
+
+        <p v-if="vencido(doc.id)" class="ox-docs__nota" role="note">
+          <v-icon icon="mdi-alert" size="16" aria-hidden="true" />
+          <span><strong>Motivo:</strong> {{ motivoDoVencido }}</span>
+        </p>
 
         <p v-if="devolvido(doc.id)" class="ox-docs__nota" role="note">
           <v-icon icon="mdi-alert" size="16" aria-hidden="true" />
@@ -58,7 +98,7 @@ const emErro = (id: string) => complemento.camposEmErro.includes(id) && !f.docum
             <v-icon icon="mdi-tray-arrow-down" size="16" aria-hidden="true" />
           </button>
           <button
-            v-if="!complemento.emCorrecao"
+            v-if="!soConsulta"
             type="button"
             class="ox-docs__icone ox-docs__icone--remover"
             :aria-label="`Excluir o arquivo de ${doc.rotulo}`"
@@ -90,6 +130,54 @@ const emErro = (id: string) => complemento.camposEmErro.includes(id) && !f.docum
           </button>
         </template>
 
+        <template v-else-if="vencido(doc.id)">
+          <div v-if="complemento.troca.arquivo" class="ox-docs__arquivo ox-docs__arquivo--novo">
+            <v-icon icon="mdi-paperclip" size="16" aria-hidden="true" />
+            <span class="ox-docs__nome">{{ complemento.troca.arquivo }}</span>
+            <button type="button" class="ox-docs__icone" :aria-label="`Baixar ${complemento.troca.arquivo}`">
+              <v-icon icon="mdi-tray-arrow-down" size="16" aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              class="ox-docs__icone ox-docs__icone--remover"
+              :aria-label="`Excluir o arquivo novo de ${doc.rotulo}`"
+              @click="complemento.removerDocumentoNovo()"
+            >
+              <v-icon icon="mdi-trash-can-outline" size="16" aria-hidden="true" />
+            </button>
+          </div>
+          <template v-else>
+            <button
+              type="button"
+              class="ox-docs__anexar"
+              :class="{ 'ox-docs__anexar--erro': erroDaTroca('arquivo') }"
+              @click="complemento.anexarDocumentoNovo()"
+            >
+              <v-icon icon="mdi-tray-arrow-up" size="18" aria-hidden="true" />
+              <span>Anexe o documento corrigido em PDF: arraste o arquivo aqui ou selecione do computador</span>
+            </button>
+            <p v-if="erroDaTroca('arquivo')" class="ox-docs__erro" role="alert">
+              Anexe o documento novo para enviar para conferência.
+            </p>
+          </template>
+          <OxCampo
+            class="ox-docs__validade"
+            rotulo="Validade do documento"
+            :model-value="complemento.troca.validade"
+            placeholder="DD/MM/AAAA"
+            :erro="erroDaTroca('validade') ? 'Informe a validade do documento novo, no formato DD/MM/AAAA.' : undefined"
+            @update:model-value="complemento.informarValidade($event)"
+          />
+        </template>
+
+        <OxCampo
+          v-else-if="emConferencia(doc.id)"
+          class="ox-docs__validade"
+          rotulo="Validade do documento"
+          :model-value="complemento.troca.validade"
+          travado
+        />
+
         <template v-else-if="!f.documentos[doc.id]?.arquivo">
           <button
             type="button"
@@ -108,13 +196,15 @@ const emErro = (id: string) => complemento.camposEmErro.includes(id) && !f.docum
       </li>
     </ul>
 
+    <!-- Nos frames do bloqueio e da conferência (L1·4 e L1·5) a observação não aparece. -->
     <OxCampo
+      v-if="!complemento.bloqueado && !complemento.emConferencia"
       class="ox-docs__observacao"
       rotulo="Observações sobre os documentos"
       v-model="f.observacaoDocumentos"
       multilinha
       opcional
-      :travado="complemento.emCorrecao"
+      :travado="soConsulta"
       dica="Use para explicar o que foi anexado no lugar de um documento, como um protocolo ou uma justificativa. Se todos os documentos estão anexados, deixe em branco."
     />
   </OxCartao>
@@ -248,6 +338,22 @@ const emErro = (id: string) => complemento.camposEmErro.includes(id) && !f.docum
   color: var(--rg-color-feedback-success);
   font-size: var(--rg-font-size-xs);
   font-weight: var(--rg-font-weight-semibold);
+}
+
+.ox-docs__em-conferencia {
+  padding: var(--rg-space-1) 10px;
+  border-radius: var(--rg-radius-pill);
+  background: var(--rg-color-feedback-info-soft);
+  color: var(--rg-color-feedback-info);
+  font-size: var(--rg-font-size-xs);
+  font-weight: var(--rg-font-weight-semibold);
+  line-height: 16px;
+}
+
+/* Provisório: largura do campo no frame (240). */
+.ox-docs__validade {
+  width: 240px;
+  max-width: 100%;
 }
 
 .ox-docs__nota {

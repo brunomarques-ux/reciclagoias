@@ -5,6 +5,11 @@
  *
  * No protótipo qualquer passo é clicável (facilita a demonstração); no sistema
  * real a regra de bloqueio de avanço é da store, não daqui.
+ *
+ * Planning de 13/11/2026: dentro de Minha Conta (cadastro aprovado) o stepper só
+ * navega, sem check nem alerta (L5·1). No bloqueio por documento vencido, só
+ * Documentos abre (L1·4): os outros passos ficam desabilitados, com o mesmo
+ * desenho. O Figma não tem variante de passo fechado.
  */
 import { ETAPAS } from '@/data/mocks/operador';
 import { useComplementoStore } from '@/stores/complemento';
@@ -15,6 +20,10 @@ const complemento = useComplementoStore();
 
 defineProps<{ atual: number }>();
 const emit = defineEmits<{ (e: 'ir', etapa: number): void }>();
+
+const feito = (n: number, atual: number) =>
+  !complemento.naMinhaConta && (n < atual || (complemento.situacao !== 'preenchendo' && n < 5));
+const alerta = (n: number) => (complemento.naMinhaConta ? null : complemento.alertaEtapa(n));
 </script>
 
 <template>
@@ -26,17 +35,17 @@ const emit = defineEmits<{ (e: 'ir', etapa: number): void }>();
           type="button"
           class="ox-stepper__botao"
           :class="{
-            'ox-stepper__botao--feito':
-              indice + 1 < atual || (complemento.situacao !== 'preenchendo' && indice + 1 < 5),
+            'ox-stepper__botao--feito': feito(indice + 1, atual),
             'ox-stepper__botao--atual': indice + 1 === atual,
-            [`ox-stepper__botao--${complemento.alertaEtapa(indice + 1)}`]: !!complemento.alertaEtapa(indice + 1),
+            [`ox-stepper__botao--${alerta(indice + 1)}`]: !!alerta(indice + 1),
           }"
           :aria-current="indice + 1 === atual ? 'step' : undefined"
+          :disabled="!complemento.etapaAberta(indice + 1)"
           @click="emit('ir', indice + 1)"
         >
           <span class="ox-stepper__bola" aria-hidden="true">
-            <v-icon v-if="complemento.alertaEtapa(indice + 1)" icon="mdi-exclamation" size="15" />
-            <v-icon v-else-if="indice + 1 < atual || (complemento.situacao !== 'preenchendo' && indice + 1 < 5)" icon="mdi-check" size="15" />
+            <v-icon v-if="alerta(indice + 1)" icon="mdi-exclamation" size="15" />
+            <v-icon v-else-if="feito(indice + 1, atual)" icon="mdi-check" size="15" />
             <template v-else>{{ indice + 1 }}</template>
           </span>
           <span class="ox-stepper__rotulo">{{ rotulo }}</span>
@@ -122,6 +131,10 @@ const emit = defineEmits<{ (e: 'ir', etapa: number): void }>();
 .ox-stepper__botao--danger .ox-stepper__bola {
   background: var(--rg-color-feedback-danger-soft);
   color: var(--rg-primitive-red-700);
+}
+
+.ox-stepper__botao:disabled {
+  cursor: not-allowed;
 }
 
 .ox-stepper__botao:focus-visible {

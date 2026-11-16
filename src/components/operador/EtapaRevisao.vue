@@ -7,6 +7,10 @@
  * só leitura, um bloco por etapa e o primeiro aberto. O que falta aparece na
  * linha do bloco, pelo nome; quem trava o envio é a janela da página (L7).
  * Na correção, abre com o bloco que tinha pendência (L3·4).
+ *
+ * Dentro de Minha Conta (planning de 13/11/2026) a etapa é só consulta: sem o
+ * Editar e sem a declaração, que já foi aceita no envio. Não tem frame no Figma
+ * (só Dados gerais foi desenhada na L5).
  */
 import ComplementoVisualizacao from '@/components/operador/ComplementoVisualizacao.vue';
 import OxOpcao from '@/components/operador/OxOpcao.vue';
@@ -21,9 +25,10 @@ const aberto = complemento.emCorrecao ? Math.min(...complemento.idsDevolvidos.ma
 
 <template>
   <div class="ox-etapa">
-    <ComplementoVisualizacao editavel :aberto="aberto" @editar="emit('editar', $event)" />
+    <ComplementoVisualizacao :editavel="!complemento.naMinhaConta" :aberto="aberto" @editar="emit('editar', $event)" />
 
     <OxOpcao
+      v-if="!complemento.naMinhaConta"
       rotulo="Declaro que as informações prestadas são verdadeiras e que os documentos anexados são autênticos."
       :marcado="f.declaracaoAceita"
       @alternar="f.declaracaoAceita = !f.declaracaoAceita"

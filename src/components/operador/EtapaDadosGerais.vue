@@ -8,9 +8,13 @@
  * suporte). O tipo condiciona o formulário: "número de cooperados" só existe
  * para cooperativa. O resto é o que só a organização sabe: contato, porte e
  * endereço da unidade.
+ *
+ * Planning de 13/11/2026 (Figma `6506:4386`, L5·1): dentro de Minha Conta, com o
+ * cadastro aprovado, tudo fica travado e os CNAEs do CNPJ aparecem em chips.
  */
 import OxCampo from '@/components/operador/OxCampo.vue';
 import OxCartao from '@/components/operador/OxCartao.vue';
+import OxNotaDaEtapa from '@/components/operador/OxNotaDaEtapa.vue';
 import { PRE_CADASTRO, ROTULO_TIPO } from '@/data/mocks/operador';
 import { useComplementoStore } from '@/stores/complemento';
 
@@ -28,16 +32,28 @@ const estado = (id: string, oQue: string) => ({
 
 <template>
   <div class="ox-etapa">
+    <OxNotaDaEtapa :etapa="1" />
     <OxCartao titulo="Identificação da cooperativa">
       <div class="ox-campos">
         <OxCampo
-          class="ox-col-5"
+          :class="complemento.naMinhaConta ? 'ox-col-6' : 'ox-col-5'"
           rotulo="Razão social"
           :model-value="PRE_CADASTRO.razaoSocial"
           travado
         />
-        <OxCampo class="ox-col-3" rotulo="CNPJ" :model-value="PRE_CADASTRO.cnpj" travado />
-        <OxCampo class="ox-col-4" rotulo="CNAE" :model-value="PRE_CADASTRO.cnae" travado />
+        <OxCampo
+          :class="complemento.naMinhaConta ? 'ox-col-6' : 'ox-col-3'"
+          rotulo="CNPJ"
+          :model-value="PRE_CADASTRO.cnpj"
+          travado
+        />
+        <OxCampo
+          v-if="!complemento.naMinhaConta"
+          class="ox-col-4"
+          rotulo="CNAE"
+          :model-value="PRE_CADASTRO.cnae"
+          travado
+        />
 
         <OxCampo
           class="ox-col-4"
@@ -64,7 +80,18 @@ const estado = (id: string, oQue: string) => ({
         <OxCampo class="ox-col-3" rotulo="Ano de criação" v-model="f.anoCriacao" v-bind="estado('ano-criacao', 'o ano de criação')" />
       </div>
 
-      <p class="ox-nota">
+      <div v-if="complemento.naMinhaConta" class="ox-cnaes">
+        <span id="ox-cnaes-rotulo" class="ox-cnaes__rotulo">CNAEs</span>
+        <ul class="ox-cnaes__lista" aria-labelledby="ox-cnaes-rotulo">
+          <li v-for="cnae in PRE_CADASTRO.cnaes" :key="cnae" class="ox-cnaes__chip">{{ cnae }}</li>
+        </ul>
+      </div>
+
+      <p v-if="complemento.naMinhaConta" class="ox-nota">
+        Razão social, nome fantasia, CNPJ, e-mail, CNAEs e o tipo de organização vêm do pré-cadastro.
+        Para corrigir algum deles, fale com o suporte.
+      </p>
+      <p v-else class="ox-nota">
         Razão social, nome fantasia, CNPJ, CNAE, e-mail e o tipo de organização vêm do pré-cadastro.
         Para corrigir algum deles, fale com o suporte.
       </p>
@@ -108,9 +135,42 @@ const estado = (id: string, oQue: string) => ({
 .ox-col-3 { grid-column: span 3; }
 .ox-col-4 { grid-column: span 4; }
 .ox-col-5 { grid-column: span 5; }
+.ox-col-6 { grid-column: span 6; }
 .ox-col-7 { grid-column: span 7; }
 .ox-col-8 { grid-column: span 8; }
 .ox-col-9 { grid-column: span 9; }
+
+.ox-cnaes {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ox-cnaes__rotulo {
+  font-size: var(--rg-font-size-xs);
+  font-weight: var(--rg-font-weight-medium);
+  line-height: 16px;
+  color: var(--rg-color-text-secondary);
+}
+
+.ox-cnaes__lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--rg-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ox-cnaes__chip {
+  padding: var(--rg-space-1) 10px;
+  border-radius: var(--rg-radius-pill);
+  background: var(--rg-color-surface-subtle);
+  font-size: var(--rg-font-size-xs);
+  font-weight: var(--rg-font-weight-semibold);
+  line-height: 16px;
+  color: var(--rg-color-text-secondary);
+}
 
 .ox-nota {
   margin: 0;

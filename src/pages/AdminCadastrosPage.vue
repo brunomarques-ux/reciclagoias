@@ -11,6 +11,10 @@
  * A primeira linha é a Recicla Cerrado, que acompanha a store do complemento: é ela
  * que fecha a volta da demonstração. No reenvio ela volta como Enviado, no topo, sem
  * analista, na data do reenvio. As outras linhas são ilustrativas.
+ *
+ * Planning de 13/11/2026 (Figma `6507:6819`, L2·1): o cadastro que trocou o documento
+ * vencido entra na mesma lista, no topo, como "Documento atualizado". Analisar abre a
+ * conferência só do documento trocado.
  */
 import { computed, reactive } from 'vue';
 import { useRouter } from 'vue-router';
@@ -25,12 +29,15 @@ import { useComplementoStore } from '@/stores/complemento';
 const router = useRouter();
 const c = useComplementoStore();
 
-type SituacaoFila = 'enviado' | 'em-analise' | 'devolvido' | 'aprovado';
+type SituacaoFila = 'enviado' | 'em-analise' | 'devolvido' | 'aprovado' | 'bloqueado' | 'documento-atualizado';
 const SITUACOES: Record<SituacaoFila, { rotulo: string; tom: string }> = {
   enviado: { rotulo: 'Enviado', tom: 'neutro' },
   'em-analise': { rotulo: 'Em análise', tom: 'info' },
   devolvido: { rotulo: 'Devolvido', tom: 'warning' },
   aprovado: { rotulo: 'Aprovado', tom: 'success' },
+  // Não desenhado no Figma: o cadastro bloqueado que ainda não mandou o documento novo.
+  bloqueado: { rotulo: 'Bloqueado', tom: 'danger' },
+  'documento-atualizado': { rotulo: 'Documento atualizado', tom: 'neutro' },
 };
 
 interface Linha {
@@ -95,7 +102,7 @@ const linhas = computed(() => {
 // ---- menu da linha ----
 function itens(l: Linha): ItemMenu[] {
   const lista: ItemMenu[] = [{ id: 'visualizar', rotulo: 'Visualizar', desabilitado: !l.viva }];
-  if (l.situacao === 'enviado') lista.push({ id: 'analisar', rotulo: 'Analisar', desabilitado: !l.viva, destaque: true });
+  if (l.situacao === 'enviado' || l.situacao === 'documento-atualizado') lista.push({ id: 'analisar', rotulo: 'Analisar', desabilitado: !l.viva, destaque: true });
   return lista;
 }
 
@@ -120,8 +127,8 @@ function escolher(l: Linha, acao: string) {
     <header>
       <h1 class="ax-titulo">Cadastros de operador logístico</h1>
       <p class="ax-sub">
-        Complementos de cadastro enviados para análise. Os que voltaram corrigidos aparecem no topo. Busque pelo
-        nome, CNPJ ou protocolo.
+        Complementos de cadastro enviados para análise. Os que voltaram corrigidos ou com documento atualizado aparecem
+        no topo. Busque pelo nome, CNPJ ou protocolo.
       </p>
     </header>
 
@@ -419,6 +426,7 @@ function escolher(l: Linha, acao: string) {
 .ax-chip--neutro { background: var(--rg-color-surface-subtle); color: var(--rg-color-text-secondary); }
 .ax-chip--info { background: var(--rg-color-feedback-info-soft); color: var(--rg-color-feedback-info); }
 .ax-chip--warning { background: var(--rg-color-feedback-warning-soft); color: var(--rg-primitive-amber-700); }
+.ax-chip--danger { background: var(--rg-color-feedback-danger-soft); color: var(--rg-primitive-red-700); }
 .ax-chip--success { background: var(--rg-color-feedback-success-soft); color: var(--rg-color-text-brand); }
 
 .ax-vazio {

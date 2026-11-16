@@ -112,10 +112,23 @@ export const MENUS: Record<PerfilId, ItemMenu[]> = {
   // Conta em complementação: até a aprovação da análise o operador só enxerga
   // Minha Conta e o próprio complemento — o Dashboard nasce depois de aprovado.
   operador: [
-    { rotulo: 'Minha Conta', icone: 'mdi-account', rota: null },
+    { rotulo: 'Minha Conta', icone: 'mdi-home', rota: null },
     { rotulo: 'Complemento de cadastro', icone: 'mdi-clipboard-text', rota: '/operador' },
   ],
 };
+
+/**
+ * Menu do operador com o cadastro aprovado (planning de 13/11/2026): o complemento
+ * passa a morar dentro de Minha Conta e as funções do operador aparecem. Só a
+ * Minha Conta tem tela nesta fatia.
+ */
+export const MENU_OPERADOR_APROVADO: ItemMenu[] = [
+  { rotulo: 'Dashboard', icone: 'mdi-view-dashboard', rota: null },
+  { rotulo: 'Minha Conta', icone: 'mdi-home', rota: '/operador' },
+  { rotulo: 'Notas Fiscais', icone: 'mdi-file-document', rota: null },
+  { rotulo: 'Certificados de Massa', icone: 'mdi-clipboard-text', rota: null },
+  { rotulo: 'Saldo', icone: 'mdi-file-document', rota: null },
+];
 
 export interface Entidade {
   nome: string;
