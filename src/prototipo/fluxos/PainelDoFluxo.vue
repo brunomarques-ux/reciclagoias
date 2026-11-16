@@ -20,10 +20,9 @@
 import { computed, onBeforeUnmount, onMounted, ref, useId, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
-import { ROTULO_DO_TIPO_DE_FLUXO } from './tipos';
-import { COR_DO_TIPO_DE_FLUXO, type TomDoSelo } from './rotulos';
-import { BLOCOS, fluxoPorId, listaDoFluxo, proximoFluxo } from './registro';
-import { atualizarFluxoAtivo, definirFluxoAtivo, useFluxoAtivo, type ModoDoFluxo, type VelocidadeDoFluxo } from './sessao';
+import { type TomDoSelo } from './rotulos';
+import { fluxoPorId, listaDoFluxo, proximoFluxo } from './registro';
+import { atualizarFluxoAtivo, definirFluxoAtivo, useFluxoAtivo, type ModoDoFluxo } from './sessao';
 import {
   anterior, cancelar, continuar, entendi, executarPassoAtual, irPara, pausar, preparar, proximo, recomecar, repetir,
   retomarDepoisDoF5, sincronizarManual, useStatusDoFluxo,
@@ -77,7 +76,6 @@ onBeforeUnmount(() => window.removeEventListener('pointerdown', segurar, true));
 const total = computed(() => fluxo.value?.passos.length ?? 0);
 const passo = computed(() => Math.min(Math.max(ativo.value?.passo ?? 0, 0), Math.max(total.value - 1, 0)));
 const atual = computed(() => fluxo.value?.passos[passo.value]);
-const bloco = computed(() => BLOCOS.find((b) => b.id === fluxo.value?.bloco));
 const proxFluxo = computed(() => (fluxo.value ? proximoFluxo(fluxo.value.id) : undefined));
 const auto = computed(() => ativo.value?.modo === 'auto');
 const recolhido = computed(() => !!ativo.value?.recolhido);
@@ -98,9 +96,6 @@ function trocarModo(m: ModoDoFluxo) {
   if (m === ativo.value?.modo) return;
   cancelar();
   atualizarFluxoAtivo({ modo: m });
-}
-function trocarVelocidade(v: VelocidadeDoFluxo) {
-  atualizarFluxoAtivo({ velocidade: v });
 }
 function alternarRecolhido() {
   atualizarFluxoAtivo({ recolhido: !recolhido.value });
@@ -178,90 +173,78 @@ function estadoDoPasso(i: number): 'feito' | 'atual' | 'a fazer' {
       :data-recolhido="recolhido || undefined"
       :data-compacto="rodando || undefined"
       :aria-labelledby="tituloId"
+      title="Protótipo · jornada guiada"
       @mousedown.prevent
     >
-      <!-- @mousedown.prevent: o clique do mouse no painel não tira o foco da tela (um campo ou menu que fecha ao
-           perder o foco continua aberto); pelo teclado, o foco entra normalmente -->
+      <!-- Enxuto em 16/11/2026 (pedido do Bruno: a caixa tinha texto demais e não se lia). Três níveis só:
+           1. cabeçalho: a jornada, o passo em que está e a barra de passos;
+           2. corpo: o que fazer, em uma frase forte, e a nota do que observar, quieta, sem caixa;
+           3. rodapé: avançar e voltar; o modo e a lista, mais quietos.
+           O "Sobre a jornada" (resumo e regras) virou um botão de informação no cabeçalho, fechado por padrão.
+           @mousedown.prevent: o clique do mouse no painel não tira o foco da tela. -->
       <header class="fx-painel__header">
         <div class="fx-painel__bar">
-          <p class="fx-painel__eyebrow">Protótipo · fluxo guiado</p>
+          <h2 :id="tituloId" class="fx-painel__title">{{ fluxo.titulo }}</h2>
+          <button
+            v-if="!recolhido && (fluxo.apresentacao || nRegras > 0)"
+            type="button"
+            class="fx-painel__icone"
+            :aria-expanded="sobreAberto"
+            :aria-controls="sobreId"
+            aria-label="Sobre a jornada"
+            title="Sobre a jornada"
+            :data-ligado="sobreAberto || undefined"
+            @click="sobreAberto = !sobreAberto"
+          >
+            <v-icon icon="mdi-information-outline" size="18" aria-hidden="true" />
+          </button>
           <button
             type="button"
             class="fx-painel__icone"
-            :aria-label="recolhido ? 'Expandir o painel do fluxo' : 'Recolher o painel do fluxo'"
-            :title="recolhido ? 'Expandir o painel do fluxo' : 'Recolher o painel do fluxo'"
+            :aria-label="recolhido ? 'Expandir o painel' : 'Recolher o painel'"
+            :title="recolhido ? 'Expandir o painel' : 'Recolher o painel'"
             :aria-expanded="!recolhido"
             @click="alternarRecolhido"
           >
             <v-icon :icon="recolhido ? 'mdi-chevron-up' : 'mdi-chevron-down'" size="18" aria-hidden="true" />
           </button>
-          <button type="button" class="fx-painel__icone" aria-label="Encerrar o fluxo" title="Encerrar o fluxo" @click="encerrar">
+          <button type="button" class="fx-painel__icone" aria-label="Encerrar a jornada" title="Encerrar a jornada" @click="encerrar">
             <v-icon icon="mdi-close" size="18" aria-hidden="true" />
           </button>
         </div>
-        <h2 :id="tituloId" class="fx-painel__title">{{ fluxo.titulo }}</h2>
-        <p v-if="!recolhido" class="fx-painel__block">
-          <span v-if="bloco">{{ bloco.titulo }}</span>
-          <span class="fx-selo" :class="`fx-selo--${COR_DO_TIPO_DE_FLUXO[fluxo.tipo]}`">{{ ROTULO_DO_TIPO_DE_FLUXO[fluxo.tipo] }}</span>
-        </p>
+        <div class="fx-painel__progresso">
+          <p class="fx-painel__count" aria-live="polite">
+            Passo {{ passo + 1 }} de {{ total }}<template v-if="estado.id !== 'sua-vez' && estado.id !== 'pronto'"><span class="fx-painel__estado" :data-tom="estado.tom"> · {{ estado.rotulo }}</span></template>
+          </p>
+          <ol class="fx-painel__trilha" aria-label="Passos da jornada">
+            <li v-for="(p, i) in fluxo.passos" :key="i">
+              <button
+                type="button"
+                class="fx-painel__seg"
+                :aria-current="i === passo ? 'step' : undefined"
+                :data-feito="estadoDoPasso(i) === 'feito' || undefined"
+                :aria-label="`Ir para o passo ${i + 1} (${estadoDoPasso(i)}): ${p.fazer}`"
+                :title="`Passo ${i + 1}: ${p.fazer}`"
+                :disabled="ocupado"
+                @click="irPara(i)"
+              />
+            </li>
+          </ol>
+        </div>
       </header>
 
       <div v-if="!recolhido" class="fx-painel__body">
-        <div v-if="fluxo.apresentacao || nRegras > 0" class="fx-painel__about">
-          <button
-            type="button"
-            class="fx-painel__about-toggle"
-            :aria-expanded="sobreAberto"
-            :aria-controls="sobreId"
-            @click="sobreAberto = !sobreAberto"
-          >
-            <span class="fx-painel__about-title">Sobre o fluxo</span>
-            <span v-if="nRegras > 0" class="fx-painel__about-meta">{{ nRegras === 1 ? '1 regra' : `${nRegras} regras` }}</span>
-            <span class="fx-painel__chevron" :class="{ 'is-aberto': sobreAberto }" aria-hidden="true" />
-          </button>
-          <div :id="sobreId" :hidden="!sobreAberto" class="fx-painel__about-body">
-            <p v-if="fluxo.apresentacao" class="fx-painel__intro">{{ fluxo.apresentacao }}</p>
-            <ul v-if="fluxo.regras.length" class="fx-painel__rules" aria-label="Regras do documento">
-              <li v-for="r in fluxo.regras" :key="r.ref + r.texto">
-                <span class="fx-painel__rule-ref">{{ r.ref }}</span> {{ r.texto }}
-              </li>
-            </ul>
-          </div>
+        <div v-if="sobreAberto" :id="sobreId" class="fx-painel__sobre">
+          <p v-if="fluxo.apresentacao">{{ fluxo.apresentacao }}</p>
+          <ul v-if="fluxo.regras.length" aria-label="Regras da jornada">
+            <li v-for="r in fluxo.regras" :key="r.ref + r.texto">{{ r.texto }} <span class="fx-painel__ref">{{ r.ref }}</span></li>
+          </ul>
         </div>
 
-        <ol class="fx-painel__steps" aria-label="Passos do fluxo">
-          <li v-for="(p, i) in fluxo.passos" :key="i">
-            <button
-              type="button"
-              class="fx-painel__step-n"
-              :aria-current="i === passo ? 'step' : undefined"
-              :data-feito="estadoDoPasso(i) === 'feito' || undefined"
-              :aria-label="`Ir para o passo ${i + 1} (${estadoDoPasso(i)}): ${p.fazer}`"
-              :title="`Passo ${i + 1} (${estadoDoPasso(i)}): ${p.fazer}`"
-              :disabled="ocupado"
-              @click="irPara(i)"
-            >
-              <!-- o atual mostra sempre o número; o feito, o ✓ -->
-              <v-icon v-if="estadoDoPasso(i) === 'feito' && i !== passo" icon="mdi-check" size="16" aria-hidden="true" />
-              <template v-else>{{ i + 1 }}</template>
-            </button>
-          </li>
-        </ol>
-
         <div class="fx-painel__step" :data-estado="estado.id" :data-feito="feito || undefined">
-          <div class="fx-painel__step-head" aria-live="polite">
-            <p class="fx-painel__count">
-              <span>Passo {{ passo + 1 }} de {{ total }}</span>
-              <span class="fx-painel__sr">: </span>
-              <span class="fx-selo fx-painel__state" :class="`fx-selo--${estado.tom}`">{{ estado.rotulo }}</span>
-            </p>
-            <p class="fx-painel__do">{{ atual.fazer }}</p>
-          </div>
-          <div v-if="atual.observar" class="fx-painel__see">
-            <p class="fx-painel__see-label">Observe</p>
-            <p class="fx-painel__see-text">{{ atual.observar }}</p>
-          </div>
-          <p v-if="acaoAgora && acaoAgora.tipo !== 'esperar' && !preparando" class="fx-painel__now">
+          <p class="fx-painel__do">{{ atual.fazer }}</p>
+          <p v-if="atual.observar" class="fx-painel__nota">{{ atual.observar }}</p>
+          <p v-if="auto && rodando && acaoAgora && acaoAgora.tipo !== 'esperar'" class="fx-painel__now">
             <span class="fx-painel__now-dot" aria-hidden="true" /> {{ rotuloDaAcao(acaoAgora) }}
           </p>
           <div v-if="!auto && status.esperaEntendi && !concluido" class="fx-painel__ok">
@@ -281,37 +264,29 @@ function estadoDoPasso(i: number): 'feito' | 'atual' | 'a fazer' {
         </div>
       </div>
 
-      <!-- três níveis: a ação principal (linha inteira), a navegação e, mais quietos, o modo e as saídas. As linhas
-           quebram antes de um botão vazar da borda. -->
       <footer class="fx-painel__footer">
         <template v-if="concluido">
           <BotaoDoFluxo
             v-if="proxFluxo"
             class="fx-painel__primary"
-            rotulo="Próximo fluxo"
+            rotulo="Próxima jornada"
             tamanho="medio"
             icone-fim="mdi-arrow-right"
             @click="iniciarProximo"
           />
-          <p v-else class="fx-painel__last">Último fluxo da lista</p>
-          <div class="fx-painel__row fx-painel__nav">
-            <BotaoDoFluxo rotulo="Recomeçar" icone="mdi-replay" variante="contorno" tom="neutro" @click="recomecar" />
-            <BotaoDoFluxo v-if="!recolhido" rotulo="Lista de fluxos" icone="mdi-arrow-left" variante="fantasma" tom="neutro" @click="listaDeFluxos" />
+          <p v-else class="fx-painel__last">Última jornada da lista</p>
+          <div class="fx-painel__row fx-painel__quieto">
+            <BotaoDoFluxo rotulo="Recomeçar" icone="mdi-replay" variante="fantasma" tom="neutro" @click="recomecar" />
+            <BotaoDoFluxo rotulo="Jornadas" icone="mdi-format-list-bulleted" variante="fantasma" tom="neutro" @click="listaDeFluxos" />
           </div>
         </template>
         <template v-else>
-          <BotaoDoFluxo
-            v-if="auto"
-            class="fx-painel__primary"
-            tamanho="medio"
-            :rotulo="principal.rotulo"
-            :icone="principal.icone"
-            :disabled="preparando"
-            @click="principal.acao"
-          />
           <div class="fx-painel__row fx-painel__nav">
             <BotaoDoFluxo
-              rotulo="Anterior"
+              :rotulo="auto ? '' : 'Anterior'"
+              :class="{ 'fx-painel__seta': auto }"
+              aria-label="Passo anterior"
+              title="Passo anterior"
               variante="contorno"
               tom="neutro"
               icone="mdi-chevron-left"
@@ -320,15 +295,17 @@ function estadoDoPasso(i: number): 'feito' | 'atual' | 'a fazer' {
             />
             <BotaoDoFluxo
               v-if="auto"
-              rotulo="Repetir passo"
-              icone="mdi-replay"
-              variante="fantasma"
-              tom="neutro"
+              class="fx-painel__primary"
+              :rotulo="principal.rotulo"
+              :icone="principal.icone"
               :disabled="preparando"
-              @click="repetir"
+              @click="principal.acao"
             />
             <BotaoDoFluxo
-              rotulo="Próximo"
+              :rotulo="auto ? '' : 'Pular'"
+              :class="{ 'fx-painel__seta': auto }"
+              :aria-label="auto ? 'Próximo passo' : 'Pular o passo'"
+              :title="auto ? 'Próximo passo' : 'Pula o passo sem fazer o gesto'"
               variante="contorno"
               tom="neutro"
               icone-fim="mdi-chevron-right"
@@ -336,29 +313,16 @@ function estadoDoPasso(i: number): 'feito' | 'atual' | 'a fazer' {
               @click="proximo"
             />
           </div>
-          <div v-if="!recolhido" class="fx-painel__settings">
-            <p v-if="!auto" class="fx-painel__hint">O passo avança quando você faz o gesto destacado. Próximo pula o passo.</p>
-            <div class="fx-painel__row">
-              <div class="fx-painel__segmented" role="group" aria-label="Modo">
-                <button type="button" :aria-pressed="!auto" @click="trocarModo('manual')">Manual</button>
-                <button type="button" :aria-pressed="auto" @click="trocarModo('auto')">Automático</button>
-              </div>
-              <div v-if="auto" class="fx-painel__segmented" role="group" aria-label="Velocidade">
-                <button type="button" :aria-pressed="ativo.velocidade !== 'lenta'" @click="trocarVelocidade('normal')">Normal</button>
-                <button type="button" :aria-pressed="ativo.velocidade === 'lenta'" @click="trocarVelocidade('lenta')">Lenta</button>
-              </div>
-              <BotaoDoFluxo v-else rotulo="Lista de fluxos" icone="mdi-arrow-left" variante="fantasma" tom="neutro" @click="listaDeFluxos" />
+          <div v-if="!recolhido" class="fx-painel__row fx-painel__quieto">
+            <div class="fx-painel__segmented" role="group" aria-label="Modo">
+              <button type="button" :aria-pressed="!auto" title="Você faz os cliques" @click="trocarModo('manual')">Eu clico</button>
+              <button type="button" :aria-pressed="auto" title="O protótipo faz os cliques" @click="trocarModo('auto')">Automático</button>
             </div>
-            <div v-if="auto" class="fx-painel__row">
-              <BotaoDoFluxo
-                rotulo="Reproduzir tudo"
-                icone="mdi-fast-forward"
-                variante="fantasma"
-                :disabled="ocupado"
-                @click="executarPassoAtual({ tudo: true })"
-              />
-              <BotaoDoFluxo rotulo="Lista de fluxos" icone="mdi-arrow-left" variante="fantasma" tom="neutro" @click="listaDeFluxos" />
-            </div>
+            <!-- a velocidade se escolhe na página da entrega, antes de abrir a jornada -->
+            <button v-if="auto" type="button" class="fx-painel__link" :disabled="ocupado" @click="executarPassoAtual({ tudo: true })">
+              Até o fim
+            </button>
+            <button type="button" class="fx-painel__link" title="Lista de jornadas" @click="listaDeFluxos">Jornadas</button>
           </div>
         </template>
       </footer>
@@ -760,4 +724,83 @@ function estadoDoPasso(i: number): 'feito' | 'atual' | 'a fazer' {
   .fx-painel__settings { animation: none; }
   .fx-painel__chevron { transition: none; }
 }
+
+/* ── painel enxuto (16/11/2026) ─────────────────────────────────────────────────────────────────── */
+.fx-painel { --fx-painel-w: 22.5rem; } /* 360 */
+.fx-painel__header { gap: var(--rg-space-2); padding: var(--rg-space-2) var(--rg-space-2) var(--rg-space-3) var(--rg-space-4); }
+.fx-painel__bar { display: flex; align-items: flex-start; gap: var(--rg-space-1); }
+.fx-painel__bar .fx-painel__title {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding-top: 6px;
+  font-size: var(--rg-font-size-sm);
+  line-height: 20px;
+  font-weight: var(--rg-font-weight-semibold);
+  color: var(--rg-color-text-primary);
+}
+.fx-painel__icone[data-ligado] { background: var(--rg-color-surface-subtle); color: var(--rg-color-text-brand); }
+.fx-painel__progresso { display: flex; flex-direction: column; gap: 6px; padding-right: var(--rg-space-2); }
+.fx-painel__progresso .fx-painel__count { font-size: var(--rg-font-size-xs); line-height: 16px; color: var(--rg-color-text-muted); }
+.fx-painel__estado { font-weight: var(--rg-font-weight-semibold); color: var(--rg-color-text-brand); }
+.fx-painel__estado[data-tom='warning'] { color: var(--rg-color-feedback-warning); }
+.fx-painel__estado[data-tom='danger'] { color: var(--rg-color-feedback-danger); }
+.fx-painel__trilha { display: flex; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.fx-painel__trilha li { flex: 1; display: flex; }
+.fx-painel__seg {
+  flex: 1;
+  height: 6px;
+  padding: 0;
+  border: none;
+  border-radius: var(--rg-radius-pill);
+  background: var(--rg-color-border-subtle);
+  cursor: pointer;
+}
+.fx-painel__seg[data-feito] { background: var(--rg-color-action-primary); opacity: 0.45; }
+.fx-painel__seg[aria-current='step'] { background: var(--rg-color-action-primary); opacity: 1; }
+.fx-painel__seg:disabled { cursor: default; }
+.fx-painel__seg:focus-visible { outline: 2px solid var(--rg-color-action-primary); outline-offset: 2px; }
+
+.fx-painel__body { padding: var(--rg-space-4); }
+.fx-painel__step { display: flex; flex-direction: column; gap: var(--rg-space-2); padding: 0; border: none; background: none; }
+.fx-painel__step .fx-painel__do { font-size: var(--rg-font-size-md); line-height: 24px; font-weight: var(--rg-font-weight-semibold); color: var(--rg-color-text-primary); }
+.fx-painel__nota { font-size: var(--rg-font-size-sm); line-height: 20px; color: var(--rg-color-text-secondary); }
+.fx-painel__sobre {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rg-space-2);
+  margin-bottom: var(--rg-space-4);
+  padding: var(--rg-space-3);
+  border-radius: var(--rg-radius-md);
+  background: var(--rg-color-surface-subtle);
+  font-size: var(--rg-font-size-xs);
+  line-height: 18px;
+  color: var(--rg-color-text-secondary);
+}
+.fx-painel__sobre ul { display: flex; flex-direction: column; gap: var(--rg-space-1); margin: 0; padding-left: var(--rg-space-4); }
+.fx-painel__ref { color: var(--rg-color-text-muted); white-space: nowrap; }
+
+.fx-painel__footer { display: flex; flex-direction: column; gap: var(--rg-space-3); padding: var(--rg-space-3) var(--rg-space-4); border-top: 1px solid var(--rg-color-border-subtle); }
+.fx-painel__nav { display: flex; gap: var(--rg-space-2); }
+.fx-painel__nav > * { flex: 1; }
+.fx-painel__nav .fx-painel__primary { flex: 1; }
+.fx-painel__nav .fx-painel__seta { flex: none; width: 40px; padding: 0; }
+.fx-painel__seta :deep(.fx-botao__rotulo) { display: none; }
+.fx-painel__quieto { display: flex; align-items: center; flex-wrap: nowrap; gap: var(--rg-space-1) var(--rg-space-3); }
+.fx-painel__quieto .fx-painel__segmented { margin-right: auto; }
+.fx-painel__link {
+  padding: 2px 0;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: var(--rg-font-size-xs);
+  line-height: 16px;
+  color: var(--rg-color-text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.fx-painel__link:hover:not(:disabled) { color: var(--rg-color-text-brand); }
+.fx-painel__link:disabled { color: var(--rg-color-text-disabled); cursor: not-allowed; }
+.fx-painel__link:focus-visible { outline: 2px solid var(--rg-color-action-primary); outline-offset: 2px; }
 </style>
