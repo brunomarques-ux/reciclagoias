@@ -14,7 +14,7 @@
 import { computed, nextTick, ref } from 'vue';
 
 import RgButton from '@/components/RgButton.vue';
-import { useComplementoStore, type CampoLido } from '@/stores/complemento';
+import { useCadastroAtual, type CampoLido } from '@/stores/complemento';
 
 import type { Reanalise } from './analise';
 import AxBotaoEditar from './AxBotaoEditar.vue';
@@ -26,7 +26,7 @@ const props = defineProps<{
   reanalise: Reanalise | null;
 }>();
 
-const c = useComplementoStore();
+const c = useCadastroAtual(); // o cadastro aberto na página da análise
 
 const conf = computed(() => c.conferenciaCampos[props.campo.id]);
 const resposta = computed(() => conf.value?.resposta ?? null);

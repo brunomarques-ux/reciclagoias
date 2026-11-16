@@ -10,7 +10,7 @@
  */
 import { computed, ref } from 'vue';
 
-import { useComplementoStore } from '@/stores/complemento';
+import { useCadastroAtual } from '@/stores/complemento';
 
 import { juntarNomes, type Reanalise } from './analise';
 import AxCampoConferencia from './AxCampoConferencia.vue';
@@ -23,7 +23,7 @@ const props = defineProps<{
   reanalise: Reanalise | null;
 }>();
 
-const c = useComplementoStore();
+const c = useCadastroAtual(); // o cadastro aberto na página da análise
 const aberta = ref(!!props.abertaInicial);
 
 const campos = computed(() => c.campos(props.etapa));

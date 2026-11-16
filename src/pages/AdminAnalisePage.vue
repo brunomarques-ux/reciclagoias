@@ -18,7 +18,7 @@
  * - L4 (`6507:4845` e seguintes), PROPOSTA para a SEMAD: com `soDocumentos` ligado, os
  *   blocos de dados ficam em leitura (`AxEtapaLeitura`) e a contagem fala só de documentos.
  */
-import { computed, ref } from 'vue';
+import { computed, ref, provide } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { dataPorExtenso, juntarNomes, partesDaData, type Reanalise } from '@/components/admin/analise';
@@ -29,17 +29,18 @@ import AxHistorico from '@/components/admin/AxHistorico.vue';
 import AxJanela from '@/components/admin/AxJanela.vue';
 import GestoraShell from '@/components/gestora/GestoraShell.vue';
 import RgButton from '@/components/RgButton.vue';
-import { DOCUMENTOS_EXIGIDOS, ETAPAS, PRE_CADASTRO, ROTULO_TIPO } from '@/data/mocks/operador';
-import { useComplementoStore } from '@/stores/complemento';
+import { DOCUMENTOS_EXIGIDOS, ETAPAS, ROTULO_TIPO } from '@/data/mocks/operador';
+import { CADASTRO_ABERTO, useCadastroStore, useComplementoStore } from '@/stores/complemento';
 
 const route = useRoute();
 const router = useRouter();
-const c = useComplementoStore();
+/** O cadastro do endereço: a Recicla Cerrado ou um dos cadastros de exemplo da fila (16/11/2026). */
+const doEndereco = useCadastroStore(String(route.params.protocolo ?? ''));
+const c = doEndereco ?? useComplementoStore();
+provide(CADASTRO_ABERTO, c);
+const PRE_CADASTRO = c.identidade;
 
-/** Só a Recicla Cerrado (a linha viva da fila) tem cadastro aberto no protótipo. */
-const existe = computed(
-  () => c.situacao !== 'preenchendo' && String(route.params.protocolo ?? '').toLowerCase() === c.protocolo.toLowerCase(),
-);
+const existe = computed(() => !!doEndereco && c.situacao !== 'preenchendo');
 const visualizar = computed(() => route.query.modo === 'visualizar');
 const leitura = computed(() => visualizar.value || c.situacao !== 'em-analise');
 
@@ -91,6 +92,7 @@ const linhaDoCabecalho = computed(() => {
 });
 
 const descricaoDados = computed(() => {
+  if (leitura.value && !c.revalidacao) return 'Dados enviados pela organização, só para consulta.';
   if (c.revalidacao)
     return 'Dados já conferidos na aprovação do cadastro. Nesta conferência, só o documento trocado pede resposta.';
   if (proposta.value)
@@ -249,7 +251,9 @@ function aprovar() {
       <section class="ax-bloco" aria-labelledby="ax-dados-titulo">
         <h2 id="ax-dados-titulo" class="ax-h2">Dados do cadastro</h2>
         <p class="ax-desc">{{ descricaoDados }}</p>
-        <div v-if="proposta" class="ax-etapas">
+        <!-- Em leitura (Visualizar, antes ou depois da análise) os dados aparecem só preenchidos, sem ✓ e ✕ nem os
+             destaques da conferência (Bruno, 16/11/2026). A conferência campo a campo fica só dentro da análise. -->
+        <div v-if="proposta || leitura" class="ax-etapas">
           <AxEtapaLeitura
             v-for="n in [1, 3, 4]"
             :key="n"

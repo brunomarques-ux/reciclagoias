@@ -30,7 +30,7 @@
  * a demonstração trocar de perfil em /entrar e seguir a volta completa.
  */
 import { defineStore } from 'pinia';
-import { computed, reactive, ref, watch } from 'vue';
+import { computed, inject, reactive, ref, watch, type InjectionKey } from 'vue';
 
 import {
   VALIDADE_DEMO,
@@ -45,6 +45,8 @@ import {
   PERCEPCOES_OPERACAO,
   PRE_CADASTRO,
   PROTOCOLO_DEMO,
+  cadastroDeExemplo,
+  type PreCadastro,
   ROTULO_TIPO,
   SITUACOES_AREA,
   TIPOS_RESIDUO,
@@ -243,9 +245,9 @@ function formularioPadrao(): FormularioComplemento {
   };
 }
 
-function lerPacote(): PacoteSalvo | null {
+function lerPacote(chave: string): PacoteSalvo | null {
   try {
-    const bruto = sessionStorage.getItem(CHAVE_COMPLEMENTO);
+    const bruto = sessionStorage.getItem(chave);
     return bruto ? (JSON.parse(bruto) as PacoteSalvo) : null;
   } catch {
     return null;
@@ -285,8 +287,13 @@ const conferenciaDocVazia = (): ConferenciaDocumento => ({
   travado: false,
 });
 
-export const useComplementoStore = defineStore('complemento', () => {
-  const salvo = lerPacote();
+/**
+ * O cadastro de uma organização. A Recicla Cerrado (PROTOCOLO_DEMO) é o cadastro da volta inteira, o mesmo que o
+ * perfil do operador preenche. Desde 16/11/2026 os outros cadastros da fila do Admin também são cadastros completos,
+ * cada um na sua store (`useCadastroStore`), com a identidade dele e a gravação numa chave própria.
+ */
+function setupDoCadastro(protocolo: string, identidade: PreCadastro, chave: string) {
+  const salvo = lerPacote(chave);
 
   const etapa = ref(salvo?.etapa ?? 1);
   const situacao = ref<Situacao>(salvo?.situacao ?? 'preenchendo');
@@ -344,7 +351,7 @@ export const useComplementoStore = defineStore('complemento', () => {
       compartilhaMassa: compartilhaMassa.value,
     };
     try {
-      sessionStorage.setItem(CHAVE_COMPLEMENTO, JSON.stringify(pacote));
+      sessionStorage.setItem(chave, JSON.stringify(pacote));
     } catch {
       /* sem storage a demonstração segue, só não sobrevive à recarga */
     }
@@ -359,7 +366,7 @@ export const useComplementoStore = defineStore('complemento', () => {
   );
 
   // ---- campos, como a revisão e a análise leem ----
-  const ehCooperativa = PRE_CADASTRO.tipoOrganizacao === 'cooperativa';
+  const ehCooperativa = identidade.tipoOrganizacao === 'cooperativa';
 
   /** Os campos de uma etapa (1, 3 ou 4), já com as perguntas condicionais resolvidas. */
   function campos(n: number): CampoLido[] {
@@ -370,13 +377,13 @@ export const useComplementoStore = defineStore('complemento', () => {
 
     if (n === 1) {
       const g1 = ehCooperativa ? 'Identificação da cooperativa' : 'Identificação da empresa';
-      add('razao-social', g1, 'Razão social', PRE_CADASTRO.razaoSocial);
-      add('cnpj', g1, 'CNPJ', PRE_CADASTRO.cnpj);
-      add('cnae', g1, 'CNAE', PRE_CADASTRO.cnae);
-      add('nome-fantasia', g1, 'Nome fantasia', PRE_CADASTRO.nomeFantasia);
-      add('email', g1, 'E-mail', PRE_CADASTRO.email);
+      add('razao-social', g1, 'Razão social', identidade.razaoSocial);
+      add('cnpj', g1, 'CNPJ', identidade.cnpj);
+      add('cnae', g1, 'CNAE', identidade.cnae);
+      add('nome-fantasia', g1, 'Nome fantasia', identidade.nomeFantasia);
+      add('email', g1, 'E-mail', identidade.email);
       add('telefone', g1, 'Telefone (com DDD)', f.telefone);
-      add('tipo-organizacao', g1, 'Tipo de organização', ROTULO_TIPO[PRE_CADASTRO.tipoOrganizacao]);
+      add('tipo-organizacao', g1, 'Tipo de organização', ROTULO_TIPO[identidade.tipoOrganizacao]);
       if (ehCooperativa) add('cooperados', g1, 'Número de cooperados', f.cooperados);
       add('ano-criacao', g1, 'Ano de criação', f.anoCriacao);
       const g2 = 'Endereço da unidade';
@@ -569,7 +576,7 @@ export const useComplementoStore = defineStore('complemento', () => {
       data: troca.enviadoEm,
       titulo: 'Documento atualizado pelo operador',
       desc: `${rotuloDoItem(v.doc)} novo, com validade até ${troca.validade}.`,
-      quem: PRE_CADASTRO.nomeFantasia,
+      quem: identidade.nomeFantasia,
     });
     return true;
   }
@@ -607,7 +614,6 @@ export const useComplementoStore = defineStore('complemento', () => {
 
   // ---- envio e reenvio ----
   const podeEnviar = computed(() => formulario.declaracaoAceita);
-  const protocolo = PROTOCOLO_DEMO;
 
   function enviar() {
     if (faltando.value.length || !formulario.declaracaoAceita) return;
@@ -618,7 +624,7 @@ export const useComplementoStore = defineStore('complemento', () => {
       data: dataEnvio.value,
       titulo: 'Complemento enviado',
       desc: `Enviado pelo operador, com os ${totalDocumentos} documentos anexados.`,
-      quem: PRE_CADASTRO.nomeFantasia,
+      quem: identidade.nomeFantasia,
     });
   }
 
@@ -637,7 +643,7 @@ export const useComplementoStore = defineStore('complemento', () => {
       data: dataEnvio.value,
       titulo: 'Reenviado pelo operador',
       desc: `${n} ${n === 1 ? 'pendência corrigida' : 'pendências corrigidas'}. Volta como Enviado, no topo da fila.`,
-      quem: PRE_CADASTRO.nomeFantasia,
+      quem: identidade.nomeFantasia,
     });
   }
 
@@ -931,6 +937,7 @@ export const useComplementoStore = defineStore('complemento', () => {
     reenvio,
     analista,
     protocolo,
+    identidade,
     historico,
     // campos
     campos,
@@ -1001,4 +1008,43 @@ export const useComplementoStore = defineStore('complemento', () => {
       else lista.push(id);
     },
   };
-});
+}
+
+export const useComplementoStore = defineStore('complemento', () =>
+  setupDoCadastro(PROTOCOLO_DEMO, PRE_CADASTRO, CHAVE_COMPLEMENTO),
+);
+
+export type StoreDoCadastro = ReturnType<typeof useComplementoStore>;
+
+/** Quem monta o estado inicial de um cadastro de exemplo (a camada do protótipo registra; sem ela, ele nasce vazio). */
+type Semeador = (c: StoreDoCadastro, protocolo: string) => void;
+let semeador: Semeador | null = null;
+export function registrarSemeadorDeExemplos(fn: Semeador): void {
+  semeador = fn;
+}
+
+const definicoes = new Map<string, () => StoreDoCadastro>();
+
+/** O cadastro do protocolo: o da Recicla Cerrado ou um da fila de exemplos. Null quando o protocolo não existe. */
+export function useCadastroStore(protocolo: string): StoreDoCadastro | null {
+  const p = protocolo.toLowerCase();
+  if (p === PROTOCOLO_DEMO.toLowerCase()) return useComplementoStore();
+  const exemplo = cadastroDeExemplo(p);
+  if (!exemplo) return null;
+  let usar = definicoes.get(p);
+  if (!usar) {
+    const chave = `${CHAVE_COMPLEMENTO}:${p}`;
+    usar = defineStore(`complemento:${p}`, () => setupDoCadastro(exemplo.protocolo, exemplo, chave)) as unknown as () => StoreDoCadastro;
+    definicoes.set(p, usar);
+  }
+  const c = usar();
+  if (c.situacao === 'preenchendo' && semeador) semeador(c, exemplo.protocolo);
+  return c;
+}
+
+/** A página da análise entrega o cadastro aberto aos componentes dela. */
+export const CADASTRO_ABERTO: InjectionKey<StoreDoCadastro> = Symbol('cadastro-aberto');
+/** O cadastro aberto na página (os componentes da análise do Admin); fora dela, o da Recicla Cerrado. */
+export function useCadastroAtual(): StoreDoCadastro {
+  return inject(CADASTRO_ABERTO, null) ?? useComplementoStore();
+}

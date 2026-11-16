@@ -17,7 +17,7 @@
 import { computed, nextTick, ref } from 'vue';
 
 import RgButton from '@/components/RgButton.vue';
-import { useComplementoStore } from '@/stores/complemento';
+import { useCadastroAtual } from '@/stores/complemento';
 
 import AxBotaoEditar from './AxBotaoEditar.vue';
 
@@ -29,7 +29,7 @@ const props = defineProps<{
   leitura: boolean;
 }>();
 
-const c = useComplementoStore();
+const c = useCadastroAtual(); // o cadastro aberto na página da análise
 const aberta = ref(!!props.abertaInicial);
 
 const campos = computed(() => c.campos(props.etapa));

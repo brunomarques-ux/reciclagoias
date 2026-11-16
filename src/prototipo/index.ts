@@ -12,9 +12,10 @@ import type { Pinia } from 'pinia';
 import type { Router } from 'vue-router';
 
 import { PERFIS, type PerfilId } from '@/data/mocks/sessao';
+import { registrarSemeadorDeExemplos } from '@/stores/complemento';
 import { useSessaoStore } from '@/stores/sessao';
 
-import { aplicarCenario, ehCenario, ligarGanchoDaSimulacao, simulandoAnalise } from './cenarios/complemento';
+import { aplicarCenario, ehCenario, ligarGanchoDaSimulacao, semearExemplo, simulandoAnalise } from './cenarios/complemento';
 import RaizDosFluxos from './fluxos/RaizDosFluxos.vue';
 
 /**
@@ -28,6 +29,9 @@ export function instalarPrototipo({ app, router, pinia }: { app: App; router: Ro
     const sessao = useSessaoStore(pinia);
     if (sessao.perfilId !== perfil) sessao.entrar(perfil as PerfilId);
   }
+
+  // 0b. os cadastros de exemplo da fila do Admin nascem no estado da coluna situacao (CADASTROS_DE_EXEMPLO)
+  registrarSemeadorDeExemplos(semearExemplo);
 
   // 1. as páginas da camada, sem perfil
   router.addRoute({

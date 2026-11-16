@@ -10,7 +10,8 @@
  *
  * A primeira linha é a Recicla Cerrado, que acompanha a store do complemento: é ela
  * que fecha a volta da demonstração. No reenvio ela volta como Enviado, no topo, sem
- * analista, na data do reenvio. As outras linhas são ilustrativas.
+ * analista, na data do reenvio. Desde 16/11/2026 as outras linhas também são cadastros
+ * completos (CADASTROS_DE_EXEMPLO), que abrem pela lista ou direto pelo endereço.
  *
  * Planning de 13/11/2026 (Figma `6507:6819`, L2·1): o cadastro que trocou o documento
  * vencido entra na mesma lista, no topo, como "Documento atualizado". Analisar abre a
@@ -23,8 +24,8 @@ import AxMenuLinha from '@/components/admin/AxMenuLinha.vue';
 import type { ItemMenu } from '@/components/admin/analise';
 import GestoraShell from '@/components/gestora/GestoraShell.vue';
 import RgButton from '@/components/RgButton.vue';
-import { FILA_CADASTROS, PRE_CADASTRO, ROTULO_TIPO } from '@/data/mocks/operador';
-import { useComplementoStore } from '@/stores/complemento';
+import { CADASTROS_DE_EXEMPLO, PRE_CADASTRO, ROTULO_TIPO } from '@/data/mocks/operador';
+import { useCadastroStore, useComplementoStore, type StoreDoCadastro } from '@/stores/complemento';
 
 const router = useRouter();
 const c = useComplementoStore();
@@ -49,6 +50,7 @@ interface Linha {
   enviado: string;
   analista: string | null;
   viva: boolean;
+  store: StoreDoCadastro | null;
 }
 
 /** Enquanto a Recicla Cerrado preenche, ela não está na fila. */
@@ -63,13 +65,30 @@ const linhaViva = computed<Linha | null>(() => {
     enviado: c.dataEnvio ? c.dataEnvio.split(',')[0]! : '',
     analista: c.analista,
     viva: true,
+    store: c,
   };
 });
 
-const todas = computed<Linha[]>(() => [
-  ...(linhaViva.value ? [linhaViva.value] : []),
-  ...FILA_CADASTROS.map((l) => ({ ...l, situacao: l.situacao as SituacaoFila, viva: false })),
-]);
+/** Os cadastros de exemplo, cada um na sua store; a situação e o analista vêm dela. */
+const exemplos = CADASTROS_DE_EXEMPLO.map((ex) => ({ ex, store: useCadastroStore(ex.protocolo) }));
+const linhasDeExemplo = computed<Linha[]>(() =>
+  exemplos.map(({ ex, store }) => {
+    const viva = !!store && store.situacao !== 'preenchendo';
+    return {
+      protocolo: ex.protocolo,
+      nome: ex.razaoSocial,
+      cnpj: ex.cnpj,
+      tipo: ROTULO_TIPO[ex.tipoOrganizacao],
+      situacao: (viva ? store!.situacao : ex.situacao === 'atualizado' ? 'documento-atualizado' : ex.situacao) as SituacaoFila,
+      enviado: ex.enviado,
+      analista: (viva ? store!.analista : null) ?? ex.analista,
+      viva,
+      store,
+    };
+  }),
+);
+
+const todas = computed<Linha[]>(() => [...(linhaViva.value ? [linhaViva.value] : []), ...linhasDeExemplo.value]);
 
 // ---- filtros: o formulário edita o rascunho, Filtrar aplica, Limpar zera ----
 const rascunho = reactive({ busca: '', tipo: '', situacao: '' });
@@ -110,7 +129,7 @@ function escolher(l: Linha, acao: string) {
   if (!l.viva) return;
   const params = { protocolo: l.protocolo.toLowerCase() };
   if (acao === 'analisar') {
-    c.iniciarAnalise();
+    (l.store ?? c).iniciarAnalise();
     void router.push({ name: 'admin-analise', params });
   } else {
     void router.push({ name: 'admin-analise', params, query: { modo: 'visualizar' } });

@@ -9,8 +9,8 @@
 import { nextTick, ref } from 'vue';
 import type { Pinia } from 'pinia';
 
-import { DOCUMENTOS_EXIGIDOS, VALIDADE_DEMO } from '@/data/mocks/operador';
-import { CHAVE_COMPLEMENTO, useComplementoStore } from '@/stores/complemento';
+import { cadastroDeExemplo, DOCUMENTOS_EXIGIDOS, VALIDADE_DEMO } from '@/data/mocks/operador';
+import { CHAVE_COMPLEMENTO, useComplementoStore, type StoreDoCadastro } from '@/stores/complemento';
 
 /**
  * - enviado: tudo preenchido e enviado em 01/09.
@@ -48,7 +48,7 @@ export async function aplicarCenario(pinia: Pinia, nome: Cenario): Promise<void>
   await nextTick(); // a store grava no sessionStorage antes de a tela (ou a recarga) ler
 }
 
-function montar(c: ReturnType<typeof useComplementoStore>, nome: Cenario): void {
+function montar(c: StoreDoCadastro, nome: Cenario): void {
   c.formulario.capacidadeVidro = '8 toneladas por mês';
   c.enviar();
   c.dataEnvio = '01/09/2026, às 10h12';
@@ -100,6 +100,25 @@ function montar(c: ReturnType<typeof useComplementoStore>, nome: Cenario): void 
   c.formulario.telefone = '(62) 3555-0198';
   c.corrigidos.alvara = true;
   c.reenviar();
+}
+
+// ── os cadastros de exemplo da fila do Admin (16/11/2026) ─────────────────────────────────────────
+
+/**
+ * Monta um cadastro de exemplo da fila (CADASTROS_DE_EXEMPLO) no estado dele, com as mesmas ações dos cenários. A
+ * store chama isto na primeira vez que o cadastro abre na sessão (registrarSemeadorDeExemplos, em prototipo/index.ts).
+ */
+export function semearExemplo(c: StoreDoCadastro, protocolo: string): void {
+  const ex = cadastroDeExemplo(protocolo);
+  if (!ex) return;
+  // os eventos do exemplo acontecem no dia do envio dele, não no dia em que a página abriu
+  if (ex.situacao !== 'atualizado') c.relogio = `${ex.enviado}, às 15h40`;
+  montar(c, ex.situacao === 'em-analise' ? 'enviado' : ex.situacao);
+  if (ex.situacao === 'em-analise') c.iniciarAnalise(ex.analista ?? undefined);
+  if (ex.situacao !== 'atualizado') c.relogio = null;
+  if (ex.situacao === 'atualizado') return; // as datas da história da validade já vêm do cenário
+  c.dataEnvio = `${ex.enviado}, às 10h12`;
+  if (ex.analista && c.analista) c.analista = ex.analista;
 }
 
 // ── simulação: a análise começa enquanto o operador edita ──────────────────────────────────────────
