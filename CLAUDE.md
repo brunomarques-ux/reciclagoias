@@ -150,7 +150,7 @@ src/data/mocks/sessao.ts          perfis, usuários, menus por perfil e entidade
 
 `data/mocks/gestora.ts` é um **catálogo**, não uma lista de telas: descreve o que cada linha
 da documentação e cada card de prazo podem ter. Os `PRESETS` recortam esse catálogo para
-reproduzir os frames, e o **explorador de cenários** (rodapé do menu lateral, ferramenta de
+reproduzir os frames, e o **explorador de cenários** (ferramenta de
 protótipo) edita o mesmo catálogo ao vivo. Os controles do painel **nascem do catálogo** —
 acrescentar um status ou uma ação lá faz o controle aparecer sozinho.
 

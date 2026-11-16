@@ -75,7 +75,8 @@
   filter: drop-shadow(0 2px 3px rgb(0 0 0 / 0.35));
   will-change: transform;
 }
-.fx-camada__cursor svg { display: block; }
+/* a seta encolhe no clique presa pela ponta (camada.ts, onda) */
+.fx-camada__cursor svg { display: block; transform-origin: 3px 2px; }
 
 .fx-camada__onda {
   position: absolute;

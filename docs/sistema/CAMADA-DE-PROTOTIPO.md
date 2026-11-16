@@ -20,7 +20,8 @@ As telas (`src/pages`, `src/components`, `src/stores`, `src/router`, `src/data`)
 | `src/prototipo/index.ts` | O ponto de entrada. Registra as rotas da camada, trata `?perfil=`, `?demo=` e `?simular=` e monta a raiz das jornadas fora da árvore do `App.vue` |
 | `src/prototipo/fluxos/` | O motor das jornadas guiadas: painel sobreposto, cursor, destaque da ação, passo a passo, executar direto, velocidade. Os dados das jornadas ficam em `fluxos/dados/` |
 | `src/prototipo/entregas/` | O catálogo das entregas (`catalogo.ts`) e as páginas `/fluxos` (cards por entrega) e `/fluxos/<entrega>` (as jornadas da entrega, com o minuto da reunião e o que muda) |
-| `src/prototipo/cenarios/` | Os pontos de partida do complemento do operador (`?demo=`), a simulação da análise que começa durante a edição (`?simular=analise-comecou`) e a faixa "Protótipo" da tela do operador (Reiniciar demonstração) |
+| `src/prototipo/cenarios/` | Os pontos de partida do complemento do operador (`?demo=`) e a simulação da análise que começa durante a edição (`?simular=analise-comecou`). A faixa "Protótipo · Reiniciar demonstração" saiu da tela em 16/11 |
+| `src/prototipo/fluxos/AtalhoDasJornadas.vue` | O atalho "Jornadas do protótipo" no pé do menu lateral, em todas as telas logadas, que leva a `/fluxos`. Substitui o rodapé do explorador de cenários (16/11) |
 
 A camada acha os elementos da tela por papel e nome acessível, como um leitor de tela. Por isso as telas não
 levam nenhuma marcação de jornada.
