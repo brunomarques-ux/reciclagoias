@@ -26,10 +26,10 @@ export const FLUXOS_ADMIN: Fluxo[] = [
     tipo: 'principal',
     titulo: 'Conferir o cadastro e devolver para correção',
     apresentacao:
-      'O analista assume o cadastro pela fila, confere cada campo com ✓ ou ✕ e cada documento com Sim ou Não, e devolve com o motivo de cada pendência.',
+      'O analista assume o cadastro pela fila, lê os dados, aponta o problema no bloco quando um dado está errado, confere cada documento com Sim ou Não e devolve com o motivo de cada pendência.',
     regras: [
       { ref: 'Planning 16/10', texto: 'Analisar atribui o cadastro a quem clicou e trava a edição da organização.' },
-      { ref: 'Decisão 18/10', texto: 'O analista não altera o dado: marca ✓ ou ✕, e o ✕ abre a observação do campo.' },
+      { ref: 'Planning 13/11', texto: 'Os dados ficam para consulta, sem aceite campo a campo. Erro num dado se aponta no bloco; a conferência é dos documentos.' },
       { ref: 'SEMAD 15/09', texto: 'Documento em Não pede o motivo, que vai no e-mail de correção.' },
       { ref: 'SEMAD 27/09', texto: 'Devolver fica desabilitado enquanto houver motivo em edição.' },
     ],
@@ -44,11 +44,11 @@ export const FLUXOS_ADMIN: Fluxo[] = [
         ],
       },
       {
-        fazer: 'Marque o telefone para corrigir.',
-        observar: 'Cada campo tem ✓ e ✕ à direita. O ✕ deixa o campo vermelho e abre a observação.',
+        fazer: 'O telefone está errado: clique em Apontar problema no bloco Dados gerais.',
+        observar: 'Os dados ficam só para consulta. O problema se aponta no bloco e abre a observação.',
         acoes: [
           { tipo: 'olhar', alvo: { texto: 'Em análise', exato: true }, rotulo: 'Situação Em análise' },
-          { tipo: 'clicar', alvo: { papel: 'button', nome: 'Marcar Telefone (com DDD) para corrigir' }, rotulo: 'Clique no ✕ do telefone' },
+          { tipo: 'clicar', alvo: { papel: 'button', nome: 'Apontar problema em Dados gerais' }, rotulo: 'Clique em Apontar problema' },
         ],
       },
       {
@@ -122,9 +122,9 @@ export const FLUXOS_ADMIN: Fluxo[] = [
         ],
       },
       {
-        fazer: 'Confira o telefone corrigido e marque como correto.',
-        observar: 'Os outros campos chegam conferidos e bloqueados.',
-        acoes: [{ tipo: 'clicar', alvo: { papel: 'button', nome: 'Marcar Telefone (com DDD) como correto' }, rotulo: 'Clique no ✓ do telefone' }],
+        fazer: 'Veja os dados corrigidos, só para consulta.',
+        observar: 'Na reanálise, a conferência continua sendo a dos documentos.',
+        acoes: [{ tipo: 'olhar', alvo: { texto: 'Dados para consulta, sem aceite campo a campo' }, rotulo: 'Dados só para leitura' }],
       },
       {
         fazer: 'No alvará corrigido, responda Sim.',

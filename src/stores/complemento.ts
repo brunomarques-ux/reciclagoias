@@ -319,7 +319,9 @@ function setupDoCadastro(protocolo: string, identidade: PreCadastro, chave: stri
   const relogio = ref<string | null>(salvo?.relogio ?? null);
   const quando = () => relogio.value ?? agora();
   /** PROPOSTA para a SEMAD: conferência só em Documentos. */
-  const soDocumentos = ref(salvo?.soDocumentos ?? false);
+  // Decidido na planning de 13/11/2026 e confirmado pelo Bruno em 16/11: a análise confere só os documentos. Os dados
+  // ficam para consulta e o erro num dado se aponta no bloco. Vale para todo cadastro; o salvo antigo não volta atrás.
+  const soDocumentos = ref(true);
   /** Problemas apontados por bloco (chave `etapa-1`, `etapa-3`, `etapa-4`), só na proposta. */
   const problemas = reactive<Record<string, ProblemaDoBloco>>(salvo?.problemas ?? {});
   /** Minha Conta: autorização de compartilhamento dos dados de massa com as Entidades Gestoras. */

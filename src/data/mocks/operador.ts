@@ -225,18 +225,22 @@ export interface CadastroDeExemplo extends PreCadastro {
   /** Data do envio que a fila mostra (dd/mm/aaaa). */
   enviado: string;
   analista: string | null;
+  /** O que muda no formulário de um exemplo para outro, para os cadastros não parecerem cópias. */
+  telefone: string;
+  anoCriacao: string;
+  cooperados: string;
 }
 
 const cnaesPadrao = ['3811-4/00', '3831-9/99', '3839-4/99'];
 
 export const CADASTROS_DE_EXEMPLO: readonly CadastroDeExemplo[] = [
-  { protocolo: 'OPL-2026-00187', razaoSocial: 'Cooperativa Recicla Vale do Araguaia', nomeFantasia: 'Recicla Araguaia', cnpj: '27.903.114/0001-62', cnae: '3811-4/00', cnaes: cnaesPadrao, email: 'contato@reciclaaraguaia.org.br', tipoOrganizacao: 'cooperativa', situacao: 'atualizado', enviado: '16/12/2026', analista: null },
-  { protocolo: 'OPL-2026-00182', razaoSocial: 'Central de Triagem Goiânia Leste Ltda', nomeFantasia: 'Triagem Leste', cnpj: '35.611.208/0001-47', cnae: '3831-9/99', cnaes: cnaesPadrao, email: 'cadastro@triagemleste.com.br', tipoOrganizacao: 'empresa', situacao: 'corrigido', enviado: '05/09/2026', analista: null },
-  { protocolo: 'OPL-2026-00179', razaoSocial: 'Reciclagem Anhanguera Ltda', nomeFantasia: 'Anhanguera Reciclagem', cnpj: '31.204.118/0001-09', cnae: '3831-9/99', cnaes: cnaesPadrao, email: 'contato@anhangueraeciclagem.com.br', tipoOrganizacao: 'empresa', situacao: 'em-analise', enviado: '29/08/2026', analista: 'Carlos Mendes' },
-  { protocolo: 'OPL-2026-00171', razaoSocial: 'Cooperativa Mãos que Reciclam', nomeFantasia: 'Mãos que Reciclam', cnpj: '18.330.442/0001-71', cnae: '3811-4/00', cnaes: cnaesPadrao, email: 'contato@maosquereciclam.org.br', tipoOrganizacao: 'cooperativa', situacao: 'devolvido', enviado: '27/08/2026', analista: 'Ana Ribeiro' },
-  { protocolo: 'OPL-2026-00166', razaoSocial: 'Associação Catadores Meia Ponte', nomeFantasia: 'Catadores Meia Ponte', cnpj: '12.877.590/0001-38', cnae: '3811-4/00', cnaes: cnaesPadrao, email: 'associacao@meiaponte.org.br', tipoOrganizacao: 'cooperativa', situacao: 'enviado', enviado: '26/08/2026', analista: null },
-  { protocolo: 'OPL-2026-00158', razaoSocial: 'Ecoponto Sudoeste Reciclagem Ltda', nomeFantasia: 'Ecoponto Sudoeste', cnpj: '40.115.623/0001-50', cnae: '3839-4/99', cnaes: cnaesPadrao, email: 'contato@ecopontosudoeste.com.br', tipoOrganizacao: 'empresa', situacao: 'aprovado', enviado: '22/08/2026', analista: 'Carlos Mendes' },
-  { protocolo: 'OPL-2026-00150', razaoSocial: 'Cooperativa Nova Esperança', nomeFantasia: 'Nova Esperança', cnpj: '09.664.201/0001-84', cnae: '3811-4/00', cnaes: cnaesPadrao, email: 'contato@coopnovaesperanca.org.br', tipoOrganizacao: 'cooperativa', situacao: 'aprovado', enviado: '20/08/2026', analista: 'Ana Ribeiro' },
+  { protocolo: 'OPL-2026-00187', telefone: '(64) 3621-4410', anoCriacao: '2011', cooperados: '52', razaoSocial: 'Cooperativa Recicla Vale do Araguaia', nomeFantasia: 'Recicla Araguaia', cnpj: '27.903.114/0001-62', cnae: '3811-4/00', cnaes: cnaesPadrao, email: 'contato@reciclaaraguaia.org.br', tipoOrganizacao: 'cooperativa', situacao: 'atualizado', enviado: '16/12/2026', analista: null },
+  { protocolo: 'OPL-2026-00182', telefone: '(62) 3249-7731', anoCriacao: '2018', cooperados: '0', razaoSocial: 'Central de Triagem Goiânia Leste Ltda', nomeFantasia: 'Triagem Leste', cnpj: '35.611.208/0001-47', cnae: '3831-9/99', cnaes: cnaesPadrao, email: 'cadastro@triagemleste.com.br', tipoOrganizacao: 'empresa', situacao: 'corrigido', enviado: '05/09/2026', analista: null },
+  { protocolo: 'OPL-2026-00179', telefone: '(62) 3088-1290', anoCriacao: '2009', cooperados: '0', razaoSocial: 'Reciclagem Anhanguera Ltda', nomeFantasia: 'Anhanguera Reciclagem', cnpj: '31.204.118/0001-09', cnae: '3831-9/99', cnaes: cnaesPadrao, email: 'contato@anhanguerareciclagem.com.br', tipoOrganizacao: 'empresa', situacao: 'em-analise', enviado: '29/08/2026', analista: 'Carlos Mendes' },
+  { protocolo: 'OPL-2026-00171', telefone: '(62) 3277-5084', anoCriacao: '2016', cooperados: '27', razaoSocial: 'Cooperativa Mãos que Reciclam', nomeFantasia: 'Mãos que Reciclam', cnpj: '18.330.442/0001-71', cnae: '3811-4/00', cnaes: cnaesPadrao, email: 'contato@maosquereciclam.org.br', tipoOrganizacao: 'cooperativa', situacao: 'devolvido', enviado: '27/08/2026', analista: 'Ana Ribeiro' },
+  { protocolo: 'OPL-2026-00166', telefone: '(62) 3954-2215', anoCriacao: '2013', cooperados: '41', razaoSocial: 'Associação Catadores Meia Ponte', nomeFantasia: 'Catadores Meia Ponte', cnpj: '12.877.590/0001-38', cnae: '3811-4/00', cnaes: cnaesPadrao, email: 'associacao@meiaponte.org.br', tipoOrganizacao: 'cooperativa', situacao: 'enviado', enviado: '26/08/2026', analista: null },
+  { protocolo: 'OPL-2026-00158', telefone: '(64) 3411-6702', anoCriacao: '2007', cooperados: '0', razaoSocial: 'Ecoponto Sudoeste Reciclagem Ltda', nomeFantasia: 'Ecoponto Sudoeste', cnpj: '40.115.623/0001-50', cnae: '3839-4/99', cnaes: cnaesPadrao, email: 'contato@ecopontosudoeste.com.br', tipoOrganizacao: 'empresa', situacao: 'aprovado', enviado: '22/08/2026', analista: 'Carlos Mendes' },
+  { protocolo: 'OPL-2026-00150', telefone: '(62) 3521-0937', anoCriacao: '2019', cooperados: '19', razaoSocial: 'Cooperativa Nova Esperança', nomeFantasia: 'Nova Esperança', cnpj: '09.664.201/0001-84', cnae: '3811-4/00', cnaes: cnaesPadrao, email: 'contato@coopnovaesperanca.org.br', tipoOrganizacao: 'cooperativa', situacao: 'aprovado', enviado: '20/08/2026', analista: 'Ana Ribeiro' },
 ];
 
 export const cadastroDeExemplo = (protocolo: string) =>

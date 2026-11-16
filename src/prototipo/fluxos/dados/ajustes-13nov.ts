@@ -138,13 +138,13 @@ export const FLUXOS_AJUSTES_13NOV: Fluxo[] = [
     id: 'ajustes-13nov-l4-conferencia-so-documentos',
     bloco: 'ajustes-13nov',
     tipo: 'alternativo',
-    titulo: 'L4 · Proposta: conferência só em Documentos',
+    titulo: 'L4 · Análise do Admin: conferência só em Documentos',
     apresentacao:
-      'Proposta para levar à SEMAD. Dados gerais, Operação e Estrutura ficam só para leitura, sem aceite campo a campo. O Sim ou Não continua em cada documento, e o analista aponta problema por bloco quando um dado está errado.',
+      'Decidido na planning de 13/11. Dados gerais, Operação e Estrutura ficam só para leitura, sem aceite campo a campo. O Sim ou Não continua em cada documento, e o analista aponta problema por bloco quando um dado está errado.',
     regras: [
       { ref: 'Flávio, 58:07', texto: 'Dados em leitura, rótulo e valor. O aceite fica nos 11 documentos.' },
       { ref: 'Flávio, 58:07', texto: 'Apontar problema é opcional e vale por bloco. Salvo, conta como pendência e vai no e-mail de correção.' },
-      { ref: 'Decisão da SEMAD', texto: 'É proposta. Enquanto a SEMAD não decide, vale a conferência campo a campo.' },
+      { ref: 'Planning 13/11', texto: 'A conferência campo a campo saiu: a análise é dos documentos.' },
     ],
     inicio: { rota: '/admin/cadastros/opl-2026-00184?demo=proposta', perfil: 'admin', limpar: LIMPAR },
     passos: [

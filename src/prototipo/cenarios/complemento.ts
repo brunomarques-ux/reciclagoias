@@ -66,7 +66,6 @@ function montar(c: StoreDoCadastro, nome: Cenario): void {
   if (nome === 'aprovado' || nome === 'vencendo' || nome === 'vencido' || nome === 'atualizado') {
     c.relogio = VALIDADE_DEMO.aprovadoEm;
     c.iniciarAnalise();
-    for (const campo of c.todosOsCampos) c.marcarCampo(campo.id, 'ok');
     for (const d of DOCUMENTOS_EXIGIDOS) c.marcarDocumento(d.id, 'sim');
     c.aprovar();
     c.relogio = null;
@@ -87,9 +86,10 @@ function montar(c: StoreDoCadastro, nome: Cenario): void {
   }
 
   c.iniciarAnalise();
-  for (const campo of c.todosOsCampos) c.marcarCampo(campo.id, campo.id === 'telefone' ? 'corrigir' : 'ok');
-  c.conferenciaCampos.telefone!.texto = 'O telefone informado não atende. Informe um número ativo, com DDD.';
-  c.conferenciaCampos.telefone!.salvo = true;
+  // a análise confere só documentos: o telefone errado se aponta no bloco Dados gerais
+  c.apontarProblema(1);
+  c.problemas['etapa-1']!.texto = 'O telefone informado não atende. Informe um número ativo, com DDD.';
+  c.salvarProblema(1);
   for (const d of DOCUMENTOS_EXIGIDOS) c.marcarDocumento(d.id, d.id === 'alvara' ? 'nao' : 'sim');
   c.conferencia.alvara!.motivo = 'vencido';
   c.conferencia.alvara!.texto = 'O documento apresentado está vencido desde março de 2026. Anexe o alvará válido e atualizado.';
@@ -111,6 +111,9 @@ function montar(c: StoreDoCadastro, nome: Cenario): void {
 export function semearExemplo(c: StoreDoCadastro, protocolo: string): void {
   const ex = cadastroDeExemplo(protocolo);
   if (!ex) return;
+  c.formulario.telefone = ex.telefone;
+  c.formulario.anoCriacao = ex.anoCriacao;
+  if (ex.tipoOrganizacao === 'cooperativa') c.formulario.cooperados = ex.cooperados;
   // os eventos do exemplo acontecem no dia do envio dele, não no dia em que a página abriu
   if (ex.situacao !== 'atualizado') c.relogio = `${ex.enviado}, às 15h40`;
   montar(c, ex.situacao === 'em-analise' ? 'enviado' : ex.situacao);

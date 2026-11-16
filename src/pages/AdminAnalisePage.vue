@@ -23,14 +23,13 @@ import { useRoute, useRouter } from 'vue-router';
 
 import { dataPorExtenso, juntarNomes, partesDaData, type Reanalise } from '@/components/admin/analise';
 import AxDocumentoConferencia from '@/components/admin/AxDocumentoConferencia.vue';
-import AxEtapaConferencia from '@/components/admin/AxEtapaConferencia.vue';
 import AxEtapaLeitura from '@/components/admin/AxEtapaLeitura.vue';
 import AxHistorico from '@/components/admin/AxHistorico.vue';
 import AxJanela from '@/components/admin/AxJanela.vue';
 import GestoraShell from '@/components/gestora/GestoraShell.vue';
 import RgButton from '@/components/RgButton.vue';
 import { DOCUMENTOS_EXIGIDOS, ETAPAS, ROTULO_TIPO } from '@/data/mocks/operador';
-import { CADASTRO_ABERTO, useCadastroStore, useComplementoStore } from '@/stores/complemento';
+import { ANALISTA_DEMO, CADASTRO_ABERTO, useCadastroStore, useComplementoStore } from '@/stores/complemento';
 
 const route = useRoute();
 const router = useRouter();
@@ -42,7 +41,9 @@ const PRE_CADASTRO = c.identidade;
 
 const existe = computed(() => !!doEndereco && c.situacao !== 'preenchendo');
 const visualizar = computed(() => route.query.modo === 'visualizar');
-const leitura = computed(() => visualizar.value || c.situacao !== 'em-analise');
+/** A análise está com outra pessoa: quem entra só lê (16/11/2026). ANALISTA_DEMO é quem está logado como Admin. */
+const deOutroAnalista = computed(() => c.situacao === 'em-analise' && !!c.analista && c.analista !== ANALISTA_DEMO);
+const leitura = computed(() => visualizar.value || deOutroAnalista.value || c.situacao !== 'em-analise');
 
 /** Data do evento mais recente com esse título no histórico. */
 const dataDoEvento = (titulo: string) => c.historico.find((h) => h.titulo === titulo)?.data ?? null;
@@ -97,7 +98,7 @@ const descricaoDados = computed(() => {
     return 'Dados já conferidos na aprovação do cadastro. Nesta conferência, só o documento trocado pede resposta.';
   if (proposta.value)
     return 'Dados para consulta, sem aceite campo a campo. A conferência é feita nos documentos, logo abaixo. Se algum dado estiver errado, use "Apontar problema" no bloco e descreva o que a organização precisa corrigir.';
-  return 'Confira cada campo: ✓ quando estiver correto, ✕ quando a organização precisar corrigir, com a observação do que mudar. O dado não é alterado aqui: quem corrige é a organização.';
+  return 'Dados para consulta, sem aceite campo a campo. A conferência é feita nos documentos, logo abaixo.';
 });
 
 const descricaoDocumentos = computed(() => {
@@ -108,7 +109,7 @@ const descricaoDocumentos = computed(() => {
   if (c.situacao === 'devolvido' || c.situacao === 'aprovado' || c.situacao === 'bloqueado')
     return 'Análise concluída. Os documentos e os motivos ficam disponíveis apenas para consulta.';
   if (c.situacao === 'enviado') return 'Só para leitura. A conferência começa quando alguém clica em Analisar.';
-  if (visualizar.value) return `Só para leitura: a análise está com ${c.analista ?? 'outra pessoa'}.`;
+  if (visualizar.value || deOutroAnalista.value) return `Só para leitura: a análise está com ${c.analista ?? 'outra pessoa'}.`;
   return 'Abra cada documento e indique se está em conformidade. Para cada Não, descreva e salve o motivo, que é enviado ao operador no e-mail de correção. A aprovação exige todos os documentos em conformidade.';
 });
 
@@ -253,25 +254,14 @@ function aprovar() {
         <p class="ax-desc">{{ descricaoDados }}</p>
         <!-- Em leitura (Visualizar, antes ou depois da análise) os dados aparecem só preenchidos, sem ✓ e ✕ nem os
              destaques da conferência (Bruno, 16/11/2026). A conferência campo a campo fica só dentro da análise. -->
-        <div v-if="proposta || leitura" class="ax-etapas">
+        <div class="ax-etapas">
           <AxEtapaLeitura
             v-for="n in [1, 3, 4]"
             :key="n"
             :etapa="n"
             :titulo="ETAPAS[n - 1] ?? ''"
             :aberta-inicial="n === 1"
-            :leitura="leitura"
-          />
-        </div>
-        <div v-else class="ax-etapas">
-          <AxEtapaConferencia
-            v-for="n in [1, 3, 4]"
-            :key="n"
-            :etapa="n"
-            :titulo="ETAPAS[n - 1] ?? ''"
-            :aberta-inicial="n === 1 && !c.revalidacao"
-            :leitura="leitura"
-            :reanalise="reanalise"
+            :leitura="leitura || c.revalidacao"
           />
         </div>
       </section>
@@ -304,7 +294,7 @@ function aprovar() {
           <RgButton v-if="c.situacao === 'enviado' || c.situacao === 'documento-atualizado'" variant="primary" @click="analisar">
             Analisar
           </RgButton>
-          <RgButton v-else-if="c.situacao === 'em-analise'" variant="secondary" @click="abrirAnalise">
+          <RgButton v-else-if="c.situacao === 'em-analise' && !deOutroAnalista" variant="secondary" @click="abrirAnalise">
             Abrir a análise
           </RgButton>
         </template>
