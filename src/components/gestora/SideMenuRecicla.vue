@@ -11,13 +11,14 @@
  * Abaixo de 1024px o menu vira trilha de ícones — não está desenhado no Figma, é o
  * mínimo de responsividade para o protótipo não quebrar em tela menor.
  *
- * No rodapé mora o explorador de cenários, que é ferramenta de protótipo.
+ * Altura fixa (16/11/2026): o menu fica preso abaixo da TopBar, na altura da janela, e não rola com a página.
+ * O rodapé com o explorador de cenários saiu do menu na mesma data; no pé do menu a camada do protótipo põe o
+ * atalho das jornadas (src/prototipo/fluxos/AtalhoDasJornadas.vue). Os cenários do dashboard seguem pelo ?cenario=.
  */
 import { computed } from 'vue';
 
 import type { ItemMenu } from '@/data/mocks/sessao';
 import { useSessaoStore } from '@/stores/sessao';
-import ExploradorCenarios from './ExploradorCenarios.vue';
 
 const props = withDefaults(defineProps<{ ativo: string; explorador?: boolean; itens?: ItemMenu[] }>(), {
   explorador: true,
@@ -28,7 +29,6 @@ const sessao = useSessaoStore();
 
 /** Os itens vêm do perfil: o verificador tem Notas Fiscais onde a gestora tem Planos. */
 const ITENS = computed(() => props.itens ?? sessao.menu);
-const mostraExplorador = computed(() => props.explorador);
 </script>
 
 <template>
@@ -60,18 +60,20 @@ const mostraExplorador = computed(() => props.explorador);
       </ul>
     </nav>
 
-    <footer v-if="mostraExplorador" class="gx-menu__rodape">
-      <ExploradorCenarios />
-    </footer>
   </div>
 </template>
 
 <style scoped>
 .gx-menu {
+  position: sticky;
+  top: 56px; /* a altura da TopBar, presa no topo pelo GestoraShell */
+  align-self: flex-start;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
   width: 260px;
+  height: calc(100vh - 56px);
+  overflow-y: auto;
   padding: var(--rg-space-4) var(--rg-space-3);
   border-right: 1px solid var(--rg-color-border-subtle);
   background-color: var(--rg-color-surface-raised);
@@ -130,10 +132,6 @@ a.gx-menu__item:hover:not(.gx-menu__item--ativo) {
   color: var(--rg-color-text-muted);
 }
 
-.gx-menu__rodape {
-  padding-top: var(--rg-space-4);
-  border-top: 1px solid var(--rg-color-border-subtle);
-}
 
 /* Trilha de ícones: mesma navegação, sem os rótulos. */
 @media (max-width: 1023px) {

@@ -22,7 +22,9 @@ import { useSessaoStore } from '@/stores/sessao';
 import { instalarApiDosFluxos } from './raiz';
 import { definirNavegador, definirFluxoAtivo, fluxoAtivo, lerPreparado, marcarEnderecoAplicado, marcarPreparado, useFluxoAtivo, type ModoDoFluxo } from './sessao';
 
-import FerramentasDoPrototipo from '../cenarios/FerramentasDoPrototipo.vue';
+// a faixa "Protótipo · Reiniciar demonstração" (cenarios/FerramentasDoPrototipo.vue) saiu da tela em 16/11: o canto
+// inferior esquerdo passou a ser do atalho das jornadas. A simulação continua pelo ?simular= (prototipo/index.ts).
+import AtalhoDasJornadas from './AtalhoDasJornadas.vue';
 
 const PainelDoFluxo = defineAsyncComponent(() => import('./PainelDoFluxo.vue'));
 
@@ -118,5 +120,5 @@ const mostrarPainel = computed(() => pronto.value && !!ativo.value && !String(ro
 
 <template>
   <PainelDoFluxo v-if="mostrarPainel" />
-  <FerramentasDoPrototipo v-if="pronto" />
+  <AtalhoDasJornadas v-if="pronto" />
 </template>

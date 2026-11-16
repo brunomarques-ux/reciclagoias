@@ -38,7 +38,9 @@ function sair() {
   <div class="gx-shell">
     <a class="gx-shell__pular" href="#gx-conteudo">Ir para o conteúdo</a>
 
-    <TopBarRecicla :iniciais="sessao.usuario?.iniciais ?? ''" @sair="sair" />
+    <div class="gx-shell__topo">
+      <TopBarRecicla :iniciais="sessao.usuario?.iniciais ?? ''" @sair="sair" />
+    </div>
 
     <div class="gx-shell__body">
       <SideMenuRecicla :ativo="secaoAtiva" :explorador="explorador" :itens="itensDoMenu" />
@@ -86,6 +88,13 @@ function sair() {
 
 .gx-shell__area:focus-visible {
   outline: none;
+}
+
+/* A TopBar fica presa no topo e o menu logo abaixo dela, na altura da janela (16/11/2026): só o conteúdo rola. */
+.gx-shell__topo {
+  position: sticky;
+  top: 0;
+  z-index: 20;
 }
 
 .gx-shell__body {
