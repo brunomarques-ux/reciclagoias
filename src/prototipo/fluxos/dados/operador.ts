@@ -13,7 +13,7 @@ export const BLOCO_OPERADOR: BlocoDeFluxos = {
 };
 
 const LIMPAR = ['rg:complemento:*'];
-const AVANCAR: Alvo = { papel: 'button', nome: 'Avançar', exato: true };
+const AVANCAR: Alvo = { papel: 'button', nome: 'Salvar e avançar', exato: true };
 const JANELA: Alvo = { papel: 'dialog', nome: '' };
 
 /** Na ordem em que aparecem na página /fluxos (dentro do bloco, os principais e alternativos vêm antes das exceções). */
@@ -34,32 +34,32 @@ export const FLUXOS_OPERADOR: Fluxo[] = [
     inicio: { rota: '/operador', perfil: 'operador', limpar: LIMPAR },
     passos: [
       {
-        fazer: 'Confira os dados que vieram do pré-cadastro e clique em Avançar.',
+        fazer: 'Confira os dados que vieram do pré-cadastro e clique em Salvar e avançar.',
         observar: 'Razão social, CNPJ, e-mail e tipo chegam bloqueados. Todo campo aberto leva o asterisco.',
         acoes: [
           { tipo: 'olhar', alvo: { papel: 'textbox', nome: 'Razão social' }, rotulo: 'Vem do pré-cadastro' },
-          { tipo: 'clicar', alvo: AVANCAR, rotulo: 'Clique em Avançar' },
+          { tipo: 'clicar', alvo: AVANCAR, rotulo: 'Clique em Salvar e avançar' },
         ],
       },
       {
-        fazer: 'Veja os documentos anexados e clique em Avançar.',
+        fazer: 'Veja os documentos anexados e clique em Salvar e avançar.',
         observar: 'Sem o Sim/Não: um anexo por documento. A licença foi trocada pelo protocolo, explicado na observação.',
         acoes: [
           { tipo: 'olhar', alvo: { texto: 'protocolo-renovacao-licenca.pdf' }, rotulo: 'Protocolo no lugar da licença' },
           { tipo: 'olhar', alvo: { papel: 'textbox', nome: 'Observações sobre os documentos' }, rotulo: 'A observação explica' },
-          { tipo: 'clicar', alvo: AVANCAR, rotulo: 'Clique em Avançar' },
+          { tipo: 'clicar', alvo: AVANCAR, rotulo: 'Clique em Salvar e avançar' },
         ],
       },
       {
-        fazer: 'Em Operação, clique em Avançar.',
-        observar: 'As perguntas levam o asterisco. Avançar salva a etapa.',
-        acoes: [{ tipo: 'clicar', alvo: AVANCAR, rotulo: 'Clique em Avançar' }],
+        fazer: 'Em Operação, clique em Salvar e avançar.',
+        observar: 'As perguntas levam o asterisco. O botão diz o que faz: salva a etapa e avança.',
+        acoes: [{ tipo: 'clicar', alvo: AVANCAR, rotulo: 'Clique em Salvar e avançar' }],
       },
       {
-        fazer: 'Preencha a capacidade de beneficiamento do vidro com 8 toneladas por mês e clique em Avançar.',
+        fazer: 'Preencha a capacidade de beneficiamento do vidro com 8 toneladas por mês e clique em Salvar e avançar.',
         acoes: [
           { tipo: 'digitar', alvo: { papel: 'textbox', nome: 'Capacidade de beneficiamento' }, texto: '8 toneladas por mês', rotulo: 'Digite a capacidade' },
-          { tipo: 'clicar', alvo: AVANCAR, rotulo: 'Clique em Avançar' },
+          { tipo: 'clicar', alvo: AVANCAR, rotulo: 'Clique em Salvar e avançar' },
         ],
       },
       {
@@ -175,7 +175,7 @@ export const FLUXOS_OPERADOR: Fluxo[] = [
     tipo: 'excecao',
     titulo: 'Envio com campo faltando',
     apresentacao:
-      'Avançar é livre, então a revisão pode chegar com algum campo em branco. O envio não passa: a janela diz pelo nome o que falta e leva à etapa.',
+      'Salvar e avançar é livre, então a revisão pode chegar com algum campo em branco. O envio não passa: a janela diz pelo nome o que falta e leva à etapa.',
     regras: [
       { ref: 'Planning 16/10', texto: 'Só o envio final é bloqueado por pendências.' },
       { ref: 'SEMAD 26/09', texto: 'A janela lista o que falta pelo nome, não um "tem certeza?" genérico.' },
@@ -200,12 +200,12 @@ export const FLUXOS_OPERADOR: Fluxo[] = [
         acoes: [{ tipo: 'clicar', alvo: { papel: 'button', nome: 'Ir para a etapa', dentro: JANELA }, rotulo: 'Clique em Ir para a etapa' }],
       },
       {
-        fazer: 'Preencha a capacidade de beneficiamento com 8 toneladas por mês e clique em Avançar.',
+        fazer: 'Preencha a capacidade de beneficiamento com 8 toneladas por mês e clique em Salvar e avançar.',
         observar: 'O campo abre em erro, com a mensagem do que preencher.',
         acoes: [
           { tipo: 'olhar', alvo: { texto: 'Preencha a capacidade de beneficiamento' }, rotulo: 'Campo em erro' },
           { tipo: 'digitar', alvo: { papel: 'textbox', nome: 'Capacidade de beneficiamento' }, texto: '8 toneladas por mês', rotulo: 'Digite a capacidade' },
-          { tipo: 'clicar', alvo: AVANCAR, rotulo: 'Clique em Avançar' },
+          { tipo: 'clicar', alvo: AVANCAR, rotulo: 'Clique em Salvar e avançar' },
         ],
       },
       {

@@ -24,6 +24,11 @@ export interface PreCadastro {
    * está registrado. Vem do CNPJ, então fica travado como o resto do pré-cadastro.
    */
   cnae: string;
+  /**
+   * Todos os CNAEs do CNPJ, o principal primeiro. Rodada de 13/11/2026: na Minha
+   * Conta (cadastro aprovado) eles aparecem em chips, só para consulta.
+   */
+  cnaes: string[];
   email: string;
   /** O pré-cadastro de produção já pergunta "Você é: Cooperativa / Empresa". */
   tipoOrganizacao: TipoOrganizacao;
@@ -34,6 +39,7 @@ export const PRE_CADASTRO: PreCadastro = {
   nomeFantasia: 'Recicla Cerrado',
   cnpj: '23.481.907/0001-55',
   cnae: '3811-4/00',
+  cnaes: ['3811-4/00', '3812-2/00', '3821-1/00', '3831-9/99', '3832-7/00', '3839-4/99'],
   email: 'contato@reciclacerrado.org.br',
   tipoOrganizacao: 'cooperativa',
 };
@@ -56,10 +62,31 @@ export interface DocumentoExigido {
   rotulo: string;
   /** Nome de arquivo usado quando o anexo é simulado no protótipo. */
   arquivoDemo: string;
+  /**
+   * Documento com data de validade (planning de 13/11/2026): de imediato, o alvará
+   * e o licenciamento ambiental. A lista final depende das regras da SEMAD.
+   */
+  temValidade?: boolean;
+  /** Como o texto chama o documento no meio da frase ("o alvará venceu em..."). */
+  nomeCurto?: string;
 }
 
+/**
+ * Exemplo da validade dos documentos (planning de 13/11/2026), com as datas dos
+ * frames: o alvará vence em 14/12, o aviso sai 30 dias antes, o e-mail de vencido
+ * sai no dia seguinte e o documento novo é enviado em 16/12.
+ */
+export const VALIDADE_DEMO = {
+  doc: 'alvara',
+  venceEm: '14/12/2026',
+  aprovadoEm: '04/09/2026, às 16h20',
+  reenvioEm: '16/12/2026, às 09h14',
+  arquivoNovo: 'alvara-funcionamento-2027.pdf',
+  novaValidade: '14/12/2027',
+} as const;
+
 export const DOCUMENTOS_EXIGIDOS: DocumentoExigido[] = [
-  { id: 'alvara', rotulo: 'Alvará de funcionamento', arquivoDemo: 'alvara-funcionamento-2026.pdf' },
+  { id: 'alvara', rotulo: 'Alvará de funcionamento', arquivoDemo: 'alvara-funcionamento-2026.pdf', temValidade: true, nomeCurto: 'alvará' },
   { id: 'estatuto', rotulo: 'Estatuto social registrado', arquivoDemo: 'estatuto-social-registrado.pdf' },
   {
     id: 'ata',
@@ -77,7 +104,7 @@ export const DOCUMENTOS_EXIGIDOS: DocumentoExigido[] = [
     arquivoDemo: 'certidao-simplificada.pdf',
   },
   { id: 'mtr', rotulo: 'Comprovante de Cadastro no MTR', arquivoDemo: 'cadastro-mtr.pdf' },
-  { id: 'licenca', rotulo: 'Licenciamento ambiental', arquivoDemo: 'licenca-ambiental-2025.pdf' },
+  { id: 'licenca', rotulo: 'Licenciamento ambiental', arquivoDemo: 'licenca-ambiental-2025.pdf', temValidade: true, nomeCurto: 'licenciamento' },
   { id: 'cartao-cnpj', rotulo: 'Cartão de CNPJ (ativo)', arquivoDemo: 'cartao-cnpj.pdf' },
   {
     id: 'identidade',

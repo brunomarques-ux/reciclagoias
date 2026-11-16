@@ -7,33 +7,62 @@
  * de entrada. O e-mail de correção lista o que o analista devolveu na análise,
  * campos e documentos (rodada de 16/10), com o motivo de cada um; sem análise
  * feita, mostra o exemplo do Figma.
+ *
+ * Planning de 13/11/2026 (Figma `6507:5392` e `6507:5886`, L1·1 e L1·3): os dois
+ * e-mails da validade dos documentos, o aviso a 30 dias e o de documento vencido.
+ * Os dois botões levam à etapa Documentos, dentro de Minha Conta.
  */
 import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import { DOCUMENTOS_EXIGIDOS, PRE_CADASTRO } from '@/data/mocks/operador';
+import { DOCUMENTOS_EXIGIDOS, PRE_CADASTRO, VALIDADE_DEMO } from '@/data/mocks/operador';
 import { useComplementoStore } from '@/stores/complemento';
 
 const route = useRoute();
 const router = useRouter();
 const c = useComplementoStore();
 
-type Qual = 'ativacao' | 'correcao' | 'aprovado';
-const qual = computed<Qual>(() => {
-  const q = route.query.email;
-  return q === 'correcao' || q === 'aprovado' ? q : 'ativacao';
-});
+type Qual = 'ativacao' | 'correcao' | 'aprovado' | 'vencendo' | 'vencido';
+const QUAIS: { id: Qual; rotulo: string }[] = [
+  { id: 'ativacao', rotulo: 'Ativação' },
+  { id: 'correcao', rotulo: 'Correção' },
+  { id: 'aprovado', rotulo: 'Aprovado' },
+  { id: 'vencendo', rotulo: 'Vence em 30 dias' },
+  { id: 'vencido', rotulo: 'Documento vencido' },
+];
+const qual = computed<Qual>(() => QUAIS.find((q) => q.id === route.query.email)?.id ?? 'ativacao');
 
 const ASSUNTO: Record<Qual, string> = {
   ativacao: 'Confirme seu e-mail para continuar o cadastro',
   correcao: 'Seu cadastro precisa de correção',
   aprovado: 'Cadastro aprovado no Recicla Goiás',
+  vencendo: 'Documento vence em 30 dias no Recicla Goiás',
+  vencido: 'Cadastro bloqueado: documento vencido no Recicla Goiás',
 };
 const QUANDO: Record<Qual, string> = {
   ativacao: '08:02 (há 34 minutos)',
   correcao: '4 de set. de 2026, 16:20',
   aprovado: '8 de set. de 2026, 10:05',
+  vencendo: '14 de nov. de 2026, 08:00',
+  vencido: '15 de dez. de 2026, 08:00',
 };
+
+// ---- validade dos documentos: o documento e a data vêm da store; sem cenário, o exemplo do Figma ----
+const docDaValidade = computed(
+  () => DOCUMENTOS_EXIGIDOS.find((d) => d.id === (c.vencimento?.doc ?? VALIDADE_DEMO.doc)) ?? DOCUMENTOS_EXIGIDOS[0]!,
+);
+const rotuloMinusculo = computed(() => {
+  const r = docDaValidade.value.rotulo;
+  return r.charAt(0).toLowerCase() + r.slice(1);
+});
+const nomeCurto = computed(() => docDaValidade.value.nomeCurto ?? 'documento');
+const venceEm = computed(() => c.vencimento?.venceEm ?? VALIDADE_DEMO.venceEm);
+
+/** Os dois e-mails da validade levam à etapa Documentos, em Minha Conta. */
+function abrirDocumentos() {
+  c.irPara(2);
+  void router.push('/operador');
+}
 
 const itensCorrecao = computed(() => {
   const ids = Object.keys(c.devolvidos);
@@ -165,6 +194,38 @@ function trocar(q: Qual) {
               <p>Após o reenvio, o cadastro é analisado novamente.</p>
             </template>
 
+            <template v-else-if="qual === 'vencendo'">
+              <h2 class="em__titulo">Documento perto de vencer</h2>
+              <p class="em__saudacao">Prezado(a) representante da {{ PRE_CADASTRO.razaoSocial }},</p>
+              <p><strong class="em__forte">O {{ rotuloMinusculo }} da cooperativa vence em 30 dias.</strong> Para o cadastro continuar regular, envie o documento atualizado antes do vencimento.</p>
+              <dl class="em__resumo">
+                <div><dt>Organização</dt><dd>{{ PRE_CADASTRO.razaoSocial }}</dd></div>
+                <div><dt>CNPJ</dt><dd>{{ PRE_CADASTRO.cnpj }}</dd></div>
+                <div><dt>Documento</dt><dd>{{ docDaValidade.rotulo }}</dd></div>
+                <div><dt>Vence em</dt><dd>{{ venceEm }}</dd></div>
+              </dl>
+              <p class="em__saudacao">O que fazer</p>
+              <p>Acesse o sistema, abra a etapa Documentos em Minha Conta e anexe o {{ nomeCurto }} novo, com a data de validade. O documento passa pela conferência da equipe antes de valer. Se o prazo vencer sem a troca, o cadastro fica bloqueado até a regularização.</p>
+              <a class="em__botao" href="/operador" @click.prevent="abrirDocumentos">Atualizar documento</a>
+              <p>Se o documento já foi atualizado, desconsidere este aviso.</p>
+            </template>
+
+            <template v-else-if="qual === 'vencido'">
+              <h2 class="em__titulo">Documento vencido</h2>
+              <p class="em__saudacao">Prezado(a) representante da {{ PRE_CADASTRO.razaoSocial }},</p>
+              <p><strong class="em__forte">O {{ rotuloMinusculo }} da cooperativa venceu e o cadastro está bloqueado por documentação vencida.</strong> Enquanto o documento novo não for enviado e conferido, as funções do operador logístico ficam indisponíveis.</p>
+              <dl class="em__resumo">
+                <div><dt>Organização</dt><dd>{{ PRE_CADASTRO.razaoSocial }}</dd></div>
+                <div><dt>CNPJ</dt><dd>{{ PRE_CADASTRO.cnpj }}</dd></div>
+                <div><dt>Documento</dt><dd>{{ docDaValidade.rotulo }}</dd></div>
+                <div><dt>Venceu em</dt><dd>{{ venceEm }}</dd></div>
+              </dl>
+              <p class="em__saudacao">Como regularizar</p>
+              <p>Acesse o sistema e abra Minha Conta. Só a etapa Documentos fica aberta: anexe o {{ nomeCurto }} novo, informe a data de validade e envie. A equipe confere o documento e, estando tudo certo, o cadastro volta a ficar aprovado.</p>
+              <a class="em__botao" href="/operador" @click.prevent="abrirDocumentos">Regularizar documento</a>
+              <p>Os demais dados do cadastro continuam salvos e não precisam ser preenchidos de novo.</p>
+            </template>
+
             <template v-else>
               <h2 class="em__titulo">Cadastro aprovado</h2>
               <p class="em__saudacao">Prezado(a) representante da {{ PRE_CADASTRO.razaoSocial }},</p>
@@ -198,9 +259,9 @@ function trocar(q: Qual) {
     </div>
 
     <!-- ferramenta de protótipo, fora da moldura -->
-    <nav class="gm__troca" aria-label="Qual e-mail mostrar">
-      <button v-for="q in (['ativacao', 'correcao', 'aprovado'] as Qual[])" :key="q" type="button" :class="{ ativo: q === qual }" @click="trocar(q)">
-        {{ q === 'ativacao' ? 'Ativação' : q === 'correcao' ? 'Correção' : 'Aprovado' }}
+    <nav class="gm__troca" data-prototipo aria-label="Qual e-mail mostrar">
+      <button v-for="q in QUAIS" :key="q.id" type="button" :class="{ ativo: q.id === qual }" @click="trocar(q.id)">
+        {{ q.rotulo }}
       </button>
     </nav>
   </div>

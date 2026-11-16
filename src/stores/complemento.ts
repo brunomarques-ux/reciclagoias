@@ -16,6 +16,16 @@
  * - A análise confere todos os campos (✓ ou ✕ com observação) e os documentos
  *   (em conformidade? Sim ou Não com motivo). O analista não altera o dado.
  *
+ * Planning de 13/11/2026 (Figma: seção `6506:4284`):
+ * - Aprovado, o complemento mora dentro de Minha Conta, só para consulta.
+ * - Documento com validade avisa 30 dias antes. Vencido, o cadastro fica
+ *   "bloqueado por documentação vencida": só a etapa Documentos abre, e só o
+ *   documento vencido aceita troca. O documento novo, com a validade informada,
+ *   volta para o Admin como "Documento atualizado" e só ele é conferido de novo.
+ * - PROPOSTA para a SEMAD (`soDocumentos`): a análise confere só os documentos;
+ *   Dados gerais, Operação e Estrutura ficam em leitura, com "Apontar problema"
+ *   por bloco. Enquanto a SEMAD não decide, vale a conferência campo a campo.
+ *
  * Persistência: tudo vai para `sessionStorage`, inclusive o preenchimento, para
  * a demonstração trocar de perfil em /entrar e seguir a volta completa.
  */
@@ -23,6 +33,7 @@ import { defineStore } from 'pinia';
 import { computed, reactive, ref, watch } from 'vue';
 
 import {
+  VALIDADE_DEMO,
   AREAS_UNIDADE,
   BENEFICIAMENTOS,
   DOCUMENTOS_EXIGIDOS,
@@ -44,7 +55,40 @@ import {
 export const CHAVE_COMPLEMENTO = 'rg:complemento:v2';
 
 export type RespostaSimNao = 'sim' | 'nao' | null;
-export type Situacao = 'preenchendo' | 'enviado' | 'em-analise' | 'devolvido' | 'aprovado';
+export type Situacao =
+  | 'preenchendo'
+  | 'enviado'
+  | 'em-analise'
+  | 'devolvido'
+  | 'aprovado'
+  /** Bloqueado por documentação vencida: só a etapa Documentos abre. */
+  | 'bloqueado'
+  /** O documento novo foi enviado e espera a conferência do Admin. */
+  | 'documento-atualizado';
+
+/** O documento com validade que está perto de vencer ou já venceu. */
+export interface Vencimento {
+  doc: string;
+  /** DD/MM/AAAA */
+  venceEm: string;
+  vencido: boolean;
+}
+
+/** A troca do documento vencido: o arquivo novo e a validade informada. */
+export interface TrocaDeDocumento {
+  arquivo: string | null;
+  validade: string;
+  /** Preenchido quando o documento novo foi enviado para conferência. */
+  enviadoEm: string | null;
+  /** Motivo da recusa na conferência do documento novo, se houve. */
+  recusa: string | null;
+}
+
+/** Proposta de 13/11: problema apontado pelo analista num bloco de dados. */
+export interface ProblemaDoBloco {
+  texto: string;
+  salvo: boolean;
+}
 export type Alerta = 'warning' | 'danger' | null;
 
 export interface EstadoDocumento {
@@ -137,6 +181,13 @@ interface PacoteSalvo {
   conferenciaCampos: Record<string, ConferenciaCampo>;
   conferencia: Record<string, ConferenciaDocumento>;
   historico: EventoHistorico[];
+  vencimento?: Vencimento | null;
+  troca?: TrocaDeDocumento;
+  revalidacao?: boolean;
+  relogio?: string | null;
+  soDocumentos?: boolean;
+  problemas?: Record<string, ProblemaDoBloco>;
+  compartilhaMassa?: boolean;
 }
 
 /** Analista da demonstração: quem clica em Analisar no Admin. */
@@ -252,6 +303,21 @@ export const useComplementoStore = defineStore('complemento', () => {
   const conferencia = reactive<Record<string, ConferenciaDocumento>>(salvo?.conferencia ?? {});
   const historico = reactive<EventoHistorico[]>(salvo?.historico ?? []);
 
+  // ---- planning de 13/11 ----
+  const vencimento = ref<Vencimento | null>(salvo?.vencimento ?? null);
+  const troca = reactive<TrocaDeDocumento>(salvo?.troca ?? { arquivo: null, validade: '', enviadoEm: null, recusa: null });
+  /** A análise em curso (ou pedida) é só a do documento trocado. */
+  const revalidacao = ref(salvo?.revalidacao ?? false);
+  /** Data dos eventos quando o exemplo se passa em outro dia (a história da validade é em dezembro). */
+  const relogio = ref<string | null>(salvo?.relogio ?? null);
+  const quando = () => relogio.value ?? agora();
+  /** PROPOSTA para a SEMAD: conferência só em Documentos. */
+  const soDocumentos = ref(salvo?.soDocumentos ?? false);
+  /** Problemas apontados por bloco (chave `etapa-1`, `etapa-3`, `etapa-4`), só na proposta. */
+  const problemas = reactive<Record<string, ProblemaDoBloco>>(salvo?.problemas ?? {});
+  /** Minha Conta: autorização de compartilhamento dos dados de massa com as Entidades Gestoras. */
+  const compartilhaMassa = ref(salvo?.compartilhaMassa ?? true);
+
   /** Campos que a janela de envio mandou preencher: a etapa abre com eles em erro. */
   const camposEmErro = ref<string[]>([]);
 
@@ -269,6 +335,13 @@ export const useComplementoStore = defineStore('complemento', () => {
       conferenciaCampos,
       conferencia,
       historico,
+      vencimento: vencimento.value,
+      troca,
+      revalidacao: revalidacao.value,
+      relogio: relogio.value,
+      soDocumentos: soDocumentos.value,
+      problemas,
+      compartilhaMassa: compartilhaMassa.value,
     };
     try {
       sessionStorage.setItem(CHAVE_COMPLEMENTO, JSON.stringify(pacote));
@@ -277,7 +350,10 @@ export const useComplementoStore = defineStore('complemento', () => {
     }
   }
   watch(
-    [etapa, situacao, formulario, dataEnvio, reenvio, analista, devolvidos, corrigidos, conferenciaCampos, conferencia, historico],
+    [
+      etapa, situacao, formulario, dataEnvio, reenvio, analista, devolvidos, corrigidos, conferenciaCampos, conferencia,
+      historico, vencimento, troca, revalidacao, relogio, soDocumentos, problemas, compartilhaMassa,
+    ],
     persistir,
     { deep: true },
   );
@@ -352,9 +428,17 @@ export const useComplementoStore = defineStore('complemento', () => {
   const todosOsCampos = computed(() => ETAPAS_DE_CAMPOS.flatMap((n) => campos(n)));
   const campoPorId = (id: string) => todosOsCampos.value.find((c) => c.id === id);
   const ehDocumento = (id: string) => DOCUMENTOS_EXIGIDOS.some((d) => d.id === id);
-  const rotuloDoItem = (id: string) =>
-    DOCUMENTOS_EXIGIDOS.find((d) => d.id === id)?.rotulo ?? campoPorId(id)?.rotulo ?? id;
-  const etapaDoItem = (id: string) => (ehDocumento(id) ? 2 : campoPorId(id)?.etapa ?? 1);
+  /** Na proposta de 13/11 a pendência pode ser do bloco inteiro: `etapa-1`, `etapa-3`, `etapa-4`. */
+  const etapaDoBloco = (id: string) => (id.startsWith('etapa-') ? Number(id.slice(6)) : null);
+  const chaveDoBloco = (n: number) => `etapa-${n}`;
+  const rotuloDoItem = (id: string) => {
+    const bloco = etapaDoBloco(id);
+    if (bloco) return ETAPAS[bloco - 1] ?? id;
+    return DOCUMENTOS_EXIGIDOS.find((d) => d.id === id)?.rotulo ?? campoPorId(id)?.rotulo ?? id;
+  };
+  const etapaDoItem = (id: string) => etapaDoBloco(id) ?? (ehDocumento(id) ? 2 : campoPorId(id)?.etapa ?? 1);
+  /** Os valores de um bloco num texto só, para saber se algo mudou depois da devolução. */
+  const retratoDoBloco = (n: number) => campos(n).map((c) => c.valor).join('|');
 
   // ---- documentos ----
   const totalDocumentos = DOCUMENTOS_EXIGIDOS.length;
@@ -405,12 +489,90 @@ export const useComplementoStore = defineStore('complemento', () => {
   const devolvidosNaEtapa = (n: number) => idsDevolvidos.value.filter((id) => etapaDoItem(id) === n);
   const itemCorrigido = (id: string) => {
     if (ehDocumento(id)) return !!corrigidos[id];
+    const bloco = etapaDoBloco(id);
+    if (bloco) return retratoDoBloco(bloco) !== valoresDevolvidos[id];
     const atual = campoPorId(id)?.valor ?? '';
     return atual.trim() !== '' && atual !== valoresDevolvidos[id];
   };
   const faltaCorrigir = computed(() => idsDevolvidos.value.filter((id) => !itemCorrigido(id)));
   /** Na correção, só o que foi devolvido abre para edição. */
-  const editavel = (id: string) => !emCorrecao.value || devolvidos[id] !== undefined;
+  const editavel = (id: string) => {
+    if (contaTravada.value) return false;
+    if (!emCorrecao.value) return true;
+    return devolvidos[id] !== undefined || devolvidos[chaveDoBloco(etapaDoItem(id))] !== undefined;
+  };
+
+  // ---- Minha Conta e validade dos documentos (planning de 13/11) ----
+  /** O documento novo está com o Admin (na fila ou em conferência). */
+  const emConferencia = computed(
+    () => situacao.value === 'documento-atualizado' || (situacao.value === 'em-analise' && revalidacao.value),
+  );
+  const bloqueado = computed(() => situacao.value === 'bloqueado');
+  /** O complemento dentro de Minha Conta: aprovado, bloqueado ou com o documento novo em conferência. */
+  const naMinhaConta = computed(() => situacao.value === 'aprovado' || bloqueado.value || emConferencia.value);
+  /** Na Minha Conta os dados são só para consulta (a troca do documento vencido tem controle próprio). */
+  const contaTravada = computed(() => naMinhaConta.value);
+  /** Aprovado, com documento vencendo em 30 dias ou menos: aviso no topo, nada bloqueado. */
+  const avisoDeVencimento = computed(() =>
+    situacao.value === 'aprovado' && vencimento.value && !vencimento.value.vencido ? vencimento.value : null,
+  );
+  /** Bloqueado ou em conferência, só a etapa Documentos abre. */
+  const etapaAberta = (n: number) => !(bloqueado.value || emConferencia.value) || n === 2;
+  const validadeDoDocumento = (id: string) =>
+    vencimento.value?.doc === id ? (troca.enviadoEm ? troca.validade : vencimento.value.venceEm) : null;
+
+  /** Erros da troca que o Enviar para conferência apontou. */
+  const errosDaTroca = ref<('arquivo' | 'validade')[]>([]);
+  const VALIDADE = /^\d{2}\/\d{2}\/\d{4}$/;
+
+  function anexarDocumentoNovo() {
+    if (!bloqueado.value || !vencimento.value) return;
+    // anexo simulado: o arquivo novo do exemplo, como no frame
+    const doc = vencimento.value.doc;
+    troca.arquivo = doc === VALIDADE_DEMO.doc ? VALIDADE_DEMO.arquivoNovo : arquivoCorrigido(doc);
+    errosDaTroca.value = errosDaTroca.value.filter((e) => e !== 'arquivo');
+  }
+  function removerDocumentoNovo() {
+    if (bloqueado.value) troca.arquivo = null;
+  }
+  function informarValidade(valor: string) {
+    troca.validade = valor;
+    if (VALIDADE.test(valor.trim())) errosDaTroca.value = errosDaTroca.value.filter((e) => e !== 'validade');
+  }
+
+  /** O documento venceu sem a troca: a rotina de validade bloqueia o cadastro e só Documentos abre. */
+  function bloquearPorVencimento() {
+    if (situacao.value !== 'aprovado' || !vencimento.value) return;
+    vencimento.value.vencido = true;
+    situacao.value = 'bloqueado';
+    etapa.value = 2;
+  }
+
+  /** O documento novo volta para o Admin. O cadastro continua bloqueado até a conferência. */
+  function enviarParaConferencia(): boolean {
+    const v = vencimento.value;
+    if (!bloqueado.value || !v) return false;
+    const erros: ('arquivo' | 'validade')[] = [];
+    if (!troca.arquivo) erros.push('arquivo');
+    if (!VALIDADE.test(troca.validade.trim())) erros.push('validade');
+    errosDaTroca.value = erros;
+    if (erros.length) return false;
+
+    formulario.documentos[v.doc] = { arquivo: troca.arquivo };
+    troca.enviadoEm = quando();
+    troca.recusa = null;
+    situacao.value = 'documento-atualizado';
+    revalidacao.value = true;
+    analista.value = null;
+    dataEnvio.value = troca.enviadoEm;
+    historico.unshift({
+      data: troca.enviadoEm,
+      titulo: 'Documento atualizado pelo operador',
+      desc: `${rotuloDoItem(v.doc)} novo, com validade até ${troca.validade}.`,
+      quem: PRE_CADASTRO.nomeFantasia,
+    });
+    return true;
+  }
 
   function alertaEtapa(n: number): Alerta {
     if (n === 5) return null;
@@ -425,7 +587,7 @@ export const useComplementoStore = defineStore('complemento', () => {
   // ---- navegação ----
   const totalEtapas = ETAPAS.length;
   function irPara(destino: number) {
-    if (destino >= 1 && destino <= totalEtapas) etapa.value = destino;
+    if (destino >= 1 && destino <= totalEtapas && etapaAberta(destino)) etapa.value = destino;
   }
   function avancar() {
     irPara(etapa.value + 1);
@@ -450,7 +612,7 @@ export const useComplementoStore = defineStore('complemento', () => {
   function enviar() {
     if (faltando.value.length || !formulario.declaracaoAceita) return;
     situacao.value = 'enviado';
-    dataEnvio.value = agora();
+    dataEnvio.value = quando();
     camposEmErro.value = [];
     historico.unshift({
       data: dataEnvio.value,
@@ -470,7 +632,7 @@ export const useComplementoStore = defineStore('complemento', () => {
     situacao.value = 'enviado';
     reenvio.value = true;
     analista.value = null;
-    dataEnvio.value = agora();
+    dataEnvio.value = quando();
     historico.unshift({
       data: dataEnvio.value,
       titulo: 'Reenviado pelo operador',
@@ -481,8 +643,6 @@ export const useComplementoStore = defineStore('complemento', () => {
 
   // ---- edição depois do envio (até a análise começar) ----
   let copiaAntesDaEdicao: string | null = null;
-  /** Ferramenta de protótipo: a análise começa enquanto o operador edita (L8). */
-  const simularAnaliseNaGravacao = ref(false);
 
   function comecarEdicao(n: number) {
     copiaAntesDaEdicao = JSON.stringify(formulario);
@@ -492,12 +652,8 @@ export const useComplementoStore = defineStore('complemento', () => {
     if (copiaAntesDaEdicao) Object.assign(formulario, JSON.parse(copiaAntesDaEdicao) as FormularioComplemento);
     copiaAntesDaEdicao = null;
   }
-  /** Grava a edição. Devolve false quando a análise começou antes: nada é gravado. */
+  /** Grava a edição. Devolve false quando a análise começou antes (L8): nada é gravado. */
   function salvarEdicao(): boolean {
-    if (simularAnaliseNaGravacao.value) {
-      simularAnaliseNaGravacao.value = false;
-      iniciarAnalise();
-    }
     if (situacao.value !== 'enviado') {
       descartarEdicao();
       return false;
@@ -509,11 +665,26 @@ export const useComplementoStore = defineStore('complemento', () => {
   // ---- análise (Admin) ----
   /** Analisar, no menu da linha: atribui a quem clicou e trava o operador. */
   function iniciarAnalise(quem = ANALISTA_DEMO) {
+    if (situacao.value === 'documento-atualizado') {
+      // Só o documento trocado pede resposta: o resto segue conferido.
+      situacao.value = 'em-analise';
+      analista.value = quem;
+      const doc = vencimento.value?.doc;
+      for (const d of DOCUMENTOS_EXIGIDOS) {
+        if (d.id === doc) conferencia[d.id] = conferenciaDocVazia();
+        else conferencia[d.id] = { ...conferenciaDocVazia(), ...conferencia[d.id], resposta: 'sim', travado: true };
+      }
+      for (const c of todosOsCampos.value) {
+        conferenciaCampos[c.id] = { ...conferenciaCampoVazia(), resposta: 'ok', travado: true };
+      }
+      historico.unshift({ data: quando(), titulo: 'Conferência do documento iniciada', desc: `Atribuída a ${quem}.`, quem });
+      return;
+    }
     if (situacao.value !== 'enviado') return;
     situacao.value = 'em-analise';
     analista.value = quem;
     prepararConferencia();
-    historico.unshift({ data: agora(), titulo: 'Análise iniciada', desc: `Atribuída a ${quem}.`, quem });
+    historico.unshift({ data: quando(), titulo: 'Análise iniciada', desc: `Atribuída a ${quem}.`, quem });
   }
 
   /** Na reanálise, o que já estava certo chega bloqueado e o devolvido abre de novo. */
@@ -534,7 +705,37 @@ export const useComplementoStore = defineStore('complemento', () => {
         else atual.travado = atual.resposta === 'sim';
       }
     }
+    // Na proposta, o problema apontado na análise anterior não volta aberto.
+    for (const k of Object.keys(problemas)) delete problemas[k];
   }
+
+  // ---- PROPOSTA de 13/11: problema apontado por bloco ----
+  function apontarProblema(n: number) {
+    const k = chaveDoBloco(n);
+    if (!problemas[k]) problemas[k] = { texto: '', salvo: false };
+  }
+  function retirarProblema(n: number) {
+    delete problemas[chaveDoBloco(n)];
+  }
+  /** Salvar exige a descrição. Devolve se salvou. */
+  function salvarProblema(n: number): boolean {
+    const p = problemas[chaveDoBloco(n)];
+    if (!p || !p.texto.trim()) return false;
+    p.salvo = true;
+    return true;
+  }
+  function editarProblema(n: number) {
+    const p = problemas[chaveDoBloco(n)];
+    if (p) p.salvo = false;
+  }
+  const blocosComProblema = computed(() =>
+    ETAPAS_DE_CAMPOS.filter((n) => problemas[chaveDoBloco(n)]).map((n) => ({
+      etapa: n,
+      chave: chaveDoBloco(n),
+      rotulo: ETAPAS[n - 1] ?? '',
+      ...problemas[chaveDoBloco(n)]!,
+    })),
+  );
 
   function marcarCampo(id: string, resposta: 'ok' | 'corrigir') {
     const c = conferenciaCampos[id] ?? (conferenciaCampos[id] = conferenciaCampoVazia());
@@ -576,20 +777,34 @@ export const useComplementoStore = defineStore('complemento', () => {
   const camposConferidos = computed(() => todosOsCampos.value.filter((c) => conferenciaCampos[c.id]?.resposta).length);
   const docsConferidos = computed(() => DOCUMENTOS_EXIGIDOS.filter((d) => conferencia[d.id]?.resposta).length);
   const camposParaCorrigir = computed(() =>
-    todosOsCampos.value.filter((c) => conferenciaCampos[c.id]?.resposta === 'corrigir'),
+    soDocumentos.value && !revalidacao.value
+      ? []
+      : todosOsCampos.value.filter((c) => conferenciaCampos[c.id]?.resposta === 'corrigir'),
+  );
+  /** Documento respondido: Sim, ou Não com o motivo salvo (o Não em edição ainda não conta). */
+  const docsRespondidos = computed(
+    () =>
+      DOCUMENTOS_EXIGIDOS.filter((d) => {
+        const c = conferencia[d.id];
+        return c?.resposta === 'sim' || (c?.resposta === 'nao' && c.salvo);
+      }).length,
   );
   const docsEmNao = computed(() => DOCUMENTOS_EXIGIDOS.filter((d) => conferencia[d.id]?.resposta === 'nao'));
-  const totalPendencias = computed(() => camposParaCorrigir.value.length + docsEmNao.value.length);
+  const problemasNaConta = computed(() => (soDocumentos.value && !revalidacao.value ? blocosComProblema.value : []));
+  const totalPendencias = computed(
+    () => camposParaCorrigir.value.length + docsEmNao.value.length + problemasNaConta.value.length,
+  );
   /** Pendência com a observação ou o motivo ainda aberto: Devolver fica desabilitado. */
   const emEdicao = computed(
     () =>
       camposParaCorrigir.value.some((c) => !conferenciaCampos[c.id]?.salvo) ||
-      docsEmNao.value.some((d) => !conferencia[d.id]?.salvo),
+      docsEmNao.value.some((d) => !conferencia[d.id]?.salvo) ||
+      problemasNaConta.value.some((p) => !p.salvo),
   );
   const podeDevolver = computed(() => totalPendencias.value > 0 && !emEdicao.value);
   const podeAprovar = computed(
     () =>
-      camposConferidos.value === todosOsCampos.value.length &&
+      (soDocumentos.value || camposConferidos.value === todosOsCampos.value.length) &&
       docsConferidos.value === totalDocumentos &&
       totalPendencias.value === 0,
   );
@@ -600,6 +815,7 @@ export const useComplementoStore = defineStore('complemento', () => {
   const mensagemPadrao = computed(() => {
     const itens = [
       ...camposParaCorrigir.value.map((c) => `• ${c.rotulo}: ${conferenciaCampos[c.id]?.texto.trim()}`),
+      ...problemasNaConta.value.map((p) => `• ${p.rotulo}: ${p.texto.trim()}`),
       ...docsEmNao.value.map((d) => `• ${d.rotulo}: ${conferencia[d.id]?.texto.trim()}`),
     ].join('\n');
     return (
@@ -612,6 +828,23 @@ export const useComplementoStore = defineStore('complemento', () => {
   const mensagemEnviada = ref('');
 
   function devolver(mensagem: string) {
+    if (revalidacao.value) {
+      // O documento novo foi recusado: o cadastro segue bloqueado e o operador troca de novo.
+      const doc = vencimento.value?.doc ?? '';
+      troca.recusa = conferencia[doc]?.texto.trim() ?? '';
+      troca.arquivo = null;
+      troca.enviadoEm = null;
+      mensagemEnviada.value = mensagem;
+      situacao.value = 'bloqueado';
+      etapa.value = 2;
+      historico.unshift({
+        data: quando(),
+        titulo: 'Documento recusado',
+        desc: `${rotuloDoItem(doc)}: ${troca.recusa} E-mail enviado ao operador.`,
+        quem: analista.value ?? ANALISTA_DEMO,
+      });
+      return;
+    }
     for (const k of Object.keys(devolvidos)) delete devolvidos[k];
     for (const k of Object.keys(valoresDevolvidos)) delete valoresDevolvidos[k];
     for (const k of Object.keys(corrigidos)) delete corrigidos[k];
@@ -619,13 +852,17 @@ export const useComplementoStore = defineStore('complemento', () => {
       devolvidos[c.id] = conferenciaCampos[c.id]?.texto.trim() ?? '';
       valoresDevolvidos[c.id] = c.valor;
     }
+    for (const p of problemasNaConta.value) {
+      devolvidos[p.chave] = p.texto.trim();
+      valoresDevolvidos[p.chave] = retratoDoBloco(p.etapa);
+    }
     for (const d of docsEmNao.value) devolvidos[d.id] = conferencia[d.id]?.texto.trim() ?? '';
     const n = idsDevolvidos.value.length;
     mensagemEnviada.value = mensagem;
     situacao.value = 'devolvido';
     etapa.value = Math.min(...idsDevolvidos.value.map(etapaDoItem));
     historico.unshift({
-      data: agora(),
+      data: quando(),
       titulo: 'Devolvido para correção',
       desc: `${n} ${n === 1 ? 'pendência' : 'pendências'}: ${idsDevolvidos.value.map(rotuloDoItem).join(' e ')}. E-mail enviado ao operador.`,
       quem: analista.value ?? ANALISTA_DEMO,
@@ -635,80 +872,58 @@ export const useComplementoStore = defineStore('complemento', () => {
   function aprovar() {
     if (!podeAprovar.value) return;
     situacao.value = 'aprovado';
+    etapa.value = 1;
+    if (revalidacao.value) {
+      revalidacao.value = false;
+      vencimento.value = null;
+      historico.unshift({
+        data: quando(),
+        titulo: 'Documento conferido',
+        desc: 'Documento atualizado em conformidade. O cadastro voltou a ficar aprovado.',
+        quem: analista.value ?? ANALISTA_DEMO,
+      });
+      return;
+    }
     historico.unshift({
-      data: agora(),
+      data: quando(),
       titulo: 'Cadastro aprovado',
-      desc: 'Todos os campos corretos e os documentos em conformidade. E-mail de aprovação enviado com o manual em anexo.',
+      desc: soDocumentos.value
+        ? 'Todos os documentos em conformidade. E-mail de aprovação enviado com o manual em anexo.'
+        : 'Todos os campos corretos e os documentos em conformidade. E-mail de aprovação enviado com o manual em anexo.',
       quem: analista.value ?? ANALISTA_DEMO,
     });
   }
 
-  /** Ferramenta de protótipo: volta ao estado de demonstração inicial. */
-  function reiniciar() {
-    try {
-      sessionStorage.removeItem(CHAVE_COMPLEMENTO);
-    } catch {
-      /* ok */
-    }
-    Object.assign(formulario, formularioPadrao());
-    for (const obj of [devolvidos, valoresDevolvidos, corrigidos, conferenciaCampos, conferencia] as Record<string, unknown>[]) {
-      for (const k of Object.keys(obj)) delete obj[k];
-    }
-    historico.splice(0);
-    etapa.value = 1;
-    situacao.value = 'preenchendo';
-    dataEnvio.value = null;
-    reenvio.value = false;
-    analista.value = null;
-    camposEmErro.value = [];
-    simularAnaliseNaGravacao.value = false;
-  }
-
-  /**
-   * Ferramenta de protótipo: cenários de partida para os fluxos guiados, pelo
-   * endereço (`?demo=`). Assim o fluxo do Admin começa com o cadastro já
-   * enviado, sem trocar de perfil no meio. Os passos são os mesmos da tela.
-   * - enviado: tudo preenchido e enviado em 01/09.
-   * - devolvido: a análise devolveu o telefone e o alvará (L2·3).
-   * - corrigido: o operador corrigiu os dois e reenviou (L3·5, L4·1).
-   */
-  function aplicarDemo(nome: string) {
-    if (!['enviado', 'devolvido', 'corrigido'].includes(nome)) return;
-    reiniciar();
-    formulario.capacidadeVidro = '8 toneladas por mês';
-    enviar();
-    dataEnvio.value = '01/09/2026, às 10h12';
-    historico[0]!.data = dataEnvio.value;
-    if (nome === 'enviado') return;
-
-    iniciarAnalise();
-    for (const c of todosOsCampos.value) marcarCampo(c.id, c.id === 'telefone' ? 'corrigir' : 'ok');
-    conferenciaCampos.telefone!.texto = 'O telefone informado não atende. Informe um número ativo, com DDD.';
-    conferenciaCampos.telefone!.salvo = true;
-    for (const d of DOCUMENTOS_EXIGIDOS) marcarDocumento(d.id, d.id === 'alvara' ? 'nao' : 'sim');
-    conferencia.alvara!.motivo = 'vencido';
-    conferencia.alvara!.texto = 'O documento apresentado está vencido desde março de 2026. Anexe o alvará válido e atualizado.';
-    conferencia.alvara!.salvo = true;
-    devolver(mensagemPadrao.value);
-    if (nome === 'devolvido') return;
-
-    formulario.telefone = '(62) 3555-0198';
-    corrigidos.alvara = true;
-    reenviar();
-  }
-
-  if (typeof window !== 'undefined') {
-    const url = new URL(window.location.href);
-    const demo = url.searchParams.get('demo');
-    if (demo) {
-      aplicarDemo(demo);
-      url.searchParams.delete('demo');
-      window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash);
-    }
-  }
 
   return {
-    aplicarDemo,
+    // planning de 13/11: Minha Conta e validade
+    vencimento,
+    troca,
+    revalidacao,
+    relogio,
+    emConferencia,
+    bloqueado,
+    naMinhaConta,
+    contaTravada,
+    avisoDeVencimento,
+    etapaAberta,
+    validadeDoDocumento,
+    errosDaTroca,
+    anexarDocumentoNovo,
+    removerDocumentoNovo,
+    informarValidade,
+    enviarParaConferencia,
+    bloquearPorVencimento,
+    compartilhaMassa,
+    // proposta de 13/11: conferência só em Documentos
+    soDocumentos,
+    problemas,
+    blocosComProblema,
+    apontarProblema,
+    retirarProblema,
+    salvarProblema,
+    editarProblema,
+    docsRespondidos,
     etapa,
     situacao,
     formulario,
@@ -758,7 +973,6 @@ export const useComplementoStore = defineStore('complemento', () => {
     comecarEdicao,
     descartarEdicao,
     salvarEdicao,
-    simularAnaliseNaGravacao,
     // análise
     iniciarAnalise,
     prepararConferencia,
@@ -781,7 +995,6 @@ export const useComplementoStore = defineStore('complemento', () => {
     mensagemEnviada,
     devolver,
     aprovar,
-    reiniciar,
     alternarOpcao(lista: string[], id: string) {
       const posicao = lista.indexOf(id);
       if (posicao >= 0) lista.splice(posicao, 1);

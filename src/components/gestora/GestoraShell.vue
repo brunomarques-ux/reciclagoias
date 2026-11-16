@@ -11,13 +11,19 @@
  */
 import { useRouter } from 'vue-router';
 
+import type { ItemMenu } from '@/data/mocks/sessao';
 import { useSessaoStore } from '@/stores/sessao';
 import SideMenuRecicla from './SideMenuRecicla.vue';
 import TopBarRecicla from './TopBarRecicla.vue';
 
 /* `withDefaults` porque prop booleana ausente vira `false` no Vue — sem isso o
    explorador sumiria justamente na tela que o usa. */
-withDefaults(defineProps<{ secaoAtiva: string; explorador?: boolean }>(), { explorador: true });
+/* `itensDoMenu`: a tela troca o menu do perfil quando a situação muda o que a pessoa
+   enxerga (o operador aprovado ganha as funções dele, planning de 13/11/2026). */
+withDefaults(defineProps<{ secaoAtiva: string; explorador?: boolean; itensDoMenu?: ItemMenu[] }>(), {
+  explorador: true,
+  itensDoMenu: undefined,
+});
 
 const router = useRouter();
 const sessao = useSessaoStore();
@@ -35,7 +41,7 @@ function sair() {
     <TopBarRecicla :iniciais="sessao.usuario?.iniciais ?? ''" @sair="sair" />
 
     <div class="gx-shell__body">
-      <SideMenuRecicla :ativo="secaoAtiva" :explorador="explorador" />
+      <SideMenuRecicla :ativo="secaoAtiva" :explorador="explorador" :itens="itensDoMenu" />
 
       <main id="gx-conteudo" class="gx-shell__area" tabindex="-1">
         <div class="gx-shell__content">

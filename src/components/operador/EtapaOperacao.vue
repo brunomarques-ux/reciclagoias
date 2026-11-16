@@ -20,13 +20,16 @@ import {
   ORIGENS_RESIDUO,
   TIPOS_RESIDUO,
 } from '@/data/mocks/operador';
+import OxNotaDaEtapa from '@/components/operador/OxNotaDaEtapa.vue';
 import { useComplementoStore } from '@/stores/complemento';
 
 const complemento = useComplementoStore();
 const f = complemento.formulario;
 
 /** Na correção, etapa sem nada devolvido fica só para conferir (fieldset desabilitado). */
-const bloqueada = computed(() => complemento.emCorrecao && complemento.devolvidosNaEtapa(3).length === 0);
+const bloqueada = computed(
+  () => complemento.contaTravada || (complemento.emCorrecao && complemento.devolvidosNaEtapa(3).length === 0),
+);
 const estado = (id: string, oQue: string) => ({
   travado: !complemento.editavel(id),
   erro: complemento.campoEmErro(id) ? `Preencha ${oQue} para enviar o cadastro.` : undefined,
@@ -37,6 +40,7 @@ const estado = (id: string, oQue: string) => ({
 <template>
   <fieldset class="ox-etapa" :disabled="bloqueada">
     <legend class="ox-visualmente-oculto-etapa">Operação</legend>
+    <OxNotaDaEtapa :etapa="3" />
     <OxCartao titulo="Serviços e beneficiamento">
       <div class="ox-pergunta-linha">
         <span class="ox-pergunta">A cooperativa realiza serviço de coleta?</span>

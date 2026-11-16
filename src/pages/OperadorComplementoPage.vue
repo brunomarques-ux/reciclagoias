@@ -16,12 +16,22 @@
  * - Devolvido, o cadastro abre na etapa com pendência, com o alerta vermelho no
  *   topo de todas as etapas; só o devolvido abre para edição (L3).
  *
+ * Planning de 13/11/2026 (Figma: página `Novembro 2026 · Ajustes da planning de
+ * 13/11`, seção `6506:4284`):
+ * - L3 (`6507:4677`): "Avançar" vira "Salvar e avançar" nas etapas 1 a 4.
+ * - L5 (`6506:4386`): aprovado, o complemento mora dentro de Minha Conta. O menu
+ *   ganha as funções do operador, os campos ficam travados e as configurações da
+ *   conta (compartilhamento e senha) ficam acima das cinco etapas.
+ * - L1 (`6507:5722`, `6507:6214`, `6507:6524`): aviso de documento vencendo, a
+ *   situação "Bloqueado por documentação vencida" com só Documentos aberta, e o
+ *   documento novo enviado para conferência.
+ *
  * Figma: arquivo `Recicla Goiás - Figma`, página `Complemento de Cadastro -
  * Operador Logístico`, seção `Setembro 2026 · Recicla Goiás · Complemento de
  * cadastro do Operador Logístico`.
  */
 import { computed, nextTick, ref, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 
 import GestoraShell from '@/components/gestora/GestoraShell.vue';
 import ComplementoStepper from '@/components/operador/ComplementoStepper.vue';
@@ -31,16 +41,15 @@ import EtapaDocumentos from '@/components/operador/EtapaDocumentos.vue';
 import EtapaEstrutura from '@/components/operador/EtapaEstrutura.vue';
 import EtapaOperacao from '@/components/operador/EtapaOperacao.vue';
 import EtapaRevisao from '@/components/operador/EtapaRevisao.vue';
+import OxAviso from '@/components/operador/OxAviso.vue';
+import OxOpcao from '@/components/operador/OxOpcao.vue';
 import RgButton from '@/components/RgButton.vue';
-import { ETAPAS } from '@/data/mocks/operador';
+import { DOCUMENTOS_EXIGIDOS, ETAPAS } from '@/data/mocks/operador';
+import { MENU_OPERADOR_APROVADO } from '@/data/mocks/sessao';
 import { useComplementoStore } from '@/stores/complemento';
 
-const route = useRoute();
 const router = useRouter();
 const complemento = useComplementoStore();
-
-// Ferramenta de protótipo (fluxo guiado da L8): a análise começa na próxima gravação.
-if (route.query.simular === 'analise-comecou') complemento.simularAnaliseNaGravacao = true;
 
 const COMPONENTES_ETAPA = [EtapaDadosGerais, EtapaDocumentos, EtapaOperacao, EtapaEstrutura, EtapaRevisao] as const;
 const componenteAtual = computed(() => COMPONENTES_ETAPA[complemento.etapa - 1]);
@@ -52,6 +61,45 @@ const noFormulario = computed(
   () => complemento.situacao === 'preenchendo' || complemento.situacao === 'devolvido' || editando.value,
 );
 const recemEnviado = ref<'enviado' | 'reenviado' | null>(null);
+
+// ---- Minha Conta (planning de 13/11): aprovado, bloqueado ou com documento em conferência ----
+const rotuloDoVencido = computed(
+  () => DOCUMENTOS_EXIGIDOS.find((d) => d.id === complemento.vencimento?.doc)?.rotulo ?? 'Documento',
+);
+const subtituloDaConta = computed(() => {
+  if (complemento.bloqueado) return 'Regularize o documento vencido para o cadastro voltar a ficar aprovado.';
+  if (complemento.emConferencia) return 'O documento novo está em conferência. Enquanto isso, os dados ficam só para consulta.';
+  return 'Consulte os dados do seu cadastro aprovado.';
+});
+const avisoDaConta = computed(() => {
+  const v = complemento.vencimento;
+  const nome = rotuloDoVencido.value;
+  const minusculo = nome.charAt(0).toLowerCase() + nome.slice(1);
+  if (complemento.bloqueado)
+    return {
+      tom: 'danger' as const,
+      titulo: 'Cadastro bloqueado por documentação vencida',
+      texto: `O ${minusculo} venceu em ${v?.venceEm ?? ''}. Só a etapa Documentos está aberta: anexe o documento novo, informe a validade e envie para conferência.`,
+    };
+  if (complemento.emConferencia)
+    return {
+      tom: 'info' as const,
+      titulo: 'Documento enviado para conferência',
+      texto: `Recebemos o novo ${minusculo} em ${complemento.troca.enviadoEm?.split(',')[0] ?? ''}. O cadastro continua bloqueado até a equipe conferir o documento. O resultado chega no e-mail cadastrado.`,
+    };
+  if (complemento.avisoDeVencimento)
+    return {
+      tom: 'warning' as const,
+      titulo: 'Você tem documento vencendo nos próximos 30 dias',
+      texto: `${nome} vence em ${v?.venceEm ?? ''}. Abra a etapa Documentos e anexe o documento atualizado para o cadastro continuar regular.`,
+    };
+  return null;
+});
+const senhaPedida = ref(false);
+
+function enviarParaConferencia() {
+  if (complemento.enviarParaConferencia()) window.scrollTo({ top: 0 });
+}
 
 const subtitulo = computed(() => {
   if (complemento.emCorrecao)
@@ -173,20 +221,62 @@ const dataDoEnvio = computed(() => complemento.dataEnvio?.split(',')[0] ?? '');
 function cancelar() {
   void router.push({ name: 'entrar' });
 }
-
-function reiniciar() {
-  complemento.reiniciar();
-  editando.value = false;
-  recemEnviado.value = null;
-  janela.value = null;
-  window.scrollTo({ top: 0 });
-}
 </script>
 
 <template>
-  <GestoraShell secao-ativa="Complemento de cadastro" :explorador="false">
-    <!-- Visualização do cadastro: enviado, em análise ou aprovado -->
-    <template v-if="!noFormulario">
+  <GestoraShell
+    :secao-ativa="complemento.naMinhaConta ? 'Minha Conta' : 'Complemento de cadastro'"
+    :itens-do-menu="complemento.naMinhaConta ? MENU_OPERADOR_APROVADO : undefined"
+    :explorador="false"
+  >
+    <!-- Minha Conta: cadastro aprovado, bloqueado por documento vencido ou com o documento novo em conferência -->
+    <template v-if="complemento.naMinhaConta">
+      <header class="ox-pagina__cabecalho">
+        <div>
+          <h1 class="ox-pagina__titulo">Minha conta</h1>
+          <p class="ox-pagina__subtitulo">{{ subtituloDaConta }}</p>
+        </div>
+      </header>
+
+      <OxAviso v-if="avisoDaConta" :tom="avisoDaConta.tom" :titulo="avisoDaConta.titulo" :texto="avisoDaConta.texto" />
+      <OxAviso
+        v-if="complemento.situacao === 'aprovado'"
+        tom="success"
+        titulo="Seu cadastro está aprovado."
+        texto="Os dados não podem ser alterados."
+      />
+
+      <section v-if="complemento.situacao === 'aprovado'" class="ox-config" aria-labelledby="ox-config-titulo">
+        <h2 id="ox-config-titulo" class="ox-config__titulo">Configurações da conta</h2>
+        <OxOpcao
+          rotulo="Autorizo o compartilhamento dos dados de massa com as Entidades Gestoras"
+          :marcado="complemento.compartilhaMassa"
+          @alternar="complemento.compartilhaMassa = !complemento.compartilhaMassa"
+        />
+        <div class="ox-config__senha">
+          <RgButton variant="secondary" @click="senhaPedida = true">Alterar senha</RgButton>
+          <p v-if="senhaPedida" class="ox-config__nota" role="status">
+            A troca de senha usa a tela que já existe no sistema e não faz parte deste protótipo.
+          </p>
+        </div>
+      </section>
+
+      <ComplementoStepper :atual="complemento.etapa" @ir="complemento.irPara" />
+
+      <component :is="componenteAtual" />
+
+      <footer v-if="complemento.bloqueado" class="ox-pagina__acoes ox-pagina__acoes--fim">
+        <RgButton variant="primary" @click="enviarParaConferencia">Enviar para conferência</RgButton>
+      </footer>
+      <footer v-else-if="!complemento.emConferencia" class="ox-pagina__acoes">
+        <RgButton v-if="complemento.etapa === 1" variant="secondary" @click="cancelar">Cancelar</RgButton>
+        <RgButton v-else variant="secondary" @click="complemento.voltar()">Voltar</RgButton>
+        <RgButton v-if="!ultimaEtapa" variant="primary" @click="complemento.avancar()">Avançar</RgButton>
+      </footer>
+    </template>
+
+    <!-- Visualização do cadastro: enviado ou em análise -->
+    <template v-else-if="!noFormulario">
       <div v-if="recemEnviado" class="ox-alerta ox-alerta--sucesso" role="status">
         <v-icon icon="mdi-check-circle" size="22" aria-hidden="true" />
         <div>
@@ -253,28 +343,13 @@ function reiniciar() {
           <RgButton v-if="complemento.emCorrecao && !ultimaEtapa" variant="primary" @click="complemento.irPara(5)">
             Ir para a revisão
           </RgButton>
-          <RgButton v-else-if="!ultimaEtapa" variant="primary" @click="complemento.avancar()">Avançar</RgButton>
+          <RgButton v-else-if="!ultimaEtapa" variant="primary" @click="complemento.avancar()">Salvar e avançar</RgButton>
           <RgButton v-else variant="primary" :disabled="!complemento.podeEnviar" @click="pedirEnvio">
             {{ complemento.emCorrecao ? 'Reenviar para análise' : 'Enviar cadastro' }}
           </RgButton>
         </template>
       </footer>
     </template>
-
-    <!-- Camada do protótipo, fora do desenho -->
-    <aside class="ox-prototipo" data-prototipo aria-label="Ferramentas do protótipo">
-      <span class="ox-prototipo__marca">Protótipo</span>
-      <button
-        v-if="editando"
-        type="button"
-        class="ox-prototipo__botao"
-        :aria-pressed="complemento.simularAnaliseNaGravacao"
-        @click="complemento.simularAnaliseNaGravacao = !complemento.simularAnaliseNaGravacao"
-      >
-        {{ complemento.simularAnaliseNaGravacao ? 'A análise começa ao salvar (ligado)' : 'Simular a análise começando ao salvar' }}
-      </button>
-      <button type="button" class="ox-prototipo__botao" @click="reiniciar">Reiniciar demonstração</button>
-    </aside>
 
     <div v-if="janela" class="ox-veu" @click.self="fecharJanela" @keydown.esc="fecharJanela">
       <div
@@ -451,45 +526,41 @@ function reiniciar() {
   padding-top: var(--rg-space-2);
 }
 
-.ox-prototipo {
+.ox-pagina__acoes--fim {
+  justify-content: flex-end;
+}
+
+.ox-config {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--rg-space-4);
+  padding: var(--rg-space-6);
+  background: var(--rg-color-surface-raised);
+  border: 1px solid var(--rg-color-border-subtle);
+  border-radius: var(--rg-radius-lg);
+}
+
+.ox-config__titulo {
+  margin: 0;
+  font-size: var(--rg-font-size-md);
+  font-weight: var(--rg-font-weight-semibold);
+  line-height: 22px;
+  color: var(--rg-color-text-primary);
+}
+
+.ox-config__senha {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--rg-space-3);
-  margin-top: var(--rg-space-6);
-  padding: var(--rg-space-3) var(--rg-space-4);
-  border: 1px dashed var(--rg-color-border-base);
-  border-radius: var(--rg-radius-md);
-  font-size: var(--rg-font-size-xs);
-  color: var(--rg-color-text-muted);
+  gap: var(--rg-space-4);
 }
 
-.ox-prototipo__marca {
-  font-weight: var(--rg-font-weight-semibold);
-  text-transform: uppercase;
-  letter-spacing: var(--rg-letter-spacing-wide);
-}
-
-.ox-prototipo__botao {
-  padding: var(--rg-space-1) var(--rg-space-2);
-  border: none;
-  border-radius: var(--rg-radius-sm);
-  background: none;
-  font-family: inherit;
-  font-size: var(--rg-font-size-xs);
+.ox-config__nota {
+  margin: 0;
+  font-size: 13px;
+  line-height: 18px;
   color: var(--rg-color-text-secondary);
-  text-decoration: underline;
-  cursor: pointer;
-}
-
-.ox-prototipo__botao[aria-pressed='true'] {
-  color: var(--rg-color-text-brand);
-  font-weight: var(--rg-font-weight-semibold);
-}
-
-.ox-prototipo__botao:focus-visible {
-  outline: 2px solid var(--rg-color-action-primary);
-  outline-offset: 2px;
 }
 
 .ox-veu {

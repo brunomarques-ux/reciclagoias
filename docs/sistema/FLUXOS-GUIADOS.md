@@ -1,5 +1,10 @@
 # Fluxos guiados do protótipo
 
+> Atualizado em 16/11/2026: o motor mudou de `src/fluxos` para `src/prototipo/fluxos` e entra no app por
+> `instalarPrototipo` (`src/prototipo/index.ts`), chamado no `main.ts`. A entrada das jornadas passou a ser por
+> entrega (`/fluxos` e `/fluxos/<entrega>`); a lista que este documento descreve virou `/fluxos/anteriores`. A
+> fronteira da camada e como removê-la estão em [`CAMADA-DE-PROTOTIPO.md`](CAMADA-DE-PROTOTIPO.md).
+
 Camada do protótipo, fora do produto. Portada em 04/11/2026 do protótipo React do SISLOG
 (`SEAD/sislog-prototipo/src/fluxos`, especificação em `docs/ARQUITETURA.md` §23). Comportamento e textos são os
 mesmos de lá; este documento cobre o contrato dos dados, como iniciar e o que mudou.
@@ -15,22 +20,24 @@ Cada fluxo tem dois modos com os mesmos dados:
 
 | Peça | Arquivo |
 |---|---|
-| Contrato (Fluxo, Passo, Acao, Alvo, Inicio) | `src/fluxos/tipos.ts` |
-| Dados, um arquivo por bloco | `src/fluxos/dados/operador.ts`, `src/fluxos/dados/admin.ts` |
-| Ordem dos blocos e da lista | `src/fluxos/dados/index.ts` |
-| Achar o alvo (papel e nome acessível, texto, CSS) | `src/fluxos/alvo.ts` |
-| Executar as ações e a cadência do automático | `src/fluxos/motor.ts` |
-| Acompanhar o gesto no manual | `src/fluxos/manual.ts` |
-| Cursor, destaque, pílula, véu e cortina | `src/fluxos/camada.ts`, `camada.css` |
-| Lugar do painel e espaço no fim da rolagem | `src/fluxos/posicao.ts`, `posicao.css` |
-| Estado do fluxo ativo na aba | `src/fluxos/sessao.ts` |
-| Preparar, executar, pausar, voltar, repetir | `src/fluxos/execucao.ts` |
-| Iniciar por carga completa e o `limpar` | `src/fluxos/iniciar.ts` |
-| Lista, cadeia `depoisDe`, próximo fluxo, endereço | `src/fluxos/registro.ts` |
-| O painel | `src/fluxos/PainelDoFluxo.vue` |
-| A página `/fluxos` | `src/fluxos/FluxosPage.vue` |
-| A raiz (`?perfil=`, `?fluxo=`, monta o painel) | `src/fluxos/RaizDosFluxos.vue`, montada no `App.vue` |
-| API de console (`window.__fluxos`) | `src/fluxos/raiz.ts`, `src/fluxos/api.ts` |
+| Contrato (Fluxo, Passo, Acao, Alvo, Inicio) | `src/prototipo/fluxos/tipos.ts` |
+| Dados, um arquivo por bloco | `src/prototipo/fluxos/dados/operador.ts`, `src/prototipo/fluxos/dados/admin.ts` |
+| Ordem dos blocos e da lista | `src/prototipo/fluxos/dados/index.ts` |
+| Achar o alvo (papel e nome acessível, texto, CSS) | `src/prototipo/fluxos/alvo.ts` |
+| Executar as ações e a cadência do automático | `src/prototipo/fluxos/motor.ts` |
+| Acompanhar o gesto no manual | `src/prototipo/fluxos/manual.ts` |
+| Cursor, destaque, pílula, véu e cortina | `src/prototipo/fluxos/camada.ts`, `camada.css` |
+| Lugar do painel e espaço no fim da rolagem | `src/prototipo/fluxos/posicao.ts`, `posicao.css` |
+| Estado do fluxo ativo na aba | `src/prototipo/fluxos/sessao.ts` |
+| Preparar, executar, pausar, voltar, repetir | `src/prototipo/fluxos/execucao.ts` |
+| Iniciar por carga completa e o `limpar` | `src/prototipo/fluxos/iniciar.ts` |
+| Lista, cadeia `depoisDe`, próximo fluxo, endereço | `src/prototipo/fluxos/registro.ts` |
+| O painel | `src/prototipo/fluxos/PainelDoFluxo.vue` |
+| A página `/fluxos` | `src/prototipo/fluxos/FluxosPage.vue` |
+| A raiz (`?perfil=`, `?fluxo=`, monta o painel) | `src/prototipo/fluxos/RaizDosFluxos.vue`, montada por `src/prototipo/index.ts` |
+| Entregas (catálogo e páginas) | `src/prototipo/entregas/` |
+| Cenários (`?demo=`), simulações (`?simular=`) e ferramentas da tela | `src/prototipo/cenarios/` |
+| API de console (`window.__fluxos`) | `src/prototipo/fluxos/raiz.ts`, `src/prototipo/fluxos/api.ts` |
 
 O painel e a página carregam sob demanda. Sem fluxo ativo, só a raiz e o estado da sessão entram no pacote
 principal. Tudo o que é da camada leva `data-prototipo`: o alvo nunca é procurado ali dentro.
@@ -46,7 +53,9 @@ todo. `dentro` procura só dentro de outro alvo; `n` pega o enésimo (a partir d
 não é controle; CSS só em último caso.
 
 Ações: `clicar`, `marcar`, `digitar` (com `texto`), `escolher` (com `opcao`), `passar`, `tecla`, `rolar`, `olhar`
-(com `rotulo` obrigatório) e `esperar` (com `ms`). Sem `rotulo`, a pílula se monta sozinha ("Clique em Enviar").
+(com `rotulo` obrigatório), `esperar` (com `ms`) e `ir` (com `rota` e `rotulo`): leva o protótipo a outra rota,
+com o cenário no endereço, para o que a pessoa não faz na tela (o tempo que passa, a troca de perfil). O `ir`
+acontece sozinho nos dois modos. Sem `rotulo`, a pílula se monta sozinha ("Clique em Enviar").
 
 `inicio.limpar` lista chaves do armazenamento com o nome completo. Elas saem do `sessionStorage` e do
 `localStorage` antes da carga. Um `*` no fim apaga pelo prefixo (`'rg:complemento:*'`). As chaves da própria
