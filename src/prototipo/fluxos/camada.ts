@@ -185,7 +185,10 @@ function acompanhar(): void {
   caixa.hidden = false;
   if (rotuloAtual) pilula.hidden = false;
   const m = 5;
-  caixa.style.transform = `translate(${r.left - m}px, ${r.top - m}px)`;
+  // a posição na propriedade translate, não no transform: a entrada do destaque anima a escala (scale), que o
+  // navegador aplica antes do transform; com a posição no transform, a escala levava a caixa para longe do alvo e
+  // ela corria de volta (a mesma causa do cursor que esticava, corrigida no SISLOG em 10/11 e aqui em 16/11)
+  caixa.style.translate = `${r.left - m}px ${r.top - m}px`;
   caixa.style.width = `${r.width + 2 * m}px`;
   caixa.style.height = `${r.height + 2 * m}px`;
   if (rotuloAtual) {
@@ -318,7 +321,9 @@ export function cursorEm(p: { x: number; y: number }): void {
 /** O aperto do clique: o cursor encolhe um pouco e uma onda sai da ponta. Sem onda com movimento reduzido. */
 export function onda(): void {
   if (!raiz || movimentoReduzido()) return;
-  cursor?.animate([{ scale: '1' }, { scale: '0.86' }, { scale: '1' }], { duration: 260, easing: 'ease-out' });
+  // encolhe a seta (o svg), presa pela ponta, e não o contêiner: a escala no contêiner entra depois do translate da
+  // posição e encolhia a posição junto; o cursor ia para longe e voltava a cada clique
+  cursor?.querySelector('svg')?.animate([{ transform: 'scale(1)' }, { transform: 'scale(0.86)' }, { transform: 'scale(1)' }], { duration: 260, easing: 'ease-out' });
   const o = document.createElement('div');
   o.className = 'fx-camada__onda';
   o.style.left = `${pos.x}px`;
