@@ -16,7 +16,7 @@ import { computed, nextTick, ref } from 'vue';
 
 import RgButton from '@/components/RgButton.vue';
 import { MOTIVOS_ANALISE, type DocumentoExigido, type MotivoAnalise } from '@/data/mocks/operador';
-import { useComplementoStore } from '@/stores/complemento';
+import { useCadastroAtual } from '@/stores/complemento';
 
 import type { Reanalise } from './analise';
 import AxBotaoEditar from './AxBotaoEditar.vue';
@@ -28,7 +28,7 @@ const props = defineProps<{
 }>();
 const emit = defineEmits<{ (e: 'ver', id: string): void }>();
 
-const c = useComplementoStore();
+const c = useCadastroAtual(); // o cadastro aberto na página da análise
 
 const arquivo = computed(() => c.formulario.documentos[props.doc.id]?.arquivo ?? null);
 const conf = computed(() => c.conferencia[props.doc.id]);

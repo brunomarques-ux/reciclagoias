@@ -1,6 +1,7 @@
 <template>
   <v-app>
-    <router-view />
+    <!-- a chave pelo caminho: /admin/cadastros/<a> para /admin/cadastros/<b> remonta a página com o outro cadastro -->
+    <router-view :key="$route.path" />
   </v-app>
 </template>
 
