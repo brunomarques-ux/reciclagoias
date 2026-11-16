@@ -41,7 +41,7 @@ export const ENTREGAS: readonly EntregaDoPrototipo[] = [
     titulo: 'Ajustes da reunião de 13/11',
     origem: 'Planning de 13/11/2026 com o desenvolvimento · os minutos são os da gravação',
     resumo:
-      'O que o desenvolvimento pediu para o operador logístico e para a análise do Admin: a validade dos documentos, o botão que diz que salva, a proposta de conferência para a SEMAD e a Minha Conta com o complemento dentro.',
+      'O que o desenvolvimento pediu para o operador logístico e para a análise do Admin: a validade dos documentos, o botão que diz que salva, a análise do Admin só com documentos e a Minha Conta com o complemento dentro.',
     figma: 'Recicla Goiás - Figma · página Novembro 2026 · Ajustes da planning de 13/11',
     itens: [
       {
@@ -74,9 +74,9 @@ export const ENTREGAS: readonly EntregaDoPrototipo[] = [
       {
         codigo: 'L4',
         minuto: '58:07',
-        natureza: 'Proposta',
+        natureza: 'Ajuste',
         titulo: 'Análise do Admin: conferência só em Documentos',
-        muda: 'Proposta para a SEMAD: os dados ficam só para leitura, o Sim ou Não continua em cada documento e o analista aponta problema por bloco.',
+        muda: 'Os dados ficam só para leitura, sem aceite campo a campo; o Sim ou Não continua em cada documento e o analista aponta problema por bloco.',
         perfil: 'Admin',
         fluxo: 'ajustes-13nov-l4-conferencia-so-documentos',
       },
