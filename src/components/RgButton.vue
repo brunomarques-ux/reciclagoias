@@ -106,7 +106,8 @@ const vBtnProps = computed(() => {
    Usa border (não box-shadow) porque o elevation-0 do Vuetify sobrescreve
    box-shadow com !important; a border deixa o box-shadow livre pro anel de foco. */
 .rg-button--secondary {
-  background-color: transparent !important;
+  /* branco com contorno e texto verdes: o secundário do design system (não transparente, para não herdar o fundo) */
+  background-color: var(--rg-color-surface-raised) !important;
   color: var(--rg-primitive-brand-700) !important;
   border: 1.5px solid var(--rg-primitive-brand-600) !important;
 }
@@ -135,6 +136,27 @@ const vBtnProps = computed(() => {
 .rg-button--ghost:hover:not(:disabled) {
   background-color: var(--rg-color-surface-muted) !important;
   color: var(--rg-color-text-primary) !important;
+}
+
+/* Desativado (16/11/2026). O v-btn desativado pinta a camada .v-btn__overlay com a cor do texto a 46%: no
+   secundário, de texto verde, isso virava um fundo verde e o botão parecia um primário apagado. A camada sai e cada
+   variante tem o seu desativado: o primário vira cinza cheio; o secundário, o contorno e o fantasma mantêm o
+   desenho, com borda e texto apagados. */
+.rg-button.v-btn--disabled :deep(.v-btn__overlay) {
+  opacity: 0 !important;
+}
+.rg-button--primary.v-btn--disabled {
+  background-color: var(--rg-color-surface-subtle) !important;
+  color: var(--rg-color-text-disabled) !important;
+}
+.rg-button--secondary.v-btn--disabled,
+.rg-button--outline.v-btn--disabled {
+  background-color: var(--rg-color-surface-raised) !important;
+  border-color: var(--rg-color-border-base) !important;
+  color: var(--rg-color-text-disabled) !important;
+}
+.rg-button--ghost.v-btn--disabled {
+  color: var(--rg-color-text-disabled) !important;
 }
 
 .rg-button:focus-visible {

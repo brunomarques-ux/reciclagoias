@@ -285,8 +285,9 @@ function aprovar() {
       <footer class="ax-rodape" :class="{ 'ax-rodape--fixo': !leitura }">
         <template v-if="!leitura">
           <p class="ax-rodape__texto" aria-live="polite">{{ contagem }}</p>
+          <!-- Devolver é sempre o secundário; o primário da análise é Aprovar (Bruno, 16/11/2026) -->
           <RgButton
-            :variant="c.totalPendencias > 0 ? 'primary' : 'secondary'"
+            variant="secondary"
             :disabled="!c.podeDevolver"
             @click="pedirDevolucao"
           >
