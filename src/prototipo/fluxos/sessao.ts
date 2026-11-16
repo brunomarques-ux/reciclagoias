@@ -108,6 +108,15 @@ export function preferenciasDoFluxo(): PreferenciasDoFluxo {
   }
 }
 
+/** Escolhe a velocidade antes de iniciar (a página da entrega): vale para o próximo fluxo desta aba. */
+export function definirVelocidadePreferida(velocidade: VelocidadeDoFluxo): void {
+  try {
+    window.sessionStorage.setItem(CHAVE_PREFERENCIAS, JSON.stringify({ ...preferenciasDoFluxo(), velocidade }));
+  } catch {
+    /* sem sessionStorage: fica a normal */
+  }
+}
+
 /** Marca a próxima carga como nossa (antes de location.assign ou replace): não é o F5 da pessoa. */
 export function marcarCargaPropria(): void {
   try {
@@ -155,6 +164,21 @@ export function marcarEnderecoAplicado(endereco: string): void {
 
 export function enderecoAplicadoPeloRoteador(): string | null {
   return enderecoAplicado;
+}
+
+/**
+ * Quem navega pela ação "ir" é o roteador do app: a raiz (RaizDosFluxos.vue) entrega a função, e o motor não importa
+ * o roteador.
+ */
+let navegador: ((rota: string) => Promise<unknown>) | null = null;
+
+export function definirNavegador(f: ((rota: string) => Promise<unknown>) | null): void {
+  navegador = f;
+}
+
+export async function navegarPara(rota: string): Promise<void> {
+  if (navegador) await navegador(rota);
+  else window.location.assign(rota);
 }
 
 export function assinarFluxo(f: () => void): () => void {

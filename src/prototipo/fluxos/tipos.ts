@@ -11,10 +11,10 @@
 //   automático o cursor virtual vai até o alvo, devagar, e faz o gesto; quem apresenta só narra.
 //
 // Os arquivos de dados importam só tipos (import type).
-import type { PerfilId } from '../data/mocks/sessao';
+import type { PerfilId } from '@/data/mocks/sessao';
 
 /** Os blocos da página /fluxos, na ordem em que aparecem (a lista mora em dados/index.ts). */
-export type BlocoId = 'operador' | 'admin';
+export type BlocoId = 'operador' | 'admin' | 'ajustes-13nov';
 export type TipoDeFluxo = 'principal' | 'alternativo' | 'excecao';
 
 export interface BlocoDeFluxos {
@@ -22,6 +22,11 @@ export interface BlocoDeFluxos {
   titulo: string;
   /** Uma linha abaixo do título do bloco na página /fluxos (opcional). */
   resumo?: string;
+  /**
+   * O bloco é de uma entrega (src/prototipo/entregas): os fluxos dele aparecem na página da entrega, e não na lista
+   * dos fluxos anteriores.
+   */
+  entrega?: string;
 }
 
 /** Papéis que o motor sabe achar (os mesmos nomes do getByRole do Playwright). */
@@ -64,7 +69,12 @@ export type Acao =
   /** Destaca o alvo sem agir: o que quem apresenta mostra e comenta (padrão 3200 ms, o tempo de uma frase). */
   | { tipo: 'olhar'; alvo: Alvo; rotulo: string; ms?: number }
   /** Pausa (ex.: esperar uma lista carregar). */
-  | { tipo: 'esperar'; ms: number };
+  | { tipo: 'esperar'; ms: number }
+  /**
+   * Leva o protótipo a outra rota, com o cenário no endereço (`?demo=`). Para o que a pessoa não faz na tela: o
+   * tempo que passa (30 dias depois, o documento venceu), a troca de perfil. Nos dois modos acontece sozinho.
+   */
+  | { tipo: 'ir'; rota: string; rotulo: string };
 
 /** O estado de partida do fluxo: a rota, o perfil e o que limpar antes. */
 export interface Inicio {

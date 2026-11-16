@@ -5,7 +5,7 @@
 import type { Acao } from './tipos';
 import { normalizar, resolverAlvo } from './alvo';
 import { destacar } from './camada';
-import { CADENCIA, nomeDoAlvoParaAviso, rotuloDaAcao } from './motor';
+import { CADENCIA, Controle, irParaRota, nomeDoAlvoParaAviso, rotuloDaAcao } from './motor';
 
 const so = (s: string) => normalizar(s).toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
 
@@ -49,6 +49,12 @@ export function acompanharAcao(
   if (acao.tipo === 'esperar') {
     const t = window.setTimeout(() => concluir(0), acao.ms);
     limpezas.push(() => window.clearTimeout(t));
+  } else if (acao.tipo === 'ir') {
+    // não é gesto da pessoa (o tempo que passa, a troca de perfil): acontece sozinho, também no manual
+    destacar(null);
+    const c = new Controle();
+    limpezas.push(() => c.cancelar());
+    void irParaRota(acao.rota, c).then(() => concluir(400), () => undefined);
   } else if (acao.tipo === 'tecla') {
     destacar(null);
     ouvir('keydown', e => {

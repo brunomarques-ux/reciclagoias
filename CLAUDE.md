@@ -38,6 +38,8 @@ Leia antes de mexer em cada frente:
 | [`docs/sistema/DECISOES-UX.md`](docs/sistema/DECISOES-UX.md) | Decisões de UX que governam as telas do sistema (D-R001 período restritivo, D-R002 seletor de ano, D-R003 barra empilhada) — **fonte da verdade quando houver dúvida de direção** |
 | [`docs/sistema/HANDOFF-DASHBOARD-GESTORA.md`](docs/sistema/HANDOFF-DASHBOARD-GESTORA.md) | Documento para encaminhar: o que foi entregue, o porquê de cada decisão e o que vai para a biblioteca de componentes |
 | [`docs/sistema/PACOTE-ENTREGA-DASHBOARDS.md`](docs/sistema/PACOTE-ENTREGA-DASHBOARDS.md) | **O que vai para o time de desenvolvimento**: os pacotes já entregues, as três peças de cada um, as regras dos documentos (sem sigla nossa, sem diminuir o que já existia) e como refazer o recorte de código |
+| [`docs/sistema/CAMADA-DE-PROTOTIPO.md`](docs/sistema/CAMADA-DE-PROTOTIPO.md) | **A fronteira entre tela e protótipo**: tudo o que é jornada, cenário ou simulação mora em `src/prototipo` e entra por uma chamada no `main.ts`. As telas não importam nada de lá |
+| [`docs/sistema/FLUXOS-GUIADOS.md`](docs/sistema/FLUXOS-GUIADOS.md) | O motor das jornadas guiadas e o contrato dos dados |
 | [`docs/HANDOFF-DESENVOLVIMENTO.md`](docs/HANDOFF-DESENVOLVIMENTO.md) | Landing page |
 | [`docs/HANDOFF-CONSULTA-REGULARIDADE.md`](docs/HANDOFF-CONSULTA-REGULARIDADE.md) | Consulta pública de regularidade |
 | [`README.md`](README.md) | Stack e filosofia geral |

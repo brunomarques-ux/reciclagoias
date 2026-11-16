@@ -2,7 +2,7 @@
 // aba por window.__fluxos.registrar (para ensaiar um fluxo sem mexer nos dados). A cadeia (depoisDe), o próximo
 // fluxo e o endereço de início (o mesmo que um link de fora pode usar).
 import type { Fluxo } from './tipos';
-import { FLUXOS } from './dados';
+import { BLOCOS, FLUXOS } from './dados';
 import type { ModoDoFluxo } from './sessao';
 
 export { BLOCOS } from './dados';
@@ -47,10 +47,22 @@ export function cadeiaDe(f: Fluxo, vistos: Set<string> = new Set()): Fluxo[] {
   return [...cadeiaDe(anterior, vistos), f];
 }
 
-/** O próximo fluxo na ordem da lista (nos extras, nenhum). */
+/** A entrega do bloco do fluxo (src/prototipo/entregas), se ele é de uma. */
+export function entregaDoFluxo(f: Fluxo): string | undefined {
+  return BLOCOS.find(b => b.id === f.bloco)?.entrega;
+}
+
+/** A página que lista o fluxo: a da entrega dele, ou a dos fluxos anteriores. */
+export function listaDoFluxo(f: Fluxo | undefined): string {
+  const entrega = f ? entregaDoFluxo(f) : undefined;
+  return entrega ? `/fluxos/${entrega}` : f ? '/fluxos/anteriores' : '/fluxos';
+}
+
+/** O próximo fluxo na ordem da lista, dentro da mesma entrega (nos extras, nenhum). */
 export function proximoFluxo(id: string): Fluxo | undefined {
   const i = FLUXOS.findIndex(f => f.id === id);
-  return i >= 0 ? FLUXOS[i + 1] : undefined;
+  const prox = i >= 0 ? FLUXOS[i + 1] : undefined;
+  return prox && entregaDoFluxo(prox) === entregaDoFluxo(FLUXOS[i]) ? prox : undefined;
 }
 
 /**

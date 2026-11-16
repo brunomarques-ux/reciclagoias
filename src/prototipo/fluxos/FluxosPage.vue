@@ -1,6 +1,7 @@
 <script setup lang="ts">
 /**
- * /fluxos · "Fluxos do protótipo" (camada do protótipo, fora do produto; carrega sob demanda e não pede perfil).
+ * /fluxos/anteriores · "Fluxos anteriores" (até 04/11/2026 era a própria /fluxos; a entrada agora é a página das
+ * entregas, src/prototipo/entregas) (camada do protótipo, fora do produto; carrega sob demanda e não pede perfil).
  * Reescrita em Vue da página Fluxos.tsx do SISLOG: os blocos na ordem de dados/index.ts; dentro de cada bloco,
  * primeiro os fluxos principais (e alternativos) e depois os de exceção. Cada fluxo: o título, o tipo, a abertura em
  * até duas linhas, as regras que ele demonstra, os passos e os dois começos: Iniciar automático (o cursor faz, quem
@@ -28,7 +29,7 @@ interface ItemDaLista {
 
 /** Os blocos com fluxo, cada um com os principais (e alternativos) e as exceções, numerados em sequência. */
 const secoes = computed(() =>
-  BLOCOS.map((b) => {
+  BLOCOS.filter((b) => !b.entrega).map((b) => {
     const doBloco = fluxos.filter((f) => f.bloco === b.id);
     let n = 0;
     const principais: ItemDaLista[] = doBloco.filter((f) => f.tipo !== 'excecao').map((f) => ({ f, n: ++n }));
@@ -44,7 +45,7 @@ const secoes = computed(() =>
 
 /** Os nomes dos blocos para o estado vazio: "Operador logístico e Análise no Admin". */
 const nomesDosBlocos = computed(() => {
-  const nomes = BLOCOS.map((b) => b.titulo);
+  const nomes = BLOCOS.filter((b) => !b.entrega).map((b) => b.titulo);
   return nomes.length > 1 ? `${nomes.slice(0, -1).join(', ')} e ${nomes[nomes.length - 1]}` : (nomes[0] ?? '');
 });
 
@@ -65,7 +66,7 @@ function textoDasRegras(f: Fluxo) {
     <main class="fx-fluxos__conteudo">
       <header class="fx-fluxos__header">
         <p class="fx-fluxos__eyebrow">Protótipo · fora do desenho</p>
-        <h1 class="fx-fluxos__title">Fluxos do protótipo</h1>
+        <h1 class="fx-fluxos__title">Fluxos anteriores</h1>
         <p class="fx-fluxos__lead">
           Percursos guiados pelas telas do protótipo do Recicla Goiás. Cada fluxo abre o protótipo no perfil e na tela
           certos, com um painel no canto inferior direito.
@@ -76,11 +77,11 @@ function textoDasRegras(f: Fluxo) {
         </p>
         <div class="fx-fluxos__actions">
           <BotaoDoFluxo
-            rotulo="Voltar ao protótipo"
+            rotulo="Voltar às entregas"
             variante="contorno"
             tom="neutro"
             icone="mdi-arrow-left"
-            @click="router.push('/entrar')"
+            @click="router.push('/fluxos')"
           />
         </div>
       </header>

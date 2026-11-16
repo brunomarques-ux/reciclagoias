@@ -527,7 +527,9 @@ export const useComplementoStore = defineStore('complemento', () => {
 
   function anexarDocumentoNovo() {
     if (!bloqueado.value || !vencimento.value) return;
-    troca.arquivo = VALIDADE_DEMO.arquivoNovo;
+    // anexo simulado: o arquivo novo do exemplo, como no frame
+    const doc = vencimento.value.doc;
+    troca.arquivo = doc === VALIDADE_DEMO.doc ? VALIDADE_DEMO.arquivoNovo : arquivoCorrigido(doc);
     errosDaTroca.value = errosDaTroca.value.filter((e) => e !== 'arquivo');
   }
   function removerDocumentoNovo() {
@@ -536,6 +538,14 @@ export const useComplementoStore = defineStore('complemento', () => {
   function informarValidade(valor: string) {
     troca.validade = valor;
     if (VALIDADE.test(valor.trim())) errosDaTroca.value = errosDaTroca.value.filter((e) => e !== 'validade');
+  }
+
+  /** O documento venceu sem a troca: a rotina de validade bloqueia o cadastro e só Documentos abre. */
+  function bloquearPorVencimento() {
+    if (situacao.value !== 'aprovado' || !vencimento.value) return;
+    vencimento.value.vencido = true;
+    situacao.value = 'bloqueado';
+    etapa.value = 2;
   }
 
   /** O documento novo volta para o Admin. O cadastro continua bloqueado até a conferência. */
@@ -633,8 +643,6 @@ export const useComplementoStore = defineStore('complemento', () => {
 
   // ---- edição depois do envio (até a análise começar) ----
   let copiaAntesDaEdicao: string | null = null;
-  /** Ferramenta de protótipo: a análise começa enquanto o operador edita (L8). */
-  const simularAnaliseNaGravacao = ref(false);
 
   function comecarEdicao(n: number) {
     copiaAntesDaEdicao = JSON.stringify(formulario);
@@ -644,12 +652,8 @@ export const useComplementoStore = defineStore('complemento', () => {
     if (copiaAntesDaEdicao) Object.assign(formulario, JSON.parse(copiaAntesDaEdicao) as FormularioComplemento);
     copiaAntesDaEdicao = null;
   }
-  /** Grava a edição. Devolve false quando a análise começou antes: nada é gravado. */
+  /** Grava a edição. Devolve false quando a análise começou antes (L8): nada é gravado. */
   function salvarEdicao(): boolean {
-    if (simularAnaliseNaGravacao.value) {
-      simularAnaliseNaGravacao.value = false;
-      iniciarAnalise();
-    }
     if (situacao.value !== 'enviado') {
       descartarEdicao();
       return false;
@@ -890,119 +894,8 @@ export const useComplementoStore = defineStore('complemento', () => {
     });
   }
 
-  /** Ferramenta de protótipo: volta ao estado de demonstração inicial. */
-  function reiniciar() {
-    try {
-      sessionStorage.removeItem(CHAVE_COMPLEMENTO);
-    } catch {
-      /* ok */
-    }
-    Object.assign(formulario, formularioPadrao());
-    for (const obj of [devolvidos, valoresDevolvidos, corrigidos, conferenciaCampos, conferencia] as Record<string, unknown>[]) {
-      for (const k of Object.keys(obj)) delete obj[k];
-    }
-    for (const k of Object.keys(problemas)) delete problemas[k];
-    historico.splice(0);
-    vencimento.value = null;
-    Object.assign(troca, { arquivo: null, validade: '', enviadoEm: null, recusa: null });
-    revalidacao.value = false;
-    relogio.value = null;
-    soDocumentos.value = false;
-    compartilhaMassa.value = true;
-    errosDaTroca.value = [];
-    etapa.value = 1;
-    situacao.value = 'preenchendo';
-    dataEnvio.value = null;
-    reenvio.value = false;
-    analista.value = null;
-    camposEmErro.value = [];
-    simularAnaliseNaGravacao.value = false;
-  }
-
-  /**
-   * Ferramenta de protótipo: cenários de partida para os fluxos guiados, pelo
-   * endereço (`?demo=`). Assim o fluxo do Admin começa com o cadastro já
-   * enviado, sem trocar de perfil no meio. Os passos são os mesmos da tela.
-   * - enviado: tudo preenchido e enviado em 01/09.
-   * - devolvido: a análise devolveu o telefone e o alvará (L2·3).
-   * - corrigido: o operador corrigiu os dois e reenviou (L3·5, L4·1).
-   * Planning de 13/11:
-   * - proposta: em análise com a conferência só em Documentos ligada, os dez
-   *   documentos depois do alvará já em Sim (L4·1).
-   * - aprovado: cadastro aprovado, o complemento dentro de Minha Conta (L5).
-   * - vencendo: aprovado, com o alvará vencendo em 30 dias (L1·1 e L1·2).
-   * - vencido: bloqueado por documentação vencida (L1·3 e L1·4).
-   * - atualizado: o documento novo foi enviado para conferência (L1·5 e L2).
-   */
-  function aplicarDemo(nome: string) {
-    const DA_VALIDADE = ['aprovado', 'vencendo', 'vencido', 'atualizado'];
-    if (!['enviado', 'devolvido', 'corrigido', 'proposta', ...DA_VALIDADE].includes(nome)) return;
-    reiniciar();
-    formulario.capacidadeVidro = '8 toneladas por mês';
-    enviar();
-    dataEnvio.value = '01/09/2026, às 10h12';
-    historico[0]!.data = dataEnvio.value;
-    if (nome === 'enviado') return;
-    if (nome === 'proposta') {
-      soDocumentos.value = true;
-      iniciarAnalise();
-      historico[0]!.data = '02/09/2026, às 09h30';
-      for (const d of DOCUMENTOS_EXIGIDOS) if (d.id !== 'alvara') marcarDocumento(d.id, 'sim');
-      return;
-    }
-
-    if (DA_VALIDADE.includes(nome)) {
-      relogio.value = VALIDADE_DEMO.aprovadoEm;
-      iniciarAnalise();
-      for (const c of todosOsCampos.value) marcarCampo(c.id, 'ok');
-      for (const d of DOCUMENTOS_EXIGIDOS) marcarDocumento(d.id, 'sim');
-      aprovar();
-      relogio.value = null;
-      if (nome === 'aprovado') return;
-
-      vencimento.value = { doc: VALIDADE_DEMO.doc, venceEm: VALIDADE_DEMO.venceEm, vencido: false };
-      if (nome === 'vencendo') return;
-
-      vencimento.value.vencido = true;
-      situacao.value = 'bloqueado';
-      etapa.value = 2;
-      relogio.value = VALIDADE_DEMO.reenvioEm;
-      if (nome === 'vencido') return;
-
-      anexarDocumentoNovo();
-      informarValidade(VALIDADE_DEMO.novaValidade);
-      enviarParaConferencia();
-      return;
-    }
-
-    iniciarAnalise();
-    for (const c of todosOsCampos.value) marcarCampo(c.id, c.id === 'telefone' ? 'corrigir' : 'ok');
-    conferenciaCampos.telefone!.texto = 'O telefone informado não atende. Informe um número ativo, com DDD.';
-    conferenciaCampos.telefone!.salvo = true;
-    for (const d of DOCUMENTOS_EXIGIDOS) marcarDocumento(d.id, d.id === 'alvara' ? 'nao' : 'sim');
-    conferencia.alvara!.motivo = 'vencido';
-    conferencia.alvara!.texto = 'O documento apresentado está vencido desde março de 2026. Anexe o alvará válido e atualizado.';
-    conferencia.alvara!.salvo = true;
-    devolver(mensagemPadrao.value);
-    if (nome === 'devolvido') return;
-
-    formulario.telefone = '(62) 3555-0198';
-    corrigidos.alvara = true;
-    reenviar();
-  }
-
-  if (typeof window !== 'undefined') {
-    const url = new URL(window.location.href);
-    const demo = url.searchParams.get('demo');
-    if (demo) {
-      aplicarDemo(demo);
-      url.searchParams.delete('demo');
-      window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash);
-    }
-  }
 
   return {
-    aplicarDemo,
     // planning de 13/11: Minha Conta e validade
     vencimento,
     troca,
@@ -1020,6 +913,7 @@ export const useComplementoStore = defineStore('complemento', () => {
     removerDocumentoNovo,
     informarValidade,
     enviarParaConferencia,
+    bloquearPorVencimento,
     compartilhaMassa,
     // proposta de 13/11: conferência só em Documentos
     soDocumentos,
@@ -1079,7 +973,6 @@ export const useComplementoStore = defineStore('complemento', () => {
     comecarEdicao,
     descartarEdicao,
     salvarEdicao,
-    simularAnaliseNaGravacao,
     // análise
     iniciarAnalise,
     prepararConferencia,
@@ -1102,7 +995,6 @@ export const useComplementoStore = defineStore('complemento', () => {
     mensagemEnviada,
     devolver,
     aprovar,
-    reiniciar,
     alternarOpcao(lista: string[], id: string) {
       const posicao = lista.indexOf(id);
       if (posicao >= 0) lista.splice(posicao, 1);

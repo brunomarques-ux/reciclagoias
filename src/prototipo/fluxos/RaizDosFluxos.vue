@@ -20,7 +20,9 @@ import { useRoute, useRouter } from 'vue-router';
 import { PERFIS, type PerfilId } from '@/data/mocks/sessao';
 import { useSessaoStore } from '@/stores/sessao';
 import { instalarApiDosFluxos } from './raiz';
-import { definirFluxoAtivo, fluxoAtivo, lerPreparado, marcarEnderecoAplicado, marcarPreparado, useFluxoAtivo, type ModoDoFluxo } from './sessao';
+import { definirNavegador, definirFluxoAtivo, fluxoAtivo, lerPreparado, marcarEnderecoAplicado, marcarPreparado, useFluxoAtivo, type ModoDoFluxo } from './sessao';
+
+import FerramentasDoPrototipo from '../cenarios/FerramentasDoPrototipo.vue';
 
 const PainelDoFluxo = defineAsyncComponent(() => import('./PainelDoFluxo.vue'));
 
@@ -33,6 +35,7 @@ const ativo = useFluxoAtivo();
 const pronto = ref(false);
 
 instalarApiDosFluxos();
+definirNavegador((rota) => router.push(rota));
 
 function perfilValido(v: unknown): PerfilId | null {
   return PERFIS.some((p) => p.id === v) ? (v as PerfilId) : null;
@@ -54,7 +57,10 @@ void router.isReady().then(() => {
   pronto.value = true;
   void nextTick(() => marcarEnderecoAplicado(window.location.pathname + window.location.search));
 });
-onBeforeUnmount(pararDeMarcar);
+onBeforeUnmount(() => {
+  pararDeMarcar();
+  definirNavegador(null);
+});
 
 /** O endereço já tratado: a mesma entrada não se trata duas vezes. */
 let tratado: string | null = null;
@@ -107,9 +113,10 @@ function tratarEndereco(): void {
 watch(() => route.fullPath, tratarEndereco, { immediate: true, flush: 'post' });
 
 // 4. o painel: com um fluxo ativo, fora da página /fluxos
-const mostrarPainel = computed(() => pronto.value && !!ativo.value && route.name !== 'fluxos');
+const mostrarPainel = computed(() => pronto.value && !!ativo.value && !String(route.name ?? '').startsWith('fluxos'));
 </script>
 
 <template>
   <PainelDoFluxo v-if="mostrarPainel" />
+  <FerramentasDoPrototipo v-if="pronto" />
 </template>

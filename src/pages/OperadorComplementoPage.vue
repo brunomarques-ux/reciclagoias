@@ -31,7 +31,7 @@
  * cadastro do Operador Logístico`.
  */
 import { computed, nextTick, ref, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 
 import GestoraShell from '@/components/gestora/GestoraShell.vue';
 import ComplementoStepper from '@/components/operador/ComplementoStepper.vue';
@@ -48,12 +48,8 @@ import { DOCUMENTOS_EXIGIDOS, ETAPAS } from '@/data/mocks/operador';
 import { MENU_OPERADOR_APROVADO } from '@/data/mocks/sessao';
 import { useComplementoStore } from '@/stores/complemento';
 
-const route = useRoute();
 const router = useRouter();
 const complemento = useComplementoStore();
-
-// Ferramenta de protótipo (fluxo guiado da L8): a análise começa na próxima gravação.
-if (route.query.simular === 'analise-comecou') complemento.simularAnaliseNaGravacao = true;
 
 const COMPONENTES_ETAPA = [EtapaDadosGerais, EtapaDocumentos, EtapaOperacao, EtapaEstrutura, EtapaRevisao] as const;
 const componenteAtual = computed(() => COMPONENTES_ETAPA[complemento.etapa - 1]);
@@ -225,14 +221,6 @@ const dataDoEnvio = computed(() => complemento.dataEnvio?.split(',')[0] ?? '');
 function cancelar() {
   void router.push({ name: 'entrar' });
 }
-
-function reiniciar() {
-  complemento.reiniciar();
-  editando.value = false;
-  recemEnviado.value = null;
-  janela.value = null;
-  window.scrollTo({ top: 0 });
-}
 </script>
 
 <template>
@@ -362,21 +350,6 @@ function reiniciar() {
         </template>
       </footer>
     </template>
-
-    <!-- Camada do protótipo, fora do desenho -->
-    <aside class="ox-prototipo" data-prototipo aria-label="Ferramentas do protótipo">
-      <span class="ox-prototipo__marca">Protótipo</span>
-      <button
-        v-if="editando"
-        type="button"
-        class="ox-prototipo__botao"
-        :aria-pressed="complemento.simularAnaliseNaGravacao"
-        @click="complemento.simularAnaliseNaGravacao = !complemento.simularAnaliseNaGravacao"
-      >
-        {{ complemento.simularAnaliseNaGravacao ? 'A análise começa ao salvar (ligado)' : 'Simular a análise começando ao salvar' }}
-      </button>
-      <button type="button" class="ox-prototipo__botao" @click="reiniciar">Reiniciar demonstração</button>
-    </aside>
 
     <div v-if="janela" class="ox-veu" @click.self="fecharJanela" @keydown.esc="fecharJanela">
       <div
@@ -588,47 +561,6 @@ function reiniciar() {
   font-size: 13px;
   line-height: 18px;
   color: var(--rg-color-text-secondary);
-}
-
-.ox-prototipo {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--rg-space-3);
-  margin-top: var(--rg-space-6);
-  padding: var(--rg-space-3) var(--rg-space-4);
-  border: 1px dashed var(--rg-color-border-base);
-  border-radius: var(--rg-radius-md);
-  font-size: var(--rg-font-size-xs);
-  color: var(--rg-color-text-muted);
-}
-
-.ox-prototipo__marca {
-  font-weight: var(--rg-font-weight-semibold);
-  text-transform: uppercase;
-  letter-spacing: var(--rg-letter-spacing-wide);
-}
-
-.ox-prototipo__botao {
-  padding: var(--rg-space-1) var(--rg-space-2);
-  border: none;
-  border-radius: var(--rg-radius-sm);
-  background: none;
-  font-family: inherit;
-  font-size: var(--rg-font-size-xs);
-  color: var(--rg-color-text-secondary);
-  text-decoration: underline;
-  cursor: pointer;
-}
-
-.ox-prototipo__botao[aria-pressed='true'] {
-  color: var(--rg-color-text-brand);
-  font-weight: var(--rg-font-weight-semibold);
-}
-
-.ox-prototipo__botao:focus-visible {
-  outline: 2px solid var(--rg-color-action-primary);
-  outline-offset: 2px;
 }
 
 .ox-veu {

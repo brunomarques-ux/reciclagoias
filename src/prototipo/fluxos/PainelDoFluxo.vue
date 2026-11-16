@@ -22,7 +22,7 @@ import { useRouter } from 'vue-router';
 
 import { ROTULO_DO_TIPO_DE_FLUXO } from './tipos';
 import { COR_DO_TIPO_DE_FLUXO, type TomDoSelo } from './rotulos';
-import { BLOCOS, fluxoPorId, proximoFluxo } from './registro';
+import { BLOCOS, fluxoPorId, listaDoFluxo, proximoFluxo } from './registro';
 import { atualizarFluxoAtivo, definirFluxoAtivo, useFluxoAtivo, type ModoDoFluxo, type VelocidadeDoFluxo } from './sessao';
 import {
   anterior, cancelar, continuar, entendi, executarPassoAtual, irPara, pausar, preparar, proximo, recomecar, repetir,
@@ -109,8 +109,9 @@ function encerrar() {
   definirFluxoAtivo(null);
 }
 function listaDeFluxos() {
+  const lista = listaDoFluxo(fluxo.value);
   definirFluxoAtivo(null);
-  void router.push('/fluxos');
+  void router.push(lista);
 }
 function iniciarProximo() {
   if (proxFluxo.value && ativo.value) iniciarFluxo(proxFluxo.value, ativo.value.modo);

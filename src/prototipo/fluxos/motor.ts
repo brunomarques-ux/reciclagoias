@@ -20,7 +20,7 @@ import type { Acao, Alvo, Fluxo, PassoDoFluxo } from './tipos';
 import { descreverAlvo, habilitado, nomeCurtoDoAlvo, normalizar, resolverAlvo } from './alvo';
 import { alvoNaTela, cursorAparente, destacar, mostrarCortina, mostrarCursor, moverCursorAte, movimentoReduzido, onda, pontoDe, posicaoDoCursor } from './camada';
 import { cadeiaDe } from './registro';
-import { enderecoAplicadoPeloRoteador } from './sessao';
+import { enderecoAplicadoPeloRoteador, navegarPara } from './sessao';
 
 export const ESPERA_DO_ALVO = 6000;
 export const FATOR_LENTO = 1.7;
@@ -133,7 +133,26 @@ export function rotuloDaAcao(acao: Acao): string {
       return acao.rotulo;
     case 'esperar':
       return 'Aguarde';
+    case 'ir':
+      return acao.rotulo;
   }
+}
+
+/** Os parâmetros que a camada do protótipo consome e tira da barra (o cenário e a simulação). */
+const PARAMETROS_DA_CAMADA = ['perfil', 'fluxo', 'demo', 'simular'];
+
+/** A ação "ir": navega e espera a tela nova, já com o cenário aplicado e a barra limpa. */
+export async function irParaRota(rota: string, controle: Controle): Promise<void> {
+  await navegarPara(rota);
+  const limite = performance.now() + ESPERA_DO_ALVO;
+  while (performance.now() < limite) {
+    await controle.checar();
+    const q = new URLSearchParams(location.search);
+    const limpa = !PARAMETROS_DA_CAMADA.some(p => p !== 'perfil' && q.has(p));
+    if (limpa && enderecoAplicadoPeloRoteador() === location.pathname + location.search) break;
+    await dormir(80);
+  }
+  await dormir(150);
 }
 
 const NOME_DA_TECLA: Readonly<Record<string, string>> = {
@@ -377,6 +396,16 @@ export async function executarAcao(acao: Acao, ex: Execucao, opcoes: { ultima?: 
 
   if (acao.tipo === 'esperar') return controle.esperar(rapido ? Math.min(acao.ms, 1500) : acao.ms);
 
+  if (acao.tipo === 'ir') {
+    if (!rapido) {
+      destacar(null);
+      await pausa(CADENCIA.noAlvo);
+    }
+    await irParaRota(acao.rota, controle);
+    if (!rapido) await pausa(CADENCIA.depoisDaAcao);
+    return;
+  }
+
   if (acao.tipo === 'tecla') {
     if (!rapido) {
       destacar(null);
@@ -551,7 +580,7 @@ export async function esperarTelaPronta(controle: Controle): Promise<void> {
     await controle.checar();
     const q = new URLSearchParams(location.search);
     const aplicado = enderecoAplicadoPeloRoteador() === location.pathname + location.search;
-    if (!q.has('perfil') && !q.has('fluxo') && aplicado && document.readyState === 'complete') break;
+    if (!PARAMETROS_DA_CAMADA.some(p => q.has(p)) && aplicado && document.readyState === 'complete') break;
     await dormir(80);
   }
   await dormir(150);
