@@ -36,8 +36,8 @@ const nomeDoDoc = computed(() => {
 const textoDaSuspensao = computed(() => {
   const p = complemento.prazos;
   if (complemento.emConferencia)
-    return `O documento novo está em conferência. A inclusão volta assim que a equipe aprovar o ${nomeDoDoc.value}. A transferência de créditos continua liberada.`;
-  return `O ${nomeDoDoc.value} venceu em ${p?.venceEm ?? ''}. A inclusão volta depois que o documento novo for conferido. A transferência de créditos continua liberada. Troque o documento até ${p?.prazoAte ?? ''} para evitar o bloqueio do cadastro.`;
+    return `O documento atualizado está em análise. A inclusão volta assim que a equipe aprovar o ${nomeDoDoc.value}. A transferência de créditos continua liberada.`;
+  return `Seu ${nomeDoDoc.value} venceu em ${p?.venceEm ?? ''}. Até que a atualização seja realizada, a inclusão de novas notas fiscais está suspensa, sendo possível realizar apenas a transferência de créditos. Realize a atualização do documento até ${p?.prazoAte ?? ''} para evitar o bloqueio do cadastro.`;
 });
 
 const pedida = ref(false);

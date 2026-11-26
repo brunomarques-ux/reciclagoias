@@ -50,7 +50,7 @@ const SALDOS = [
       v-if="parcial"
       tom="info"
       titulo="Transferência de créditos liberada"
-      :texto="`Mesmo com o documento vencido, a transferência continua até ${complemento.prazos?.prazoAte ?? ''}. A inclusão de notas fiscais segue suspensa até a troca do documento.`"
+      :texto="`Mesmo com o documento vencido, a transferência de créditos continua operando até ${complemento.prazos?.prazoAte ?? ''}. A inclusão de notas fiscais segue suspensa até a atualização do documento.`"
     />
     <p v-if="pedida" class="sd__nota" role="status">
       A transferência usa a tela que já existe no sistema e não faz parte deste protótipo.

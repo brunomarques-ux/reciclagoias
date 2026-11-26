@@ -46,7 +46,7 @@ export const FLUXOS_AJUSTES_13NOV: Fluxo[] = [
         observar: 'O cadastro segue aprovado e nada fica bloqueado ainda.',
         acoes: [
           { tipo: 'rolar', alvo: { papel: 'heading', nome: 'Minha conta' }, rotulo: 'Minha Conta' },
-          { tipo: 'olhar', alvo: { texto: 'Você tem documento perto de vencer' }, rotulo: 'Aviso ao entrar no sistema' },
+          { tipo: 'olhar', alvo: { texto: 'Você possui um documento com data de vencimento próxima' }, rotulo: 'Aviso ao entrar no sistema' },
         ],
       },
       {

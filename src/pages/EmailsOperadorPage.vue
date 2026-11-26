@@ -219,7 +219,7 @@ function trocar(q: Qual) {
               <h2 class="em__titulo">Documento vence em {{ diasParaVencer }} dias</h2>
               <p class="em__saudacao">Prezado(a) representante da {{ PRE_CADASTRO.razaoSocial }},</p>
               <p><strong class="em__forte">O {{ rotuloMinusculo }} da cooperativa vence em {{ diasParaVencer }} dias.</strong></p>
-              <p>Para o cadastro continuar regular, envie o documento atualizado antes do vencimento.</p>
+              <p>Para que seu cadastro continue regular, envie o documento atualizado antes do vencimento.</p>
               <dl class="em__resumo">
                 <div><dt>Organização</dt><dd>{{ PRE_CADASTRO.razaoSocial }}</dd></div>
                 <div><dt>CNPJ</dt><dd>{{ PRE_CADASTRO.cnpj }}</dd></div>
@@ -229,13 +229,13 @@ function trocar(q: Qual) {
               <p class="em__saudacao">O que fazer</p>
               <ol class="em__passos">
                 <li>Acesse o sistema e abra a etapa Documentos, em Minha Conta.</li>
-                <li>Anexe o {{ nomeCurto }} novo e informe a data de validade.</li>
-                <li>Envie para conferência. A equipe confere o documento antes de valer.</li>
+                <li>Anexe o {{ nomeCurto }} atualizado e informe a data de validade.</li>
+                <li>Envie o documento. Ele passará por análise para validação.</li>
               </ol>
               <a class="em__botao" href="/operador" @click.prevent="abrirDocumentos">Atualizar documento</a>
               <div class="em__caixa em__caixa--atencao">
                 <strong>Se o documento vencer</strong>
-                <p>Sem a troca, há 10 dias corridos para regularizar. Depois disso, o cadastro é bloqueado.</p>
+                <p>Após a data de validade, o empreendimento tem 10 dias corridos para regularização. Caso não seja regularizado, o seu cadastro será bloqueado.</p>
               </div>
               <p>Se o documento já foi atualizado, desconsidere este aviso.</p>
             </template>
@@ -255,19 +255,19 @@ function trocar(q: Qual) {
               <div class="em__caixa em__caixa--atencao">
                 <strong>O que muda até {{ prazos.prazoAte }}</strong>
                 <ul>
-                  <li>A transferência de créditos continua liberada.</li>
-                  <li>A inclusão de novas notas fiscais fica suspensa.</li>
-                  <li>A partir de {{ prazos.bloqueioEm }}, sem a troca, o cadastro é bloqueado.</li>
+                  <li>A transferência de créditos continua em operação.</li>
+                  <li>A inclusão de novas notas fiscais está suspensa.</li>
+                  <li>A partir de {{ prazos.bloqueioEm }}, caso o documento não seja atualizado dentro do prazo informado, o cadastro será bloqueado.</li>
                 </ul>
               </div>
               <p class="em__saudacao">Como regularizar</p>
               <ol class="em__passos">
                 <li>Acesse o sistema e abra a etapa Documentos, em Minha Conta.</li>
-                <li>Anexe o {{ nomeCurto }} novo e informe a data de validade.</li>
-                <li>Envie para conferência. Estando tudo certo, a inclusão de notas fiscais volta.</li>
+                <li>Anexe o {{ nomeCurto }} atualizado e informe a data de validade.</li>
+                <li>A equipe realizará a análise do documento e, estando tudo regular, o sistema volta a disponibilizar todas as funcionalidades.</li>
               </ol>
               <a class="em__botao" href="/operador" @click.prevent="abrirDocumentos">Atualizar documento</a>
-              <p>Os demais dados do cadastro continuam salvos e não precisam ser preenchidos de novo.</p>
+              <p>Os demais documentos permanecem válidos, sem necessidade de atualização neste momento.</p>
             </template>
 
             <template v-else-if="qual === 'bloqueio-em-5-dias'">
@@ -290,8 +290,8 @@ function trocar(q: Qual) {
               <p class="em__saudacao">Como regularizar</p>
               <ol class="em__passos">
                 <li>Acesse o sistema e abra a etapa Documentos, em Minha Conta.</li>
-                <li>Anexe o {{ nomeCurto }} novo e informe a data de validade.</li>
-                <li>Envie para conferência. A equipe confere o documento antes de valer.</li>
+                <li>Anexe o {{ nomeCurto }} atualizado e informe a data de validade.</li>
+                <li>Envie o documento. Ele passará por análise para validação.</li>
               </ol>
               <a class="em__botao" href="/operador" @click.prevent="abrirDocumentos">Atualizar documento</a>
               <p>Se o documento já foi enviado, desconsidere este aviso.</p>

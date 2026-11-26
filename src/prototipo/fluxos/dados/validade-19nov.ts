@@ -43,7 +43,7 @@ export const FLUXOS_VALIDADE_19NOV: Fluxo[] = [
         observar: 'Saiu em 15/10. Diz qual documento vence, quando e o que acontece se vencer.',
         acoes: [
           { tipo: 'olhar', alvo: { papel: 'heading', nome: 'Documento vence em 60 dias' }, rotulo: 'Primeiro lembrete' },
-          { tipo: 'olhar', alvo: { texto: 'há 10 dias corridos para regularizar' }, rotulo: 'O que acontece se vencer' },
+          { tipo: 'olhar', alvo: { texto: '10 dias corridos para regularização' }, rotulo: 'O que acontece se vencer' },
         ],
       },
       {
@@ -59,7 +59,7 @@ export const FLUXOS_VALIDADE_19NOV: Fluxo[] = [
         fazer: 'Veja o aviso no topo da Minha Conta e troque o alvará já agora.',
         observar: 'O cadastro segue aprovado. Só o alvará aceita troca; os demais documentos seguem conferidos.',
         acoes: [
-          { tipo: 'olhar', alvo: { texto: 'Você tem documento perto de vencer' }, rotulo: 'Aviso ao entrar' },
+          { tipo: 'olhar', alvo: { texto: 'Você possui um documento com data de vencimento próxima' }, rotulo: 'Aviso ao entrar' },
           ...TROCAR_O_ALVARA,
         ],
       },
@@ -253,7 +253,7 @@ export const FLUXOS_VALIDADE_19NOV: Fluxo[] = [
         observar: 'Diz qual documento vence, a data e o que acontece se vencer.',
         acoes: [
           { tipo: 'olhar', alvo: { papel: 'heading', nome: 'Documento vence em 60 dias' }, rotulo: 'Primeiro lembrete, 15/10' },
-          { tipo: 'olhar', alvo: { texto: 'há 10 dias corridos para regularizar' }, rotulo: 'O que acontece se vencer' },
+          { tipo: 'olhar', alvo: { texto: '10 dias corridos para regularização' }, rotulo: 'O que acontece se vencer' },
         ],
       },
       // 2 · 14/11
@@ -270,7 +270,7 @@ export const FLUXOS_VALIDADE_19NOV: Fluxo[] = [
       {
         fazer: 'Ao entrar, a Minha Conta mostra o aviso de documento perto de vencer.',
         observar: 'Aviso de atenção, não de erro. O cadastro segue aprovado.',
-        acoes: [{ tipo: 'olhar', alvo: { texto: 'Você tem documento perto de vencer' }, rotulo: 'Aviso ao entrar' }],
+        acoes: [{ tipo: 'olhar', alvo: { texto: 'Você possui um documento com data de vencimento próxima' }, rotulo: 'Aviso ao entrar' }],
       },
       // 3 · troca antes de vencer
       {

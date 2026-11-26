@@ -53,10 +53,11 @@ const soConsulta = computed(() => complemento.emCorrecao || complemento.naMinhaC
 
 const descricao = computed(() => {
   if (complemento.bloqueado || complemento.emRegularizacao)
-    return 'Só o documento vencido pode ser trocado. Os demais continuam conferidos e não precisam ser enviados de novo.';
+    return 'Somente o documento vencido pode ser alterado. Os demais continuam válidos e não precisam ser enviados novamente neste momento.';
   if (complemento.trocaAberta)
-    return 'O documento perto de vencer já pode ser trocado. Os demais continuam conferidos e não precisam ser enviados de novo.';
-  if (complemento.emConferencia) return 'O documento enviado está em conferência. Os demais continuam conferidos.';
+    return 'O documento perto do vencimento já pode ser atualizado. Os demais documentos permanecem válidos, sem necessidade de atualização neste momento.';
+  if (complemento.emConferencia)
+    return 'O documento enviado está em análise. Os demais documentos permanecem válidos, sem necessidade de atualização neste momento.';
   if (complemento.naMinhaConta) return 'Os documentos foram conferidos na análise do cadastro e ficam só para consulta.';
   if (complemento.emCorrecao)
     return 'Os documentos conferidos pela análise não podem ser alterados. No documento com pendência, o motivo aparece abaixo do nome.';
@@ -69,10 +70,10 @@ const motivoDoVencido = computed(() => {
   const v = complemento.vencimento;
   const nome = DOCUMENTOS_EXIGIDOS.find((d) => d.id === v?.doc)?.nomeCurto ?? 'documento';
   if (complemento.emRegularizacao)
-    return `o ${nome} venceu em ${v?.venceEm ?? ''}. Anexe o ${nome} válido e informe a nova data de validade até ${complemento.prazos?.prazoAte ?? ''} para evitar o bloqueio.`;
+    return `o ${nome} venceu em ${v?.venceEm ?? ''}. Anexe o ${nome} atualizado e informe a nova data de validade até ${complemento.prazos?.prazoAte ?? ''} para evitar o bloqueio.`;
   if (!complemento.bloqueado)
-    return `o ${nome} vence em ${v?.venceEm ?? ''}. Anexe o ${nome} novo e informe a nova data de validade.`;
-  return `o ${nome} venceu em ${v?.venceEm ?? ''} e não foi trocado no prazo. Anexe o ${nome} válido e informe a nova data de validade.`;
+    return `o ${nome} vence em ${v?.venceEm ?? ''}. Anexe o ${nome} atualizado e informe a nova data de validade.`;
+  return `o ${nome} venceu em ${v?.venceEm ?? ''} e não foi atualizado no prazo. Anexe o ${nome} válido e informe a nova data de validade.`;
 });
 /** O rótulo da nota: antes de vencer não é motivo de recusa, é aviso. */
 const rotuloDaNota = computed(() =>

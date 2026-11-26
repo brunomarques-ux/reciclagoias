@@ -76,7 +76,7 @@ const subtituloDaConta = computed(() => {
   if (complemento.bloqueado) return 'Regularize o documento vencido para o cadastro voltar a ficar aprovado.';
   if (complemento.emRegularizacao)
     return `Troque o documento vencido até ${complemento.prazos?.prazoAte ?? ''}. Até lá, o cadastro fica parcialmente ativo.`;
-  if (complemento.emConferencia) return 'O documento novo está em conferência. Enquanto isso, os dados ficam só para consulta.';
+  if (complemento.emConferencia) return 'O documento atualizado está em análise. Enquanto isso, os dados ficam disponíveis apenas para consulta.';
   return 'Consulte os dados do seu cadastro aprovado.';
 });
 // Regras de 19/11 (Figma `6558:1924`): lembretes antes de vencer, 10 dias parcialmente ativo e bloqueio total no 11º dia.
@@ -89,31 +89,31 @@ const avisoDaConta = computed(() => {
     return {
       tom: 'danger' as const,
       titulo: 'Cadastro bloqueado por documentação vencida',
-      texto: `O ${minusculo} venceu em ${v?.venceEm ?? ''} e o prazo de 10 dias para regularizar terminou em ${p?.prazoAte ?? ''}. Até a troca, nenhuma operação pode ser feita no sistema: só a etapa Documentos está aberta. Anexe o documento novo, informe a validade e envie para conferência.`,
+      texto: `O ${minusculo} venceu em ${v?.venceEm ?? ''} e o prazo de 10 dias para regularizar terminou em ${p?.prazoAte ?? ''}. Até a atualização do documento, nenhuma operação além da substituição do documento pode ser realizada no sistema. Anexe o documento atualizado, informe a validade e envie para análise.`,
     };
   if (complemento.emRegularizacao)
     return {
       tom: 'danger' as const,
       titulo: `Documento vencido: regularize até ${p?.prazoAte ?? ''}`,
-      texto: `O ${minusculo} venceu em ${v?.venceEm ?? ''}. Até a troca, a inclusão de novas notas fiscais está suspensa e a transferência de créditos continua. Sem o documento novo, o cadastro é bloqueado a partir de ${p?.bloqueioEm ?? ''}.`,
+      texto: `Seu ${minusculo} venceu em ${v?.venceEm ?? ''}. Até que a atualização seja realizada, a inclusão de novas notas fiscais está suspensa, sendo possível realizar apenas a transferência de créditos. Sem o documento atualizado, o cadastro será totalmente bloqueado a partir de ${p?.bloqueioEm ?? ''}.`,
     };
   if (complemento.emConferencia)
     return {
       tom: 'info' as const,
       titulo: 'Documento enviado para conferência',
-      texto: `Recebemos o novo ${minusculo} em ${complemento.troca.enviadoEm?.split(',')[0] ?? ''}. ${
+      texto: `Recebemos o ${minusculo} atualizado em ${complemento.troca.enviadoEm?.split(',')[0] ?? ''}. ${
         complemento.troca.origem === 'regularizacao'
-          ? 'Até a equipe conferir o documento, a inclusão de notas fiscais continua suspensa e a transferência de créditos continua liberada.'
+          ? 'Até a análise do documento enviado, a inclusão de notas fiscais continua suspensa e a transferência de créditos continua liberada.'
           : complemento.troca.origem === 'antecipada'
-            ? 'Enquanto a equipe confere, o cadastro segue aprovado e nada muda no uso do sistema.'
-            : 'O cadastro continua bloqueado até a equipe conferir o documento.'
-      } O resultado chega no e-mail cadastrado.`,
+            ? 'Durante a análise, o cadastro segue aprovado e nada muda no uso do sistema.'
+            : 'O cadastro continua bloqueado até que seja realizada a análise do documento enviado.'
+      } O resultado da análise chegará no e-mail cadastrado.`,
     };
   if (complemento.avisoDeVencimento)
     return {
       tom: 'warning' as const,
-      titulo: 'Você tem documento perto de vencer',
-      texto: `${nome} vence em ${v?.venceEm ?? ''}. Abra a etapa Documentos e anexe o documento atualizado. Se vencer sem a troca, há 10 dias corridos para regularizar; depois disso, o cadastro é bloqueado.`,
+      titulo: 'Você possui um documento com data de vencimento próxima',
+      texto: `${nome} vence em ${v?.venceEm ?? ''}. Abra a etapa Documentos e anexe o documento atualizado.`,
     };
   return null;
 });
@@ -269,7 +269,7 @@ function cancelar() {
         titulo="Seu cadastro está aprovado."
         :texto="
           complemento.trocaAberta
-            ? 'Os dados não podem ser alterados. Só o documento perto de vencer aceita troca.'
+            ? 'Os dados não podem ser alterados. Somente o documento com data de vencimento próxima aceita atualização.'
             : 'Os dados não podem ser alterados.'
         "
       />
