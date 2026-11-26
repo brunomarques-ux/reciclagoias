@@ -19,11 +19,17 @@ import { CHAVE_COMPLEMENTO, useComplementoStore, type StoreDoCadastro } from '@/
  * Planning de 13/11/2026:
  * - proposta: em análise com a conferência só em Documentos ligada, os dez documentos depois do alvará em Sim (L4).
  * - aprovado: cadastro aprovado, o complemento dentro de Minha Conta (L5).
- * - vencendo: aprovado, com o alvará vencendo em 30 dias (L1·1 e L1·2).
- * - vencido: bloqueado por documentação vencida (L1·3 e L1·4).
- * - atualizado: o documento novo foi enviado para conferência (L1·5 e L2).
+ * - vencendo: aprovado, com o alvará vencendo (lembretes de 60 e 30 dias; aviso no painel).
+ * - vencido: bloqueio total, no 11º dia depois do vencimento.
+ * - atualizado: o documento novo foi enviado para conferência depois do bloqueio.
+ * Regras de 19/11/2026:
+ * - regularizacao: vencido dentro dos 10 dias, cadastro parcialmente ativo.
+ * - atualizado-no-prazo: o documento novo foi enviado dentro dos 10 dias e espera a conferência.
  */
-export const CENARIOS = ['enviado', 'devolvido', 'corrigido', 'proposta', 'aprovado', 'vencendo', 'vencido', 'atualizado'] as const;
+export const CENARIOS = [
+  'enviado', 'devolvido', 'corrigido', 'proposta', 'aprovado', 'vencendo', 'regularizacao', 'atualizado-no-prazo',
+  'vencido', 'atualizado',
+] as const;
 export type Cenario = (typeof CENARIOS)[number];
 
 export const ehCenario = (nome: unknown): nome is Cenario => CENARIOS.includes(nome as Cenario);
@@ -63,7 +69,10 @@ function montar(c: StoreDoCadastro, nome: Cenario): void {
     return;
   }
 
-  if (nome === 'aprovado' || nome === 'vencendo' || nome === 'vencido' || nome === 'atualizado') {
+  if (
+    nome === 'aprovado' || nome === 'vencendo' || nome === 'regularizacao' || nome === 'atualizado-no-prazo' ||
+    nome === 'vencido' || nome === 'atualizado'
+  ) {
     c.relogio = VALIDADE_DEMO.aprovadoEm;
     c.iniciarAnalise();
     for (const d of DOCUMENTOS_EXIGIDOS) c.marcarDocumento(d.id, 'sim');
@@ -74,7 +83,23 @@ function montar(c: StoreDoCadastro, nome: Cenario): void {
     c.vencimento = { doc: VALIDADE_DEMO.doc, venceEm: VALIDADE_DEMO.venceEm, vencido: false };
     if (nome === 'vencendo') return;
 
-    // o documento venceu: quem bloqueia no sistema real é a rotina de validade
+    // o documento venceu: quem avisa e restringe no sistema real é a rotina de validade
+    c.relogio = VALIDADE_DEMO.vencidoEm;
+    c.iniciarRegularizacao();
+    if (nome === 'regularizacao') {
+      c.relogio = VALIDADE_DEMO.reenvioNoPrazoEm;
+      return;
+    }
+    if (nome === 'atualizado-no-prazo') {
+      c.relogio = VALIDADE_DEMO.reenvioNoPrazoEm;
+      c.anexarDocumentoNovo();
+      c.informarValidade(VALIDADE_DEMO.novaValidade);
+      c.enviarParaConferencia();
+      return;
+    }
+
+    // 11º dia sem a troca: bloqueio total
+    c.relogio = VALIDADE_DEMO.bloqueadoEm;
     c.bloquearPorVencimento();
     c.relogio = VALIDADE_DEMO.reenvioEm;
     if (nome === 'vencido') return;

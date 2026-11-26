@@ -23,7 +23,7 @@ export const FLUXOS_AJUSTES_13NOV: Fluxo[] = [
     tipo: 'principal',
     titulo: 'L1 · Validade dos documentos: aviso, bloqueio e reenvio',
     apresentacao:
-      'O alvará da cooperativa vai vencer. O operador recebe o aviso 30 dias antes, por e-mail e no sistema. Sem a troca, o cadastro fica bloqueado e só a etapa Documentos abre, até o documento novo ser conferido.',
+      'Versão de 13/11, substituída pelas regras de 19/11 (entrega Validade: regras de 19/11). O alvará da cooperativa vai vencer. O operador recebe o aviso 30 dias antes, por e-mail e no sistema. Sem a troca, o cadastro fica bloqueado e só a etapa Documentos abre, até o documento novo ser conferido.',
     regras: [
       { ref: 'Nikael, 27:28', texto: 'Aviso 30 dias antes do vencimento, por e-mail e no topo do sistema. Nada fica bloqueado nesse período.' },
       { ref: 'Nikael, 27:28', texto: 'No vencimento, a situação vira Bloqueado por documentação vencida. Só Documentos abre, e só o documento vencido aceita troca.' },
@@ -36,7 +36,7 @@ export const FLUXOS_AJUSTES_13NOV: Fluxo[] = [
         fazer: 'Leia o e-mail de aviso e clique em Atualizar documento.',
         observar: 'Sai 30 dias antes do vencimento. Diz qual documento vence e quando.',
         acoes: [
-          { tipo: 'olhar', alvo: { papel: 'heading', nome: 'Documento perto de vencer' }, rotulo: 'E-mail de aviso, a 30 dias' },
+          { tipo: 'olhar', alvo: { papel: 'heading', nome: 'Documento vence em 30 dias' }, rotulo: 'E-mail de aviso, a 30 dias' },
           { tipo: 'olhar', alvo: { texto: 'Vence em', exato: true }, rotulo: 'O documento e a data' },
           { tipo: 'clicar', alvo: { papel: 'link', nome: 'Atualizar documento' }, rotulo: 'Clique em Atualizar documento' },
         ],
@@ -46,16 +46,16 @@ export const FLUXOS_AJUSTES_13NOV: Fluxo[] = [
         observar: 'O cadastro segue aprovado e nada fica bloqueado ainda.',
         acoes: [
           { tipo: 'rolar', alvo: { papel: 'heading', nome: 'Minha conta' }, rotulo: 'Minha Conta' },
-          { tipo: 'olhar', alvo: { texto: 'Você tem documento vencendo nos próximos 30 dias' }, rotulo: 'Aviso ao entrar no sistema' },
+          { tipo: 'olhar', alvo: { texto: 'Você tem documento perto de vencer' }, rotulo: 'Aviso ao entrar no sistema' },
         ],
       },
       {
-        fazer: 'O prazo venceu sem a troca. Leia o e-mail de documento vencido e clique em Regularizar documento.',
-        observar: 'Sai no dia seguinte ao vencimento. Avisa que o cadastro está bloqueado.',
+        fazer: 'O prazo venceu sem a troca. Leia o e-mail de documento vencido e clique em Atualizar documento.',
+        observar: 'Desde as regras de 19/11, este e-mail sai no vencimento e dá 10 dias antes do bloqueio.',
         acoes: [
           { tipo: 'ir', rota: '/emails-operador?email=vencido&demo=vencido', rotulo: 'O documento venceu' },
           { tipo: 'olhar', alvo: { papel: 'heading', nome: 'Documento vencido' }, rotulo: 'E-mail de documento vencido' },
-          { tipo: 'clicar', alvo: { papel: 'link', nome: 'Regularizar documento' }, rotulo: 'Clique em Regularizar documento' },
+          { tipo: 'clicar', alvo: { papel: 'link', nome: 'Atualizar documento' }, rotulo: 'Clique em Atualizar documento' },
         ],
       },
       {

@@ -125,10 +125,18 @@ export const MENUS: Record<PerfilId, ItemMenu[]> = {
 export const MENU_OPERADOR_APROVADO: ItemMenu[] = [
   { rotulo: 'Dashboard', icone: 'mdi-view-dashboard', rota: null },
   { rotulo: 'Minha Conta', icone: 'mdi-home', rota: '/operador' },
-  { rotulo: 'Notas Fiscais', icone: 'mdi-file-document', rota: null },
+  // Regras de 19/11/2026: Notas Fiscais e Saldo ganham tela para mostrar o que o período parcial suspende e o que segue.
+  { rotulo: 'Notas Fiscais', icone: 'mdi-file-document', rota: '/operador/notas-fiscais' },
   { rotulo: 'Certificados de Massa', icone: 'mdi-clipboard-text', rota: null },
-  { rotulo: 'Saldo', icone: 'mdi-file-document', rota: null },
+  { rotulo: 'Saldo', icone: 'mdi-file-document', rota: '/operador/saldo' },
 ];
+
+/** Bloqueio total (regras de 19/11, item 3): o acesso fica só na Minha Conta, onde se troca o documento vencido. */
+export function menuDoOperadorAprovado(bloqueado: boolean): ItemMenu[] {
+  return bloqueado
+    ? MENU_OPERADOR_APROVADO.map((i) => (i.rotulo === 'Minha Conta' ? i : { ...i, rota: null }))
+    : MENU_OPERADOR_APROVADO;
+}
 
 export interface Entidade {
   nome: string;

@@ -26,6 +26,12 @@
  *   situação "Bloqueado por documentação vencida" com só Documentos aberta, e o
  *   documento novo enviado para conferência.
  *
+ * Regras de 19/11/2026 (Figma: página `Novembro 2026 · Validade e bloqueio ·
+ * Regras de 19/11`, seção `6558:1924`): lembretes de 60 e 30 dias com a troca
+ * já aberta; no vencimento, 10 dias com o cadastro parcialmente ativo (aviso
+ * vermelho com o prazo, troca aberta, sem nota fiscal nova); bloqueio total no
+ * 11º dia, com o menu inerte além da Minha Conta.
+ *
  * Figma: arquivo `Recicla Goiás - Figma`, página `Complemento de Cadastro -
  * Operador Logístico`, seção `Setembro 2026 · Recicla Goiás · Complemento de
  * cadastro do Operador Logístico`.
@@ -45,7 +51,7 @@ import OxAviso from '@/components/operador/OxAviso.vue';
 import OxOpcao from '@/components/operador/OxOpcao.vue';
 import RgButton from '@/components/RgButton.vue';
 import { DOCUMENTOS_EXIGIDOS, ETAPAS } from '@/data/mocks/operador';
-import { MENU_OPERADOR_APROVADO } from '@/data/mocks/sessao';
+import { menuDoOperadorAprovado } from '@/data/mocks/sessao';
 import { useComplementoStore } from '@/stores/complemento';
 
 const router = useRouter();
@@ -68,33 +74,51 @@ const rotuloDoVencido = computed(
 );
 const subtituloDaConta = computed(() => {
   if (complemento.bloqueado) return 'Regularize o documento vencido para o cadastro voltar a ficar aprovado.';
+  if (complemento.emRegularizacao)
+    return `Troque o documento vencido até ${complemento.prazos?.prazoAte ?? ''}. Até lá, o cadastro fica parcialmente ativo.`;
   if (complemento.emConferencia) return 'O documento novo está em conferência. Enquanto isso, os dados ficam só para consulta.';
   return 'Consulte os dados do seu cadastro aprovado.';
 });
+// Regras de 19/11 (Figma `6558:1924`): lembretes antes de vencer, 10 dias parcialmente ativo e bloqueio total no 11º dia.
 const avisoDaConta = computed(() => {
   const v = complemento.vencimento;
+  const p = complemento.prazos;
   const nome = rotuloDoVencido.value;
   const minusculo = nome.charAt(0).toLowerCase() + nome.slice(1);
   if (complemento.bloqueado)
     return {
       tom: 'danger' as const,
       titulo: 'Cadastro bloqueado por documentação vencida',
-      texto: `O ${minusculo} venceu em ${v?.venceEm ?? ''}. Só a etapa Documentos está aberta: anexe o documento novo, informe a validade e envie para conferência.`,
+      texto: `O ${minusculo} venceu em ${v?.venceEm ?? ''} e o prazo de 10 dias para regularizar terminou em ${p?.prazoAte ?? ''}. Até a troca, nenhuma operação pode ser feita no sistema: só a etapa Documentos está aberta. Anexe o documento novo, informe a validade e envie para conferência.`,
+    };
+  if (complemento.emRegularizacao)
+    return {
+      tom: 'danger' as const,
+      titulo: `Documento vencido: regularize até ${p?.prazoAte ?? ''}`,
+      texto: `O ${minusculo} venceu em ${v?.venceEm ?? ''}. Até a troca, a inclusão de novas notas fiscais está suspensa e a transferência de créditos continua. Sem o documento novo, o cadastro é bloqueado a partir de ${p?.bloqueioEm ?? ''}.`,
     };
   if (complemento.emConferencia)
     return {
       tom: 'info' as const,
       titulo: 'Documento enviado para conferência',
-      texto: `Recebemos o novo ${minusculo} em ${complemento.troca.enviadoEm?.split(',')[0] ?? ''}. O cadastro continua bloqueado até a equipe conferir o documento. O resultado chega no e-mail cadastrado.`,
+      texto: `Recebemos o novo ${minusculo} em ${complemento.troca.enviadoEm?.split(',')[0] ?? ''}. ${
+        complemento.troca.origem === 'regularizacao'
+          ? 'Até a equipe conferir o documento, a inclusão de notas fiscais continua suspensa e a transferência de créditos continua liberada.'
+          : complemento.troca.origem === 'antecipada'
+            ? 'Enquanto a equipe confere, o cadastro segue aprovado e nada muda no uso do sistema.'
+            : 'O cadastro continua bloqueado até a equipe conferir o documento.'
+      } O resultado chega no e-mail cadastrado.`,
     };
   if (complemento.avisoDeVencimento)
     return {
       tom: 'warning' as const,
-      titulo: 'Você tem documento vencendo nos próximos 30 dias',
-      texto: `${nome} vence em ${v?.venceEm ?? ''}. Abra a etapa Documentos e anexe o documento atualizado para o cadastro continuar regular.`,
+      titulo: 'Você tem documento perto de vencer',
+      texto: `${nome} vence em ${v?.venceEm ?? ''}. Abra a etapa Documentos e anexe o documento atualizado. Se vencer sem a troca, há 10 dias corridos para regularizar; depois disso, o cadastro é bloqueado.`,
     };
   return null;
 });
+/** O menu acompanha o acesso: bloqueado, só a Minha Conta navega. */
+const menuDaConta = computed(() => menuDoOperadorAprovado(complemento.acesso === 'bloqueado'));
 const senhaPedida = ref(false);
 
 function enviarParaConferencia() {
@@ -226,7 +250,7 @@ function cancelar() {
 <template>
   <GestoraShell
     :secao-ativa="complemento.naMinhaConta ? 'Minha Conta' : 'Complemento de cadastro'"
-    :itens-do-menu="complemento.naMinhaConta ? MENU_OPERADOR_APROVADO : undefined"
+    :itens-do-menu="complemento.naMinhaConta ? menuDaConta : undefined"
     :explorador="false"
   >
     <!-- Minha Conta: cadastro aprovado, bloqueado por documento vencido ou com o documento novo em conferência -->
@@ -243,7 +267,11 @@ function cancelar() {
         v-if="complemento.situacao === 'aprovado'"
         tom="success"
         titulo="Seu cadastro está aprovado."
-        texto="Os dados não podem ser alterados."
+        :texto="
+          complemento.trocaAberta
+            ? 'Os dados não podem ser alterados. Só o documento perto de vencer aceita troca.'
+            : 'Os dados não podem ser alterados.'
+        "
       />
 
       <section v-if="complemento.situacao === 'aprovado'" class="ox-config" aria-labelledby="ox-config-titulo">
@@ -266,6 +294,11 @@ function cancelar() {
       <component :is="componenteAtual" />
 
       <footer v-if="complemento.bloqueado" class="ox-pagina__acoes ox-pagina__acoes--fim">
+        <RgButton variant="primary" @click="enviarParaConferencia">Enviar para conferência</RgButton>
+      </footer>
+      <!-- Antes de vencer e nos 10 dias de regularização: as etapas seguem navegáveis e Documentos ganha o envio da troca. -->
+      <footer v-else-if="complemento.trocaAberta && complemento.etapa === 2" class="ox-pagina__acoes">
+        <RgButton variant="secondary" @click="complemento.voltar()">Voltar</RgButton>
         <RgButton variant="primary" @click="enviarParaConferencia">Enviar para conferência</RgButton>
       </footer>
       <footer v-else-if="!complemento.emConferencia" class="ox-pagina__acoes">

@@ -73,6 +73,8 @@ const selo = computed(() => {
       return { rotulo: 'Documento atualizado', tom: 'neutro', icone: 'mdi-sync' };
     case 'bloqueado':
       return { rotulo: 'Bloqueado por documentação vencida', tom: 'warning', icone: 'mdi-alert-outline' };
+    case 'regularizacao':
+      return { rotulo: 'Parcialmente ativo · documento vencido', tom: 'warning', icone: 'mdi-timer-sand' };
     case 'devolvido':
       return { rotulo: 'Devolvido para correção', tom: 'warning', icone: 'mdi-history' };
     case 'aprovado':
@@ -86,7 +88,7 @@ const linhaDoCabecalho = computed(() => {
   const tipo = ROTULO_TIPO[PRE_CADASTRO.tipoOrganizacao].toLowerCase();
   const quando = c.revalidacao
     ? `documento atualizado em ${partesDaData(c.troca.enviadoEm)?.data ?? ''}`
-    : c.situacao === 'aprovado' || c.situacao === 'bloqueado'
+    : c.situacao === 'aprovado' || c.situacao === 'bloqueado' || c.situacao === 'regularizacao'
       ? `aprovado em ${partesDaData(dataDoEvento('Cadastro aprovado'))?.data ?? ''}`
       : `${c.reenvio ? 'reenviado' : 'enviado'} em ${partesDaData(c.dataEnvio)?.data ?? ''}`;
   return `CNPJ ${PRE_CADASTRO.cnpj} · protocolo ${c.protocolo} · ${tipo} · ${quando}`;
@@ -101,12 +103,20 @@ const descricaoDados = computed(() => {
   return 'Dados para consulta, sem aceite campo a campo. A conferência é feita nos documentos, logo abaixo.';
 });
 
+/** Regras de 19/11: a troca pode vir antes de vencer, dentro dos 10 dias ou depois do bloqueio. */
+const comoEstava = computed(() => {
+  if (c.troca.origem === 'antecipada') return `que venceria em ${c.vencimento?.venceEm ?? ''}`;
+  if (c.troca.origem === 'regularizacao')
+    return `que venceu em ${c.vencimento?.venceEm ?? ''} (cadastro parcialmente ativo, sem inclusão de notas fiscais até a conferência)`;
+  return 'que estava vencido (cadastro bloqueado até a conferência)';
+});
+
 const descricaoDocumentos = computed(() => {
   if (c.revalidacao && c.situacao === 'documento-atualizado')
-    return `O operador trocou o ${nomeDoTrocado.value.toLowerCase()}, que estava vencido. Só para leitura. A conferência começa quando alguém clica em Analisar.`;
+    return `O operador trocou o ${nomeDoTrocado.value.toLowerCase()}, ${comoEstava.value}. Só para leitura. A conferência começa quando alguém clica em Analisar.`;
   if (c.revalidacao && !visualizar.value)
-    return `O operador trocou o ${nomeDoTrocado.value.toLowerCase()}, que estava vencido. Abra o arquivo, confira a nova validade e indique se está em conformidade. Os demais documentos já estão conferidos.`;
-  if (c.situacao === 'devolvido' || c.situacao === 'aprovado' || c.situacao === 'bloqueado')
+    return `O operador trocou o ${nomeDoTrocado.value.toLowerCase()}, ${comoEstava.value}. Abra o arquivo, confira a nova validade e indique se está em conformidade. Os demais documentos já estão conferidos.`;
+  if (c.situacao === 'devolvido' || c.situacao === 'aprovado' || c.situacao === 'bloqueado' || c.situacao === 'regularizacao')
     return 'Análise concluída. Os documentos e os motivos ficam disponíveis apenas para consulta.';
   if (c.situacao === 'enviado') return 'Só para leitura. A conferência começa quando alguém clica em Analisar.';
   if (visualizar.value || deOutroAnalista.value) return `Só para leitura: a análise está com ${c.analista ?? 'outra pessoa'}.`;
@@ -167,7 +177,9 @@ const situacaoNoRodape = computed(() => {
     case 'documento-atualizado':
       return `Documento atualizado em ${dataPorExtenso(c.troca.enviadoEm)}. Aguardando o início da conferência.`;
     case 'bloqueado':
-      return `Bloqueado por documentação vencida desde ${c.vencimento?.venceEm ?? ''}. Aguardando o documento novo.`;
+      return `Bloqueado por documentação vencida desde ${c.prazos?.bloqueioEm ?? ''}. Aguardando o documento novo.`;
+    case 'regularizacao':
+      return `Documento vencido em ${c.vencimento?.venceEm ?? ''}. Parcialmente ativo até ${c.prazos?.prazoAte ?? ''}; sem a troca, bloqueio total em ${c.prazos?.bloqueioEm ?? ''}.`;
     default:
       return `Em análise por ${c.analista ?? 'outra pessoa'}. Aberto só para leitura.`;
   }

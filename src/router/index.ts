@@ -74,6 +74,19 @@ const routes: RouteRecordRaw[] = [
     meta: { titulo: 'Complemento de cadastro', requerPerfil: 'operador' },
   },
   {
+    // Regras de 19/11/2026: o que o período parcialmente ativo suspende (nota fiscal nova) e o que segue (créditos).
+    path: '/operador/notas-fiscais',
+    name: 'operador-notas-fiscais',
+    component: () => import('@/pages/OperadorNotasFiscaisPage.vue'),
+    meta: { titulo: 'Notas Fiscais', requerPerfil: 'operador' },
+  },
+  {
+    path: '/operador/saldo',
+    name: 'operador-saldo',
+    component: () => import('@/pages/OperadorSaldoPage.vue'),
+    meta: { titulo: 'Saldo', requerPerfil: 'operador' },
+  },
+  {
     path: '/admin/cadastros',
     name: 'admin-cadastros',
     component: () => import('@/pages/AdminCadastrosPage.vue'),

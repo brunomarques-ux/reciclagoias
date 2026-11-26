@@ -4,8 +4,14 @@ import type { BlocoDeFluxos, Fluxo } from '../tipos';
 import { BLOCO_OPERADOR, FLUXOS_OPERADOR } from './operador';
 import { BLOCO_ADMIN, FLUXOS_ADMIN } from './admin';
 import { BLOCO_AJUSTES_13NOV, FLUXOS_AJUSTES_13NOV } from './ajustes-13nov';
+import { BLOCO_VALIDADE_19NOV, FLUXOS_VALIDADE_19NOV } from './validade-19nov';
 
 // O bloco de uma entrega (com `entrega`) fica fora da lista dos fluxos anteriores: aparece na página da entrega.
-export const BLOCOS: readonly BlocoDeFluxos[] = [BLOCO_OPERADOR, BLOCO_ADMIN, BLOCO_AJUSTES_13NOV];
+export const BLOCOS: readonly BlocoDeFluxos[] = [BLOCO_OPERADOR, BLOCO_ADMIN, BLOCO_AJUSTES_13NOV, BLOCO_VALIDADE_19NOV];
 
-export const FLUXOS: readonly Fluxo[] = [...FLUXOS_OPERADOR, ...FLUXOS_ADMIN, ...FLUXOS_AJUSTES_13NOV];
+export const FLUXOS: readonly Fluxo[] = [
+  ...FLUXOS_OPERADOR,
+  ...FLUXOS_ADMIN,
+  ...FLUXOS_AJUSTES_13NOV,
+  ...FLUXOS_VALIDADE_19NOV,
+];
