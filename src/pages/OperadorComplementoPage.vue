@@ -267,7 +267,11 @@ function cancelar() {
         v-if="complemento.situacao === 'aprovado'"
         tom="success"
         titulo="Seu cadastro está aprovado."
-        texto="Os dados não podem ser alterados."
+        :texto="
+          complemento.trocaAberta
+            ? 'Os dados não podem ser alterados. Só o documento perto de vencer aceita troca.'
+            : 'Os dados não podem ser alterados.'
+        "
       />
 
       <section v-if="complemento.situacao === 'aprovado'" class="ox-config" aria-labelledby="ox-config-titulo">

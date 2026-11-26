@@ -97,7 +97,12 @@ const emErro = (id: string) => complemento.camposEmErro.includes(id) && !f.docum
           <span v-else-if="conferido(doc.id)" class="ox-docs__conferido">Conferido</span>
         </div>
 
-        <p v-if="vencido(doc.id)" class="ox-docs__nota" role="note">
+        <p
+          v-if="vencido(doc.id)"
+          class="ox-docs__nota"
+          :class="{ 'ox-docs__nota--aviso': rotuloDaNota === 'Aviso:' }"
+          role="note"
+        >
           <v-icon icon="mdi-alert" size="16" aria-hidden="true" />
           <span><strong>{{ rotuloDaNota }}</strong> {{ motivoDoVencido }}</span>
         </p>
@@ -383,6 +388,12 @@ const emErro = (id: string) => complemento.camposEmErro.includes(id) && !f.docum
   color: var(--rg-primitive-red-700);
   font-size: var(--rg-font-size-sm);
   line-height: var(--rg-line-height-base);
+}
+
+/* Antes de vencer não é recusa: o aviso vai no tom de atenção, como o aviso da Minha Conta. */
+.ox-docs__nota--aviso {
+  background: var(--rg-color-feedback-warning-soft);
+  color: var(--rg-primitive-amber-700);
 }
 
 .ox-docs__observacao {
