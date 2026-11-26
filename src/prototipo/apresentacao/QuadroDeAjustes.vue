@@ -53,6 +53,7 @@ const estadoDe = (i: number) => (i < riscados.value ? 'riscado' : i === destaque
                 <path d="M0,6 C12,3 22,8 36,5 S62,3 76,6 S94,4 100,5" />
               </svg>
             </span>
+            <span v-if="a.marca" class="qa__item-tag">{{ a.marca }}</span>
           </p>
           <div class="qa__detalhe">
             <div>

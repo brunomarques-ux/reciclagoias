@@ -218,7 +218,8 @@ function trocar(q: Qual) {
             <template v-else-if="qual === 'vence-60' || qual === 'vencendo'">
               <h2 class="em__titulo">Documento vence em {{ diasParaVencer }} dias</h2>
               <p class="em__saudacao">Prezado(a) representante da {{ PRE_CADASTRO.razaoSocial }},</p>
-              <p><strong class="em__forte">O {{ rotuloMinusculo }} da cooperativa vence em {{ diasParaVencer }} dias.</strong> Para o cadastro continuar regular, envie o documento atualizado antes do vencimento.</p>
+              <p><strong class="em__forte">O {{ rotuloMinusculo }} da cooperativa vence em {{ diasParaVencer }} dias.</strong></p>
+              <p>Para o cadastro continuar regular, envie o documento atualizado antes do vencimento.</p>
               <dl class="em__resumo">
                 <div><dt>Organização</dt><dd>{{ PRE_CADASTRO.razaoSocial }}</dd></div>
                 <div><dt>CNPJ</dt><dd>{{ PRE_CADASTRO.cnpj }}</dd></div>
@@ -226,15 +227,24 @@ function trocar(q: Qual) {
                 <div><dt>Vence em</dt><dd>{{ venceEm }}</dd></div>
               </dl>
               <p class="em__saudacao">O que fazer</p>
-              <p>Acesse o sistema, abra a etapa Documentos em Minha Conta e anexe o {{ nomeCurto }} novo, com a data de validade. O documento passa pela conferência da equipe antes de valer. Se vencer sem a troca, há 10 dias corridos para regularizar; depois disso, o cadastro é bloqueado.</p>
+              <ol class="em__passos">
+                <li>Acesse o sistema e abra a etapa Documentos, em Minha Conta.</li>
+                <li>Anexe o {{ nomeCurto }} novo e informe a data de validade.</li>
+                <li>Envie para conferência. A equipe confere o documento antes de valer.</li>
+              </ol>
               <a class="em__botao" href="/operador" @click.prevent="abrirDocumentos">Atualizar documento</a>
+              <div class="em__caixa em__caixa--atencao">
+                <strong>Se o documento vencer</strong>
+                <p>Sem a troca, há 10 dias corridos para regularizar. Depois disso, o cadastro é bloqueado.</p>
+              </div>
               <p>Se o documento já foi atualizado, desconsidere este aviso.</p>
             </template>
 
             <template v-else-if="qual === 'vencido'">
               <h2 class="em__titulo">Documento vencido</h2>
               <p class="em__saudacao">Prezado(a) representante da {{ PRE_CADASTRO.razaoSocial }},</p>
-              <p><strong class="em__forte">O {{ rotuloMinusculo }} da cooperativa venceu hoje, {{ venceEm }}. Você tem 10 dias corridos, até {{ prazos.prazoAte }}, para enviar o documento atualizado.</strong> Até lá, a transferência de créditos continua e a inclusão de novas notas fiscais fica suspensa. A partir de {{ prazos.bloqueioEm }}, sem a troca, o cadastro é bloqueado.</p>
+              <p><strong class="em__forte">O {{ rotuloMinusculo }} da cooperativa venceu hoje, {{ venceEm }}.</strong></p>
+              <p>Você tem 10 dias corridos, até {{ prazos.prazoAte }}, para enviar o documento atualizado.</p>
               <dl class="em__resumo">
                 <div><dt>Organização</dt><dd>{{ PRE_CADASTRO.razaoSocial }}</dd></div>
                 <div><dt>CNPJ</dt><dd>{{ PRE_CADASTRO.cnpj }}</dd></div>
@@ -242,8 +252,20 @@ function trocar(q: Qual) {
                 <div><dt>Venceu em</dt><dd>{{ venceEm }}</dd></div>
                 <div><dt>Prazo para regularizar</dt><dd>{{ prazos.prazoAte }}</dd></div>
               </dl>
+              <div class="em__caixa em__caixa--atencao">
+                <strong>O que muda até {{ prazos.prazoAte }}</strong>
+                <ul>
+                  <li>A transferência de créditos continua liberada.</li>
+                  <li>A inclusão de novas notas fiscais fica suspensa.</li>
+                  <li>A partir de {{ prazos.bloqueioEm }}, sem a troca, o cadastro é bloqueado.</li>
+                </ul>
+              </div>
               <p class="em__saudacao">Como regularizar</p>
-              <p>Acesse o sistema, abra a etapa Documentos em Minha Conta, anexe o {{ nomeCurto }} novo e informe a data de validade. A equipe confere o documento e, estando tudo certo, a inclusão de notas fiscais volta.</p>
+              <ol class="em__passos">
+                <li>Acesse o sistema e abra a etapa Documentos, em Minha Conta.</li>
+                <li>Anexe o {{ nomeCurto }} novo e informe a data de validade.</li>
+                <li>Envie para conferência. Estando tudo certo, a inclusão de notas fiscais volta.</li>
+              </ol>
               <a class="em__botao" href="/operador" @click.prevent="abrirDocumentos">Atualizar documento</a>
               <p>Os demais dados do cadastro continuam salvos e não precisam ser preenchidos de novo.</p>
             </template>
@@ -251,15 +273,26 @@ function trocar(q: Qual) {
             <template v-else-if="qual === 'bloqueio-em-5-dias'">
               <h2 class="em__titulo">Faltam 5 dias para o bloqueio</h2>
               <p class="em__saudacao">Prezado(a) representante da {{ PRE_CADASTRO.razaoSocial }},</p>
-              <p><strong class="em__forte">O {{ rotuloMinusculo }} da cooperativa venceu em {{ venceEm }} e ainda não foi atualizado.</strong> Se o documento novo não for enviado até {{ prazos.prazoAte }}, o cadastro será bloqueado a partir de {{ prazos.bloqueioEm }} e nenhuma operação poderá ser feita no sistema até a regularização.</p>
+              <p><strong class="em__forte">O {{ rotuloMinusculo }} da cooperativa venceu em {{ venceEm }} e ainda não foi atualizado.</strong></p>
               <dl class="em__resumo">
                 <div><dt>Organização</dt><dd>{{ PRE_CADASTRO.razaoSocial }}</dd></div>
                 <div><dt>CNPJ</dt><dd>{{ PRE_CADASTRO.cnpj }}</dd></div>
                 <div><dt>Documento</dt><dd>{{ docDaValidade.rotulo }}</dd></div>
                 <div><dt>Bloqueio em</dt><dd>{{ prazos.bloqueioEm }}</dd></div>
               </dl>
+              <div class="em__caixa em__caixa--erro">
+                <strong>Se o documento novo não for enviado até {{ prazos.prazoAte }}</strong>
+                <ul>
+                  <li>O cadastro será bloqueado a partir de {{ prazos.bloqueioEm }}.</li>
+                  <li>Nenhuma operação poderá ser feita no sistema até a regularização.</li>
+                </ul>
+              </div>
               <p class="em__saudacao">Como regularizar</p>
-              <p>Acesse o sistema, abra a etapa Documentos em Minha Conta, anexe o {{ nomeCurto }} novo e informe a data de validade. A equipe confere o documento antes de valer.</p>
+              <ol class="em__passos">
+                <li>Acesse o sistema e abra a etapa Documentos, em Minha Conta.</li>
+                <li>Anexe o {{ nomeCurto }} novo e informe a data de validade.</li>
+                <li>Envie para conferência. A equipe confere o documento antes de valer.</li>
+              </ol>
               <a class="em__botao" href="/operador" @click.prevent="abrirDocumentos">Atualizar documento</a>
               <p>Se o documento já foi enviado, desconsidere este aviso.</p>
             </template>
@@ -359,10 +392,13 @@ function trocar(q: Qual) {
 .em__caixa ul { margin: 0; padding-left: 20px; }
 .em__caixa--info { background: var(--rg-color-feedback-info-soft); }
 .em__caixa--info strong { color: var(--rg-color-feedback-info); }
+.em__caixa--atencao { background: var(--rg-color-feedback-warning-soft); }
+.em__caixa--atencao strong { color: var(--rg-color-text-primary); }
 .em__caixa--erro { background: var(--rg-color-feedback-danger-soft); }
 .em__caixa--erro strong { color: var(--rg-primitive-red-700); }
 .em__caixa--erro b { color: var(--rg-color-text-primary); }
 .em__passos { margin: -12px 0 0; padding-left: 20px; }
+.em__passos li + li, .em__caixa li + li { margin-top: 6px; }
 .em__botao { display: grid; place-items: center; height: 48px; border-radius: 10px; background: var(--rg-color-action-primary); color: var(--rg-color-text-on-brand) !important; font-size: 15px; font-weight: 600; text-decoration: none; }
 .em__rodape { text-align: center; font-size: 12px; color: var(--rg-color-text-muted); }
 </style>

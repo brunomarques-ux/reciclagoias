@@ -378,21 +378,23 @@ const textoDoBotao = computed(() => {
         </section>
 
         <section v-else-if="cena.tipo === 'decisoes'" key="decisoes" class="pv-cena pv-decisoes">
-          <p class="pv-rot">Decidido em 26/11</p>
-          <h2 class="pv-titulo">Três leituras que adotamos</h2>
+          <p class="pv-rot pv-rot--ambar">Para confirmar</p>
+          <h2 class="pv-titulo">O que a mensagem pede e como lemos</h2>
           <ol class="pv-decisoes__lista">
             <li v-for="d in DECISOES" :key="d.titulo">
               <h3>{{ d.titulo }}</h3>
-              <p>{{ d.resposta }}</p>
-              <span>{{ d.exemplo }}</span>
+              <small>Na mensagem</small>
+              <p>{{ d.pedido }}</p>
+              <small class="pv-decisoes__nossa">Leitura nossa</small>
+              <span>{{ d.leitura }}</span>
             </li>
           </ol>
         </section>
 
         <section v-else-if="cena.tipo === 'aberto'" key="aberto" class="pv-cena pv-aberto">
           <div class="pv-aberto__lado">
-            <p class="pv-rot pv-rot--ambar">Segue em aberto</p>
-            <p class="pv-aberto__n">4</p>
+            <p class="pv-rot pv-rot--ambar">A mensagem não diz</p>
+            <p class="pv-aberto__n">{{ EM_ABERTO.length }}</p>
             <p class="pv-sub">perguntas</p>
           </div>
           <ol class="pv-aberto__lista">
@@ -655,14 +657,16 @@ const textoDoBotao = computed(() => {
 .pv-veu-enter-from, .pv-veu-leave-to { opacity: 0; }
 
 /* ── decisões, em aberto e fim ── */
-.pv-decisoes { inset: 150px 80px 150px; }
+.pv-decisoes { inset: 124px 80px 150px; }
 .pv-decisoes .pv-titulo { margin-top: 20px; max-width: 1300px; }
 .pv-decisoes__lista { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 50px; }
 .pv-decisoes__lista li { padding: 30px 32px 32px; border-radius: 12px; background: var(--pv-papel-claro); box-shadow: 0 2px 0 rgba(27, 36, 32, .06), 0 24px 44px -30px rgba(27, 36, 32, .4); }
 .pv-decisoes__n { display: block; }
-.pv-decisoes__lista h3 { margin: 0; font: 700 20px/1.2 var(--pv-inter); letter-spacing: .12em; text-transform: uppercase; color: var(--pv-verde); }
-.pv-decisoes__lista p { margin-top: 20px; font: 800 46px/1.08 var(--pv-inter); letter-spacing: -.02em; min-height: 150px; text-wrap: balance; }
-.pv-decisoes__lista span { display: block; margin-top: 18px; padding-top: 18px; border-top: 2px solid var(--pv-linha); color: var(--pv-tinta2); font: 500 24px/1.3 var(--pv-inter); }
+.pv-decisoes__lista h3 { margin: 0 0 26px; font: 800 30px/1.1 var(--pv-inter); letter-spacing: -.015em; }
+.pv-decisoes__lista small { display: block; font: 700 17px/1 var(--pv-inter); letter-spacing: .12em; text-transform: uppercase; color: var(--pv-verde); }
+.pv-decisoes__lista small.pv-decisoes__nossa { margin-top: 22px; padding-top: 22px; border-top: 2px solid var(--pv-linha); color: var(--pv-ambar); }
+.pv-decisoes__lista p { margin-top: 10px; font: 800 40px/1.1 var(--pv-inter); letter-spacing: -.02em; min-height: 132px; text-wrap: balance; }
+.pv-decisoes__lista span { display: block; margin-top: 10px; color: var(--pv-tinta); font: 500 26px/1.32 var(--pv-inter); min-height: 104px; }
 .pv-decisoes__pe { margin-top: 34px; font: 500 26px/1.3 var(--pv-inter); color: var(--pv-tinta2); }
 
 .pv-aberto__lado { position: absolute; left: 80px; top: 150px; width: 420px; }
