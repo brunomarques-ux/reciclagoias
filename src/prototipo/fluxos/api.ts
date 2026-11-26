@@ -9,7 +9,7 @@ import { Controle, esperarTelaPronta, refazerRapido, type ResultadoDoTeste } fro
 import { capitulosDe, fluxoPorId, registrarFluxo, type Capitulo } from './registro';
 import * as execucao from './execucao';
 import { fluxoAtivo } from './sessao';
-import { iniciarFluxo } from './iniciar';
+import { iniciarFluxo, recarregarNoPasso } from './iniciar';
 import type { ModoDoFluxo } from './sessao';
 
 export function iniciar(id: string, modo: ModoDoFluxo = 'auto'): boolean {
@@ -81,4 +81,14 @@ export function continuar(): void {
 }
 export function cancelar(): void {
   execucao.cancelar();
+}
+/**
+ * Recarrega a página no início do fluxo e refaz rápido até o passo n, mesmo que o fluxo já esteja nele: para quando
+ * a pessoa mexeu na tela por conta própria e a história precisa voltar a um ponto conhecido.
+ */
+export function recarregarEm(n: number): void {
+  const f = fluxoPorId(fluxoAtivo()?.id);
+  if (!f) return;
+  execucao.cancelar();
+  recarregarNoPasso(f, Math.min(Math.max(n, 0), f.passos.length - 1), false);
 }
