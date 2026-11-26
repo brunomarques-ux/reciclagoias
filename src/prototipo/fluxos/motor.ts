@@ -295,6 +295,15 @@ function teclaEvento(tipo: 'keydown' | 'keyup', el: Element, key: string, mods: 
 async function digitarEm(el: Element, texto: string, limpar: boolean, controle: Controle, porLetra: number): Promise<void> {
   const campo = campoDe(el);
   if (!campo) throw new Error('o alvo não é um campo de texto');
+  // campo de data não aceita letra por letra: a data entra inteira (o roteiro pode escrever DD/MM/AAAA)
+  if (campo instanceof HTMLInputElement && campo.type === 'date') {
+    const iso = /^\d{2}\/\d{2}\/\d{4}$/.test(texto) ? texto.split('/').reverse().join('-') : texto;
+    definirValor(campo, iso);
+    campo.dispatchEvent(new Event('input', { bubbles: true }));
+    campo.dispatchEvent(new Event('change', { bubbles: true }));
+    await (porLetra > 0 ? controle.esperar(porLetra * 6) : dormir(8));
+    return;
+  }
   if (limpar && campo.value) {
     definirValor(campo, '');
     campo.dispatchEvent(new InputEvent('input', { bubbles: true, composed: true, inputType: 'deleteContentBackward' }));

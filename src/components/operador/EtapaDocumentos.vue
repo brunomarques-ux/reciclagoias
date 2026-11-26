@@ -79,6 +79,12 @@ const rotuloDaNota = computed(() =>
   complemento.troca.recusa || complemento.bloqueado || complemento.emRegularizacao ? 'Motivo:' : 'Aviso:',
 );
 const erroDaTroca = (qual: 'arquivo' | 'validade') => complemento.errosDaTroca.includes(qual);
+/**
+ * Validade com calendário (Bruno, 26/11/2026): a entrada é de data nativa (AAAA-MM-DD), a store segue com DD/MM/AAAA,
+ * que é como a conferência do Admin e os textos mostram a data.
+ */
+const paraIso = (v: string) => (/^\d{2}\/\d{2}\/\d{4}$/.test(v) ? v.split('/').reverse().join('-') : '');
+const deIso = (v: string) => (/^\d{4}-\d{2}-\d{2}$/.test(v) ? v.split('-').reverse().join('/') : '');
 const emErro = (id: string) => complemento.camposEmErro.includes(id) && !f.documentos[id]?.arquivo;
 </script>
 
@@ -184,10 +190,10 @@ const emErro = (id: string) => complemento.camposEmErro.includes(id) && !f.docum
           <OxCampo
             class="ox-docs__validade"
             rotulo="Validade do documento"
-            :model-value="complemento.troca.validade"
-            placeholder="DD/MM/AAAA"
-            :erro="erroDaTroca('validade') ? 'Informe a validade do documento novo, no formato DD/MM/AAAA.' : undefined"
-            @update:model-value="complemento.informarValidade($event)"
+            tipo="date"
+            :model-value="paraIso(complemento.troca.validade)"
+            :erro="erroDaTroca('validade') ? 'Informe a data de validade do documento novo.' : undefined"
+            @update:model-value="complemento.informarValidade(deIso($event))"
           />
         </template>
 
