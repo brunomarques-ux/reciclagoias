@@ -17,6 +17,8 @@ export interface Ajuste {
   item: string;
   antes: string;
   agora: string;
+  /** Quando o ajuste (ou parte dele) não está na mensagem: foi acréscimo nosso, e o quadro avisa. */
+  marca?: string;
 }
 
 export const AJUSTES: readonly Ajuste[] = [
@@ -29,6 +31,7 @@ export const AJUSTES: readonly Ajuste[] = [
   {
     titulo: 'Troca liberada antes de vencer',
     item: 'Veio junto',
+    marca: 'Acréscimo nosso',
     antes: 'Só trocava depois de vencido.',
     agora: 'Troca aberta antes, com calendário.',
   },
@@ -53,6 +56,7 @@ export const AJUSTES: readonly Ajuste[] = [
   {
     titulo: 'Administrador: situação nova e conferência',
     item: 'Item 3 da mensagem',
+    marca: 'Em parte, acréscimo nosso',
     antes: 'Não havia Parcialmente ativo.',
     agora: 'Situação nova na lista. Aprovado, o acesso volta.',
   },
@@ -143,7 +147,7 @@ export const CENAS: readonly Cena[] = [
   {
     tipo: 'quadro',
     foco: 1,
-    fala: 'Lembretes mostrados. O segundo ajuste veio junto, para o caminho fechar: se o lembrete pede a troca, a troca precisa abrir antes de vencer.',
+    fala: 'Lembretes mostrados. O segundo ajuste não está na mensagem, foi acréscimo nosso para o caminho fechar: se o lembrete pede a troca, a troca precisa abrir antes de vencer.',
   },
   {
     tipo: 'tela',
@@ -197,7 +201,7 @@ export const CENAS: readonly Cena[] = [
     titulo: 'O último aviso',
     nota: 'Sai 5 dias antes do bloqueio, se o documento ainda não foi trocado.',
     quem: 'Operador logístico',
-    fala: 'Em 20/12, cinco dias antes do bloqueio, sai o último aviso, com a data do bloqueio. Na mensagem ele aparece junto dos lembretes; lemos como 5 dias antes do bloqueio, que é quando ele ainda pode agir.',
+    fala: 'Em 20/12, cinco dias antes do bloqueio, sai o último aviso, com a data do bloqueio. O aviso é pedido da mensagem; a data, 20/12, é leitura nossa.',
   },
   {
     tipo: 'quadro',
@@ -218,7 +222,7 @@ export const CENAS: readonly Cena[] = [
   {
     tipo: 'quadro',
     foco: 5,
-    fala: 'Falta o outro lado: o que o administrador vê e como o acesso volta.',
+    fala: 'Falta o outro lado. A mensagem pede que o acesso volte depois da validação; como o administrador vê e confere isso foi desenho nosso.',
   },
   {
     tipo: 'tela',
@@ -249,11 +253,11 @@ export const CENAS: readonly Cena[] = [
   },
   {
     tipo: 'decisoes',
-    fala: 'Três pontos da mensagem pediam leitura. Decidimos pelo mais usado, e o protótipo já está assim. Se a SEMAD preferir outro caminho, a gente ajusta.',
+    fala: 'Três pontos para confirmar. Em cada um, o pedido é da mensagem e a leitura é nossa: a data do aviso de 5 dias, o termo Parcialmente ativo como nome na tela e a contagem dos 10 dias a partir do dia seguinte. O protótipo está assim; se a leitura for outra, a gente ajusta.',
   },
   {
     tipo: 'aberto',
-    fala: 'Quatro perguntas seguem em aberto e dependem de vocês.',
+    fala: 'Duas coisas a mensagem não diz e o protótipo não resolve: quais documentos têm validade, e se vale mandar um e-mail no dia do bloqueio. Hoje não manda.',
   },
   {
     tipo: 'fim',
@@ -261,18 +265,20 @@ export const CENAS: readonly Cena[] = [
   },
 ];
 
-/** Uma resposta curta por decisão: o porquê fica na fala. */
+/**
+ * Os três pontos a confirmar. Em cada um, o que está na mensagem de 19/11 e o que é leitura nossa: a apresentação
+ * não pode passar leitura nossa como pedido (Bruno, 26/11).
+ */
 export const DECISOES = [
-  { titulo: 'Contagem dos 10 dias', resposta: 'Do dia seguinte ao vencimento', exemplo: 'Vence 14/12 · prazo até 24/12 · bloqueio 25/12' },
-  { titulo: 'Aviso de 5 dias', resposta: '5 dias antes do bloqueio', exemplo: 'No exemplo, 20/12' },
-  { titulo: 'Nome da situação', resposta: 'Parcialmente ativo', exemplo: 'Para o operador e para o administrador' },
+  { titulo: 'Aviso de 5 dias', pedido: '5 dias antes do bloqueio', leitura: 'A data: 20/12. Na mensagem ele vem junto dos lembretes de antes do vencimento.' },
+  { titulo: 'Nome da situação', pedido: 'Parcialmente ativo', leitura: 'Usar o termo como nome na tela, para o operador e para o administrador.' },
+  { titulo: 'Contagem dos 10 dias', pedido: '10 dias corridos a partir do vencimento', leitura: 'Contar do dia seguinte: prazo até 24/12, bloqueio em 25/12.' },
 ] as const;
 
+/** O que a mensagem não diz e o protótipo não resolve. São sugestões nossas de pergunta, não pedidos. */
 export const EM_ABERTO = [
   'Quais documentos têm validade?',
-  'Troca feita antes, conferência depois do vencimento: fica parcialmente ativo?',
-  'Nota fiscal em andamento no vencimento: segue ou para?',
-  'E-mail no dia do bloqueio: mandamos?',
+  'E-mail no dia do bloqueio: a mensagem não pede e o protótipo não manda. Incluímos?',
 ] as const;
 
 /** Os quatro itens da mensagem: a palavra forte e o complemento. */
