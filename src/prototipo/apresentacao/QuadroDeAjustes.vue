@@ -34,12 +34,12 @@ const estadoDe = (i: number) => (i < riscados.value ? 'riscado' : i === destaque
 <template>
   <div class="qa">
     <div class="qa__lado">
-      <p class="qa__rot">O que mudou</p>
+      <p class="qa__rot">Os ajustes</p>
       <p class="qa__conta">
         <span class="qa__num">{{ Math.min(riscados, ajustes.length) }}</span>
         <span class="qa__de">de {{ ajustes.length }}</span>
       </p>
-      <p class="qa__frase">{{ tudo ? 'Tudo mostrado. Está no protótipo e no Figma.' : 'ajustes mostrados' }}</p>
+      <p class="qa__frase">{{ tudo ? 'Tudo no protótipo e no Figma' : 'mostrados' }}</p>
     </div>
 
     <ol class="qa__lista">
@@ -53,7 +53,6 @@ const estadoDe = (i: number) => (i < riscados.value ? 'riscado' : i === destaque
                 <path d="M0,6 C12,3 22,8 36,5 S62,3 76,6 S94,4 100,5" />
               </svg>
             </span>
-            <span class="qa__item-tag">{{ a.item }}</span>
           </p>
           <div class="qa__detalhe">
             <div>

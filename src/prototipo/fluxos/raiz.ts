@@ -21,6 +21,8 @@ declare global {
       continuar(): Promise<void>;
       /** Para o que estiver rodando, sem mexer no passo. */
       cancelar(): Promise<void>;
+      /** Recarrega e refaz rápido até o passo n (a pessoa mexeu na tela e a história volta a um ponto conhecido). */
+      recarregarEm(n: number): Promise<void>;
     };
   }
 }
@@ -37,5 +39,6 @@ export function instalarApiDosFluxos(): void {
     pausar: async () => (await import('./api')).pausar(),
     continuar: async () => (await import('./api')).continuar(),
     cancelar: async () => (await import('./api')).cancelar(),
+    recarregarEm: async (n) => (await import('./api')).recarregarEm(n),
   };
 }

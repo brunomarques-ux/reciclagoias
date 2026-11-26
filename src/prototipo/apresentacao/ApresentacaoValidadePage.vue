@@ -8,6 +8,8 @@
  *   o quadro      os seis ajustes, riscados um a um conforme são mostrados (QuadroDeAjustes.vue);
  *   a tela ao vivo  o protótipo embutido num quadro, que reproduz um capítulo da jornada quando se dá play. O
  *                   quadro aproxima o ponto que a jornada destaca e volta.
+ * Terminada a animação de um capítulo, a tela ao vivo fica livre: dá para clicar e navegar no protótipo ali mesmo,
+ * sem sair da apresentação. "Reiniciar animação" (ou R) volta a história ao começo do capítulo e reproduz de novo.
  * A régua de datas no pé acompanha tudo. Direção de arte "calendário editorial", a mesma do vídeo de 26/11
  * (docs/sistema/video-validade-19nov): papel claro, datas grandes em Roboto Flex condensada, marca-texto à mão.
  *
@@ -51,6 +53,10 @@ const situacao = ref<Situacao>('carregando');
 const zoomLigado = ref(true);
 const camera = ref('translate(0px, 0px) scale(1)');
 let sincronizando = false;
+/** Quem apresenta clicou dentro da tela ao vivo: a próxima tela refaz a história até o ponto dela. */
+let mexeu = false;
+let refazer = false;
+let tocarQuandoPronto = false;
 let pedidoEm = 0;
 let tocouEm = 0;
 let relogio: number | undefined;
@@ -64,13 +70,14 @@ const api = () => {
 };
 const capitulo = computed(() => (tela.value ? est.value?.capitulos[tela.value.capitulo] : undefined));
 
-function sincronizar(): void {
+function sincronizar(recarregar = false): void {
   const c = capitulo.value;
   const a = api();
   if (!c || !a) return;
   sincronizando = true;
   pedidoEm = Date.now();
-  void a.cancelar().then(() => a.irPara(c.inicio));
+  if (recarregar) void a.recarregarEm(c.inicio);
+  else void a.cancelar().then(() => a.irPara(c.inicio));
 }
 
 /** Lê o estado do protótipo embutido e decide a situação da tela desta cena. */
@@ -89,6 +96,12 @@ async function acompanhar(): Promise<void> {
   }
   const noInicio = (e.passo === c.inicio && !e.feito) || (c.inicio > 0 && e.passo === c.inicio - 1 && e.feito);
   const noFim = e.passo === c.fim && e.feito;
+  if (refazer && e.fase === 'parado' && !sincronizando) {
+    refazer = false;
+    situacao.value = 'carregando';
+    sincronizar(true);
+    return;
+  }
   if (sincronizando) {
     if (e.fase === 'parado' && noInicio) sincronizando = false;
     else {
@@ -103,7 +116,13 @@ async function acompanhar(): Promise<void> {
   else if (e.erro) situacao.value = 'erro';
   else if (Date.now() - tocouEm < 1500) situacao.value = 'tocando'; // o play acabou de ser dado
   else if (noFim) situacao.value = 'feito';
-  else if (noInicio) situacao.value = 'pronto';
+  else if (noInicio) {
+    situacao.value = 'pronto';
+    if (tocarQuandoPronto) {
+      tocarQuandoPronto = false;
+      tocar();
+    }
+  }
   else {
     situacao.value = 'carregando';
     sincronizar(); // o protótipo está em outro ponto da história: leva ao começo do capítulo desta cena
@@ -141,10 +160,14 @@ function tocar(): void {
   situacao.value = 'tocando';
   void a.reproduzirCapitulo();
 }
+/** Reiniciar a animação: a história volta ao começo do capítulo (desfaz o que foi mexido à mão) e reproduz. */
 function repetir(): void {
   if (!tela.value) return;
+  mexeu = false;
+  refazer = false;
+  tocarQuandoPronto = true;
   situacao.value = 'carregando';
-  sincronizar();
+  sincronizar(true);
 }
 function pausarOuContinuar(): void {
   const a = api();
@@ -173,6 +196,9 @@ function avancar(pular = false): void {
 const voltar = () => irPara(idx.value - 1);
 
 watch(idx, (n) => {
+  refazer = mexeu;
+  mexeu = false;
+  tocarQuandoPronto = false;
   sincronizando = false;
   tocouEm = 0;
   situacao.value = 'carregando';
@@ -208,10 +234,35 @@ function aoTeclar(e: KeyboardEvent): void {
   dica.value = false;
 }
 const aoMudarTelaCheia = () => (telaCheia.value = !!document.fullscreenElement);
-/** A jornada põe o foco em campos dentro do quadro: as teclas de lá também navegam a apresentação. */
+/**
+ * Com o foco dentro da tela ao vivo, só as setas navegam a apresentação, e só fora de um campo: Espaço, Enter e as
+ * letras são de quem está mexendo no protótipo.
+ */
+function aoTeclarNoQuadro(e: KeyboardEvent): void {
+  if (!['ArrowRight', 'ArrowLeft', 'PageDown', 'PageUp'].includes(e.key)) return;
+  const alvo = e.target as HTMLElement | null;
+  if (alvo?.closest?.('input, textarea, select, [contenteditable], [role="slider"], [role="tablist"], [role="menu"], [role="listbox"]')) return;
+  aoTeclar(e);
+}
+const aoTocarNoQuadro = (e: Event) => {
+  if (!e.isTrusted) return;
+  // o primeiro toque tira o destaque que a animação deixou parado: a tela é de quem apresenta
+  if (!mexeu) void api()?.cancelar();
+  mexeu = true;
+};
+// ── os controles só aparecem enquanto o mouse se mexe (em tela cheia eles ficam por cima da régua) ──
+const mouseVivo = ref(false);
+let tMouse: number | undefined;
+function aoMoverOMouse(): void {
+  mouseVivo.value = true;
+  window.clearTimeout(tMouse);
+  tMouse = window.setTimeout(() => (mouseVivo.value = false), 2200);
+}
 function aoCarregarQuadro(): void {
   try {
-    quadro.value?.contentWindow?.addEventListener('keydown', aoTeclar, true);
+    quadro.value?.contentWindow?.addEventListener('keydown', aoTeclarNoQuadro, true);
+    quadro.value?.contentWindow?.addEventListener('pointerdown', aoTocarNoQuadro, true);
+    quadro.value?.contentWindow?.addEventListener('mousemove', aoMoverOMouse, { passive: true });
   } catch {
     /* sem acesso ao quadro: as teclas valem só com o foco na apresentação */
   }
@@ -243,6 +294,7 @@ onBeforeUnmount(() => {
   document.removeEventListener('fullscreenchange', aoMudarTelaCheia);
   window.clearInterval(relogio);
   window.clearTimeout(tDica);
+  window.clearTimeout(tMouse);
   document.documentElement.classList.remove('pv-aberta');
 });
 
@@ -253,7 +305,7 @@ const textoDoBotao = computed(() => {
 </script>
 
 <template>
-  <div ref="raiz" class="pv" data-prototipo>
+  <div ref="raiz" class="pv" data-prototipo :data-mouse="mouseVivo || undefined" @mousemove.passive="aoMoverOMouse">
     <div class="pv__palco" :style="{ transform: `scale(${escala})` }">
       <svg class="pv__grao" width="1920" height="1080" aria-hidden="true">
         <filter id="pv-ruido">
@@ -265,7 +317,7 @@ const textoDoBotao = computed(() => {
 
       <header class="pv__cab">
         <span><b>Recicla Goiás</b> · Validade dos documentos do operador logístico</span>
-        <span v-if="tela">Ajuste {{ tela.ajuste + 1 }} de {{ AJUSTES.length }}</span>
+        <span v-if="tela">Ajuste {{ tela.ajuste + 1 }} de {{ AJUSTES.length }} · {{ AJUSTES[tela.ajuste].titulo }}</span>
         <span v-else>Regras de 19/11/2026</span>
       </header>
 
@@ -275,7 +327,7 @@ const textoDoBotao = computed(() => {
           <div class="pv-capa__texto">
             <p class="pv-rot">Apresentação · 26/11/2026</p>
             <h1 class="pv-capa__titulo">Validade dos documentos do operador logístico</h1>
-            <p class="pv-sub">Como ficaram as regras de aviso e de bloqueio enviadas em 19/11, do primeiro lembrete ao acesso de volta.</p>
+            <p class="pv-sub">As regras de 19/11, do primeiro lembrete ao acesso de volta.</p>
           </div>
           <div class="pv-folhas" aria-hidden="true">
             <div class="pv-folha pv-folha--1"><span>Outubro</span><b>15</b><small>1º lembrete</small></div>
@@ -289,15 +341,14 @@ const textoDoBotao = computed(() => {
 
         <section v-else-if="cena.tipo === 'origem'" key="origem" class="pv-cena pv-origem">
           <div class="pv-origem__antes">
-            <p class="pv-rot pv-rot--verm">Combinado em 13/11</p>
+            <p class="pv-rot pv-rot--verm">Antes · 13/11</p>
             <p class="pv-origem__velho"><span>Um aviso só, 30 dias antes</span></p>
             <p class="pv-origem__velho"><span>Bloqueio no dia do vencimento</span></p>
-            <p class="pv-origem__nota">A mensagem de 19/11 troca essas duas regras.</p>
           </div>
           <div class="pv-origem__agora">
-            <p class="pv-rot">O que a mensagem de 19/11 pede</p>
+            <p class="pv-rot">Agora · mensagem de 19/11</p>
             <ol class="pv-origem__lista">
-              <li v-for="(m, i) in MENSAGEM" :key="i"><b>{{ i + 1 }}</b><span>{{ m }}</span></li>
+              <li v-for="(m, i) in MENSAGEM" :key="i"><b>{{ i + 1 }}</b><span><strong>{{ m.forte }}</strong> {{ m.resto }}</span></li>
             </ol>
           </div>
         </section>
@@ -306,25 +357,14 @@ const textoDoBotao = computed(() => {
           <div class="pv-caso__texto">
             <p class="pv-rot">O caso que vamos seguir</p>
             <p class="pv-caso__data">14/12</p>
-            <h2 class="pv-titulo">O alvará de funcionamento da cooperativa Recicla Cerrado vence em 14/12/2026</h2>
-            <p class="pv-sub">O cadastro está aprovado. Vamos seguir esse documento no tempo e ver o que o sistema faz em cada data.</p>
+            <h2 class="pv-titulo">Vence o alvará da cooperativa Recicla Cerrado</h2>
             <p class="pv-caso__exemplo">Dados de exemplo</p>
           </div>
           <ol class="pv-caso__estados">
-            <li data-tom="verde">
-              <b>Aprovado</b><span>Até o vencimento</span>
-              <p>Tudo liberado. Os lembretes saem 60 e 30 dias antes, e o documento já pode ser trocado.</p>
-            </li>
-            <li data-tom="ambar">
-              <b>Parcialmente ativo</b><span>10 dias corridos depois de vencer</span>
-              <p>Transfere créditos. Não inclui nota fiscal nova.</p>
-            </li>
-            <li data-tom="verm">
-              <b>Bloqueado</b><span>A partir do 11º dia</span>
-              <p>Nenhuma operação. Só a troca do documento abre.</p>
-            </li>
+            <li data-tom="verde"><b>Aprovado</b><p>Até o vencimento</p></li>
+            <li data-tom="ambar"><b>Parcialmente ativo</b><p>10 dias: transfere créditos, sem nota fiscal nova</p></li>
+            <li data-tom="verm"><b>Bloqueado</b><p>Do 11º dia: só a troca do documento</p></li>
           </ol>
-          <p class="pv-caso__seta">a régua acompanha a apresentação <span aria-hidden="true">↓</span></p>
         </section>
 
         <section v-else-if="cena.tipo === 'quadro'" :key="`quadro-${idx}`" class="pv-cena">
@@ -332,32 +372,28 @@ const textoDoBotao = computed(() => {
         </section>
 
         <section v-else-if="cena.tipo === 'tela'" :key="`tela-${idx}`" class="pv-cena pv-lado">
-          <p class="pv-rot">{{ AJUSTES[cena.ajuste].titulo }}</p>
           <p class="pv-lado__data" :data-palavra="!dataEhData || undefined">{{ cena.data }}</p>
           <h2 class="pv-lado__titulo">{{ cena.titulo }}</h2>
-          <p class="pv-lado__nota">{{ cena.nota }}</p>
           <p class="pv-lado__quem" :data-admin="cena.quem === 'Administrador' || undefined">{{ cena.quem }}</p>
         </section>
 
         <section v-else-if="cena.tipo === 'decisoes'" key="decisoes" class="pv-cena pv-decisoes">
           <p class="pv-rot">Decidido em 26/11</p>
-          <h2 class="pv-titulo">Três pontos da mensagem pediam leitura. Adotamos o mais usado.</h2>
+          <h2 class="pv-titulo">Três leituras que adotamos</h2>
           <ol class="pv-decisoes__lista">
-            <li v-for="(d, i) in DECISOES" :key="d.titulo">
-              <b class="pv-decisoes__n">{{ i + 1 }}</b>
+            <li v-for="d in DECISOES" :key="d.titulo">
               <h3>{{ d.titulo }}</h3>
-              <p>{{ d.texto }}</p>
+              <p>{{ d.resposta }}</p>
               <span>{{ d.exemplo }}</span>
             </li>
           </ol>
-          <p class="pv-decisoes__pe">O protótipo já está assim. Se a SEMAD preferir outro caminho, ajustamos.</p>
         </section>
 
         <section v-else-if="cena.tipo === 'aberto'" key="aberto" class="pv-cena pv-aberto">
           <div class="pv-aberto__lado">
             <p class="pv-rot pv-rot--ambar">Segue em aberto</p>
             <p class="pv-aberto__n">4</p>
-            <p class="pv-sub">perguntas para a SEMAD</p>
+            <p class="pv-sub">perguntas</p>
           </div>
           <ol class="pv-aberto__lista">
             <li v-for="(p, i) in EM_ABERTO" :key="i"><b>{{ i + 1 }}</b><span>{{ p }}</span></li>
@@ -366,11 +402,10 @@ const textoDoBotao = computed(() => {
 
         <section v-else key="fim" class="pv-cena pv-fim">
           <p class="pv-rot">Para conferir depois</p>
-          <h2 class="pv-titulo">O que for decidido aqui entra no protótipo e no Figma</h2>
+          <h2 class="pv-titulo">O que decidirmos entra no protótipo e no Figma</h2>
           <ul class="pv-fim__links">
             <li><b>Jornadas guiadas</b><span>reciclagoias.vercel.app/fluxos/validade-19nov</span></li>
             <li><b>Esta apresentação</b><span>reciclagoias.vercel.app/apresentacao-validade</span></li>
-            <li><b>Figma</b><span>Recicla Goiás, página Novembro 2026 · Validade e bloqueio · Regras de 19/11</span></li>
           </ul>
         </section>
       </Transition>
@@ -416,8 +451,12 @@ const textoDoBotao = computed(() => {
         <p class="pv-tela__legenda" aria-live="polite">
           <template v-if="situacao === 'tocando' && est?.fazer"><b>Agora</b> {{ est.fazer }}</template>
           <template v-else-if="situacao === 'pausado'"><b>Pausado</b> Espaço para continuar</template>
-          <template v-else-if="situacao === 'feito'"><b class="pv-ok">Mostrado</b> Seta para a direita para seguir</template>
+          <template v-else-if="situacao === 'feito'"><b class="pv-ok">Tela livre</b> Clique e navegue no protótipo</template>
         </p>
+        <button v-if="tela && situacao === 'feito'" type="button" class="pv-tela__reiniciar" title="Reiniciar a animação (R)" @mousedown.prevent @click="repetir">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 5V2L7 6l5 4V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z" fill="currentColor" /></svg>
+          Reiniciar animação
+        </button>
       </div>
 
       <!-- a régua de datas: acompanha a apresentação inteira -->
@@ -448,7 +487,7 @@ const textoDoBotao = computed(() => {
     <Transition name="pv-veu">
       <aside v-if="cola" class="pv-cola"><b>Fala</b> {{ cena.fala }}</aside>
     </Transition>
-    <nav class="pv-controles" aria-label="Controles da apresentação">
+    <nav class="pv-controles" aria-label="Controles da apresentação" @mousedown.prevent>
       <button type="button" title="Voltar (seta para a esquerda)" aria-label="Voltar" :disabled="idx === 0" @click="voltar">‹</button>
       <span class="pv-controles__conta">{{ idx + 1 }} / {{ total }}</span>
       <button type="button" class="pv-controles__principal" :disabled="!!tela && (situacao === 'tocando' || situacao === 'carregando')" @click="avancar()">
@@ -460,7 +499,7 @@ const textoDoBotao = computed(() => {
     </nav>
     <Transition name="pv-veu">
       <p v-if="dica" class="pv-dica">
-        <b>→</b> ou <b>Espaço</b> avança e dá play · <b>←</b> volta · <b>F</b> tela cheia · <b>N</b> cola da fala · <b>R</b> repete a tela
+        <b>→</b> ou <b>Espaço</b> avança e dá play · <b>←</b> volta · <b>F</b> tela cheia · <b>N</b> cola da fala · <b>R</b> reinicia a tela
       </p>
     </Transition>
   </div>
@@ -530,30 +569,32 @@ const textoDoBotao = computed(() => {
 .pv-origem__lista { margin-top: 24px; }
 .pv-origem__lista li { display: flex; gap: 28px; align-items: flex-start; padding: 22px 0; border-top: 2px solid var(--pv-linha); }
 .pv-origem__lista b, .pv-aberto__lista b, .pv-decisoes__n { flex: none; width: 64px; font-family: var(--pv-flex) !important; font-weight: 900; font-variation-settings: 'wdth' 30; font-size: 84px; line-height: .86; color: var(--pv-verde); }
-.pv-origem__lista span { font: 500 32px/1.34 var(--pv-inter); text-wrap: pretty; }
+.pv-origem__lista li { align-items: center; padding: 30px 0; }
+.pv-origem__lista span { font: 500 38px/1.2 var(--pv-inter); color: var(--pv-tinta2); }
+.pv-origem__lista strong { font-weight: 800; color: var(--pv-tinta); }
 
 /* ── o caso ── */
 .pv-caso__texto { position: absolute; left: 80px; top: 150px; width: 800px; }
 .pv-caso__data { margin-top: 10px; font-family: var(--pv-flex) !important; font-weight: 1000; font-variation-settings: 'wdth' 25; font-size: 330px; line-height: .84; letter-spacing: -.02em; color: var(--pv-verm); }
-.pv-caso .pv-titulo { margin-top: 18px; font-size: 50px; }
+.pv-caso .pv-titulo { margin-top: 22px; font-size: 54px; }
 .pv-caso .pv-sub { margin-top: 22px; font-size: 29px; }
 .pv-caso__exemplo { margin-top: 18px; font: 600 18px/1 var(--pv-inter); letter-spacing: .12em; text-transform: uppercase; color: var(--pv-apagado); }
-.pv-caso__estados { position: absolute; left: 980px; right: 80px; top: 170px; display: flex; flex-direction: column; gap: 18px; }
+.pv-caso__estados { position: absolute; left: 1020px; right: 80px; top: 210px; display: flex; flex-direction: column; gap: 22px; }
 .pv-caso__estados li { padding: 26px 30px 28px; border-radius: 12px; background: var(--pv-papel-claro); box-shadow: inset 10px 0 0 var(--tom); }
 .pv-caso__estados li[data-tom='verde'] { --tom: var(--pv-verde); }
 .pv-caso__estados li[data-tom='ambar'] { --tom: var(--pv-ambar); }
 .pv-caso__estados li[data-tom='verm'] { --tom: var(--pv-verm); }
-.pv-caso__estados b { font: 800 38px/1.1 var(--pv-inter); letter-spacing: -.015em; color: var(--tom); }
+.pv-caso__estados b { font: 800 46px/1.1 var(--pv-inter); letter-spacing: -.015em; color: var(--tom); }
 .pv-caso__estados span { margin-left: 16px; font: 600 20px/1 var(--pv-inter); letter-spacing: .08em; text-transform: uppercase; color: var(--pv-apagado); }
-.pv-caso__estados p { margin-top: 10px; font: 500 27px/1.35 var(--pv-inter); color: var(--pv-tinta2); }
+.pv-caso__estados p { margin-top: 8px; font: 500 28px/1.3 var(--pv-inter); color: var(--pv-tinta2); }
 .pv-caso__seta { position: absolute; right: 80px; top: 872px; font: 600 22px/1 var(--pv-inter); color: var(--pv-tinta2); }
 
 /* ── a coluna ao lado da tela ── */
 .pv-lado { inset: 122px auto 150px 80px; width: 410px; }
 .pv-lado .pv-rot { font-size: 19px; }
-.pv-lado__data { margin-top: 26px; font-family: var(--pv-flex) !important; font-weight: 1000; font-variation-settings: 'wdth' 25; font-size: 184px; line-height: .86; letter-spacing: -.02em; color: var(--pv-tinta); }
+.pv-lado__data { margin-top: 0; font-family: var(--pv-flex) !important; font-weight: 1000; font-variation-settings: 'wdth' 25; font-size: 184px; line-height: .86; letter-spacing: -.02em; color: var(--pv-tinta); }
 .pv-lado__data[data-palavra] { font-size: 112px; line-height: .9; font-variation-settings: 'wdth' 30; }
-.pv-lado__titulo { margin-top: 26px; font: 800 42px/1.1 var(--pv-inter); letter-spacing: -.02em; text-wrap: balance; }
+.pv-lado__titulo { margin-top: 30px; font: 800 46px/1.08 var(--pv-inter); letter-spacing: -.02em; text-wrap: balance; }
 .pv-lado__nota { margin-top: 18px; font: 500 26px/1.38 var(--pv-inter); color: var(--pv-tinta2); text-wrap: pretty; }
 .pv-lado__quem { display: inline-block; margin-top: 28px; padding: 10px 18px; border-radius: 999px; background: var(--pv-verde-claro); color: var(--pv-verde); font: 700 19px/1 var(--pv-inter); letter-spacing: .08em; text-transform: uppercase; }
 .pv-lado__quem[data-admin] { background: var(--pv-tinta); color: var(--pv-papel); }
@@ -584,7 +625,15 @@ const textoDoBotao = computed(() => {
 .pv-tela__escala { width: 1440px; height: 864px; transform: scale(.9); transform-origin: 0 0; }
 .pv-tela__camera { width: 1440px; height: 864px; transform-origin: 0 0; transition: transform .8s cubic-bezier(.3, 0, .1, 1); }
 .pv-tela__quadro { display: block; width: 1440px; height: 864px; border: 0; pointer-events: none; background: #fff; }
-.pv-tela__legenda { margin-top: 12px; min-height: 30px; font: 500 22px/1.35 var(--pv-inter); color: var(--pv-tinta2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* terminada a animação, a tela aceita clique: dá para navegar no protótipo sem sair da apresentação */
+.pv-tela[data-visivel][data-situacao='feito'] .pv-tela__quadro { pointer-events: auto; }
+.pv-tela__reiniciar {
+  position: absolute; right: 0; bottom: -4px; display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 16px 0 12px;
+  border: 2px solid var(--pv-tinta); border-radius: 999px; background: transparent; color: var(--pv-tinta); font: 700 17px/1 var(--pv-inter); cursor: pointer;
+}
+.pv-tela__reiniciar:hover { background: var(--pv-tinta); color: var(--pv-papel); }
+.pv-tela__reiniciar:focus-visible { outline: 3px solid var(--pv-verde); outline-offset: 2px; }
+.pv-tela__legenda { margin-top: 12px; min-height: 30px; padding-right: 240px; font: 500 22px/1.35 var(--pv-inter); color: var(--pv-tinta2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .pv-tela__legenda b { margin-right: 10px; font: 700 16px/1 var(--pv-inter); letter-spacing: .12em; text-transform: uppercase; color: var(--pv-verm); }
 .pv-tela__legenda b.pv-ok { color: var(--pv-verde); }
 
@@ -611,9 +660,9 @@ const textoDoBotao = computed(() => {
 .pv-decisoes__lista { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; margin-top: 50px; }
 .pv-decisoes__lista li { padding: 30px 32px 32px; border-radius: 12px; background: var(--pv-papel-claro); box-shadow: 0 2px 0 rgba(27, 36, 32, .06), 0 24px 44px -30px rgba(27, 36, 32, .4); }
 .pv-decisoes__n { display: block; }
-.pv-decisoes__lista h3 { margin: 16px 0 0; font: 800 34px/1.1 var(--pv-inter); letter-spacing: -.015em; }
-.pv-decisoes__lista p { margin-top: 14px; font: 500 25px/1.4 var(--pv-inter); color: var(--pv-tinta2); min-height: 176px; }
-.pv-decisoes__lista span { display: inline-block; margin-top: 18px; padding: 10px 16px; border-radius: 8px; background: var(--pv-verde-claro); color: var(--pv-verde); font: 700 20px/1.2 var(--pv-inter); }
+.pv-decisoes__lista h3 { margin: 0; font: 700 20px/1.2 var(--pv-inter); letter-spacing: .12em; text-transform: uppercase; color: var(--pv-verde); }
+.pv-decisoes__lista p { margin-top: 20px; font: 800 46px/1.08 var(--pv-inter); letter-spacing: -.02em; min-height: 150px; text-wrap: balance; }
+.pv-decisoes__lista span { display: block; margin-top: 18px; padding-top: 18px; border-top: 2px solid var(--pv-linha); color: var(--pv-tinta2); font: 500 24px/1.3 var(--pv-inter); }
 .pv-decisoes__pe { margin-top: 34px; font: 500 26px/1.3 var(--pv-inter); color: var(--pv-tinta2); }
 
 .pv-aberto__lado { position: absolute; left: 80px; top: 150px; width: 420px; }
@@ -623,7 +672,8 @@ const textoDoBotao = computed(() => {
 .pv-aberto__lista li { display: flex; gap: 28px; align-items: flex-start; padding: 28px 0; border-top: 2px solid var(--pv-linha); }
 .pv-aberto__lista li:last-child { border-bottom: 2px solid var(--pv-linha); }
 .pv-aberto__lista b { color: var(--pv-ambar); }
-.pv-aberto__lista span { font: 500 34px/1.32 var(--pv-inter); text-wrap: pretty; }
+.pv-aberto__lista li { align-items: center; }
+.pv-aberto__lista span { font: 600 38px/1.2 var(--pv-inter); text-wrap: balance; }
 
 .pv-fim { inset: 210px 80px 150px; }
 .pv-fim .pv-titulo { margin-top: 22px; font-size: 76px; max-width: 1300px; }
@@ -660,9 +710,10 @@ const textoDoBotao = computed(() => {
 .pv-controles {
   position: fixed; left: 50%; bottom: 14px; z-index: 5; transform: translateX(-50%); display: flex; align-items: center; gap: 8px;
   padding: 7px 9px; border-radius: 999px; background: rgba(20, 17, 12, .82); border: 1px solid rgba(255, 255, 255, .16);
-  opacity: 0; transition: opacity .25s;
+  opacity: 0; pointer-events: none; transition: opacity .3s;
 }
-.pv:hover .pv-controles, .pv-controles:focus-within { opacity: 1; }
+.pv[data-mouse] .pv-controles, .pv-controles:hover, .pv-controles:has(:focus-visible) { opacity: 1; pointer-events: auto; }
+.pv:not([data-mouse]) { cursor: none; }
 .pv-controles button {
   min-width: 38px; height: 38px; padding: 0 12px; border: 0; border-radius: 999px; background: rgba(255, 255, 255, .12); color: #fff;
   font: 700 16px/1 'Inter Variable', Inter, sans-serif; cursor: pointer;

@@ -24,19 +24,19 @@ export const AJUSTES: readonly Ajuste[] = [
     titulo: 'Dois lembretes antes de vencer',
     item: 'Item 1 da mensagem',
     antes: 'Um aviso só, 30 dias antes.',
-    agora: 'E-mails 60 e 30 dias antes, e o aviso ao entrar no sistema.',
+    agora: 'E-mails 60 e 30 dias antes.',
   },
   {
     titulo: 'Troca liberada antes de vencer',
     item: 'Veio junto',
-    antes: 'A Minha Conta só deixava trocar o documento depois de vencido.',
-    agora: 'O documento perto de vencer já aceita troca. A validade se escolhe no calendário.',
+    antes: 'Só trocava depois de vencido.',
+    agora: 'Troca aberta antes, com calendário.',
   },
   {
     titulo: 'No vencimento, 10 dias parcialmente ativo',
     item: 'Itens 2 e 4 da mensagem',
-    antes: 'O cadastro bloqueava no dia do vencimento.',
-    agora: 'Aviso no dia e 10 dias corridos para trocar. Transfere créditos, não inclui nota fiscal nova.',
+    antes: 'Bloqueava no dia do vencimento.',
+    agora: '10 dias: transfere créditos, sem nota fiscal nova.',
   },
   {
     titulo: 'Último aviso, 5 dias antes do bloqueio',
@@ -47,14 +47,14 @@ export const AJUSTES: readonly Ajuste[] = [
   {
     titulo: 'Bloqueio total no 11º dia',
     item: 'Item 3 da mensagem',
-    antes: 'O bloqueio começava no dia do vencimento.',
+    antes: 'Começava no vencimento.',
     agora: 'Começa em 25/12. Só a troca do documento abre.',
   },
   {
     titulo: 'Administrador: situação nova e conferência',
     item: 'Item 3 da mensagem',
-    antes: 'Não havia a situação Parcialmente ativo.',
-    agora: 'A lista mostra Parcialmente ativo, a conferência diz de onde a troca partiu e, aprovado, o acesso volta.',
+    antes: 'Não havia Parcialmente ativo.',
+    agora: 'Situação nova na lista. Aprovado, o acesso volta.',
   },
 ];
 
@@ -261,34 +261,24 @@ export const CENAS: readonly Cena[] = [
   },
 ];
 
+/** Uma resposta curta por decisão: o porquê fica na fala. */
 export const DECISOES = [
-  {
-    titulo: 'Contagem dos 10 dias',
-    texto: 'Começa no dia seguinte ao vencimento. Não se conta o dia do começo e se conta o último, como no Código Civil (art. 132) e na Lei 9.784/1999 (art. 66).',
-    exemplo: 'Vence em 14/12 · prazo até 24/12 · bloqueio em 25/12',
-  },
-  {
-    titulo: 'Aviso de 5 dias',
-    texto: 'Sai 5 dias antes do bloqueio, quando o operador ainda pode agir. É o sexto dia depois de vencer.',
-    exemplo: 'No exemplo, 20/12',
-  },
-  {
-    titulo: 'Nome da situação',
-    texto: 'Parcialmente ativo, o termo da mensagem, para o operador e para a lista do administrador.',
-    exemplo: 'Um nome só nos dois lados',
-  },
+  { titulo: 'Contagem dos 10 dias', resposta: 'Do dia seguinte ao vencimento', exemplo: 'Vence 14/12 · prazo até 24/12 · bloqueio 25/12' },
+  { titulo: 'Aviso de 5 dias', resposta: '5 dias antes do bloqueio', exemplo: 'No exemplo, 20/12' },
+  { titulo: 'Nome da situação', resposta: 'Parcialmente ativo', exemplo: 'Para o operador e para o administrador' },
 ] as const;
 
 export const EM_ABERTO = [
-  'Quais documentos têm validade? O exemplo é o alvará; na review de 04/11 se falou também da licença ambiental.',
-  'Se a troca é feita antes de vencer e a conferência passa da data, o cadastro fica parcialmente ativo?',
-  'Nota fiscal que estava em andamento no dia do vencimento: segue ou para?',
-  'A regra não pede e-mail no dia do bloqueio. Mandamos um, ou o aviso de 5 dias basta?',
+  'Quais documentos têm validade?',
+  'Troca feita antes, conferência depois do vencimento: fica parcialmente ativo?',
+  'Nota fiscal em andamento no vencimento: segue ou para?',
+  'E-mail no dia do bloqueio: mandamos?',
 ] as const;
 
+/** Os quatro itens da mensagem: a palavra forte e o complemento. */
 export const MENSAGEM = [
-  'Lembretes 60 e 30 dias antes do vencimento, e 5 dias antes do bloqueio.',
-  'Do vencimento, 10 dias corridos para trocar o documento. O cadastro fica parcialmente ativo: transfere créditos, não inclui nota fiscal nova.',
-  'Sem a troca, bloqueio total a partir do 11º dia. Só a troca do documento abre. Validado, o acesso volta.',
-  'No dia do vencimento, aviso de documento vencido, com o prazo de 10 dias.',
+  { forte: 'Lembretes', resto: '60 e 30 dias antes de vencer' },
+  { forte: '10 dias', resto: 'parcialmente ativo depois de vencer' },
+  { forte: 'Bloqueio total', resto: 'a partir do 11º dia' },
+  { forte: 'Aviso', resto: 'no dia do vencimento' },
 ] as const;
