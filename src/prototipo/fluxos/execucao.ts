@@ -148,8 +148,9 @@ export async function preparar(): Promise<void> {
 /**
  * Executa o passo atual com animação. Se ele já foi feito, avança e executa o seguinte ("Executar passo N").
  * `tudo`: segue executando os próximos, com uma pausa entre eles, até o fim (Reproduzir tudo).
+ * `capitulo`: segue até o fim do capítulo, isto é, para antes do passo que abre o capítulo seguinte.
  */
-export async function executarPassoAtual(opcoes: { tudo?: boolean } = {}): Promise<void> {
+export async function executarPassoAtual(opcoes: { tudo?: boolean; capitulo?: boolean } = {}): Promise<void> {
   let a = fluxoAtivo();
   const f = fluxoAtual();
   if (!a || !f || controle || a.preparar) return;
@@ -168,7 +169,8 @@ export async function executarPassoAtual(opcoes: { tudo?: boolean } = {}): Promi
       await executarPasso(f.passos[atual.passo], execucao(c));
       const ultimo = atual.passo >= total - 1;
       atualizarFluxoAtivo({ feito: true, concluido: ultimo });
-      if (!opcoes.tudo || ultimo) break;
+      const seguirNoCapitulo = !!opcoes.capitulo && !f.passos[atual.passo + 1]?.capitulo;
+      if (ultimo || !(opcoes.tudo || seguirNoCapitulo)) break;
       await c.esperar(CADENCIA.entrePassos * fator());
       destacar(null);
       atualizarFluxoAtivo({ passo: atual.passo + 1, feito: false });

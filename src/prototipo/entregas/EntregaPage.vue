@@ -13,7 +13,7 @@ import { useRoute, useRouter } from 'vue-router';
 
 import BotaoDoFluxo from '../fluxos/BotaoDoFluxo.vue';
 import { iniciarFluxo } from '../fluxos/iniciar';
-import { fluxoPorId } from '../fluxos/registro';
+import { capitulosDe, fluxoPorId } from '../fluxos/registro';
 import { definirVelocidadePreferida, preferenciasDoFluxo, type ModoDoFluxo, type VelocidadeDoFluxo } from '../fluxos/sessao';
 import { entregaPorId, type ItemDaEntrega } from './catalogo';
 
@@ -37,6 +37,15 @@ function iniciar(i: ItemDaEntrega, modo: ModoDoFluxo) {
 }
 
 const TOM = { 'Fluxo novo': 'success', Ajuste: 'info', Proposta: 'warning' } as const;
+
+/** A jornada de apresentação da entrega, se houver: abre sempre no automático, um capítulo por vez. */
+const apresentacao = computed(() => {
+  const f = fluxoPorId(entrega.value?.apresentacao?.fluxo);
+  return f ? { fluxo: f, capitulos: capitulosDe(f).length } : undefined;
+});
+function apresentar() {
+  if (apresentacao.value) iniciarFluxo(apresentacao.value.fluxo, 'auto');
+}
 </script>
 
 <template>
@@ -71,6 +80,31 @@ const TOM = { 'Fluxo novo': 'success', Ajuste: 'info', Proposta: 'warning' } as 
           </div>
         </header>
 
+        <section v-if="apresentacao" class="px-entrega__item px-entrega__apresentacao" aria-labelledby="px-apresentacao-titulo">
+          <span class="px-entrega__codigo" aria-hidden="true"><v-icon icon="mdi-presentation-play" size="20" /></span>
+          <div class="px-entrega__body">
+            <div class="px-entrega__item-head">
+              <h2 id="px-apresentacao-titulo" class="px-entrega__item-title">{{ entrega.apresentacao!.titulo }}</h2>
+              <span class="px-selo px-selo--success">{{ apresentacao.capitulos }} capítulos</span>
+            </div>
+            <p class="px-entrega__muda">{{ entrega.apresentacao!.resumo }}</p>
+          </div>
+          <div class="px-entrega__start">
+            <BotaoDoFluxo
+              v-if="entrega.apresentacao!.slides"
+              rotulo="Abrir os slides"
+              icone="mdi-presentation-play"
+              @click="router.push(entrega.apresentacao!.slides!)"
+            />
+            <BotaoDoFluxo
+              :rotulo="entrega.apresentacao!.slides ? 'Só a jornada' : 'Apresentar'"
+              :variante="entrega.apresentacao!.slides ? 'contorno' : undefined"
+              :tom="entrega.apresentacao!.slides ? 'neutro' : undefined"
+              icone="mdi-play"
+              @click="apresentar"
+            />
+          </div>
+        </section>
         <ol class="px-entrega__lista">
           <li v-for="i in entrega.itens" :key="i.codigo" class="px-entrega__item">
             <span class="px-entrega__codigo" aria-hidden="true">{{ i.codigo }}</span>
@@ -242,6 +276,17 @@ const TOM = { 'Fluxo novo': 'success', Ajuste: 'info', Proposta: 'warning' } as 
   border: 1px solid var(--rg-color-border-subtle);
   border-radius: var(--rg-radius-lg);
   background: var(--rg-color-surface-raised);
+}
+
+/* a apresentação vem antes das linhas, com a borda de marca */
+.px-entrega__apresentacao {
+  margin-bottom: var(--rg-space-6);
+  border-color: var(--rg-color-border-brand);
+  background: var(--rg-color-surface-brand);
+}
+.px-entrega__apresentacao .px-entrega__codigo {
+  background: var(--rg-color-action-primary);
+  color: var(--rg-color-text-on-brand);
 }
 
 .px-entrega__codigo {

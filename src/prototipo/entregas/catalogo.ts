@@ -32,6 +32,17 @@ export interface EntregaDoPrototipo {
   resumo: string;
   /** Onde estão as telas no Figma. */
   figma: string;
+  /**
+   * A jornada de apresentação (opcional): a entrega inteira numa jornada só, em capítulos, para apresentar numa
+   * reunião. Aparece em destaque acima das linhas.
+   */
+  apresentacao?: {
+    fluxo: string;
+    titulo: string;
+    resumo: string;
+    /** A rota da apresentação em slides que embute a jornada (src/prototipo/apresentacao), se houver. */
+    slides?: string;
+  };
   itens: ItemDaEntrega[];
 }
 
@@ -43,6 +54,13 @@ export const ENTREGAS: readonly EntregaDoPrototipo[] = [
     resumo:
       'O que acontece com o operador logístico quando um documento com validade vai vencer e vence: dois lembretes, 10 dias com o cadastro parcialmente ativo, bloqueio total no 11º dia e a conferência do documento novo. Substitui o aviso único e o bloqueio no vencimento de 13/11.',
     figma: 'Recicla Goiás - Figma · página Novembro 2026 · Validade e bloqueio · Regras de 19/11',
+    apresentacao: {
+      fluxo: 'validade-19nov-apresentacao',
+      titulo: 'Apresentação: do lembrete ao acesso de volta',
+      resumo:
+        'A história inteira do alvará que vence em 14/12, na ordem do tempo. Em slides, com o quadro dos seis ajustes e a tela ao vivo a cada play. Ou só a jornada, em 9 capítulos, direto no protótipo.',
+      slides: '/apresentacao-validade',
+    },
     itens: [
       {
         codigo: 'L1',

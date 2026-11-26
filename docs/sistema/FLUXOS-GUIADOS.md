@@ -4,6 +4,9 @@
 > `instalarPrototipo` (`src/prototipo/index.ts`), chamado no `main.ts`. A entrada das jornadas passou a ser por
 > entrega (`/fluxos` e `/fluxos/<entrega>`); a lista que este documento descreve virou `/fluxos/anteriores`. A
 > fronteira da camada e como removê-la estão em [`CAMADA-DE-PROTOTIPO.md`](CAMADA-DE-PROTOTIPO.md).
+>
+> 26/11/2026: entrega nova `/fluxos/validade-19nov` (dados em `src/prototipo/fluxos/dados/validade-19nov.ts`) e
+> `digitar` em campo de data (ver "O contrato dos dados").
 
 Camada do protótipo, fora do produto. Portada em 04/11/2026 do protótipo React do SISLOG
 (`SEAD/sislog-prototipo/src/fluxos`, especificação em `docs/ARQUITETURA.md` §23). Comportamento e textos são os
@@ -56,6 +59,27 @@ Ações: `clicar`, `marcar`, `digitar` (com `texto`), `escolher` (com `opcao`), 
 (com `rotulo` obrigatório), `esperar` (com `ms`) e `ir` (com `rota` e `rotulo`): leva o protótipo a outra rota,
 com o cenário no endereço, para o que a pessoa não faz na tela (o tempo que passa, a troca de perfil). O `ir`
 acontece sozinho nos dois modos. Sem `rotulo`, a pílula se monta sozinha ("Clique em Enviar").
+
+`digitar` num campo de data (`<input type="date">`) não vai letra por letra, porque o navegador não aceita: a data
+entra inteira. O roteiro pode escrever `DD/MM/AAAA` (`'14/12/2027'`), e o motor converte. Nasceu com o calendário
+da validade do documento (26/11/2026).
+
+**Capítulos (jornada de apresentação, 26/11/2026).** Um passo pode abrir um capítulo com `capitulo: '<título>'`.
+Com capítulos, o painel mostra "Capítulo N de M · título", a trilha ganha um respiro antes de cada capítulo e, no
+automático, o botão principal vira **Reproduzir capítulo N**: roda o capítulo inteiro e para antes do seguinte, para
+quem apresenta falar. "Até o fim" continua rodando tudo. Jornada com capítulos não encadeia com as outras (nem
+"Próxima jornada"). Na entrega, ela entra em `apresentacao` (`src/prototipo/entregas/catalogo.ts`) e aparece em
+destaque acima das linhas, com o botão Apresentar. A primeira é `validade-19nov-apresentacao`.
+
+**Comandar de fora (a apresentação em slides, 26/11/2026).** `/apresentacao-validade` embute o protótipo num quadro
+(a própria aplicação, mesma origem) e fala com a jornada por `window.__fluxos`: `estado()`, `reproduzirCapitulo()`,
+`irPara(n)`, `pausar()`, `continuar()` e `cancelar()` (`api.ts`). Embutida, a aplicação marca `html[data-palco]` e esconde
+o painel e o atalho das jornadas (`prototipo/index.ts`); o painel continua montado, porque é ele que prepara e executa.
+Na janela de fora, a rota tem `meta.palco` e o painel não monta. O roteiro dos slides (cenas, ajustes, falas, régua
+de datas) está em `src/prototipo/apresentacao/roteiro.ts`.
+
+**Troca de perfil no `ir`.** `?perfil=` na rota do `ir` entra na sessão antes de navegar (`RaizDosFluxos.vue`), porque o
+guard de perfil do roteador roda antes dos ganchos da camada e devolveria a pessoa ao próprio painel.
 
 `inicio.limpar` lista chaves do armazenamento com o nome completo. Elas saem do `sessionStorage` e do
 `localStorage` antes da carga. Um `*` no fim apaga pelo prefixo (`'rg:complemento:*'`). As chaves da própria

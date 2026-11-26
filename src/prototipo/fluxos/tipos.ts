@@ -97,6 +97,12 @@ export interface Inicio {
 }
 
 export interface PassoDoFluxo {
+  /**
+   * Abre um capítulo (opcional): o título dele, no primeiro passo. Uma jornada com capítulos é uma apresentação: o
+   * painel mostra o capítulo em que está e o botão principal reproduz o capítulo inteiro e para no fim dele, para
+   * quem apresenta falar antes do seguinte (26/11/2026).
+   */
+  capitulo?: string;
   /** O gesto, curto e imperativo: "Clique em Enviar cadastro." */
   fazer: string;
   /** O que observar depois do gesto, numa linha (opcional). */

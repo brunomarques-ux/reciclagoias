@@ -21,7 +21,7 @@ import { computed, onBeforeUnmount, onMounted, ref, useId, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { type TomDoSelo } from './rotulos';
-import { fluxoPorId, listaDoFluxo, proximoFluxo } from './registro';
+import { capituloDoPasso, capitulosDe, fluxoPorId, listaDoFluxo, proximoFluxo } from './registro';
 import { atualizarFluxoAtivo, definirFluxoAtivo, useFluxoAtivo, type ModoDoFluxo } from './sessao';
 import {
   anterior, cancelar, continuar, entendi, executarPassoAtual, irPara, pausar, preparar, proximo, recomecar, repetir,
@@ -78,6 +78,12 @@ const passo = computed(() => Math.min(Math.max(ativo.value?.passo ?? 0, 0), Math
 const atual = computed(() => fluxo.value?.passos[passo.value]);
 const proxFluxo = computed(() => (fluxo.value ? proximoFluxo(fluxo.value.id) : undefined));
 const auto = computed(() => ativo.value?.modo === 'auto');
+// Jornada de apresentação (com capítulos): o painel diz o capítulo e o principal reproduz o capítulo inteiro
+const capitulos = computed(() => capitulosDe(fluxo.value));
+const capAtual = computed(() => capituloDoPasso(fluxo.value, passo.value));
+/** O passo que o principal vai executar: o atual, ou o seguinte se o atual já foi feito. */
+const passoDoPlay = computed(() => (ativo.value?.feito ? Math.min(passo.value + 1, total.value - 1) : passo.value));
+const capDoPlay = computed(() => capituloDoPasso(fluxo.value, passoDoPlay.value));
 const recolhido = computed(() => !!ativo.value?.recolhido);
 const feito = computed(() => !!ativo.value?.feito);
 const preparando = computed(() => status.value.fase === 'preparando' || !!ativo.value?.preparar);
@@ -116,6 +122,11 @@ function iniciarProximo() {
 const principal = computed(() => {
   if (status.value.fase === 'executando') return { rotulo: 'Pausar', icone: 'mdi-pause', acao: pausar };
   if (status.value.fase === 'pausado') return { rotulo: 'Continuar', icone: 'mdi-play', acao: continuar };
+  if (capitulos.value.length && capDoPlay.value >= 0) {
+    const c = capitulos.value[capDoPlay.value];
+    const verbo = passoDoPlay.value === c.inicio ? 'Reproduzir' : 'Continuar';
+    return { rotulo: `${verbo} capítulo ${capDoPlay.value + 1}`, icone: 'mdi-play', acao: () => void executarPassoAtual({ capitulo: true }) };
+  }
   if (feito.value && passo.value + 1 < total.value) {
     return { rotulo: `Executar passo ${passo.value + 2}`, icone: 'mdi-play', acao: () => void executarPassoAtual() };
   }
@@ -213,6 +224,9 @@ function estadoDoPasso(i: number): 'feito' | 'atual' | 'a fazer' {
           </button>
         </div>
         <div class="fx-painel__progresso">
+          <p v-if="capAtual >= 0" class="fx-painel__capitulo">
+            Capítulo {{ capAtual + 1 }} de {{ capitulos.length }} · <strong>{{ capitulos[capAtual].titulo }}</strong>
+          </p>
           <p class="fx-painel__count" aria-live="polite">
             Passo {{ passo + 1 }} de {{ total }}<template v-if="estado.id !== 'sua-vez' && estado.id !== 'pronto'"><span class="fx-painel__estado" :data-tom="estado.tom"> · {{ estado.rotulo }}</span></template>
           </p>
@@ -223,6 +237,7 @@ function estadoDoPasso(i: number): 'feito' | 'atual' | 'a fazer' {
                 class="fx-painel__seg"
                 :aria-current="i === passo ? 'step' : undefined"
                 :data-feito="estadoDoPasso(i) === 'feito' || undefined"
+                :data-capitulo="(i > 0 && !!p.capitulo) || undefined"
                 :aria-label="`Ir para o passo ${i + 1} (${estadoDoPasso(i)}): ${p.fazer}`"
                 :title="`Passo ${i + 1}: ${p.fazer}`"
                 :disabled="ocupado"
@@ -747,6 +762,15 @@ function estadoDoPasso(i: number): 'feito' | 'atual' | 'a fazer' {
 .fx-painel__estado[data-tom='danger'] { color: var(--rg-color-feedback-danger); }
 .fx-painel__trilha { display: flex; gap: 4px; margin: 0; padding: 0; list-style: none; }
 .fx-painel__trilha li { flex: 1; display: flex; }
+/* jornada com capítulos: um respiro maior antes do passo que abre cada capítulo */
+.fx-painel__trilha li:has(> [data-capitulo]) { margin-left: 6px; }
+.fx-painel__capitulo {
+  margin: 0;
+  color: var(--rg-color-text-secondary);
+  font-size: var(--rg-font-size-sm);
+  line-height: 20px;
+}
+.fx-painel__capitulo strong { color: var(--rg-color-text-primary); font-weight: var(--rg-font-weight-semibold); }
 .fx-painel__seg {
   flex: 1;
   height: 6px;

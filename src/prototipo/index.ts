@@ -53,6 +53,24 @@ export function instalarPrototipo({ app, router, pinia }: { app: App; router: Ro
     meta: { titulo: 'Jornadas da entrega' },
   });
 
+  // 1b. a apresentação em slides da validade (26/11/2026): alterna quadro e tela ao vivo, com o protótipo embutido
+  router.addRoute({
+    path: '/apresentacao-validade',
+    name: 'apresentacao-validade',
+    component: () => import('./apresentacao/ApresentacaoValidadePage.vue'),
+    meta: { titulo: 'Apresentação · Validade dos documentos', palco: true },
+  });
+  // Embutido no quadro da apresentação, o painel e o atalho das jornadas somem e a barra de rolagem também: quem
+  // comanda é o slide. O cursor e o destaque continuam. O painel segue montado (é ele que prepara e executa).
+  if (window.self !== window.top) {
+    document.documentElement.setAttribute('data-palco', '');
+    const estilo = document.createElement('style');
+    estilo.textContent =
+      "html[data-palco] [data-prototipo='fluxo-painel'],html[data-palco] .px-atalho{display:none!important}" +
+      'html[data-palco]{scrollbar-width:none}html[data-palco]::-webkit-scrollbar{display:none}';
+    document.head.appendChild(estilo);
+  }
+
   // 2. os cenários e as simulações pelo endereço: aplica, tira o parâmetro e segue para a tela
   router.beforeEach(async (to, from) => {
     const { demo, simular, ...resto } = to.query;

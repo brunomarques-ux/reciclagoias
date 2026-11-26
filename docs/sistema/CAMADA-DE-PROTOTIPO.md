@@ -1,6 +1,7 @@
 # Camada de protótipo: onde fica a fronteira e como remover
 
-Escrito em 16/11/2026, junto com a entrega "Ajustes da reunião de 13/11".
+Escrito em 16/11/2026, junto com a entrega "Ajustes da reunião de 13/11". Atualizado em 26/11/2026 com a entrega
+"Validade: regras de 19/11" (rota, cenários e as telas ilustrativas de Notas Fiscais e Saldo).
 
 O repositório tem duas coisas diferentes: as **telas** (o que vai para o desenvolvimento) e a **camada de
 protótipo** (o que só existe para demonstrar as telas). Este documento diz onde uma termina e a outra começa.
@@ -42,11 +43,13 @@ depois, com calma:
 | Endereço | O que faz |
 |---|---|
 | `/fluxos` | Cards por entrega |
+| `/fluxos/validade-19nov` | As quatro jornadas das regras de validade da Claudia, de 19/11, e a jornada de apresentação em capítulos |
+| `/apresentacao-validade` | A apresentação em slides da validade (26/11): capa, o caso, o quadro dos seis ajustes que vai sendo riscado e a tela ao vivo, com o protótipo embutido. `?cena=N` abre direto num slide. Código em `src/prototipo/apresentacao` |
 | `/fluxos/ajustes-13nov` | As jornadas L1 a L5 da reunião de 13/11 |
 | `/fluxos/anteriores` | Os nove fluxos de antes das entregas |
 | `?perfil=<gestora\|verificador\|admin\|operador>` | Entra no perfil sem passar pelo login |
 | `?fluxo=<id>&modo=<manual\|auto>` | Abre a jornada: `manual` é o passo a passo, `auto` é o executar direto |
-| `?demo=<cenário>` | Leva o complemento a um ponto de partida: `enviado`, `devolvido`, `corrigido`, `proposta`, `aprovado`, `vencendo`, `vencido`, `atualizado` |
+| `?demo=<cenário>` | Leva o complemento a um ponto de partida: `enviado`, `devolvido`, `corrigido`, `proposta`, `aprovado`, `vencendo`, `regularizacao`, `atualizado-no-prazo`, `vencido`, `atualizado`. Na validade de 19/11: `vencendo` é antes de vencer (troca já aberta), `regularizacao` é vencido dentro dos 10 dias (parcialmente ativo), `atualizado-no-prazo` é o documento novo enviado nesses 10 dias, `vencido` é o bloqueio total a partir do 11º dia e `atualizado` é o documento novo enviado depois do bloqueio |
 | `?simular=analise-comecou` | A próxima gravação da edição encontra a análise já começada |
 
 Os parâmetros saem da barra de endereço depois de aplicados.
@@ -64,7 +67,8 @@ nesta rodada:
 | `src/pages/EntrarPage.vue` e `src/stores/sessao.ts` | Login provisório, sem autenticação | A tela de login do sistema já existe e fica como está |
 | `src/pages/EmailsOperadorPage.vue` | Moldura de cliente de e-mail e o seletor de qual e-mail mostrar | O que vai ao desenvolvimento é o corpo do e-mail (bloco `.em`), não a moldura |
 | `src/components/gestora/ExploradorCenarios.vue` e `src/stores/explorador.ts` | Explorador de cenários dos dashboards, no rodapé do menu | É anterior a esta camada e está descrito no `CLAUDE.md`. Mover para `src/prototipo` fica como passo seguinte |
-| `src/stores/complemento.ts`, `soDocumentos` e `problemas` | A PROPOSTA de 13/11 para a SEMAD (conferência só em Documentos) | É variação de produto em avaliação, não camada de protótipo. Sai ou vira regra quando a SEMAD decidir |
+| `src/stores/complemento.ts`, `soDocumentos` e `problemas` | A conferência só em Documentos, proposta em 13/11 | Virou regra em 16/11 (PR #48): `soDocumentos` nasce ligado em todo o protótipo e dado errado se aponta com "Apontar problema" no bloco. O ramo da conferência campo a campo segue no código, desligado |
+| `src/pages/OperadorNotasFiscaisPage.vue` e `OperadorSaldoPage.vue` | Notas Fiscais e Saldo do operador, criadas em 26/11 só para mostrar o que fica suspenso e o que segue no período parcialmente ativo | Não têm referência no sistema: são ilustrativas. Vale só a regra (incluir nota nova fica suspenso, transferir crédito segue liberado), não a tela |
 
 ## Como acrescentar uma entrega
 
