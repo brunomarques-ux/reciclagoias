@@ -84,7 +84,7 @@ export const FLUXOS_VALIDADE_19NOV: Fluxo[] = [
       { ref: 'Claudia, 19/11, item 4', texto: 'No dia do vencimento sai o aviso de documento vencido, com os 10 dias corridos.' },
       { ref: 'Claudia, 19/11, item 2', texto: 'Parcialmente ativo: transferência de créditos permitida, inclusão de notas fiscais não.' },
       { ref: 'Claudia, 19/11, item 1', texto: 'Aviso 5 dias antes do bloqueio, se o documento não foi trocado.' },
-      { ref: 'Em aberto, 26/11', texto: 'A contagem dos 10 dias e a data do aviso de 5 dias são leitura nossa, a confirmar.' },
+      { ref: 'Decidido, 26/11', texto: 'Os 10 dias contam do dia seguinte ao vencimento (prazo até 24/12); o aviso de 5 dias sai em 20/12.' },
     ],
     inicio: { rota: '/emails-operador?email=vencido&demo=regularizacao', perfil: 'operador', limpar: LIMPAR },
     passos: [
@@ -191,7 +191,7 @@ export const FLUXOS_VALIDADE_19NOV: Fluxo[] = [
     apresentacao:
       'Na lista do Admin, o cadastro com documento vencido aparece como Parcialmente ativo. Quando o documento novo chega, ele volta ao topo como Documento atualizado e o analista confere só o alvará. Aprovado, o acesso volta inteiro.',
     regras: [
-      { ref: 'Claudia, 19/11, item 2', texto: 'A situação Parcialmente ativo aparece na lista. O nome está em aberto para a reunião de 26/11.' },
+      { ref: 'Claudia, 19/11, item 2', texto: 'A situação Parcialmente ativo aparece na lista, com o mesmo nome que o operador vê (decidido em 26/11).' },
       { ref: 'Planning de 13/11', texto: 'Mesma lista, no topo, como Documento atualizado. Só o documento trocado pede resposta.' },
     ],
     // Começa na ficha do cadastro e só depois vai à lista: trocar de cenário na mesma tela recarrega a página.
@@ -223,6 +223,186 @@ export const FLUXOS_VALIDADE_19NOV: Fluxo[] = [
           { tipo: 'olhar', alvo: { texto: 'Validade informada pelo operador' }, rotulo: 'A validade informada' },
           { tipo: 'clicar', alvo: { papel: 'button', nome: 'Sim', exato: true, dentro: ALVARA }, rotulo: 'Clique em Sim' },
           { tipo: 'olhar', alvo: { texto: 'Tudo conferido · documento atualizado em conformidade' }, rotulo: 'Pronto para aprovar' },
+        ],
+      },
+    ],
+  },
+  {
+    // Apresentação de 26/11/2026, 14h (Bruno com a Thainá, SEMAD): a história inteira numa jornada só, em capítulos,
+    // na linha do tempo do documento. Cada capítulo para no fim, para quem apresenta falar. O roteiro de fala está em
+    // docs/sistema/roteiro-apresentacao-validade-26nov.md. Sem encadear com L1 a L4 (registro.ts).
+    id: 'validade-19nov-apresentacao',
+    bloco: 'validade-19nov',
+    tipo: 'principal',
+    titulo: 'Apresentação · Validade do documento, do lembrete ao acesso de volta',
+    apresentacao:
+      'O alvará da cooperativa Recicla Cerrado vence em 14/12/2026. A jornada segue esse documento no tempo: os lembretes, a troca antes de vencer, o vencimento com 10 dias parcialmente ativo, o último aviso, o bloqueio total e a conferência do Admin, até o acesso voltar.',
+    regras: [
+      { ref: 'Claudia, 19/11, item 1', texto: 'Lembretes 60 e 30 dias antes do vencimento e 5 dias antes do bloqueio.' },
+      { ref: 'Claudia, 19/11, item 2', texto: '10 dias corridos parcialmente ativo: transfere créditos, não inclui nota fiscal.' },
+      { ref: 'Claudia, 19/11, item 3', texto: 'Bloqueio total no 11º dia; só a troca do documento abre; o acesso volta depois da validação.' },
+      { ref: 'Claudia, 19/11, item 4', texto: 'No dia do vencimento, aviso de documento vencido com o prazo de 10 dias.' },
+      { ref: 'Decidido, 26/11', texto: 'Prazo do dia seguinte ao vencimento (até 24/12), aviso de 5 dias em 20/12, nome Parcialmente ativo.' },
+    ],
+    inicio: { rota: '/emails-operador?email=vence-60&demo=vencendo', perfil: 'operador', limpar: LIMPAR },
+    passos: [
+      // 1 · 15/10
+      {
+        capitulo: '60 dias antes: o primeiro lembrete',
+        fazer: 'Em 15/10, 60 dias antes, o operador recebe o primeiro lembrete.',
+        observar: 'Diz qual documento vence, a data e o que acontece se vencer.',
+        acoes: [
+          { tipo: 'olhar', alvo: { papel: 'heading', nome: 'Documento vence em 60 dias' }, rotulo: 'Primeiro lembrete, 15/10' },
+          { tipo: 'olhar', alvo: { texto: 'há 10 dias corridos para regularizar' }, rotulo: 'O que acontece se vencer' },
+        ],
+      },
+      // 2 · 14/11
+      {
+        capitulo: '30 dias antes: o segundo lembrete e o aviso ao entrar',
+        fazer: 'Em 14/11, 30 dias antes, chega o segundo lembrete. Ele leva direto para a troca.',
+        observar: 'Mesmo e-mail, com o prazo menor.',
+        acoes: [
+          { tipo: 'ir', rota: '/emails-operador?email=vencendo', rotulo: '14/11, 30 dias antes' },
+          { tipo: 'olhar', alvo: { papel: 'heading', nome: 'Documento vence em 30 dias' }, rotulo: 'Segundo lembrete' },
+          { tipo: 'clicar', alvo: { papel: 'link', nome: 'Atualizar documento' }, rotulo: 'Clique em Atualizar documento' },
+        ],
+      },
+      {
+        fazer: 'Ao entrar, a Minha Conta mostra o aviso de documento perto de vencer.',
+        observar: 'Aviso de atenção, não de erro. O cadastro segue aprovado.',
+        acoes: [{ tipo: 'olhar', alvo: { texto: 'Você tem documento perto de vencer' }, rotulo: 'Aviso ao entrar' }],
+      },
+      // 3 · troca antes de vencer
+      {
+        capitulo: 'Se ele trocar antes de vencer',
+        fazer: 'Ele já pode trocar o alvará: anexa o novo, escolhe a validade no calendário e envia.',
+        observar: 'Só o documento perto de vencer aceita troca. Os outros seguem conferidos.',
+        acoes: [...TROCAR_O_ALVARA],
+      },
+      {
+        fazer: 'O documento vai para a conferência, e nada fica restrito.',
+        observar: 'Enquanto a equipe confere, o cadastro segue aprovado e o uso do sistema não muda.',
+        acoes: [
+          { tipo: 'olhar', alvo: { texto: 'Documento enviado para conferência' }, rotulo: 'Enviado para conferência' },
+          { tipo: 'olhar', alvo: { texto: 'nada muda no uso do sistema' }, rotulo: 'Sem restrição' },
+        ],
+      },
+      // 4 · 14/12
+      {
+        capitulo: 'Se não trocar: o vencimento, em 14/12',
+        fazer: 'Sem a troca, o alvará vence em 14/12. No mesmo dia sai o aviso de documento vencido.',
+        observar: 'Não bloqueia no dia: dá o prazo até 24/12 e diz o que fica suspenso.',
+        acoes: [
+          { tipo: 'ir', rota: '/emails-operador?email=vencido&demo=regularizacao', rotulo: '14/12, o alvará venceu' },
+          { tipo: 'olhar', alvo: { papel: 'heading', nome: 'Documento vencido' }, rotulo: 'Aviso de vencido' },
+          { tipo: 'olhar', alvo: { texto: 'Prazo para regularizar' }, rotulo: 'Prazo até 24/12' },
+          { tipo: 'clicar', alvo: { papel: 'link', nome: 'Atualizar documento' }, rotulo: 'Clique em Atualizar documento' },
+        ],
+      },
+      {
+        fazer: 'Na Minha Conta, o aviso vermelho: cadastro parcialmente ativo até 24/12.',
+        observar: 'O menu continua funcionando.',
+        acoes: [{ tipo: 'olhar', alvo: { texto: 'Documento vencido: regularize até' }, rotulo: 'Parcialmente ativo' }],
+      },
+      // 5 · os 10 dias
+      {
+        capitulo: 'Os 10 dias parcialmente ativo',
+        fazer: 'Em Notas Fiscais, incluir nota nova fica suspenso.',
+        observar: 'O botão fica desativado, com o motivo e o prazo ao lado.',
+        acoes: [
+          { tipo: 'clicar', alvo: { papel: 'link', nome: 'Notas Fiscais' }, rotulo: 'Clique em Notas Fiscais' },
+          { tipo: 'olhar', alvo: { texto: 'Inclusão de notas fiscais suspensa' }, rotulo: 'Inclusão suspensa' },
+          { tipo: 'olhar', alvo: { papel: 'button', nome: 'Incluir nota fiscal' }, rotulo: 'Botão desativado' },
+        ],
+      },
+      {
+        fazer: 'Em Saldo, a transferência de créditos continua liberada.',
+        observar: 'Notas Fiscais e Saldo são telas ilustrativas: vale a regra, não o desenho.',
+        acoes: [
+          { tipo: 'clicar', alvo: { papel: 'link', nome: 'Saldo' }, rotulo: 'Clique em Saldo' },
+          { tipo: 'olhar', alvo: { texto: 'Transferência de créditos liberada' }, rotulo: 'Créditos liberados' },
+          { tipo: 'olhar', alvo: { papel: 'button', nome: 'Transferir créditos' }, rotulo: 'Botão ativo' },
+        ],
+      },
+      // 6 · 20/12
+      {
+        capitulo: '20/12: o último aviso, 5 dias antes do bloqueio',
+        fazer: 'Em 20/12, ainda sem a troca, sai o último aviso, com a data do bloqueio.',
+        observar: 'O bloqueio total começa em 25/12.',
+        acoes: [
+          { tipo: 'ir', rota: '/emails-operador?email=bloqueio-em-5-dias', rotulo: '20/12, sem a troca' },
+          { tipo: 'olhar', alvo: { papel: 'heading', nome: 'Faltam 5 dias para o bloqueio' }, rotulo: 'Último aviso' },
+        ],
+      },
+      // 7 · 25/12
+      {
+        capitulo: '25/12: o bloqueio total',
+        fazer: 'No 11º dia, 25/12, o cadastro fica bloqueado por completo.',
+        observar: 'Notas Fiscais, Saldo e as demais funções ficam sem acesso. Só a Minha Conta abre, na etapa Documentos.',
+        acoes: [
+          { tipo: 'ir', rota: '/operador?demo=vencido', rotulo: '25/12, o 11º dia' },
+          { tipo: 'olhar', alvo: { texto: 'Cadastro bloqueado por documentação vencida' }, rotulo: 'Bloqueio total' },
+          { tipo: 'olhar', alvo: { texto: 'Notas Fiscais', exato: true }, rotulo: 'Menu sem acesso' },
+        ],
+      },
+      {
+        fazer: 'A única saída é trocar o alvará: anexa o novo, escolhe a validade e envia.',
+        observar: 'As outras etapas ficam fechadas.',
+        acoes: [...TROCAR_O_ALVARA],
+      },
+      {
+        fazer: 'Enviado, o cadastro segue bloqueado até a equipe conferir.',
+        acoes: [
+          { tipo: 'olhar', alvo: { texto: 'Documento enviado para conferência' }, rotulo: 'Enviado para conferência' },
+          { tipo: 'olhar', alvo: { texto: 'O cadastro continua bloqueado' }, rotulo: 'Ainda bloqueado' },
+        ],
+      },
+      // 8 · Admin
+      {
+        capitulo: 'O administrador: situação nova e conferência',
+        fazer: 'Do lado do Admin, o cadastro aparece como Parcialmente ativo, com o prazo e a data do bloqueio.',
+        observar: 'Mesmo nome que o operador vê.',
+        acoes: [
+          { tipo: 'ir', rota: '/admin/cadastros/OPL-2026-00184?demo=regularizacao&perfil=admin', rotulo: 'Agora, o administrador' },
+          { tipo: 'olhar', alvo: { texto: 'Parcialmente ativo · documento vencido' }, rotulo: 'Situação nova' },
+          { tipo: 'olhar', alvo: { texto: 'Parcialmente ativo até' }, rotulo: 'O prazo e o bloqueio' },
+        ],
+      },
+      {
+        fazer: 'Chegou o alvará novo: a linha volta ao topo como Documento atualizado. O analista abre a análise.',
+        acoes: [
+          { tipo: 'ir', rota: '/admin/cadastros?demo=atualizado-no-prazo', rotulo: 'O documento novo chegou' },
+          { tipo: 'olhar', alvo: { texto: 'Documento atualizado', exato: true }, rotulo: 'Documento atualizado' },
+          { tipo: 'clicar', alvo: MENU_DA_LINHA, rotulo: 'Abra o menu da linha' },
+          { tipo: 'clicar', alvo: { papel: 'menuitem', nome: 'Analisar' }, rotulo: 'Clique em Analisar' },
+        ],
+      },
+      {
+        fazer: 'A conferência diz de onde a troca partiu. O analista confere a validade e responde Sim no alvará.',
+        observar: 'Só o documento trocado pede resposta.',
+        acoes: [
+          { tipo: 'olhar', alvo: { texto: 'parcialmente ativo, sem inclusão de notas fiscais' }, rotulo: 'De onde veio a troca' },
+          { tipo: 'olhar', alvo: { texto: 'Validade informada pelo operador' }, rotulo: 'A validade informada' },
+          { tipo: 'clicar', alvo: { papel: 'button', nome: 'Sim', exato: true, dentro: ALVARA }, rotulo: 'Clique em Sim' },
+        ],
+      },
+      // 9 · o acesso volta
+      {
+        capitulo: 'Aprovado, o acesso volta',
+        fazer: 'O analista aprova o cadastro.',
+        observar: 'O operador é avisado por e-mail.',
+        acoes: [
+          { tipo: 'clicar', alvo: { papel: 'button', nome: 'Aprovar cadastro' }, rotulo: 'Clique em Aprovar cadastro' },
+          { tipo: 'clicar', alvo: { papel: 'button', nome: 'Aprovar cadastro', dentro: { papel: 'dialog', nome: 'Aprovar o cadastro?' } }, rotulo: 'Confirme' },
+          { tipo: 'olhar', alvo: { texto: 'Cadastro aprovado' }, rotulo: 'Aprovado' },
+        ],
+      },
+      {
+        fazer: 'De volta ao operador: Notas Fiscais aceita nota nova outra vez.',
+        observar: 'O cadastro está aprovado, sem aviso e sem restrição.',
+        acoes: [
+          { tipo: 'ir', rota: '/operador/notas-fiscais?perfil=operador', rotulo: 'O operador de novo' },
+          { tipo: 'olhar', alvo: { papel: 'button', nome: 'Incluir nota fiscal' }, rotulo: 'Inclusão liberada' },
         ],
       },
     ],

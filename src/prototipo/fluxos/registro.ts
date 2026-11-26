@@ -58,11 +58,37 @@ export function listaDoFluxo(f: Fluxo | undefined): string {
   return entrega ? `/fluxos/${entrega}` : f ? '/fluxos/anteriores' : '/fluxos';
 }
 
-/** O próximo fluxo na ordem da lista, dentro da mesma entrega (nos extras, nenhum). */
+/** Um capítulo de uma jornada de apresentação: o título e os passos dele (do `inicio` ao `fim`, inclusive). */
+export interface Capitulo {
+  titulo: string;
+  inicio: number;
+  fim: number;
+}
+
+/** Os capítulos da jornada, na ordem (vazio se ela não tem). Passos antes do primeiro capítulo ficam fora. */
+export function capitulosDe(f: Fluxo | undefined): Capitulo[] {
+  const lista: Capitulo[] = [];
+  f?.passos.forEach((p, i) => {
+    if (p.capitulo) lista.push({ titulo: p.capitulo, inicio: i, fim: i });
+    else if (lista.length) lista[lista.length - 1].fim = i;
+  });
+  return lista;
+}
+
+/** O índice do capítulo do passo `i` (-1 se a jornada não tem capítulos ou o passo vem antes do primeiro). */
+export function capituloDoPasso(f: Fluxo | undefined, i: number): number {
+  return capitulosDe(f).findIndex(c => i >= c.inicio && i <= c.fim);
+}
+
+/**
+ * O próximo fluxo na ordem da lista, dentro da mesma entrega (nos extras, nenhum). Uma jornada de apresentação (com
+ * capítulos) não encadeia com as outras, nem as outras com ela.
+ */
 export function proximoFluxo(id: string): Fluxo | undefined {
   const i = FLUXOS.findIndex(f => f.id === id);
   const prox = i >= 0 ? FLUXOS[i + 1] : undefined;
-  return prox && entregaDoFluxo(prox) === entregaDoFluxo(FLUXOS[i]) ? prox : undefined;
+  if (!prox || capitulosDe(FLUXOS[i]).length || capitulosDe(prox).length) return undefined;
+  return entregaDoFluxo(prox) === entregaDoFluxo(FLUXOS[i]) ? prox : undefined;
 }
 
 /**

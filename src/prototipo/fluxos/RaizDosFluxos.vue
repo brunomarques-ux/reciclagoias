@@ -37,7 +37,14 @@ const ativo = useFluxoAtivo();
 const pronto = ref(false);
 
 instalarApiDosFluxos();
-definirNavegador((rota) => router.push(rota));
+// A ação "ir" de uma jornada pode trocar de perfil (?perfil=admin no meio de uma apresentação): o perfil entra na
+// sessão ANTES de navegar, porque o guard de perfil do roteador roda antes de qualquer gancho desta camada e
+// devolveria o operador para o próprio painel (26/11/2026).
+definirNavegador((rota) => {
+  const p = perfilValido(new URLSearchParams(rota.split('?')[1] ?? '').get('perfil'));
+  if (p && !rota.startsWith(ROTA_DE_ENTRADA) && sessao.perfilId !== p) sessao.entrar(p);
+  return router.push(rota);
+});
 
 function perfilValido(v: unknown): PerfilId | null {
   return PERFIS.some((p) => p.id === v) ? (v as PerfilId) : null;
@@ -115,10 +122,13 @@ function tratarEndereco(): void {
 watch(() => route.fullPath, tratarEndereco, { immediate: true, flush: 'post' });
 
 // 4. o painel: com um fluxo ativo, fora da página /fluxos
-const mostrarPainel = computed(() => pronto.value && !!ativo.value && !String(route.name ?? '').startsWith('fluxos'));
+// (a apresentação em slides, meta.palco, embute o protótipo num quadro: o fluxo roda lá dentro, não nesta janela)
+const mostrarPainel = computed(
+  () => pronto.value && !!ativo.value && !route.meta.palco && !String(route.name ?? '').startsWith('fluxos'),
+);
 </script>
 
 <template>
   <PainelDoFluxo v-if="mostrarPainel" />
-  <AtalhoDasJornadas v-if="pronto" />
+  <AtalhoDasJornadas v-if="pronto && !route.meta.palco" />
 </template>
