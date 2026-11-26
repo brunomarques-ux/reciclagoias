@@ -22,6 +22,16 @@
  *   "bloqueado por documentação vencida": só a etapa Documentos abre, e só o
  *   documento vencido aceita troca. O documento novo, com a validade informada,
  *   volta para o Admin como "Documento atualizado" e só ele é conferido de novo.
+ * Regras de 19/11/2026 (Claudia, grupo HOMOLOGAÇÃO RECICLAGO; Figma: página
+ * `Novembro 2026 · Validade e bloqueio · Regras de 19/11`, seção `6558:1924`),
+ * que substituem o aviso único e o bloqueio no dia do vencimento:
+ * - Lembretes 60 e 30 dias antes do vencimento. O cadastro segue aprovado.
+ * - No vencimento, 10 dias corridos para trocar o documento, com o cadastro
+ *   "parcialmente ativo" (situação `regularizacao`): transfere créditos, não
+ *   inclui notas fiscais novas. A troca já pode ser feita nesse período.
+ * - Sem a troca, bloqueio total a partir do 11º dia (`bloqueado`).
+ * - O documento novo vai para o Admin; o acesso volta depois da conferência.
+ *   Enquanto ela não termina, vale a restrição de onde a troca partiu.
  * - PROPOSTA para a SEMAD (`soDocumentos`): a análise confere só os documentos;
  *   Dados gerais, Operação e Estrutura ficam em leitura, com "Apontar problema"
  *   por bloco. Enquanto a SEMAD não decide, vale a conferência campo a campo.
@@ -63,6 +73,8 @@ export type Situacao =
   | 'em-analise'
   | 'devolvido'
   | 'aprovado'
+  /** Regras de 19/11: documento vencido, 10 dias para trocar. Parcialmente ativo: sem nota fiscal nova. */
+  | 'regularizacao'
   /** Bloqueado por documentação vencida: só a etapa Documentos abre. */
   | 'bloqueado'
   /** O documento novo foi enviado e espera a conferência do Admin. */
@@ -84,6 +96,44 @@ export interface TrocaDeDocumento {
   enviadoEm: string | null;
   /** Motivo da recusa na conferência do documento novo, se houve. */
   recusa: string | null;
+  /** De onde a troca partiu: define o que segue restrito enquanto o Admin confere (regras de 19/11). */
+  origem?: 'antecipada' | 'regularizacao' | 'bloqueio' | null;
+}
+
+/** Os marcos da validade (regras de 19/11), contados a partir do vencimento. */
+export interface PrazosDaValidade {
+  lembrete60: string;
+  lembrete30: string;
+  venceEm: string;
+  /** Último dia para trocar: o 10º dia corrido depois do vencimento. */
+  prazoAte: string;
+  /** 5 dias antes do bloqueio (leitura nossa da regra, a confirmar com a SEMAD). */
+  ultimoAviso: string;
+  /** O 11º dia: bloqueio total. */
+  bloqueioEm: string;
+}
+
+/** DD/MM/AAAA somado de n dias corridos. */
+export function somarDias(data: string, n: number): string {
+  const [d, m, a] = data.split('/').map(Number);
+  const x = new Date(a!, m! - 1, d! + n);
+  const p = (v: number) => String(v).padStart(2, '0');
+  return `${p(x.getDate())}/${p(x.getMonth() + 1)}/${x.getFullYear()}`;
+}
+
+/**
+ * Os 10 dias contam a partir do dia seguinte ao vencimento (leitura nossa, em aberto para a reunião de 26/11): vence
+ * 14/12, prazo até 24/12, aviso de 5 dias em 20/12, bloqueio em 25/12.
+ */
+export function prazosDaValidade(venceEm: string): PrazosDaValidade {
+  return {
+    lembrete60: somarDias(venceEm, -60),
+    lembrete30: somarDias(venceEm, -30),
+    venceEm,
+    prazoAte: somarDias(venceEm, 10),
+    ultimoAviso: somarDias(venceEm, 6),
+    bloqueioEm: somarDias(venceEm, 11),
+  };
 }
 
 /** Proposta de 13/11: problema apontado pelo analista num bloco de dados. */
@@ -517,8 +567,39 @@ function setupDoCadastro(protocolo: string, identidade: PreCadastro, chave: stri
     () => situacao.value === 'documento-atualizado' || (situacao.value === 'em-analise' && revalidacao.value),
   );
   const bloqueado = computed(() => situacao.value === 'bloqueado');
-  /** O complemento dentro de Minha Conta: aprovado, bloqueado ou com o documento novo em conferência. */
-  const naMinhaConta = computed(() => situacao.value === 'aprovado' || bloqueado.value || emConferencia.value);
+  /** Regras de 19/11: vencido, dentro dos 10 dias para trocar. */
+  const emRegularizacao = computed(() => situacao.value === 'regularizacao');
+  /**
+   * O documento acompanhado aceita troca: antes de vencer (os lembretes pedem a troca antecipada), nos 10 dias de
+   * regularização e no bloqueio total.
+   */
+  const trocaAberta = computed(
+    () =>
+      bloqueado.value ||
+      emRegularizacao.value ||
+      (situacao.value === 'aprovado' && !!vencimento.value && !vencimento.value.vencido),
+  );
+  /** O complemento dentro de Minha Conta: aprovado, vencido (parcial ou bloqueado) ou com o documento novo em conferência. */
+  const naMinhaConta = computed(
+    () => situacao.value === 'aprovado' || trocaAberta.value || emConferencia.value,
+  );
+  /** Os marcos da validade do documento acompanhado, ou nada. */
+  const prazos = computed(() => (vencimento.value ? prazosDaValidade(vencimento.value.venceEm) : null));
+  /**
+   * Até onde o operador usa o sistema (regras de 19/11):
+   * - completo: aprovado, inclusive nos lembretes antes de vencer;
+   * - parcial: vencido nos 10 dias, transfere créditos e não inclui nota fiscal nova;
+   * - bloqueado: a partir do 11º dia, só a troca do documento.
+   * Com o documento novo em conferência, vale a restrição de onde a troca partiu.
+   */
+  const acesso = computed<'completo' | 'parcial' | 'bloqueado' | null>(() => {
+    if (emRegularizacao.value) return 'parcial';
+    if (bloqueado.value) return 'bloqueado';
+    if (emConferencia.value)
+      return troca.origem === 'regularizacao' ? 'parcial' : troca.origem === 'antecipada' ? 'completo' : 'bloqueado';
+    if (situacao.value === 'aprovado') return 'completo';
+    return null;
+  });
   /** Na Minha Conta os dados são só para consulta (a troca do documento vencido tem controle próprio). */
   const contaTravada = computed(() => naMinhaConta.value);
   /** Aprovado, com documento vencendo em 30 dias ou menos: aviso no topo, nada bloqueado. */
@@ -535,32 +616,54 @@ function setupDoCadastro(protocolo: string, identidade: PreCadastro, chave: stri
   const VALIDADE = /^\d{2}\/\d{2}\/\d{4}$/;
 
   function anexarDocumentoNovo() {
-    if (!bloqueado.value || !vencimento.value) return;
+    if (!trocaAberta.value || !vencimento.value) return;
     // anexo simulado: o arquivo novo do exemplo, como no frame
     const doc = vencimento.value.doc;
     troca.arquivo = doc === VALIDADE_DEMO.doc ? VALIDADE_DEMO.arquivoNovo : arquivoCorrigido(doc);
     errosDaTroca.value = errosDaTroca.value.filter((e) => e !== 'arquivo');
   }
   function removerDocumentoNovo() {
-    if (bloqueado.value) troca.arquivo = null;
+    if (trocaAberta.value) troca.arquivo = null;
   }
   function informarValidade(valor: string) {
     troca.validade = valor;
     if (VALIDADE.test(valor.trim())) errosDaTroca.value = errosDaTroca.value.filter((e) => e !== 'validade');
   }
 
-  /** O documento venceu sem a troca: a rotina de validade bloqueia o cadastro e só Documentos abre. */
-  function bloquearPorVencimento() {
+  /**
+   * Dia do vencimento (regras de 19/11, itens 2 e 4): a rotina de validade manda o aviso de vencido e o cadastro fica
+   * parcialmente ativo por 10 dias corridos. Nada de bloqueio ainda.
+   */
+  function iniciarRegularizacao() {
     if (situacao.value !== 'aprovado' || !vencimento.value) return;
+    vencimento.value.vencido = true;
+    situacao.value = 'regularizacao';
+    historico.unshift({
+      data: quando(),
+      titulo: 'Documento vencido',
+      desc: `${rotuloDoItem(vencimento.value.doc)} venceu. Prazo para troca até ${prazosDaValidade(vencimento.value.venceEm).prazoAte}; inclusão de notas fiscais suspensa.`,
+      quem: 'Rotina de validade',
+    });
+  }
+
+  /** 11º dia sem a troca (regras de 19/11, item 3): bloqueio total, só a etapa Documentos abre. */
+  function bloquearPorVencimento() {
+    if (!(situacao.value === 'aprovado' || emRegularizacao.value) || !vencimento.value) return;
     vencimento.value.vencido = true;
     situacao.value = 'bloqueado';
     etapa.value = 2;
+    historico.unshift({
+      data: quando(),
+      titulo: 'Cadastro bloqueado',
+      desc: `${rotuloDoItem(vencimento.value.doc)} não foi trocado em 10 dias. Bloqueio total até a regularização.`,
+      quem: 'Rotina de validade',
+    });
   }
 
-  /** O documento novo volta para o Admin. O cadastro continua bloqueado até a conferência. */
+  /** O documento novo volta para o Admin. Até a conferência, segue a restrição de onde a troca partiu. */
   function enviarParaConferencia(): boolean {
     const v = vencimento.value;
-    if (!bloqueado.value || !v) return false;
+    if (!trocaAberta.value || !v) return false;
     const erros: ('arquivo' | 'validade')[] = [];
     if (!troca.arquivo) erros.push('arquivo');
     if (!VALIDADE.test(troca.validade.trim())) erros.push('validade');
@@ -568,6 +671,7 @@ function setupDoCadastro(protocolo: string, identidade: PreCadastro, chave: stri
     if (erros.length) return false;
 
     formulario.documentos[v.doc] = { arquivo: troca.arquivo };
+    troca.origem = bloqueado.value ? 'bloqueio' : emRegularizacao.value ? 'regularizacao' : 'antecipada';
     troca.enviadoEm = quando();
     troca.recusa = null;
     situacao.value = 'documento-atualizado';
@@ -837,13 +941,14 @@ function setupDoCadastro(protocolo: string, identidade: PreCadastro, chave: stri
 
   function devolver(mensagem: string) {
     if (revalidacao.value) {
-      // O documento novo foi recusado: o cadastro segue bloqueado e o operador troca de novo.
+      // O documento novo foi recusado: volta à situação de onde a troca partiu e o operador troca de novo.
       const doc = vencimento.value?.doc ?? '';
       troca.recusa = conferencia[doc]?.texto.trim() ?? '';
       troca.arquivo = null;
       troca.enviadoEm = null;
       mensagemEnviada.value = mensagem;
-      situacao.value = 'bloqueado';
+      situacao.value =
+        troca.origem === 'regularizacao' ? 'regularizacao' : troca.origem === 'antecipada' ? 'aprovado' : 'bloqueado';
       etapa.value = 2;
       historico.unshift({
         data: quando(),
@@ -884,6 +989,7 @@ function setupDoCadastro(protocolo: string, identidade: PreCadastro, chave: stri
     if (revalidacao.value) {
       revalidacao.value = false;
       vencimento.value = null;
+      troca.origem = null;
       historico.unshift({
         data: quando(),
         titulo: 'Documento conferido',
@@ -911,6 +1017,11 @@ function setupDoCadastro(protocolo: string, identidade: PreCadastro, chave: stri
     relogio,
     emConferencia,
     bloqueado,
+    emRegularizacao,
+    trocaAberta,
+    prazos,
+    acesso,
+    iniciarRegularizacao,
     naMinhaConta,
     contaTravada,
     avisoDeVencimento,

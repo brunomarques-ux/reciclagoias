@@ -37,6 +37,52 @@ export interface EntregaDoPrototipo {
 
 export const ENTREGAS: readonly EntregaDoPrototipo[] = [
   {
+    id: 'validade-19nov',
+    titulo: 'Validade: regras de 19/11',
+    origem: 'Mensagem da Claudia no grupo HOMOLOGAÇÃO RECICLAGO, 19/11/2026 · os itens são os da mensagem',
+    resumo:
+      'O que acontece com o operador logístico quando um documento com validade vai vencer e vence: dois lembretes, 10 dias com o cadastro parcialmente ativo, bloqueio total no 11º dia e a conferência do documento novo. Substitui o aviso único e o bloqueio no vencimento de 13/11.',
+    figma: 'Recicla Goiás - Figma · página Novembro 2026 · Validade e bloqueio · Regras de 19/11',
+    itens: [
+      {
+        codigo: 'L1',
+        minuto: 'item 1',
+        natureza: 'Ajuste',
+        titulo: 'Antes de vencer: dois lembretes',
+        muda: 'O aviso único de 30 dias vira dois e-mails, a 60 e a 30 dias. O documento já pode ser trocado antes de vencer.',
+        perfil: 'Operador logístico',
+        fluxo: 'validade-19nov-l1-antes-de-vencer',
+      },
+      {
+        codigo: 'L2',
+        minuto: 'itens 1, 2 e 4',
+        natureza: 'Fluxo novo',
+        titulo: 'Vencido: 10 dias para regularizar',
+        muda: 'No vencimento o cadastro não bloqueia: fica parcialmente ativo por 10 dias, sem nota fiscal nova e com a transferência de créditos liberada.',
+        perfil: 'Operador logístico',
+        fluxo: 'validade-19nov-l2-regularizacao',
+      },
+      {
+        codigo: 'L3',
+        minuto: 'item 3',
+        natureza: 'Ajuste',
+        titulo: 'Bloqueio total a partir do 11º dia',
+        muda: 'O bloqueio passa para o 11º dia e fica total: o menu fica inerte e só a troca do documento abre.',
+        perfil: 'Operador logístico',
+        fluxo: 'validade-19nov-l3-bloqueio-total',
+      },
+      {
+        codigo: 'L4',
+        minuto: 'item 3',
+        natureza: 'Ajuste',
+        titulo: 'Admin: situação nova e conferência',
+        muda: 'A lista ganha a situação Parcialmente ativo; a conferência do documento novo diz de onde a troca partiu.',
+        perfil: 'Admin',
+        fluxo: 'validade-19nov-l4-admin',
+      },
+    ],
+  },
+  {
     id: 'ajustes-13nov',
     titulo: 'Ajustes da reunião de 13/11',
     origem: 'Planning de 13/11/2026 com o desenvolvimento · os minutos são os da gravação',

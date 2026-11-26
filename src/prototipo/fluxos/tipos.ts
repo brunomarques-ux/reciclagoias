@@ -14,7 +14,7 @@
 import type { PerfilId } from '@/data/mocks/sessao';
 
 /** Os blocos da página /fluxos, na ordem em que aparecem (a lista mora em dados/index.ts). */
-export type BlocoId = 'operador' | 'admin' | 'ajustes-13nov';
+export type BlocoId = 'operador' | 'admin' | 'ajustes-13nov' | 'validade-19nov';
 export type TipoDeFluxo = 'principal' | 'alternativo' | 'excecao';
 
 export interface BlocoDeFluxos {

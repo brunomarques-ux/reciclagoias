@@ -72,15 +72,19 @@ export interface DocumentoExigido {
 }
 
 /**
- * Exemplo da validade dos documentos (planning de 13/11/2026), com as datas dos
- * frames: o alvará vence em 14/12, o aviso sai 30 dias antes, o e-mail de vencido
- * sai no dia seguinte e o documento novo é enviado em 16/12.
+ * Exemplo da validade dos documentos, com as datas da página de 19/11 no Figma:
+ * o alvará vence em 14/12; lembretes em 15/10 e 14/11; aviso de vencido em 14/12;
+ * prazo até 24/12; último aviso em 20/12; bloqueio total em 25/12. O documento
+ * novo chega em 18/12 (troca dentro do prazo) ou em 26/12 (depois do bloqueio).
  */
 export const VALIDADE_DEMO = {
   doc: 'alvara',
   venceEm: '14/12/2026',
   aprovadoEm: '04/09/2026, às 16h20',
-  reenvioEm: '16/12/2026, às 09h14',
+  vencidoEm: '14/12/2026, às 08h00',
+  bloqueadoEm: '25/12/2026, às 00h05',
+  reenvioNoPrazoEm: '18/12/2026, às 09h14',
+  reenvioEm: '26/12/2026, às 09h14',
   arquivoNovo: 'alvara-funcionamento-2027.pdf',
   novaValidade: '14/12/2027',
 } as const;
@@ -234,7 +238,7 @@ export interface CadastroDeExemplo extends PreCadastro {
 const cnaesPadrao = ['3811-4/00', '3831-9/99', '3839-4/99'];
 
 export const CADASTROS_DE_EXEMPLO: readonly CadastroDeExemplo[] = [
-  { protocolo: 'OPL-2026-00187', telefone: '(64) 3621-4410', anoCriacao: '2011', cooperados: '52', razaoSocial: 'Cooperativa Recicla Vale do Araguaia', nomeFantasia: 'Recicla Araguaia', cnpj: '27.903.114/0001-62', cnae: '3811-4/00', cnaes: cnaesPadrao, email: 'contato@reciclaaraguaia.org.br', tipoOrganizacao: 'cooperativa', situacao: 'atualizado', enviado: '16/12/2026', analista: null },
+  { protocolo: 'OPL-2026-00187', telefone: '(64) 3621-4410', anoCriacao: '2011', cooperados: '52', razaoSocial: 'Cooperativa Recicla Vale do Araguaia', nomeFantasia: 'Recicla Araguaia', cnpj: '27.903.114/0001-62', cnae: '3811-4/00', cnaes: cnaesPadrao, email: 'contato@reciclaaraguaia.org.br', tipoOrganizacao: 'cooperativa', situacao: 'atualizado', enviado: '26/12/2026', analista: null },
   { protocolo: 'OPL-2026-00182', telefone: '(62) 3249-7731', anoCriacao: '2018', cooperados: '0', razaoSocial: 'Central de Triagem Goiânia Leste Ltda', nomeFantasia: 'Triagem Leste', cnpj: '35.611.208/0001-47', cnae: '3831-9/99', cnaes: cnaesPadrao, email: 'cadastro@triagemleste.com.br', tipoOrganizacao: 'empresa', situacao: 'corrigido', enviado: '05/09/2026', analista: null },
   { protocolo: 'OPL-2026-00179', telefone: '(62) 3088-1290', anoCriacao: '2009', cooperados: '0', razaoSocial: 'Reciclagem Anhanguera Ltda', nomeFantasia: 'Anhanguera Reciclagem', cnpj: '31.204.118/0001-09', cnae: '3831-9/99', cnaes: cnaesPadrao, email: 'contato@anhanguerareciclagem.com.br', tipoOrganizacao: 'empresa', situacao: 'em-analise', enviado: '29/08/2026', analista: 'Carlos Mendes' },
   { protocolo: 'OPL-2026-00171', telefone: '(62) 3277-5084', anoCriacao: '2016', cooperados: '27', razaoSocial: 'Cooperativa Mãos que Reciclam', nomeFantasia: 'Mãos que Reciclam', cnpj: '18.330.442/0001-71', cnae: '3811-4/00', cnaes: cnaesPadrao, email: 'contato@maosquereciclam.org.br', tipoOrganizacao: 'cooperativa', situacao: 'devolvido', enviado: '27/08/2026', analista: 'Ana Ribeiro' },

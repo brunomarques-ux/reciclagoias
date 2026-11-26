@@ -10,25 +10,33 @@
  *
  * Planning de 13/11/2026 (Figma `6507:5392` e `6507:5886`, L1·1 e L1·3): os dois
  * e-mails da validade dos documentos, o aviso a 30 dias e o de documento vencido.
- * Os dois botões levam à etapa Documentos, dentro de Minha Conta.
+ * Os botões levam à etapa Documentos, dentro de Minha Conta.
+ *
+ * Regras de 19/11/2026 (Figma: página `Novembro 2026 · Validade e bloqueio · Regras
+ * de 19/11`, seção `6558:1924`): quatro e-mails da validade. Lembretes de 60 e 30
+ * dias, aviso no dia do vencimento com o prazo de 10 dias e o que fica suspenso, e
+ * o último aviso 5 dias antes do bloqueio. O e-mail de vencido deixa de dizer que o
+ * cadastro está bloqueado. As datas saem do vencimento (prazosDaValidade).
  */
 import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { DOCUMENTOS_EXIGIDOS, PRE_CADASTRO, VALIDADE_DEMO } from '@/data/mocks/operador';
-import { useComplementoStore } from '@/stores/complemento';
+import { prazosDaValidade, useComplementoStore } from '@/stores/complemento';
 
 const route = useRoute();
 const router = useRouter();
 const c = useComplementoStore();
 
-type Qual = 'ativacao' | 'correcao' | 'aprovado' | 'vencendo' | 'vencido';
+type Qual = 'ativacao' | 'correcao' | 'aprovado' | 'vence-60' | 'vencendo' | 'vencido' | 'bloqueio-em-5-dias';
 const QUAIS: { id: Qual; rotulo: string }[] = [
   { id: 'ativacao', rotulo: 'Ativação' },
   { id: 'correcao', rotulo: 'Correção' },
   { id: 'aprovado', rotulo: 'Aprovado' },
+  { id: 'vence-60', rotulo: 'Vence em 60 dias' },
   { id: 'vencendo', rotulo: 'Vence em 30 dias' },
-  { id: 'vencido', rotulo: 'Documento vencido' },
+  { id: 'vencido', rotulo: 'Venceu hoje' },
+  { id: 'bloqueio-em-5-dias', rotulo: '5 dias para o bloqueio' },
 ];
 const qual = computed<Qual>(() => QUAIS.find((q) => q.id === route.query.email)?.id ?? 'ativacao');
 
@@ -36,16 +44,26 @@ const ASSUNTO: Record<Qual, string> = {
   ativacao: 'Confirme seu e-mail para continuar o cadastro',
   correcao: 'Seu cadastro precisa de correção',
   aprovado: 'Cadastro aprovado no Recicla Goiás',
+  'vence-60': 'Documento vence em 60 dias no Recicla Goiás',
   vencendo: 'Documento vence em 30 dias no Recicla Goiás',
-  vencido: 'Cadastro bloqueado: documento vencido no Recicla Goiás',
+  vencido: 'Documento vencido: 10 dias para regularizar no Recicla Goiás',
+  'bloqueio-em-5-dias': 'Faltam 5 dias para o bloqueio do cadastro no Recicla Goiás',
 };
-const QUANDO: Record<Qual, string> = {
+/** "14/12/2026" vira "14 de dez. de 2026, 08:00", como o Gmail mostra. */
+const MESES = ['jan.', 'fev.', 'mar.', 'abr.', 'maio', 'jun.', 'jul.', 'ago.', 'set.', 'out.', 'nov.', 'dez.'];
+const porExtenso = (data: string) => {
+  const [d, m, a] = data.split('/');
+  return `${Number(d)} de ${MESES[Number(m) - 1]} de ${a}, 08:00`;
+};
+const QUANDO = computed<Record<Qual, string>>(() => ({
   ativacao: '08:02 (há 34 minutos)',
   correcao: '4 de set. de 2026, 16:20',
   aprovado: '8 de set. de 2026, 10:05',
-  vencendo: '14 de nov. de 2026, 08:00',
-  vencido: '15 de dez. de 2026, 08:00',
-};
+  'vence-60': porExtenso(prazos.value.lembrete60),
+  vencendo: porExtenso(prazos.value.lembrete30),
+  vencido: porExtenso(prazos.value.venceEm),
+  'bloqueio-em-5-dias': porExtenso(prazos.value.ultimoAviso),
+}));
 
 // ---- validade dos documentos: o documento e a data vêm da store; sem cenário, o exemplo do Figma ----
 const docDaValidade = computed(
@@ -57,6 +75,9 @@ const rotuloMinusculo = computed(() => {
 });
 const nomeCurto = computed(() => docDaValidade.value.nomeCurto ?? 'documento');
 const venceEm = computed(() => c.vencimento?.venceEm ?? VALIDADE_DEMO.venceEm);
+const prazos = computed(() => prazosDaValidade(venceEm.value));
+/** Os dois lembretes antes de vencer: o mesmo e-mail, com o prazo de cada um. */
+const diasParaVencer = computed(() => (qual.value === 'vence-60' ? 60 : 30));
 
 /** Os dois e-mails da validade levam à etapa Documentos, em Minha Conta. */
 function abrirDocumentos() {
@@ -194,10 +215,10 @@ function trocar(q: Qual) {
               <p>Após o reenvio, o cadastro é analisado novamente.</p>
             </template>
 
-            <template v-else-if="qual === 'vencendo'">
-              <h2 class="em__titulo">Documento perto de vencer</h2>
+            <template v-else-if="qual === 'vence-60' || qual === 'vencendo'">
+              <h2 class="em__titulo">Documento vence em {{ diasParaVencer }} dias</h2>
               <p class="em__saudacao">Prezado(a) representante da {{ PRE_CADASTRO.razaoSocial }},</p>
-              <p><strong class="em__forte">O {{ rotuloMinusculo }} da cooperativa vence em 30 dias.</strong> Para o cadastro continuar regular, envie o documento atualizado antes do vencimento.</p>
+              <p><strong class="em__forte">O {{ rotuloMinusculo }} da cooperativa vence em {{ diasParaVencer }} dias.</strong> Para o cadastro continuar regular, envie o documento atualizado antes do vencimento.</p>
               <dl class="em__resumo">
                 <div><dt>Organização</dt><dd>{{ PRE_CADASTRO.razaoSocial }}</dd></div>
                 <div><dt>CNPJ</dt><dd>{{ PRE_CADASTRO.cnpj }}</dd></div>
@@ -205,7 +226,7 @@ function trocar(q: Qual) {
                 <div><dt>Vence em</dt><dd>{{ venceEm }}</dd></div>
               </dl>
               <p class="em__saudacao">O que fazer</p>
-              <p>Acesse o sistema, abra a etapa Documentos em Minha Conta e anexe o {{ nomeCurto }} novo, com a data de validade. O documento passa pela conferência da equipe antes de valer. Se o prazo vencer sem a troca, o cadastro fica bloqueado até a regularização.</p>
+              <p>Acesse o sistema, abra a etapa Documentos em Minha Conta e anexe o {{ nomeCurto }} novo, com a data de validade. O documento passa pela conferência da equipe antes de valer. Se vencer sem a troca, há 10 dias corridos para regularizar; depois disso, o cadastro é bloqueado.</p>
               <a class="em__botao" href="/operador" @click.prevent="abrirDocumentos">Atualizar documento</a>
               <p>Se o documento já foi atualizado, desconsidere este aviso.</p>
             </template>
@@ -213,17 +234,34 @@ function trocar(q: Qual) {
             <template v-else-if="qual === 'vencido'">
               <h2 class="em__titulo">Documento vencido</h2>
               <p class="em__saudacao">Prezado(a) representante da {{ PRE_CADASTRO.razaoSocial }},</p>
-              <p><strong class="em__forte">O {{ rotuloMinusculo }} da cooperativa venceu e o cadastro está bloqueado por documentação vencida.</strong> Enquanto o documento novo não for enviado e conferido, as funções do operador logístico ficam indisponíveis.</p>
+              <p><strong class="em__forte">O {{ rotuloMinusculo }} da cooperativa venceu hoje, {{ venceEm }}. Você tem 10 dias corridos, até {{ prazos.prazoAte }}, para enviar o documento atualizado.</strong> Até lá, a transferência de créditos continua e a inclusão de novas notas fiscais fica suspensa. A partir de {{ prazos.bloqueioEm }}, sem a troca, o cadastro é bloqueado.</p>
               <dl class="em__resumo">
                 <div><dt>Organização</dt><dd>{{ PRE_CADASTRO.razaoSocial }}</dd></div>
                 <div><dt>CNPJ</dt><dd>{{ PRE_CADASTRO.cnpj }}</dd></div>
                 <div><dt>Documento</dt><dd>{{ docDaValidade.rotulo }}</dd></div>
                 <div><dt>Venceu em</dt><dd>{{ venceEm }}</dd></div>
+                <div><dt>Prazo para regularizar</dt><dd>{{ prazos.prazoAte }}</dd></div>
               </dl>
               <p class="em__saudacao">Como regularizar</p>
-              <p>Acesse o sistema e abra Minha Conta. Só a etapa Documentos fica aberta: anexe o {{ nomeCurto }} novo, informe a data de validade e envie. A equipe confere o documento e, estando tudo certo, o cadastro volta a ficar aprovado.</p>
-              <a class="em__botao" href="/operador" @click.prevent="abrirDocumentos">Regularizar documento</a>
+              <p>Acesse o sistema, abra a etapa Documentos em Minha Conta, anexe o {{ nomeCurto }} novo e informe a data de validade. A equipe confere o documento e, estando tudo certo, a inclusão de notas fiscais volta.</p>
+              <a class="em__botao" href="/operador" @click.prevent="abrirDocumentos">Atualizar documento</a>
               <p>Os demais dados do cadastro continuam salvos e não precisam ser preenchidos de novo.</p>
+            </template>
+
+            <template v-else-if="qual === 'bloqueio-em-5-dias'">
+              <h2 class="em__titulo">Faltam 5 dias para o bloqueio</h2>
+              <p class="em__saudacao">Prezado(a) representante da {{ PRE_CADASTRO.razaoSocial }},</p>
+              <p><strong class="em__forte">O {{ rotuloMinusculo }} da cooperativa venceu em {{ venceEm }} e ainda não foi atualizado.</strong> Se o documento novo não for enviado até {{ prazos.prazoAte }}, o cadastro será bloqueado a partir de {{ prazos.bloqueioEm }} e nenhuma operação poderá ser feita no sistema até a regularização.</p>
+              <dl class="em__resumo">
+                <div><dt>Organização</dt><dd>{{ PRE_CADASTRO.razaoSocial }}</dd></div>
+                <div><dt>CNPJ</dt><dd>{{ PRE_CADASTRO.cnpj }}</dd></div>
+                <div><dt>Documento</dt><dd>{{ docDaValidade.rotulo }}</dd></div>
+                <div><dt>Bloqueio em</dt><dd>{{ prazos.bloqueioEm }}</dd></div>
+              </dl>
+              <p class="em__saudacao">Como regularizar</p>
+              <p>Acesse o sistema, abra a etapa Documentos em Minha Conta, anexe o {{ nomeCurto }} novo e informe a data de validade. A equipe confere o documento antes de valer.</p>
+              <a class="em__botao" href="/operador" @click.prevent="abrirDocumentos">Atualizar documento</a>
+              <p>Se o documento já foi enviado, desconsidere este aviso.</p>
             </template>
 
             <template v-else>

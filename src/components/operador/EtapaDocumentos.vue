@@ -22,6 +22,9 @@
  *   Dropzone da correção e a validade é informada no campo ao lado.
  * - Enviado para conferência (L1·5, `6507:6524`): o documento novo fica só para
  *   consulta, com o chip Em conferência e a validade travada.
+ * Regras de 19/11/2026 (Figma `6558:1924`): a troca abre também antes de vencer
+ * (lembretes de 60 e 30 dias) e nos 10 dias de regularização, cada fase com o
+ * seu texto. O envio continua o mesmo.
  * O campo de validade é PROVISÓRIO: o definitivo vem do print da homologação.
  */
 import OxCampo from '@/components/operador/OxCampo.vue';
@@ -35,8 +38,11 @@ const complemento = useComplementoStore();
 const f = complemento.formulario;
 
 const devolvido = (id: string) => complemento.emCorrecao && complemento.devolvidos[id] !== undefined;
-/** O documento vencido, enquanto o cadastro está bloqueado: o único que aceita troca. */
-const vencido = (id: string) => complemento.bloqueado && complemento.vencimento?.doc === id;
+/**
+ * O documento acompanhado pela validade, enquanto aceita troca: antes de vencer, nos 10 dias de regularização e no
+ * bloqueio total (regras de 19/11). É o único que aceita troca.
+ */
+const vencido = (id: string) => complemento.trocaAberta && complemento.vencimento?.doc === id;
 /** O documento novo, enquanto o Admin confere. */
 const emConferencia = (id: string) => complemento.emConferencia && complemento.vencimento?.doc === id;
 const conferido = (id: string) =>
@@ -46,8 +52,10 @@ const conferido = (id: string) =>
 const soConsulta = computed(() => complemento.emCorrecao || complemento.naMinhaConta);
 
 const descricao = computed(() => {
-  if (complemento.bloqueado)
+  if (complemento.bloqueado || complemento.emRegularizacao)
     return 'Só o documento vencido pode ser trocado. Os demais continuam conferidos e não precisam ser enviados de novo.';
+  if (complemento.trocaAberta)
+    return 'O documento perto de vencer já pode ser trocado. Os demais continuam conferidos e não precisam ser enviados de novo.';
   if (complemento.emConferencia) return 'O documento enviado está em conferência. Os demais continuam conferidos.';
   if (complemento.naMinhaConta) return 'Os documentos foram conferidos na análise do cadastro e ficam só para consulta.';
   if (complemento.emCorrecao)
@@ -60,8 +68,16 @@ const motivoDoVencido = computed(() => {
   if (complemento.troca.recusa) return complemento.troca.recusa;
   const v = complemento.vencimento;
   const nome = DOCUMENTOS_EXIGIDOS.find((d) => d.id === v?.doc)?.nomeCurto ?? 'documento';
-  return `o ${nome} venceu em ${v?.venceEm ?? ''}. Anexe o ${nome} válido e informe a nova data de validade.`;
+  if (complemento.emRegularizacao)
+    return `o ${nome} venceu em ${v?.venceEm ?? ''}. Anexe o ${nome} válido e informe a nova data de validade até ${complemento.prazos?.prazoAte ?? ''} para evitar o bloqueio.`;
+  if (!complemento.bloqueado)
+    return `o ${nome} vence em ${v?.venceEm ?? ''}. Anexe o ${nome} novo e informe a nova data de validade.`;
+  return `o ${nome} venceu em ${v?.venceEm ?? ''} e não foi trocado no prazo. Anexe o ${nome} válido e informe a nova data de validade.`;
 });
+/** O rótulo da nota: antes de vencer não é motivo de recusa, é aviso. */
+const rotuloDaNota = computed(() =>
+  complemento.troca.recusa || complemento.bloqueado || complemento.emRegularizacao ? 'Motivo:' : 'Aviso:',
+);
 const erroDaTroca = (qual: 'arquivo' | 'validade') => complemento.errosDaTroca.includes(qual);
 const emErro = (id: string) => complemento.camposEmErro.includes(id) && !f.documentos[id]?.arquivo;
 </script>
@@ -83,7 +99,7 @@ const emErro = (id: string) => complemento.camposEmErro.includes(id) && !f.docum
 
         <p v-if="vencido(doc.id)" class="ox-docs__nota" role="note">
           <v-icon icon="mdi-alert" size="16" aria-hidden="true" />
-          <span><strong>Motivo:</strong> {{ motivoDoVencido }}</span>
+          <span><strong>{{ rotuloDaNota }}</strong> {{ motivoDoVencido }}</span>
         </p>
 
         <p v-if="devolvido(doc.id)" class="ox-docs__nota" role="note">
@@ -198,7 +214,7 @@ const emErro = (id: string) => complemento.camposEmErro.includes(id) && !f.docum
 
     <!-- Nos frames do bloqueio e da conferência (L1·4 e L1·5) a observação não aparece. -->
     <OxCampo
-      v-if="!complemento.bloqueado && !complemento.emConferencia"
+      v-if="!complemento.trocaAberta && !complemento.emConferencia"
       class="ox-docs__observacao"
       rotulo="Observações sobre os documentos"
       v-model="f.observacaoDocumentos"

@@ -30,12 +30,15 @@ import { useCadastroStore, useComplementoStore, type StoreDoCadastro } from '@/s
 const router = useRouter();
 const c = useComplementoStore();
 
-type SituacaoFila = 'enviado' | 'em-analise' | 'devolvido' | 'aprovado' | 'bloqueado' | 'documento-atualizado';
+type SituacaoFila =
+  | 'enviado' | 'em-analise' | 'devolvido' | 'aprovado' | 'regularizacao' | 'bloqueado' | 'documento-atualizado';
 const SITUACOES: Record<SituacaoFila, { rotulo: string; tom: string }> = {
   enviado: { rotulo: 'Enviado', tom: 'neutro' },
   'em-analise': { rotulo: 'Em análise', tom: 'info' },
   devolvido: { rotulo: 'Devolvido', tom: 'warning' },
   aprovado: { rotulo: 'Aprovado', tom: 'success' },
+  // Regras de 19/11: documento vencido, dentro dos 10 dias. O nome da situação é o da regra, a confirmar com a SEMAD.
+  regularizacao: { rotulo: 'Parcialmente ativo', tom: 'warning' },
   // Não desenhado no Figma: o cadastro bloqueado que ainda não mandou o documento novo.
   bloqueado: { rotulo: 'Bloqueado', tom: 'danger' },
   'documento-atualizado': { rotulo: 'Documento atualizado', tom: 'neutro' },
