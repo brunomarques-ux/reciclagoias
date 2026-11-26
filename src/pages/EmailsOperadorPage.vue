@@ -17,6 +17,10 @@
  * dias, aviso no dia do vencimento com o prazo de 10 dias e o que fica suspenso, e
  * o último aviso 5 dias antes do bloqueio. O e-mail de vencido deixa de dizer que o
  * cadastro está bloqueado. As datas saem do vencimento (prazosDaValidade).
+ *
+ * Reunião de 26/11/2026 com a SEMAD: textos revisados pela Thainá ("análise" no lugar
+ * de "conferência", "documento atualizado" no lugar de "novo") e um quinto e-mail, no
+ * dia do bloqueio.
  */
 import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -28,7 +32,15 @@ const route = useRoute();
 const router = useRouter();
 const c = useComplementoStore();
 
-type Qual = 'ativacao' | 'correcao' | 'aprovado' | 'vence-60' | 'vencendo' | 'vencido' | 'bloqueio-em-5-dias';
+type Qual =
+  | 'ativacao'
+  | 'correcao'
+  | 'aprovado'
+  | 'vence-60'
+  | 'vencendo'
+  | 'vencido'
+  | 'bloqueio-em-5-dias'
+  | 'bloqueado';
 const QUAIS: { id: Qual; rotulo: string }[] = [
   { id: 'ativacao', rotulo: 'Ativação' },
   { id: 'correcao', rotulo: 'Correção' },
@@ -37,6 +49,7 @@ const QUAIS: { id: Qual; rotulo: string }[] = [
   { id: 'vencendo', rotulo: 'Vence em 30 dias' },
   { id: 'vencido', rotulo: 'Venceu hoje' },
   { id: 'bloqueio-em-5-dias', rotulo: '5 dias para o bloqueio' },
+  { id: 'bloqueado', rotulo: 'Bloqueado' },
 ];
 const qual = computed<Qual>(() => QUAIS.find((q) => q.id === route.query.email)?.id ?? 'ativacao');
 
@@ -48,6 +61,7 @@ const ASSUNTO: Record<Qual, string> = {
   vencendo: 'Documento vence em 30 dias no Recicla Goiás',
   vencido: 'Documento vencido: 10 dias para regularizar no Recicla Goiás',
   'bloqueio-em-5-dias': 'Faltam 5 dias para o bloqueio do cadastro no Recicla Goiás',
+  bloqueado: 'Cadastro bloqueado por documentação vencida no Recicla Goiás',
 };
 /** "14/12/2026" vira "14 de dez. de 2026, 08:00", como o Gmail mostra. */
 const MESES = ['jan.', 'fev.', 'mar.', 'abr.', 'maio', 'jun.', 'jul.', 'ago.', 'set.', 'out.', 'nov.', 'dez.'];
@@ -63,6 +77,7 @@ const QUANDO = computed<Record<Qual, string>>(() => ({
   vencendo: porExtenso(prazos.value.lembrete30),
   vencido: porExtenso(prazos.value.venceEm),
   'bloqueio-em-5-dias': porExtenso(prazos.value.ultimoAviso),
+  bloqueado: porExtenso(prazos.value.bloqueioEm),
 }));
 
 // ---- validade dos documentos: o documento e a data vêm da store; sem cenário, o exemplo do Figma ----
@@ -295,6 +310,36 @@ function trocar(q: Qual) {
               </ol>
               <a class="em__botao" href="/operador" @click.prevent="abrirDocumentos">Atualizar documento</a>
               <p>Se o documento já foi enviado, desconsidere este aviso.</p>
+            </template>
+
+            <!-- Reunião de 26/11 com a SEMAD: o bloqueio também avisa por e-mail. Texto nosso, a partir do aviso
+                 da tela de cadastro bloqueado revisado pela Thainá. -->
+            <template v-else-if="qual === 'bloqueado'">
+              <h2 class="em__titulo">Cadastro bloqueado</h2>
+              <p class="em__saudacao">Prezado(a) representante da {{ PRE_CADASTRO.razaoSocial }},</p>
+              <p><strong class="em__forte">O cadastro da cooperativa foi bloqueado em {{ prazos.bloqueioEm }}.</strong></p>
+              <p>O {{ rotuloMinusculo }} venceu em {{ venceEm }} e o prazo de 10 dias para regularização terminou em {{ prazos.prazoAte }}.</p>
+              <dl class="em__resumo">
+                <div><dt>Organização</dt><dd>{{ PRE_CADASTRO.razaoSocial }}</dd></div>
+                <div><dt>CNPJ</dt><dd>{{ PRE_CADASTRO.cnpj }}</dd></div>
+                <div><dt>Documento</dt><dd>{{ docDaValidade.rotulo }}</dd></div>
+                <div><dt>Bloqueado em</dt><dd>{{ prazos.bloqueioEm }}</dd></div>
+              </dl>
+              <div class="em__caixa em__caixa--erro">
+                <strong>Até a atualização do documento</strong>
+                <ul>
+                  <li>Nenhuma operação além da substituição do documento pode ser realizada no sistema.</li>
+                  <li>A inclusão de notas fiscais e a transferência de créditos ficam suspensas.</li>
+                </ul>
+              </div>
+              <p class="em__saudacao">Como regularizar</p>
+              <ol class="em__passos">
+                <li>Acesse o sistema e abra a etapa Documentos, em Minha Conta.</li>
+                <li>Anexe o {{ nomeCurto }} atualizado e informe a data de validade.</li>
+                <li>A equipe realizará a análise do documento e, estando tudo regular, o sistema volta a disponibilizar todas as funcionalidades.</li>
+              </ol>
+              <a class="em__botao" href="/operador" @click.prevent="abrirDocumentos">Atualizar documento</a>
+              <p>Os demais documentos permanecem válidos, sem necessidade de atualização neste momento.</p>
             </template>
 
             <template v-else>
