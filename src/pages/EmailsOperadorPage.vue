@@ -296,7 +296,7 @@ function trocar(q: Qual) {
                 <div><dt>Bloqueio em</dt><dd>{{ prazos.bloqueioEm }}</dd></div>
               </dl>
               <div class="em__caixa em__caixa--erro">
-                <strong>Se o documento novo não for enviado até {{ prazos.prazoAte }}</strong>
+                <strong>Se o documento atualizado não for enviado até {{ prazos.prazoAte }}</strong>
                 <ul>
                   <li>O cadastro será bloqueado a partir de {{ prazos.bloqueioEm }}.</li>
                   <li>Nenhuma operação poderá ser feita no sistema até a regularização.</li>

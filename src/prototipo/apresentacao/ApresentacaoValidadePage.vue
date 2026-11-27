@@ -378,8 +378,8 @@ const textoDoBotao = computed(() => {
         </section>
 
         <section v-else-if="cena.tipo === 'decisoes'" key="decisoes" class="pv-cena pv-decisoes">
-          <p class="pv-rot pv-rot--ambar">Para confirmar</p>
-          <h2 class="pv-titulo">O que a mensagem pede e como lemos</h2>
+          <p class="pv-rot pv-rot--ambar">Confirmado em 26/11</p>
+          <h2 class="pv-titulo">O que a mensagem pedia e como lemos</h2>
           <ol class="pv-decisoes__lista">
             <li v-for="d in DECISOES" :key="d.titulo">
               <h3>{{ d.titulo }}</h3>
@@ -393,9 +393,9 @@ const textoDoBotao = computed(() => {
 
         <section v-else-if="cena.tipo === 'aberto'" key="aberto" class="pv-cena pv-aberto">
           <div class="pv-aberto__lado">
-            <p class="pv-rot pv-rot--ambar">A mensagem não diz</p>
+            <p class="pv-rot pv-rot--ambar">A mensagem não dizia</p>
             <p class="pv-aberto__n">{{ EM_ABERTO.length }}</p>
-            <p class="pv-sub">perguntas</p>
+            <p class="pv-sub">respostas da reunião</p>
           </div>
           <ol class="pv-aberto__lista">
             <li v-for="(p, i) in EM_ABERTO" :key="i"><b>{{ i + 1 }}</b><span>{{ p }}</span></li>
@@ -403,8 +403,8 @@ const textoDoBotao = computed(() => {
         </section>
 
         <section v-else key="fim" class="pv-cena pv-fim">
-          <p class="pv-rot">Para conferir depois</p>
-          <h2 class="pv-titulo">O que decidirmos entra no protótipo e no Figma</h2>
+          <p class="pv-rot">Para conferir</p>
+          <h2 class="pv-titulo">Os textos revisados pela SEMAD já estão no protótipo e no Figma</h2>
           <ul class="pv-fim__links">
             <li><b>Jornadas guiadas</b><span>reciclagoias.vercel.app/fluxos/validade-19nov</span></li>
             <li><b>Esta apresentação</b><span>reciclagoias.vercel.app/apresentacao-validade</span></li>

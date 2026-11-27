@@ -100,7 +100,7 @@ const avisoDaConta = computed(() => {
   if (complemento.emConferencia)
     return {
       tom: 'info' as const,
-      titulo: 'Documento enviado para conferência',
+      titulo: 'Documento enviado para análise',
       texto: `Recebemos o ${minusculo} atualizado em ${complemento.troca.enviadoEm?.split(',')[0] ?? ''}. ${
         complemento.troca.origem === 'regularizacao'
           ? 'Até a análise do documento enviado, a inclusão de notas fiscais continua suspensa e a transferência de créditos continua liberada.'
@@ -294,12 +294,12 @@ function cancelar() {
       <component :is="componenteAtual" />
 
       <footer v-if="complemento.bloqueado" class="ox-pagina__acoes ox-pagina__acoes--fim">
-        <RgButton variant="primary" @click="enviarParaConferencia">Enviar para conferência</RgButton>
+        <RgButton variant="primary" @click="enviarParaConferencia">Enviar para análise</RgButton>
       </footer>
       <!-- Antes de vencer e nos 10 dias de regularização: as etapas seguem navegáveis e Documentos ganha o envio da troca. -->
       <footer v-else-if="complemento.trocaAberta && complemento.etapa === 2" class="ox-pagina__acoes">
         <RgButton variant="secondary" @click="complemento.voltar()">Voltar</RgButton>
-        <RgButton variant="primary" @click="enviarParaConferencia">Enviar para conferência</RgButton>
+        <RgButton variant="primary" @click="enviarParaConferencia">Enviar para análise</RgButton>
       </footer>
       <footer v-else-if="!complemento.emConferencia" class="ox-pagina__acoes">
         <RgButton v-if="complemento.etapa === 1" variant="secondary" @click="cancelar">Cancelar</RgButton>

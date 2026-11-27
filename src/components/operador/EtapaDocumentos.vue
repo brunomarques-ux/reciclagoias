@@ -100,7 +100,7 @@ const emErro = (id: string) => complemento.camposEmErro.includes(id) && !f.docum
           <span :id="`doc-${doc.id}`" class="ox-docs__rotulo">
             {{ doc.rotulo }}<span v-if="!soConsulta" aria-hidden="true"> *</span>
           </span>
-          <span v-if="emConferencia(doc.id)" class="ox-docs__em-conferencia">Em conferência</span>
+          <span v-if="emConferencia(doc.id)" class="ox-docs__em-conferencia">Em análise</span>
           <span v-else-if="conferido(doc.id)" class="ox-docs__conferido">Conferido</span>
         </div>
 
@@ -185,7 +185,7 @@ const emErro = (id: string) => complemento.camposEmErro.includes(id) && !f.docum
               <span>Anexe o documento corrigido em PDF: arraste o arquivo aqui ou selecione do computador</span>
             </button>
             <p v-if="erroDaTroca('arquivo')" class="ox-docs__erro" role="alert">
-              Anexe o documento novo para enviar para conferência.
+              Anexe o documento atualizado para enviar para análise.
             </p>
           </template>
           <OxCampo

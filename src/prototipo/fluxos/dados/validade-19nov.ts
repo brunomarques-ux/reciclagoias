@@ -20,7 +20,7 @@ const MENU_DA_LINHA: Alvo = { papel: 'button', nome: 'Ações de Cooperativa de 
 const TROCAR_O_ALVARA = [
   { tipo: 'clicar', alvo: { papel: 'button', nome: 'Anexe o documento corrigido' }, rotulo: 'Clique para anexar' },
   { tipo: 'digitar', alvo: { papel: 'textbox', nome: 'Validade do documento' }, texto: '14/12/2027', rotulo: 'Digite a validade' },
-  { tipo: 'clicar', alvo: { papel: 'button', nome: 'Enviar para conferência' }, rotulo: 'Clique em Enviar para conferência' },
+  { tipo: 'clicar', alvo: { papel: 'button', nome: 'Enviar para análise' }, rotulo: 'Clique em Enviar para análise' },
 ] as const;
 
 export const FLUXOS_VALIDADE_19NOV: Fluxo[] = [
@@ -64,10 +64,10 @@ export const FLUXOS_VALIDADE_19NOV: Fluxo[] = [
         ],
       },
       {
-        fazer: 'Veja o documento enviado para conferência.',
+        fazer: 'Veja o documento enviado para análise.',
         observar: 'Enquanto a equipe confere, o cadastro segue aprovado e nada muda no uso do sistema.',
         acoes: [
-          { tipo: 'olhar', alvo: { texto: 'Documento enviado para conferência' }, rotulo: 'Enviado para conferência' },
+          { tipo: 'olhar', alvo: { texto: 'Documento enviado para análise' }, rotulo: 'Enviado para análise' },
           { tipo: 'olhar', alvo: { texto: 'nada muda no uso do sistema' }, rotulo: 'Sem restrição' },
         ],
       },
@@ -132,15 +132,15 @@ export const FLUXOS_VALIDADE_19NOV: Fluxo[] = [
         ],
       },
       {
-        fazer: 'Anexe o alvará novo, informe a validade 14/12/2027 e clique em Enviar para conferência.',
+        fazer: 'Anexe o alvará atualizado, informe a validade 14/12/2027 e clique em Enviar para análise.',
         observar: 'Só o alvará aceita troca. As outras etapas seguem abertas para consulta.',
         acoes: [...TROCAR_O_ALVARA],
       },
       {
-        fazer: 'Veja o documento enviado para conferência.',
+        fazer: 'Veja o documento enviado para análise.',
         observar: 'Até a equipe conferir, a inclusão de notas fiscais segue suspensa e os créditos seguem liberados.',
         acoes: [
-          { tipo: 'olhar', alvo: { texto: 'Documento enviado para conferência' }, rotulo: 'Enviado para conferência' },
+          { tipo: 'olhar', alvo: { texto: 'Documento enviado para análise' }, rotulo: 'Enviado para análise' },
           { tipo: 'olhar', alvo: { texto: 'a inclusão de notas fiscais continua suspensa' }, rotulo: 'Ainda parcial' },
         ],
       },
@@ -169,15 +169,15 @@ export const FLUXOS_VALIDADE_19NOV: Fluxo[] = [
         ],
       },
       {
-        fazer: 'Anexe o alvará novo, informe a validade 14/12/2027 e clique em Enviar para conferência.',
+        fazer: 'Anexe o alvará atualizado, informe a validade 14/12/2027 e clique em Enviar para análise.',
         observar: 'As outras etapas ficam fechadas. Só o alvará aceita troca.',
         acoes: [...TROCAR_O_ALVARA],
       },
       {
-        fazer: 'Veja o documento enviado para conferência.',
+        fazer: 'Veja o documento enviado para análise.',
         observar: 'O cadastro segue bloqueado até a equipe conferir.',
         acoes: [
-          { tipo: 'olhar', alvo: { texto: 'Documento enviado para conferência' }, rotulo: 'Enviado para conferência' },
+          { tipo: 'olhar', alvo: { texto: 'Documento enviado para análise' }, rotulo: 'Enviado para análise' },
           { tipo: 'olhar', alvo: { texto: 'O cadastro continua bloqueado' }, rotulo: 'Ainda bloqueado' },
         ],
       },
@@ -280,10 +280,10 @@ export const FLUXOS_VALIDADE_19NOV: Fluxo[] = [
         acoes: [...TROCAR_O_ALVARA],
       },
       {
-        fazer: 'O documento vai para a conferência, e nada fica restrito.',
+        fazer: 'O documento vai para análise, e nada fica restrito.',
         observar: 'Enquanto a equipe confere, o cadastro segue aprovado e o uso do sistema não muda.',
         acoes: [
-          { tipo: 'olhar', alvo: { texto: 'Documento enviado para conferência' }, rotulo: 'Enviado para conferência' },
+          { tipo: 'olhar', alvo: { texto: 'Documento enviado para análise' }, rotulo: 'Enviado para análise' },
           { tipo: 'olhar', alvo: { texto: 'nada muda no uso do sistema' }, rotulo: 'Sem restrição' },
         ],
       },
@@ -337,10 +337,18 @@ export const FLUXOS_VALIDADE_19NOV: Fluxo[] = [
       // 7 · 25/12
       {
         capitulo: '25/12: o bloqueio total',
-        fazer: 'No 11º dia, 25/12, o cadastro fica bloqueado por completo.',
+        fazer: 'No 11º dia, 25/12, o cadastro é bloqueado e o operador recebe um e-mail.',
+        observar: 'O e-mail no dia do bloqueio foi decidido na reunião de 26/11 com a SEMAD.',
+        acoes: [
+          { tipo: 'ir', rota: '/emails-operador?email=bloqueado', rotulo: '25/12, o 11º dia' },
+          { tipo: 'olhar', alvo: { papel: 'heading', nome: 'Cadastro bloqueado', exato: true }, rotulo: 'E-mail do bloqueio' },
+        ],
+      },
+      {
+        fazer: 'Ao entrar, o cadastro está bloqueado por completo.',
         observar: 'Notas Fiscais, Saldo e as demais funções ficam sem acesso. Só a Minha Conta abre, na etapa Documentos.',
         acoes: [
-          { tipo: 'ir', rota: '/operador?demo=vencido', rotulo: '25/12, o 11º dia' },
+          { tipo: 'ir', rota: '/operador?demo=vencido', rotulo: 'Bloqueio total' },
           { tipo: 'olhar', alvo: { texto: 'Cadastro bloqueado por documentação vencida' }, rotulo: 'Bloqueio total' },
           { tipo: 'olhar', alvo: { texto: 'Notas Fiscais', exato: true }, rotulo: 'Menu sem acesso' },
         ],
@@ -351,9 +359,9 @@ export const FLUXOS_VALIDADE_19NOV: Fluxo[] = [
         acoes: [...TROCAR_O_ALVARA],
       },
       {
-        fazer: 'Enviado, o cadastro segue bloqueado até a equipe conferir.',
+        fazer: 'Enviado, o cadastro segue bloqueado até a análise do documento.',
         acoes: [
-          { tipo: 'olhar', alvo: { texto: 'Documento enviado para conferência' }, rotulo: 'Enviado para conferência' },
+          { tipo: 'olhar', alvo: { texto: 'Documento enviado para análise' }, rotulo: 'Enviado para análise' },
           { tipo: 'olhar', alvo: { texto: 'O cadastro continua bloqueado' }, rotulo: 'Ainda bloqueado' },
         ],
       },
