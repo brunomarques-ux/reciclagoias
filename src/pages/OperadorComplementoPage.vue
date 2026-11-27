@@ -48,9 +48,10 @@ import EtapaEstrutura from '@/components/operador/EtapaEstrutura.vue';
 import EtapaOperacao from '@/components/operador/EtapaOperacao.vue';
 import EtapaRevisao from '@/components/operador/EtapaRevisao.vue';
 import OxAviso from '@/components/operador/OxAviso.vue';
+import OxAvisoDaValidade from '@/components/operador/OxAvisoDaValidade.vue';
 import OxOpcao from '@/components/operador/OxOpcao.vue';
 import RgButton from '@/components/RgButton.vue';
-import { DOCUMENTOS_EXIGIDOS, ETAPAS } from '@/data/mocks/operador';
+import { ETAPAS } from '@/data/mocks/operador';
 import { menuDoOperadorAprovado } from '@/data/mocks/sessao';
 import { useComplementoStore } from '@/stores/complemento';
 
@@ -69,54 +70,14 @@ const noFormulario = computed(
 const recemEnviado = ref<'enviado' | 'reenviado' | null>(null);
 
 // ---- Minha Conta (planning de 13/11): aprovado, bloqueado ou com documento em conferência ----
-const rotuloDoVencido = computed(
-  () => DOCUMENTOS_EXIGIDOS.find((d) => d.id === complemento.vencimento?.doc)?.rotulo ?? 'Documento',
-);
 const subtituloDaConta = computed(() => {
   if (complemento.bloqueado) return 'Regularize o documento vencido para o cadastro voltar a ficar aprovado.';
   if (complemento.emRegularizacao)
-    return `Troque o documento vencido até ${complemento.prazos?.prazoAte ?? ''}. Até lá, o cadastro fica parcialmente ativo.`;
+    return 'O cadastro está parcialmente ativo até a atualização do documento vencido.';
   if (complemento.emConferencia) return 'O documento atualizado está em análise. Enquanto isso, os dados ficam disponíveis apenas para consulta.';
   return 'Consulte os dados do seu cadastro aprovado.';
 });
-// Regras de 19/11 (Figma `6558:1924`): lembretes antes de vencer, 10 dias parcialmente ativo e bloqueio total no 11º dia.
-const avisoDaConta = computed(() => {
-  const v = complemento.vencimento;
-  const p = complemento.prazos;
-  const nome = rotuloDoVencido.value;
-  const minusculo = nome.charAt(0).toLowerCase() + nome.slice(1);
-  if (complemento.bloqueado)
-    return {
-      tom: 'danger' as const,
-      titulo: 'Cadastro bloqueado por documentação vencida',
-      texto: `O ${minusculo} venceu em ${v?.venceEm ?? ''} e o prazo de 10 dias para regularizar terminou em ${p?.prazoAte ?? ''}. Até a atualização do documento, nenhuma operação além da substituição do documento pode ser realizada no sistema. Anexe o documento atualizado, informe a validade e envie para análise.`,
-    };
-  if (complemento.emRegularizacao)
-    return {
-      tom: 'danger' as const,
-      titulo: `Documento vencido: regularize até ${p?.prazoAte ?? ''}`,
-      texto: `Seu ${minusculo} venceu em ${v?.venceEm ?? ''}. Até que a atualização seja realizada, a inclusão de novas notas fiscais está suspensa, sendo possível realizar apenas a transferência de créditos. Sem o documento atualizado, o cadastro será totalmente bloqueado a partir de ${p?.bloqueioEm ?? ''}.`,
-    };
-  if (complemento.emConferencia)
-    return {
-      tom: 'info' as const,
-      titulo: 'Documento enviado para análise',
-      texto: `Recebemos o ${minusculo} atualizado em ${complemento.troca.enviadoEm?.split(',')[0] ?? ''}. ${
-        complemento.troca.origem === 'regularizacao'
-          ? 'Até a análise do documento enviado, a inclusão de notas fiscais continua suspensa e a transferência de créditos continua liberada.'
-          : complemento.troca.origem === 'antecipada'
-            ? 'Durante a análise, o cadastro segue aprovado e nada muda no uso do sistema.'
-            : 'O cadastro continua bloqueado até que seja realizada a análise do documento enviado.'
-      } O resultado da análise chegará no e-mail cadastrado.`,
-    };
-  if (complemento.avisoDeVencimento)
-    return {
-      tom: 'warning' as const,
-      titulo: 'Você possui um documento com data de vencimento próxima',
-      texto: `${nome} vence em ${v?.venceEm ?? ''}. Abra a etapa Documentos e anexe o documento atualizado.`,
-    };
-  return null;
-});
+// O aviso da validade (lembrete, parcialmente ativo, bloqueio, documento em análise) mora em OxAvisoDaValidade.
 /** O menu acompanha o acesso: bloqueado, só a Minha Conta navega. */
 const menuDaConta = computed(() => menuDoOperadorAprovado(complemento.acesso === 'bloqueado'));
 const senhaPedida = ref(false);
@@ -262,7 +223,7 @@ function cancelar() {
         </div>
       </header>
 
-      <OxAviso v-if="avisoDaConta" :tom="avisoDaConta.tom" :titulo="avisoDaConta.titulo" :texto="avisoDaConta.texto" />
+      <OxAvisoDaValidade onde="conta" />
       <OxAviso
         v-if="complemento.situacao === 'aprovado'"
         tom="success"

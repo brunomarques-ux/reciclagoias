@@ -8,11 +8,11 @@
  *
  * Nasceu em código, sem frame. A transferência em si usa a tela que já existe no sistema.
  */
-import { computed, ref, watchEffect } from 'vue';
+import { ref, watchEffect } from 'vue';
 import { useRouter } from 'vue-router';
 
 import GestoraShell from '@/components/gestora/GestoraShell.vue';
-import OxAviso from '@/components/operador/OxAviso.vue';
+import OxAvisoDaValidade from '@/components/operador/OxAvisoDaValidade.vue';
 import RgButton from '@/components/RgButton.vue';
 import { menuDoOperadorAprovado } from '@/data/mocks/sessao';
 import { useComplementoStore } from '@/stores/complemento';
@@ -24,7 +24,6 @@ watchEffect(() => {
   if (complemento.acesso === null || complemento.acesso === 'bloqueado') void router.replace('/operador');
 });
 
-const parcial = computed(() => complemento.acesso === 'parcial');
 const pedida = ref(false);
 
 // Exemplo inventado, no formato real.
@@ -46,12 +45,7 @@ const SALDOS = [
       <RgButton variant="primary" @click="pedida = true">Transferir créditos</RgButton>
     </header>
 
-    <OxAviso
-      v-if="parcial"
-      tom="info"
-      titulo="Transferência de créditos liberada"
-      :texto="`Mesmo com o documento vencido, a transferência de créditos continua operando até ${complemento.prazos?.prazoAte ?? ''}. A inclusão de notas fiscais segue suspensa até a atualização do documento.`"
-    />
+    <OxAvisoDaValidade onde="saldo" />
     <p v-if="pedida" class="sd__nota" role="status">
       A transferência usa a tela que já existe no sistema e não faz parte deste protótipo.
     </p>

@@ -103,19 +103,33 @@ const descricaoDados = computed(() => {
   return 'Dados para consulta, sem aceite campo a campo. A conferência é feita nos documentos, logo abaixo.';
 });
 
-/** Regras de 19/11: a troca pode vir antes de vencer, dentro dos 10 dias ou depois do bloqueio. */
-const comoEstava = computed(() => {
-  if (c.troca.origem === 'antecipada') return `que venceria em ${c.vencimento?.venceEm ?? ''}`;
-  if (c.troca.origem === 'regularizacao')
-    return `que venceu em ${c.vencimento?.venceEm ?? ''} (cadastro parcialmente ativo, sem inclusão de notas fiscais até a conferência)`;
-  return 'que estava vencido (cadastro bloqueado até a conferência)';
+/**
+ * 26/11/2026 (pedido do Bruno): o que chega com o documento atualizado vira uma ficha de três linhas (o documento, a
+ * situação do cadastro enquanto espera e o vencimento), no lugar de uma frase comprida na descrição.
+ */
+const fichaDaTroca = computed(() => {
+  if (!c.revalidacao || !c.vencimento) return null;
+  const situacao =
+    c.troca.origem === 'antecipada'
+      ? 'Aprovado, sem restrição até a conferência'
+      : c.troca.origem === 'regularizacao'
+        ? 'Parcialmente ativo, sem inclusão de notas fiscais até a conferência'
+        : 'Bloqueado até a conferência';
+  return [
+    { rotulo: 'Documento atualizado', valor: nomeDoTrocado.value },
+    { rotulo: 'Situação do cadastro', valor: situacao },
+    {
+      rotulo: 'Vencimento',
+      valor: c.troca.origem === 'antecipada' ? `Venceria em ${c.vencimento.venceEm}` : `Venceu em ${c.vencimento.venceEm}`,
+    },
+  ];
 });
 
 const descricaoDocumentos = computed(() => {
   if (c.revalidacao && c.situacao === 'documento-atualizado')
-    return `O operador trocou o ${nomeDoTrocado.value.toLowerCase()}, ${comoEstava.value}. Só para leitura. A conferência começa quando alguém clica em Analisar.`;
+    return 'Só para leitura. A conferência começa quando alguém clica em Analisar.';
   if (c.revalidacao && !visualizar.value)
-    return `O operador trocou o ${nomeDoTrocado.value.toLowerCase()}, ${comoEstava.value}. Abra o arquivo, confira a nova validade e indique se está em conformidade. Os demais documentos já estão conferidos.`;
+    return 'Abra o arquivo, confira a nova validade e indique se está em conformidade. Os demais documentos já estão conferidos.';
   if (c.situacao === 'devolvido' || c.situacao === 'aprovado' || c.situacao === 'bloqueado' || c.situacao === 'regularizacao')
     return 'Análise concluída. Os documentos e os motivos ficam disponíveis apenas para consulta.';
   if (c.situacao === 'enviado') return 'Só para leitura. A conferência começa quando alguém clica em Analisar.';
@@ -179,7 +193,7 @@ const situacaoNoRodape = computed(() => {
     case 'bloqueado':
       return `Bloqueado por documentação vencida desde ${c.prazos?.bloqueioEm ?? ''}. Aguardando o documento novo.`;
     case 'regularizacao':
-      return `Documento vencido em ${c.vencimento?.venceEm ?? ''}. Parcialmente ativo até ${c.prazos?.prazoAte ?? ''}; sem a troca, bloqueio total em ${c.prazos?.bloqueioEm ?? ''}.`;
+      return `Documento vencido em ${c.vencimento?.venceEm ?? ''} · Parcialmente ativo até ${c.prazos?.prazoAte ?? ''} · Sem a atualização, bloqueio total em ${c.prazos?.bloqueioEm ?? ''}`;
     default:
       return `Em análise por ${c.analista ?? 'outra pessoa'}. Aberto só para leitura.`;
   }
@@ -280,6 +294,12 @@ function aprovar() {
 
       <section class="ax-card" aria-labelledby="ax-docs-titulo">
         <h2 id="ax-docs-titulo" class="ax-h2">Documentos</h2>
+        <dl v-if="fichaDaTroca" class="ax-ficha">
+          <div v-for="l in fichaDaTroca" :key="l.rotulo">
+            <dt>{{ l.rotulo }}</dt>
+            <dd>{{ l.valor }}</dd>
+          </div>
+        </dl>
         <p class="ax-desc">{{ descricaoDocumentos }}</p>
         <ul class="ax-docs">
           <li v-for="d in DOCUMENTOS_EXIGIDOS" :key="d.id">
@@ -472,6 +492,39 @@ function aprovar() {
   font-size: 13px;
   line-height: 18px;
   color: var(--rg-color-text-secondary);
+}
+
+.ax-ficha {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--rg-space-4);
+  margin: var(--rg-space-1) 0 var(--rg-space-1);
+  padding: var(--rg-space-4);
+  background: var(--rg-color-surface-subtle);
+  border: 1px solid var(--rg-color-border-subtle);
+  border-radius: var(--rg-radius-md);
+}
+
+.ax-ficha dt {
+  font-size: var(--rg-font-size-xs);
+  font-weight: var(--rg-font-weight-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--rg-color-text-secondary);
+}
+
+.ax-ficha dd {
+  margin: var(--rg-space-1) 0 0;
+  font-size: var(--rg-font-size-sm);
+  font-weight: var(--rg-font-weight-semibold);
+  line-height: 20px;
+  color: var(--rg-color-text-primary);
+}
+
+@media (max-width: 720px) {
+  .ax-ficha {
+    grid-template-columns: 1fr;
+  }
 }
 
 .ax-docs {

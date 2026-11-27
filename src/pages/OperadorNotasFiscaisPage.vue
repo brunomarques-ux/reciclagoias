@@ -14,9 +14,8 @@ import { computed, ref, watchEffect } from 'vue';
 import { useRouter } from 'vue-router';
 
 import GestoraShell from '@/components/gestora/GestoraShell.vue';
-import OxAviso from '@/components/operador/OxAviso.vue';
+import OxAvisoDaValidade from '@/components/operador/OxAvisoDaValidade.vue';
 import RgButton from '@/components/RgButton.vue';
-import { DOCUMENTOS_EXIGIDOS } from '@/data/mocks/operador';
 import { menuDoOperadorAprovado } from '@/data/mocks/sessao';
 import { useComplementoStore } from '@/stores/complemento';
 
@@ -29,23 +28,7 @@ watchEffect(() => {
 });
 
 const suspensa = computed(() => complemento.acesso === 'parcial');
-const nomeDoDoc = computed(() => {
-  const r = DOCUMENTOS_EXIGIDOS.find((d) => d.id === complemento.vencimento?.doc)?.rotulo ?? 'Documento';
-  return r.charAt(0).toLowerCase() + r.slice(1);
-});
-const textoDaSuspensao = computed(() => {
-  const p = complemento.prazos;
-  if (complemento.emConferencia)
-    return `O documento atualizado está em análise. A inclusão volta assim que a equipe aprovar o ${nomeDoDoc.value}. A transferência de créditos continua liberada.`;
-  return `Seu ${nomeDoDoc.value} venceu em ${p?.venceEm ?? ''}. Até que a atualização seja realizada, a inclusão de novas notas fiscais está suspensa, sendo possível realizar apenas a transferência de créditos. Realize a atualização do documento até ${p?.prazoAte ?? ''} para evitar o bloqueio do cadastro.`;
-});
-
 const pedida = ref(false);
-
-function trocarDocumento() {
-  complemento.irPara(2);
-  void router.push('/operador');
-}
 
 // Exemplo inventado, no formato real.
 const NOTAS = [
@@ -68,11 +51,8 @@ const NOTAS = [
       </RgButton>
     </header>
 
-    <div v-if="suspensa" id="nf-suspensa" class="nf__suspensa">
-      <OxAviso tom="danger" titulo="Inclusão de notas fiscais suspensa" :texto="textoDaSuspensao" />
-      <RgButton v-if="!complemento.emConferencia" variant="secondary" @click="trocarDocumento">Trocar o documento</RgButton>
-    </div>
-    <p v-else-if="pedida" class="nf__nota" role="status">
+    <div id="nf-suspensa"><OxAvisoDaValidade onde="notas" /></div>
+    <p v-if="pedida && !suspensa" class="nf__nota" role="status">
       A inclusão de nota fiscal usa a tela que já existe no sistema e não faz parte deste protótipo.
     </p>
 
