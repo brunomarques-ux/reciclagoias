@@ -101,7 +101,9 @@ export type Cena =
     }
   | { tipo: 'decisoes'; fala: string }
   | { tipo: 'aberto'; fala: string }
-  | { tipo: 'fim'; fala: string };
+  | { tipo: 'fim'; fala: string }
+  /** Depois da reunião de 26/11: o que foi feito e entregue, com as telas. */
+  | { tipo: 'entrega'; fala: string };
 
 export const CENAS: readonly Cena[] = [
   {
@@ -263,6 +265,10 @@ export const CENAS: readonly Cena[] = [
     tipo: 'fim',
     fala: 'Os textos revisados pela SEMAD já estão no protótipo e no Figma. Segue pendente com a SEMAD: com prazo prorrogado, o cadastro volta ao acesso normal?',
   },
+  {
+    tipo: 'entrega',
+    fala: 'Depois da reunião, os ajustes foram feitos e entregues: os textos revisados pela SEMAD, os avisos em blocos que acompanham o operador, o e-mail no dia do bloqueio e a ficha do documento atualizado para o administrador. Está pronto para produção.',
+  },
 ];
 
 /**
@@ -290,4 +296,28 @@ export const MENSAGEM = [
   { forte: '10 dias', resto: 'parcialmente ativo depois de vencer' },
   { forte: 'Bloqueio total', resto: 'a partir do 11º dia' },
   { forte: 'Aviso', resto: 'no dia do vencimento' },
+] as const;
+
+/** O slide final, depois da reunião de 26/11: o que foi feito, com a tela de cada coisa (public/img/apresentacao-validade). */
+export const ENTREGA = [
+  {
+    titulo: 'Avisos em blocos',
+    texto: 'O que fica suspenso e o que continua liberado, um por linha.',
+    imagem: '/img/apresentacao-validade/entrega-conta.png',
+  },
+  {
+    titulo: 'O aviso segue o operador',
+    texto: 'Também em Notas Fiscais e em Saldo, até a aprovação do documento.',
+    imagem: '/img/apresentacao-validade/entrega-notas.png',
+  },
+  {
+    titulo: 'E-mail no dia do bloqueio',
+    texto: 'Decidido na reunião. Sai em 25/12, com como regularizar.',
+    imagem: '/img/apresentacao-validade/entrega-email.png',
+  },
+  {
+    titulo: 'Ficha do documento atualizado',
+    texto: 'Para o administrador: documento, situação do cadastro e vencimento.',
+    imagem: '/img/apresentacao-validade/entrega-admin.png',
+  },
 ] as const;
