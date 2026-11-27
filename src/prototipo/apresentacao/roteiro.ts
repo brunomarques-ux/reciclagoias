@@ -51,7 +51,7 @@ export const AJUSTES: readonly Ajuste[] = [
     titulo: 'Bloqueio total no 11º dia',
     item: 'Item 3 da mensagem',
     antes: 'Começava no vencimento.',
-    agora: 'Começa em 25/12. Só a troca do documento abre.',
+    agora: 'Começa em 25/12, com e-mail. Só a troca do documento abre.',
   },
   {
     titulo: 'Administrador: situação nova e conferência',
@@ -101,7 +101,9 @@ export type Cena =
     }
   | { tipo: 'decisoes'; fala: string }
   | { tipo: 'aberto'; fala: string }
-  | { tipo: 'fim'; fala: string };
+  | { tipo: 'fim'; fala: string }
+  /** Depois da reunião de 26/11: o que foi feito e entregue, com as telas. */
+  | { tipo: 'entrega'; fala: string };
 
 export const CENAS: readonly Cena[] = [
   {
@@ -158,7 +160,7 @@ export const CENAS: readonly Cena[] = [
     titulo: 'Se ele trocar antes de vencer',
     nota: 'Só o documento perto de vencer aceita troca. A validade é escolhida no calendário.',
     quem: 'Operador logístico',
-    fala: 'Ele anexa o alvará novo, escolhe a validade no calendário e envia. Vai para a conferência, e nada muda no uso do sistema enquanto a equipe confere.',
+    fala: 'Ele anexa o alvará atualizado, escolhe a validade no calendário e envia. Vai para análise, e nada muda no uso do sistema durante a análise.',
   },
   {
     tipo: 'quadro',
@@ -215,9 +217,9 @@ export const CENAS: readonly Cena[] = [
     marco: 'd2512',
     data: '25/12',
     titulo: 'O bloqueio total',
-    nota: 'O menu fica sem acesso. Só a troca do documento abre.',
+    nota: 'Sai um e-mail no dia do bloqueio. O menu fica sem acesso; só a atualização do documento abre.',
     quem: 'Operador logístico',
-    fala: 'No 11º dia, 25/12, o cadastro bloqueia por completo. Só a Minha Conta abre, na etapa Documentos. A única saída é trocar o alvará, e ele segue bloqueado até a equipe conferir.',
+    fala: 'No 11º dia, 25/12, o cadastro bloqueia por completo e o operador recebe um e-mail avisando, como ficou decidido na reunião de 26/11. Só a Minha Conta abre, na etapa Documentos. A única saída é atualizar o alvará, e ele segue bloqueado até a análise.',
   },
   {
     tipo: 'quadro',
@@ -253,15 +255,19 @@ export const CENAS: readonly Cena[] = [
   },
   {
     tipo: 'decisoes',
-    fala: 'Três pontos para confirmar. Em cada um, o pedido é da mensagem e a leitura é nossa: a data do aviso de 5 dias, o termo Parcialmente ativo como nome na tela e a contagem dos 10 dias a partir do dia seguinte. O protótipo está assim; se a leitura for outra, a gente ajusta.',
+    fala: 'Três pontos em que o pedido é da mensagem e a leitura foi nossa: a data do aviso de 5 dias, o termo Parcialmente ativo como nome na tela e a contagem dos 10 dias a partir do dia seguinte. Confirmados na reunião de 26/11; o nome da situação no sistema fica com o desenvolvimento.',
   },
   {
     tipo: 'aberto',
-    fala: 'Duas coisas a mensagem não diz e o protótipo não resolve: quais documentos têm validade, e se vale mandar um e-mail no dia do bloqueio. Hoje não manda.',
+    fala: 'As duas perguntas que a mensagem deixava abertas foram respondidas na reunião: a validade é um campo de data, e a lista de documentos com validade vem com o tempo; e o bloqueio também avisa por e-mail.',
   },
   {
     tipo: 'fim',
-    fala: 'O que for decidido aqui entra no protótipo e no Figma. O link das jornadas fica com vocês para conferir com calma.',
+    fala: 'Os textos revisados pela SEMAD já estão no protótipo e no Figma. Segue pendente com a SEMAD: com prazo prorrogado, o cadastro volta ao acesso normal?',
+  },
+  {
+    tipo: 'entrega',
+    fala: 'Depois da reunião, os ajustes foram feitos e entregues: os textos revisados pela SEMAD, os avisos em blocos que acompanham o operador, o e-mail no dia do bloqueio e a ficha do documento atualizado para o administrador. Está pronto para produção.',
   },
 ];
 
@@ -275,10 +281,13 @@ export const DECISOES = [
   { titulo: 'Contagem dos 10 dias', pedido: '10 dias corridos a partir do vencimento', leitura: 'Contar do dia seguinte: prazo até 24/12, bloqueio em 25/12.' },
 ] as const;
 
-/** O que a mensagem não diz e o protótipo não resolve. São sugestões nossas de pergunta, não pedidos. */
+/**
+ * O que a mensagem não dizia, e como a reunião de 26/11 com a SEMAD respondeu. Até a reunião eram perguntas; a
+ * apresentação enviada depois dela registra as respostas.
+ */
 export const EM_ABERTO = [
-  'Quais documentos têm validade?',
-  'E-mail no dia do bloqueio: a mensagem não pede e o protótipo não manda. Incluímos?',
+  'Validade dos documentos: um campo de data. Quais documentos têm validade se levanta com o tempo.',
+  'E-mail no dia do bloqueio: sim. O operador recebe um aviso em 25/12.',
 ] as const;
 
 /** Os quatro itens da mensagem: a palavra forte e o complemento. */
@@ -287,4 +296,28 @@ export const MENSAGEM = [
   { forte: '10 dias', resto: 'parcialmente ativo depois de vencer' },
   { forte: 'Bloqueio total', resto: 'a partir do 11º dia' },
   { forte: 'Aviso', resto: 'no dia do vencimento' },
+] as const;
+
+/** O slide final, depois da reunião de 26/11: o que foi feito, com a tela de cada coisa (public/img/apresentacao-validade). */
+export const ENTREGA = [
+  {
+    titulo: 'Avisos em blocos',
+    texto: 'O que fica suspenso e o que continua liberado, um por linha.',
+    imagem: '/img/apresentacao-validade/entrega-conta.png',
+  },
+  {
+    titulo: 'O aviso segue o operador',
+    texto: 'Também em Notas Fiscais e em Saldo, até a aprovação do documento.',
+    imagem: '/img/apresentacao-validade/entrega-notas.png',
+  },
+  {
+    titulo: 'E-mail no dia do bloqueio',
+    texto: 'Decidido na reunião. Sai em 25/12, com como regularizar.',
+    imagem: '/img/apresentacao-validade/entrega-email.png',
+  },
+  {
+    titulo: 'Ficha do documento atualizado',
+    texto: 'Para o administrador: documento, situação do cadastro e vencimento.',
+    imagem: '/img/apresentacao-validade/entrega-admin.png',
+  },
 ] as const;

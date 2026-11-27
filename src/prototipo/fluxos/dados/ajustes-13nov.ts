@@ -46,7 +46,7 @@ export const FLUXOS_AJUSTES_13NOV: Fluxo[] = [
         observar: 'O cadastro segue aprovado e nada fica bloqueado ainda.',
         acoes: [
           { tipo: 'rolar', alvo: { papel: 'heading', nome: 'Minha conta' }, rotulo: 'Minha Conta' },
-          { tipo: 'olhar', alvo: { texto: 'Você tem documento perto de vencer' }, rotulo: 'Aviso ao entrar no sistema' },
+          { tipo: 'olhar', alvo: { texto: 'Você possui um documento com data de vencimento próxima' }, rotulo: 'Aviso ao entrar no sistema' },
         ],
       },
       {
@@ -59,21 +59,21 @@ export const FLUXOS_AJUSTES_13NOV: Fluxo[] = [
         ],
       },
       {
-        fazer: 'Anexe o alvará novo, informe a validade 14/12/2027 e clique em Enviar para conferência.',
+        fazer: 'Anexe o alvará atualizado, informe a validade 14/12/2027 e clique em Enviar para análise.',
         observar: 'Situação nova. As outras etapas ficam fechadas e só o documento vencido aceita troca.',
         acoes: [
           { tipo: 'olhar', alvo: { texto: 'Cadastro bloqueado por documentação vencida' }, rotulo: 'Bloqueado por documentação vencida' },
           { tipo: 'clicar', alvo: { papel: 'button', nome: 'Anexe o documento corrigido' }, rotulo: 'Clique para anexar' },
           { tipo: 'digitar', alvo: { papel: 'textbox', nome: 'Validade do documento' }, texto: '14/12/2027', rotulo: 'Digite a validade' },
-          { tipo: 'clicar', alvo: { papel: 'button', nome: 'Enviar para conferência' }, rotulo: 'Clique em Enviar para conferência' },
+          { tipo: 'clicar', alvo: { papel: 'button', nome: 'Enviar para análise' }, rotulo: 'Clique em Enviar para análise' },
         ],
       },
       {
-        fazer: 'Veja o documento enviado para conferência.',
+        fazer: 'Veja o documento enviado para análise.',
         observar: 'O cadastro continua bloqueado até o Admin conferir. O documento fica só para consulta.',
         acoes: [
-          { tipo: 'olhar', alvo: { texto: 'Documento enviado para conferência' }, rotulo: 'Enviado para conferência' },
-          { tipo: 'olhar', alvo: { texto: 'Em conferência', exato: true }, rotulo: 'O documento novo' },
+          { tipo: 'olhar', alvo: { texto: 'Documento enviado para análise' }, rotulo: 'Enviado para análise' },
+          { tipo: 'olhar', alvo: { texto: 'Em análise', exato: true }, rotulo: 'O documento novo' },
         ],
       },
     ],

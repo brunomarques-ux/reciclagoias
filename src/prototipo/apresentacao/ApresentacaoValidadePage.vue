@@ -29,7 +29,7 @@ import flexEstreita from '@fontsource-variable/roboto-flex/files/roboto-flex-lat
 
 import type { EstadoParaFora } from '../fluxos/api';
 import QuadroDeAjustes from './QuadroDeAjustes.vue';
-import { AJUSTES, CENAS, DECISOES, EM_ABERTO, FLUXO, INICIO_DA_TELA, MARCOS, MENSAGEM } from './roteiro';
+import { AJUSTES, CENAS, DECISOES, EM_ABERTO, ENTREGA, FLUXO, INICIO_DA_TELA, MARCOS, MENSAGEM } from './roteiro';
 
 const route = useRoute();
 const router = useRouter();
@@ -378,8 +378,8 @@ const textoDoBotao = computed(() => {
         </section>
 
         <section v-else-if="cena.tipo === 'decisoes'" key="decisoes" class="pv-cena pv-decisoes">
-          <p class="pv-rot pv-rot--ambar">Para confirmar</p>
-          <h2 class="pv-titulo">O que a mensagem pede e como lemos</h2>
+          <p class="pv-rot pv-rot--ambar">Confirmado em 26/11</p>
+          <h2 class="pv-titulo">O que a mensagem pedia e como lemos</h2>
           <ol class="pv-decisoes__lista">
             <li v-for="d in DECISOES" :key="d.titulo">
               <h3>{{ d.titulo }}</h3>
@@ -393,18 +393,31 @@ const textoDoBotao = computed(() => {
 
         <section v-else-if="cena.tipo === 'aberto'" key="aberto" class="pv-cena pv-aberto">
           <div class="pv-aberto__lado">
-            <p class="pv-rot pv-rot--ambar">A mensagem não diz</p>
+            <p class="pv-rot pv-rot--ambar">A mensagem não dizia</p>
             <p class="pv-aberto__n">{{ EM_ABERTO.length }}</p>
-            <p class="pv-sub">perguntas</p>
+            <p class="pv-sub">respostas da reunião</p>
           </div>
           <ol class="pv-aberto__lista">
             <li v-for="(p, i) in EM_ABERTO" :key="i"><b>{{ i + 1 }}</b><span>{{ p }}</span></li>
           </ol>
         </section>
 
+        <section v-else-if="cena.tipo === 'entrega'" key="entrega" class="pv-cena pv-entrega">
+          <p class="pv-rot">Definição · depois da reunião de 26/11</p>
+          <h2 class="pv-titulo">Ajustes feitos e entregues. Pronto para produção.</h2>
+          <p class="pv-entrega__sub">Textos da SEMAD aplicados em todos os e-mails e telas, com “análise” no lugar de “conferência”.</p>
+          <ul class="pv-entrega__lista">
+            <li v-for="e in ENTREGA" :key="e.titulo">
+              <img :src="e.imagem" :alt="e.titulo" />
+              <h3>{{ e.titulo }}</h3>
+              <p>{{ e.texto }}</p>
+            </li>
+          </ul>
+        </section>
+
         <section v-else key="fim" class="pv-cena pv-fim">
-          <p class="pv-rot">Para conferir depois</p>
-          <h2 class="pv-titulo">O que decidirmos entra no protótipo e no Figma</h2>
+          <p class="pv-rot">Para conferir</p>
+          <h2 class="pv-titulo">Os textos revisados pela SEMAD já estão no protótipo e no Figma</h2>
           <ul class="pv-fim__links">
             <li><b>Jornadas guiadas</b><span>reciclagoias.vercel.app/fluxos/validade-19nov</span></li>
             <li><b>Esta apresentação</b><span>reciclagoias.vercel.app/apresentacao-validade</span></li>
@@ -679,6 +692,14 @@ const textoDoBotao = computed(() => {
 .pv-aberto__lista li { align-items: center; }
 .pv-aberto__lista span { font: 600 38px/1.2 var(--pv-inter); text-wrap: balance; }
 
+.pv-entrega { inset: 100px 80px 150px; }
+.pv-entrega .pv-titulo { margin-top: 14px; font-size: 60px; }
+.pv-entrega__sub { margin-top: 14px; max-width: 1400px; font: 500 28px/1.35 var(--pv-inter); color: var(--pv-tinta2); }
+.pv-entrega__lista { display: grid; grid-template-columns: repeat(2, 1fr); gap: 22px 28px; margin-top: 26px; }
+.pv-entrega__lista li { overflow: hidden; border-radius: 12px; background: var(--pv-papel-claro); box-shadow: 0 2px 0 rgba(27, 36, 32, .06), 0 24px 44px -30px rgba(27, 36, 32, .4); }
+.pv-entrega__lista img { display: block; width: 100%; height: 184px; object-fit: contain; background: #f1f5f9; border-bottom: 2px solid var(--pv-linha); }
+.pv-entrega__lista h3 { margin: 14px 26px 0; font: 800 26px/1.15 var(--pv-inter); letter-spacing: -.015em; }
+.pv-entrega__lista p { margin: 4px 26px 16px; font: 500 21px/1.35 var(--pv-inter); color: var(--pv-tinta2); }
 .pv-fim { inset: 210px 80px 150px; }
 .pv-fim .pv-titulo { margin-top: 22px; font-size: 76px; max-width: 1300px; }
 .pv-fim__links { margin-top: 64px; max-width: 1400px; }
